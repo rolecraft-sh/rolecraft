@@ -1,0 +1,45 @@
+{
+  "name": "rolecraft",
+  "version": "0.1.0",
+  "description": "Install AI agent skills as roles & behaviors directly from any source — zero-dependency CLI for opencode, claude-code, cursor, and more",
+  "type": "module",
+  "bin": {
+    "rolecraft": "bin/rolecraft.js"
+  },
+  "files": [
+    "bin",
+    "src"
+  ],
+  "preferGlobal": true,
+  "keywords": [
+    "skill",
+    "skills",
+    "role",
+    "cli",
+    "agent",
+    "ai",
+    "rolecraft",
+    "opencode",
+    "claude-code",
+    "cursor",
+    "agentskill",
+    "zero-dependency"
+  ],
+  "author": "Samet ÇELİKBIÇAK",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sametcelikbicak/rolecraft.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sametcelikbicak/rolecraft/issues"
+  },
+  "homepage": "https://github.com/sametcelikbicak/rolecraft#readme",
+  "scripts": {
+    "test": "node --test",
+    "test:coverage": "node --experimental-test-coverage --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
