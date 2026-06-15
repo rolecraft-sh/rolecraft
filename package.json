@@ -23,7 +23,16 @@
     "claude-code",
     "cursor",
     "agentskill",
-    "zero-dependency"
+    "zero-dependency",
+    "awesome",
+    "awesome-list",
+    "skill-installer",
+    "skill-manager",
+    "agent-skills",
+    "mcp",
+    "gemini-cli",
+    "codex",
+    "antigravity"
   ],
   "author": "Samet ÇELİKBIÇAK",
   "license": "MIT",

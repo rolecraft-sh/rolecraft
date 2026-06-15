@@ -3,6 +3,10 @@
 
 # RoleCraft — Simple Skill Installer for AI
 
+ [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
+ [![npm](https://img.shields.io/npm/v/rolecraft)](https://www.npmjs.com/package/rolecraft)
+ [![GitHub Stars](https://img.shields.io/github/stars/sametcelikbicak/rolecraft?style=social)](https://github.com/sametcelikbicak/rolecraft)
+
  </div>
 
 **Zero-dependency** CLI to install AI agent skills as roles & behaviors from any source. No marketplace, no registry, no signup — just point it at a local folder or a GitHub repo and it works.
