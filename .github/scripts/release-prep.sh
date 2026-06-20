@@ -14,9 +14,9 @@ echo "Previous tag: $PREVIOUS_TAG"
 echo "Current tag:  $NEW_TAG"
 
 if [ -n "$PREVIOUS_TAG" ]; then
-  COMMITS=$(git log "$PREVIOUS_TAG..$NEW_TAG" --oneline --no-decorate 2>/dev/null || true)
+  COMMITS=$(git log "$PREVIOUS_TAG..$NEW_TAG" --oneline --no-decorate --no-merges 2>/dev/null || true)
 else
-  COMMITS=$(git log --oneline --no-decorate "$NEW_TAG" 2>/dev/null || true)
+  COMMITS=$(git log --oneline --no-decorate --no-merges "$NEW_TAG" 2>/dev/null || true)
 fi
 
 DATE=$(date +%Y-%m-%d)
@@ -86,7 +86,7 @@ if [ -f CHANGELOG.md ]; then
   if [ -n "$FIRST_ENTRY_LINE" ]; then
     HEADER=$(head -n $((FIRST_ENTRY_LINE - 1)) CHANGELOG.md)
     REST=$(tail -n +"$FIRST_ENTRY_LINE" CHANGELOG.md)
-    printf "%s\n\n%s\n%s\n" "$HEADER" "$CONTENT" "$REST" > CHANGELOG.md
+    echo -e "$HEADER\n\n$CONTENT\n$REST" > CHANGELOG.md
   else
     echo -e "\n$CONTENT" >> CHANGELOG.md
   fi
