@@ -6,6 +6,7 @@
  [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
  [![npm](https://img.shields.io/npm/v/rolecraft)](https://www.npmjs.com/package/rolecraft)
  [![GitHub Stars](https://img.shields.io/github/stars/sametcelikbicak/rolecraft?style=social)](https://github.com/sametcelikbicak/rolecraft)
+ [![Changelog](https://img.shields.io/badge/📜-Changelog-blue)](CHANGELOG.md)
 
  </div>
 
@@ -122,6 +123,7 @@ rolecraft/
 │       ├── installer.js      # copy files to target dirs
 │       └── lockfile.js       # read/write .skill-lock.json
 ├── package.json
+├── CHANGELOG.md               # Release history
 └── README.md
 ```
 
