@@ -40,6 +40,7 @@ jobs:
       - name: Create branch and commit
         run: |
           BRANCH_NAME="changelog/${{ github.ref_name }}"
+          git push origin --delete "$BRANCH_NAME" 2>/dev/null || true
           git checkout -b "$BRANCH_NAME"
           git add CHANGELOG.md package.json
           git commit -m "chore: update changelog and version for ${{ github.ref_name }} [skip ci]"
