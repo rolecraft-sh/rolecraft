@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.1.2] - 2026-06-20
+
+### Added
+- add changelog automation with GitHub Actions
+- add version command (version, --version, -v) (#4)
+
+### Fixed
+- use pull_request_target and npm install for release-publish
+- use echo -e instead of printf for newlines; skip merge commits in changelog
+- delete existing branch before creating new one
+- restructure release-prep workflow YAML and use PAT_TOKEN
+- resolve YAML syntax error in release-prep workflow and fix script for Linux compatibility
+- list command now includes project-scoped skills (#3)
+
+### Changed
+- release v0.1.1
+
+### Other
+- Update README
 ## [v0.1.1] - 2026-06-20
 
 ### Added
