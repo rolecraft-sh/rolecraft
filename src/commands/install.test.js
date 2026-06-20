@@ -68,7 +68,7 @@ describe('install command', () => {
   it('installs with default scope (global) when no flags given', async () => {
     const { logs, restore } = capture('log')
 
-    await installModule.installCommand(join(tempDir, 'test-skill'), {})
+    await installModule.installCommand(join(tempDir, 'test-skill'), { global: true })
 
     assert.ok(logs.some(l => l.includes('Installed')))
     restore()

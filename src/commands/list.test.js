@@ -5,12 +5,14 @@ import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
-let tempDir, listModule
+let tempDir, listModule, projectDir
 
 before(async () => {
   tempDir = mkdtempSync(join(tmpdir(), 'rolecraft-list-test-'))
+  projectDir = join(tempDir, 'some-project')
   process.env.HOME = tempDir
   await mkdir(join(tempDir, '.agents'), { recursive: true })
+  await mkdir(join(projectDir, '.agents'), { recursive: true })
   listModule = await import('./list.js')
 })
 
@@ -88,5 +90,70 @@ describe('list command', () => {
     await listModule.listCommand()
 
     assert.ok(logs.some(l => l.includes('nodate/skill')))
+  })
+
+  it('merges project-scoped skills when cwd is given', async () => {
+    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
+      version: 3,
+      skills: { 'global/only': { installedAt: '2025-01-01T00:00:00.000Z' } },
+      dismissed: {},
+      lastSelectedAgents: [],
+    }))
+
+    await writeFile(join(projectDir, '.agents', '.skill-lock.json'), JSON.stringify({
+      version: 3,
+      skills: { 'project/only': { installedAt: '2025-06-01T00:00:00.000Z' } },
+      dismissed: {},
+      lastSelectedAgents: [],
+    }))
+
+    const logs = captureLogs()
+
+    await listModule.listCommand(projectDir)
+
+    assert.ok(logs.some(l => l.includes('global/only')), 'should show global skill')
+    assert.ok(logs.some(l => l.includes('project/only')), 'should show project skill')
+    assert.ok(logs.some(l => l.includes('2 skill(s)')))
+  })
+
+  it('shows scope as project for skills only in project lock', async () => {
+    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
+      version: 3, skills: {}, dismissed: {}, lastSelectedAgents: [],
+    }))
+
+    await writeFile(join(projectDir, '.agents', '.skill-lock.json'), JSON.stringify({
+      version: 3,
+      skills: { 'proj/skill': { installedAt: '2025-06-01T00:00:00.000Z' } },
+      dismissed: {},
+      lastSelectedAgents: [],
+    }))
+
+    const logs = captureLogs()
+
+    await listModule.listCommand(projectDir)
+
+    assert.ok(logs.some(l => l.includes('Scope: project')))
+  })
+
+  it('shows scope as global, project when skill exists in both', async () => {
+    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
+      version: 3,
+      skills: { 'shared/skill': { installedAt: '2025-01-01T00:00:00.000Z' } },
+      dismissed: {},
+      lastSelectedAgents: [],
+    }))
+
+    await writeFile(join(projectDir, '.agents', '.skill-lock.json'), JSON.stringify({
+      version: 3,
+      skills: { 'shared/skill': { installedAt: '2025-06-01T00:00:00.000Z' } },
+      dismissed: {},
+      lastSelectedAgents: [],
+    }))
+
+    const logs = captureLogs()
+
+    await listModule.listCommand(projectDir)
+
+    assert.ok(logs.some(l => l.includes('Scope: global, project')))
   })
 })

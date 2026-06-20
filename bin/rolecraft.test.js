@@ -171,4 +171,14 @@ describe('rolecraft CLI', () => {
     restoreErr()
     restoreExit()
   })
+
+  it('entry point invokes run() when executed directly', async () => {
+    const { execSync } = await import('node:child_process')
+    const binPath = new URL('./rolecraft.js', import.meta.url).pathname
+    const result = execSync(`node "${binPath}" help`, {
+      encoding: 'utf-8',
+      env: { ...process.env, HOME: tempDir },
+    })
+    assert.ok(result.includes('rolecraft'))
+  })
 })

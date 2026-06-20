@@ -97,4 +97,30 @@ describe('installer', () => {
     assert.ok(existsSync(join(skillDir, 'SKILL.md')))
     assert.ok(!existsSync(join(skillDir, 'nonexistent.js')))
   })
+
+  it('installs using fileContents when provided', async () => {
+    const fileContentResolved = {
+      ...resolvedSkill,
+      skillDir: undefined,
+      files: ['SKILL.md', 'data.json'],
+      fileContents: {
+        'SKILL.md': '# slug: test/filecontent\nname: filecontent-skill\nContent',
+        'data.json': '{"key": "value"}',
+      },
+    }
+    const results = await installerModule.installSkill(fileContentResolved, ['agents'])
+    assert.equal(results.length, 1)
+
+    const skillDir = join(tempDir, '.agents', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+    assert.equal(
+      readFileSync(join(skillDir, 'SKILL.md'), 'utf-8'),
+      '# slug: test/filecontent\nname: filecontent-skill\nContent',
+    )
+    assert.ok(existsSync(join(skillDir, 'data.json')))
+    assert.equal(
+      readFileSync(join(skillDir, 'data.json'), 'utf-8'),
+      '{"key": "value"}',
+    )
+  })
 })

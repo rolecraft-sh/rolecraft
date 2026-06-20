@@ -56,7 +56,7 @@ export async function main() {
     }
 
     case 'list':
-      await listCommand()
+      await listCommand(process.cwd())
       break
 
     case 'remove': {

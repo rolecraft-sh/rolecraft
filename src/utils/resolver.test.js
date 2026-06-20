@@ -215,14 +215,21 @@ describe('resolver', () => {
 
   describe('resolveGitHub', () => {
     it('throws for invalid GitHub ref', async () => {
-      // Invalid GitHub ref falls through to isGitHubRef check
-      // A valid-looking ref (owner/repo) triggers GitHub resolution
-      // which requires cloning, so we test the error path
       await freshImport()
       await assert.rejects(
         () => resolverModule.resolveSource('a'),
         /Invalid source/,
       )
     })
+
+    it('throws when GitHub clone fails', async () => {
+      await freshImport()
+      await assert.rejects(
+        () => resolverModule.resolveSource('nonexistent-owner/nonexistent-repo'),
+        /Failed to clone/,
+      )
+    })
+
+
   })
 })

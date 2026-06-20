@@ -1,8 +1,19 @@
-import { readLock } from '../utils/lockfile.js'
+import { readLock, getProjectLockPath } from '../utils/lockfile.js'
 
-export async function listCommand() {
-  const lock = await readLock()
-  const skills = Object.entries(lock.skills)
+export async function listCommand(cwd) {
+  const [globalLock, projectLock] = await Promise.all([
+    readLock(),
+    cwd ? readLock(getProjectLockPath(cwd)) : Promise.resolve(null),
+  ])
+
+  const projectSkills = new Set(Object.keys(projectLock?.skills ?? {}))
+
+  const mergedSkills = { ...globalLock.skills }
+  if (projectLock) {
+    Object.assign(mergedSkills, projectLock.skills)
+  }
+
+  const skills = Object.entries(mergedSkills)
 
   if (skills.length === 0) {
     console.log('No skills installed.')
@@ -11,11 +22,17 @@ export async function listCommand() {
 
   console.log('Installed skills:\n')
   for (const [slug, entry] of skills) {
+    const inProject = projectSkills.has(slug)
+    const inGlobal = slug in globalLock.skills
+    const scope = inProject && inGlobal ? 'global, project'
+      : inProject ? 'project'
+      : 'global'
     const date = entry.installedAt
       ? new Date(entry.installedAt).toLocaleDateString()
       : 'unknown'
     console.log(`   ${slug}`)
     console.log(`   ├─ Installed: ${date}`)
+    console.log(`   ├─ Scope: ${scope}`)
     if (entry.source) console.log(`   ├─ Source: ${entry.source}`)
     if (entry.sourceType) console.log(`   └─ Type: ${entry.sourceType}`)
     console.log()
