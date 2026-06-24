@@ -3,10 +3,11 @@
 
 # RoleCraft — Simple Skill Installer for AI
 
- [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
- [![npm](https://img.shields.io/npm/v/rolecraft)](https://www.npmjs.com/package/rolecraft)
- [![GitHub Stars](https://img.shields.io/github/stars/sametcelikbicak/rolecraft?style=social)](https://github.com/sametcelikbicak/rolecraft)
- [![Changelog](https://img.shields.io/badge/📜-Changelog-blue)](CHANGELOG.md)
+[![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
+[![npm](https://img.shields.io/npm/v/rolecraft)](https://www.npmjs.com/package/rolecraft)
+[![GitHub Stars](https://img.shields.io/github/stars/sametcelikbicak/rolecraft?style=social)](https://github.com/sametcelikbicak/rolecraft)
+[![Changelog](https://img.shields.io/badge/📜-Changelog-blue)](CHANGELOG.md)
+[![Contributing](https://img.shields.io/badge/🤝-Contributing-green)](CONTRIBUTING.md)
 
  </div>
 
@@ -106,7 +107,7 @@ The CLI clones with `--depth 1`, finds `SKILL.md` recursively, installs it, and 
 | `rolecraft list`             | Show all installed skills         |
 | `rolecraft remove <slug>`    | Uninstall a skill                 |
 | `rolecraft help`             | Show this help                    |
-| `rolecraft version`          | Show version (`--version`, `-v`) |
+| `rolecraft version`          | Show version (`--version`, `-v`)  |
 
 ## Project structure
 
@@ -123,9 +124,14 @@ rolecraft/
 │       ├── installer.js      # copy files to target dirs
 │       └── lockfile.js       # read/write .skill-lock.json
 ├── package.json
-├── CHANGELOG.md               # Release history
+├── CHANGELOG.md              # Release history
+├── CONTRIBUTING.md           # Contribution guide
 └── README.md
 ```
+
+## Contributing
+
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## License
 
