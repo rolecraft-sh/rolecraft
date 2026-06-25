@@ -30,7 +30,8 @@ Usage:
   rolecraft help                 Show this help
 
 Options for install:
-  --global     Install to ~/.agents/skills/ (default)
+  --global     Install to ~/.agents/skills/
+  --project    Install to ./.agents/skills/ (default)
   --claude     Also install to ~/.claude/skills/
   --cursor     Also install to ~/.cursor/skills/
   --windsurf   Also install to ~/.windsurf/skills/
@@ -38,7 +39,6 @@ Options for install:
   --copilot    Also install to ~/.copilot/skills/
   --aider      Also install to ~/.aider/skills/
   --cline      Also install to ~/.cline/skills/
-  --project    Install to ./.agents/skills/
   --all        Install to all locations
 
 Examples:

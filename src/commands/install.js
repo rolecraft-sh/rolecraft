@@ -26,16 +26,16 @@ function defaultAskQuestion(query) {
 
 async function askScope() {
   console.log('\nWhere do you want to install this skill?\n')
-  console.log('  1) Global (~/.agents/skills/) [default]')
-  console.log('  2) Project (./.agents/skills/)')
+  console.log('  1) Global (~/.agents/skills/)')
+  console.log('  2) Project (./.agents/skills/) [default]')
   console.log('  3) Both\n')
 
-  const answer = await askQuestion('Choice [1/2/3] (default: 1): ')
+  const answer = await askQuestion('Choice [1/2/3] (default: 2): ')
 
   switch (answer) {
-    case '2': return { global: false, project: true, claude: false }
+    case '1': return { global: true, project: false, claude: false }
     case '3': return { global: true, project: true, claude: false }
-    default:  return { global: true, project: false, claude: false }
+    default:  return { global: false, project: true, claude: false }
   }
 }
 

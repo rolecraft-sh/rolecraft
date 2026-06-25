@@ -59,16 +59,18 @@ When you run `rolecraft install <source>` without flags, it asks where to instal
 
 ```
 Where do you want to install this skill?
-  1) Global (~/.agents/skills/) [default]
-  2) Project (./.agents/skills/)
+  1) Global (~/.agents/skills/)
+  2) Project (./.agents/skills/) [default]
   3) Both
 ```
+
+**Project scope is the default** — installed skills are committed with your repo and shared with your team. Use `--global` for personal skills or flags to target specific agents.
 
 Select specific agents with flags:
 
 ```bash
+rolecraft install ./my-skill --project   # ./.agents/skills/ (default)
 rolecraft install ./my-skill --global    # ~/.agents/skills/
-rolecraft install ./my-skill --project   # ./.agents/skills/
 rolecraft install ./my-skill --claude    # also ~/.claude/skills/
 rolecraft install ./my-skill --cursor    # also ~/.cursor/skills/
 rolecraft install ./my-skill --windsurf  # also ~/.windsurf/skills/
