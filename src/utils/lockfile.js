@@ -7,6 +7,11 @@ const GLOBAL_LOCK_PATH = join(GLOBAL_AGENTS_DIR, '.skill-lock.json')
 const GLOBAL_AGENTS_SKILLS_DIR = join(GLOBAL_AGENTS_DIR, 'skills')
 const CLAUDE_DIR = join(homedir(), '.claude', 'skills')
 const CURSOR_DIR = join(homedir(), '.cursor', 'skills')
+const WINDSURF_DIR = join(homedir(), '.windsurf', 'skills')
+const CODEX_DIR = join(homedir(), '.codex', 'skills')
+const COPILOT_DIR = join(homedir(), '.copilot', 'skills')
+const AIDER_DIR = join(homedir(), '.aider', 'skills')
+const CLINE_DIR = join(homedir(), '.cline', 'skills')
 
 export function getGlobalLockPath() {
   return GLOBAL_LOCK_PATH
@@ -22,6 +27,26 @@ export function getClaudeDir() {
 
 export function getCursorDir() {
   return CURSOR_DIR
+}
+
+export function getWindsurfDir() {
+  return WINDSURF_DIR
+}
+
+export function getCodexDir() {
+  return CODEX_DIR
+}
+
+export function getCopilotDir() {
+  return COPILOT_DIR
+}
+
+export function getAiderDir() {
+  return AIDER_DIR
+}
+
+export function getClineDir() {
+  return CLINE_DIR
 }
 
 export function getProjectLockPath(cwd) {

@@ -14,7 +14,7 @@
 
 **Zero-dependency** CLI to install AI agent skills as roles & behaviors from any source. No marketplace, no registry, no signup — just point it at a local folder or a GitHub repo and it works.
 
-Works with **opencode**, **claude-code**, **cursor**, and all spec-compliant agents.
+Works with **opencode**, **claude-code**, **cursor**, **windsurf**, **codex**, **copilot**, **aider**, **cline**, and all spec-compliant agents.
 
 ## Why rolecraft?
 
@@ -23,9 +23,11 @@ Works with **opencode**, **claude-code**, **cursor**, and all spec-compliant age
 | Zero dependencies                 | ✅               | ✅              | ❌ (2)               |
 | Local path install                | ✅ **1st class** | ❌ GitHub only  | ❌ marketplace only  |
 | GitHub repo install               | ✅               | ✅              | ❌                   |
+| Agent targets                     | 9                | 68+             | 20+                  |
 | Offline capable                   | ✅               | ❌              | ❌                   |
 | agentskill.sh lockfile compatible | ✅               | ✅              | ✅                   |
 | Project-level install             | ✅               | ✅              | ✅                   |
+| npm provenance                    | ✅               | ❌              | ❌                   |
 | File size                         | ~3 KB            | ~500 KB+        | ~84 KB               |
 
 ## Install
@@ -39,11 +41,13 @@ npx rolecraft install <source>
 ## Usage
 
 ```bash
-rolecraft install ./path/to/my-skill          # install from local folder
+rolecraft install ./path/to/my-skill              # install from local folder
 rolecraft install sametcelikbicak/task-decomposer  # install from GitHub
-rolecraft list                                 # list installed skills
-rolecraft remove <slug>                        # remove a skill
-rolecraft --version                            # show version
+rolecraft install ./my-skill --claude --cursor     # install for specific agents
+rolecraft list                                     # list installed skills
+rolecraft remove <slug>                            # remove a skill
+rolecraft update <slug>                            # re-install to latest
+rolecraft --version                                # show version
 ```
 
 ### Install scope
@@ -57,13 +61,25 @@ Where do you want to install this skill?
   3) Both
 ```
 
-Use flags to skip the prompt:
+Select specific agents with flags:
 
 ```bash
 rolecraft install ./my-skill --global    # ~/.agents/skills/
 rolecraft install ./my-skill --project   # ./.agents/skills/
 rolecraft install ./my-skill --claude    # also ~/.claude/skills/
+rolecraft install ./my-skill --cursor    # also ~/.cursor/skills/
+rolecraft install ./my-skill --windsurf  # also ~/.windsurf/skills/
+rolecraft install ./my-skill --codex     # also ~/.codex/skills/
+rolecraft install ./my-skill --copilot   # also ~/.copilot/skills/
+rolecraft install ./my-skill --aider     # also ~/.aider/skills/
+rolecraft install ./my-skill --cline     # also ~/.cline/skills/
 rolecraft install ./my-skill --all       # all locations
+```
+
+Combine flags to install to multiple agents:
+
+```bash
+rolecraft install ./my-skill --claude --cursor --windsurf
 ```
 
 ### Source types
@@ -94,22 +110,33 @@ The CLI clones with `--depth 1`, finds `SKILL.md` recursively, installs it, and 
 
 ## How agents discover skills
 
-| Agent       | Directory                                  |
-| ----------- | ------------------------------------------ |
-| opencode    | `~/.agents/skills/` or `./.agents/skills/` |
-| claude-code | `~/.claude/skills/` or `./.claude/skills/` |
-| cursor      | `~/.cursor/skills/` or `./.cursor/skills/` |
+| Agent       | Directory                                   |
+| ----------- | ------------------------------------------- |
+| opencode    | `~/.agents/skills/` or `./.agents/skills/`  |
+| claude-code | `~/.claude/skills/` or `./.claude/skills/`  |
+| cursor      | `~/.cursor/skills/` or `./.cursor/skills/`  |
+| windsurf    | `~/.windsurf/skills/` or `./.windsurf/skills/` |
+| codex       | `~/.codex/skills/` or `./.codex/skills/`    |
+| copilot     | `~/.copilot/skills/` or `./.copilot/skills/` |
+| aider       | `~/.aider/skills/` or `./.aider/skills/`    |
+| cline       | `~/.cline/skills/` or `./.cline/skills/`    |
+
+Install to multiple agents at once:
+
+```bash
+rolecraft install ./my-skill --cursor --windsurf --copilot
+```
 
 ## Commands
 
-| Command                      | Description                       |
-| ---------------------------- | --------------------------------- |
-| `rolecraft install <source>` | Install a skill (local or GitHub) |
-| `rolecraft list`             | Show all installed skills         |
-| `rolecraft remove <slug>`    | Uninstall a skill                 |
-| `rolecraft update <slug>`    | Re-install a skill to latest      |
-| `rolecraft help`             | Show this help                    |
-| `rolecraft version`          | Show version (`--version`, `-v`) |
+| Command                      | Description                                       |
+| ---------------------------- | ------------------------------------------------- |
+| `rolecraft install <source>` | Install a skill (local path or GitHub `owner/repo`) |
+| `rolecraft list`             | Show all installed skills                         |
+| `rolecraft remove <slug>`    | Uninstall a skill                                 |
+| `rolecraft update <slug>`    | Re-install a skill to latest                      |
+| `rolecraft help`             | Show this help                                    |
+| `rolecraft version`          | Show version (`--version`, `-v`)                 |
 
 ## Project structure
 

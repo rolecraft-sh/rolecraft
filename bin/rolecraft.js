@@ -16,7 +16,7 @@ function usage() {
 rolecraft — Install AI agent skills like roles & behaviors
 
 Zero dependencies, no marketplace required.
-Works with opencode, claude-code, cursor, and all spec-compliant agents.
+Works with opencode, claude-code, cursor, windsurf, codex, copilot, aider, cline, and all spec-compliant agents.
 
 Usage:
   rolecraft install <source>     Install a skill (local path or owner/repo)
@@ -29,13 +29,18 @@ Options for install:
   --global     Install to ~/.agents/skills/ (default)
   --claude     Also install to ~/.claude/skills/
   --cursor     Also install to ~/.cursor/skills/
+  --windsurf   Also install to ~/.windsurf/skills/
+  --codex      Also install to ~/.codex/skills/
+  --copilot    Also install to ~/.copilot/skills/
+  --aider      Also install to ~/.aider/skills/
+  --cline      Also install to ~/.cline/skills/
   --project    Install to ./.agents/skills/
   --all        Install to all locations
 
 Examples:
   rolecraft install ./my-skill
   rolecraft install sametcelikbicak/task-decomposer
-  rolecraft install ./skills/my-skill --claude
+  rolecraft install ./skills/my-skill --claude --cursor
   rolecraft list
   rolecraft remove task-decomposer
 `)
@@ -53,11 +58,17 @@ export async function main() {
       }
 
       const flags = args.slice(1)
-      const hasAnyFlag = flags.some(f => ['--global', '--project', '--claude', '--cursor', '--all'].includes(f))
+      const knownFlags = ['--global', '--project', '--claude', '--cursor', '--windsurf', '--codex', '--copilot', '--aider', '--cline', '--all']
+      const hasAnyFlag = flags.some(f => knownFlags.includes(f))
       const options = hasAnyFlag ? {
         global: flags.includes('--global') || flags.includes('--all'),
         claude: flags.includes('--claude') || flags.includes('--all'),
         cursor: flags.includes('--cursor') || flags.includes('--all'),
+        windsurf: flags.includes('--windsurf') || flags.includes('--all'),
+        codex: flags.includes('--codex') || flags.includes('--all'),
+        copilot: flags.includes('--copilot') || flags.includes('--all'),
+        aider: flags.includes('--aider') || flags.includes('--all'),
+        cline: flags.includes('--cline') || flags.includes('--all'),
         project: flags.includes('--project') || flags.includes('--all'),
       } : {}
 
