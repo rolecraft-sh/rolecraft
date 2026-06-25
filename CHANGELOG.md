@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.2.0] - 2026-06-25
+
+### Added
+- make project scope default install target
+- add rolecraft setup command to detect agents and install
+- add rolecraft use command to preview skills without installing
+- add windsurf, codex, copilot, aider, cline agent targets
+
+### Changed
+- enable npm provenance and add SECURITY.md
+- add coverage improvements for install, update, resolver (#13)
+- release v0.1.4
+
+### Documentation
+- add competitive analysis and roadmap
 ## [v0.1.4] - 2026-06-25
 
 ### Added
