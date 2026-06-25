@@ -83,7 +83,11 @@ async function resolveLocal(source) {
     const meta = parseMetadata(content)
     const dirEntries = await readdir(skillDir, { withFileTypes: true })
     const files = dirEntries.filter(e => e.name !== '.git').map(e => e.name)
-    return { ...meta, content, files, skillDir, sourcePath: source, sourceType: 'local' }
+    const fileContents = {}
+    for (const f of files) {
+      try { fileContents[f] = readFileSync(join(skillDir, f), 'utf-8') } catch {}
+    }
+    return { ...meta, content, files, fileContents, skillDir, sourcePath: source, sourceType: 'local' }
   } catch {
     // direct SKILL.md not found, scan recursively
   }
@@ -98,7 +102,12 @@ async function resolveLocal(source) {
     .filter(e => e.name !== '.git')
     .map(e => e.name)
 
-  return { ...skill, files, skillDir: skill.dir, sourcePath: source, sourceType: 'local' }
+  const fileContents = {}
+  for (const f of files) {
+    try { fileContents[f] = readFileSync(join(skill.dir, f), 'utf-8') } catch {}
+  }
+
+  return { ...skill, files, fileContents, skillDir: skill.dir, sourcePath: source, sourceType: 'local' }
 }
 
 async function resolveGitHub(source) {

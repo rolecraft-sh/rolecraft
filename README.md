@@ -44,6 +44,7 @@ npx rolecraft install <source>
 rolecraft install ./path/to/my-skill              # install from local folder
 rolecraft install sametcelikbicak/task-decomposer  # install from GitHub
 rolecraft install ./my-skill --claude --cursor     # install for specific agents
+rolecraft use sametcelikbicak/task-decomposer      # preview without installing
 rolecraft list                                     # list installed skills
 rolecraft remove <slug>                            # remove a skill
 rolecraft update <slug>                            # re-install to latest
@@ -81,6 +82,15 @@ Combine flags to install to multiple agents:
 ```bash
 rolecraft install ./my-skill --claude --cursor --windsurf
 ```
+
+### Preview a skill without installing
+
+```bash
+rolecraft use ./my-skill
+rolecraft use sametcelikbicak/task-decomposer
+```
+
+The `use` command resolves the source, shows metadata, and prints all file contents to stdout — without writing anything to disk. Useful for inspecting a skill before installing, or piping content into other tools.
 
 ### Source types
 
@@ -129,14 +139,15 @@ rolecraft install ./my-skill --cursor --windsurf --copilot
 
 ## Commands
 
-| Command                      | Description                                       |
-| ---------------------------- | ------------------------------------------------- |
-| `rolecraft install <source>` | Install a skill (local path or GitHub `owner/repo`) |
-| `rolecraft list`             | Show all installed skills                         |
-| `rolecraft remove <slug>`    | Uninstall a skill                                 |
-| `rolecraft update <slug>`    | Re-install a skill to latest                      |
-| `rolecraft help`             | Show this help                                    |
-| `rolecraft version`          | Show version (`--version`, `-v`)                 |
+| Command                      | Description                                              |
+| ---------------------------- | -------------------------------------------------------- |
+| `rolecraft install <source>` | Install a skill (local path or GitHub `owner/repo`)      |
+| `rolecraft use <source>`     | Preview a skill's files without installing               |
+| `rolecraft list`             | Show all installed skills                                |
+| `rolecraft remove <slug>`    | Uninstall a skill                                        |
+| `rolecraft update <slug>`    | Re-install a skill to latest                             |
+| `rolecraft help`             | Show this help                                           |
+| `rolecraft version`          | Show version (`--version`, `-v`)                         |
 
 ## Project structure
 
@@ -148,7 +159,8 @@ rolecraft/
 │   │   ├── install.js        # install logic + interactive scope
 │   │   ├── list.js           # list installed skills
 │   │   ├── remove.js         # remove skill + lockfile cleanup
-│   │   └── update.js         # re-install skill to latest
+│   │   ├── update.js         # re-install skill to latest
+│   │   └── use.js            # preview skill without installing
 │   └── utils/
 │       ├── resolver.js       # source resolver (local / GitHub)
 │       ├── installer.js      # copy files to target dirs

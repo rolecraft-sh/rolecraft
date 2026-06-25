@@ -7,6 +7,7 @@ import { installCommand } from '../src/commands/install.js'
 import { listCommand } from '../src/commands/list.js'
 import { removeCommand } from '../src/commands/remove.js'
 import { updateCommand } from '../src/commands/update.js'
+import { useCommand } from '../src/commands/use.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'))
@@ -20,6 +21,7 @@ Works with opencode, claude-code, cursor, windsurf, codex, copilot, aider, cline
 
 Usage:
   rolecraft install <source>     Install a skill (local path or owner/repo)
+  rolecraft use <source>         Preview a skill without installing
   rolecraft list                 List installed skills
   rolecraft remove <slug>        Remove a skill
   rolecraft update <slug>        Re-install a skill (update to latest)
@@ -97,6 +99,17 @@ export async function main() {
         process.exit(1)
       }
       await updateCommand(slug)
+      break
+    }
+
+    case 'use': {
+      const source = args[0]
+      if (!source) {
+        console.error('Usage: rolecraft use <source>')
+        console.error('Source can be a local path (./, /, ~) or a GitHub ref (owner/repo)')
+        process.exit(1)
+      }
+      await useCommand(source)
       break
     }
 

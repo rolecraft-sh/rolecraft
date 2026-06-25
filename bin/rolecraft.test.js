@@ -259,4 +259,36 @@ describe('rolecraft CLI', () => {
     })
     assert.equal(result.trim(), VERSION)
   })
+
+  it('errors when use has no source', async () => {
+    process.argv = ['node', 'rolecraft', 'use']
+    const { logs: errors, restore: restoreErr } = capture('error')
+    const restoreExit = mockExit()
+
+    try {
+      await rolecraftModule.main()
+    } catch (e) {
+      assert.ok(e.message.includes('exit:1'))
+    }
+
+    assert.ok(errors.some(e => e.includes('Usage: rolecraft use <source>')))
+    restoreErr()
+    restoreExit()
+  })
+
+  it('runs use command with existing source', async () => {
+    const skillDir = join(tempDir, 'use-cli-skill')
+    mkdirSync(skillDir, { recursive: true })
+    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/use-skill\nname: use-skill\nContent')
+
+    process.argv = ['node', 'rolecraft', 'use', skillDir]
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l.includes('use-skill')))
+    assert.ok(logs.some(l => l.includes('SKILL.md')))
+    assert.ok(logs.some(l => l.includes('Content')))
+    restore()
+  })
 })
