@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.1.4] - 2026-06-25
+
+### Added
+- cursor target, update command, project-scoped remove, and more (#11)
+
+### Changed
+- release v0.1.3
+
+### Documentation
+- add contributing guide and CODEOWNERS (#10)
 ## [v0.1.3] - 2026-06-21
 
 ### Fixed
