@@ -1,7 +1,7 @@
 import { accessSync, readdirSync, constants } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir } from '../utils/lockfile.js'
+import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir } from '../utils/lockfile.js'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 
@@ -26,6 +26,15 @@ const KNOWN_AGENTS = [
   { flag: 'supermaven', label: 'supermaven', dir: getSupermavenDir },
   { flag: 'pr-pilot', label: 'pr-pilot', dir: getPrPilotDir },
   { flag: 'loom', label: 'loom', dir: getLoomDir },
+  { flag: 'roo', label: 'roo-code', dir: getRooDir },
+  { flag: 'trae', label: 'trae', dir: getTraeDir },
+  { flag: 'hermes', label: 'hermes', dir: getHermesDir },
+  { flag: 'kiro', label: 'kiro', dir: getKiroDir },
+  { flag: 'augment', label: 'augment', dir: getAugmentDir },
+  { flag: 'kilo', label: 'kilo-code', dir: getKiloDir },
+  { flag: 'openhands', label: 'openhands', dir: getOpenHandsDir },
+  { flag: 'junie', label: 'junie', dir: getJunieDir },
+  { flag: 'factory', label: 'factory', dir: getFactoryDir },
 ]
 
 export function detectAgents() {
@@ -57,7 +66,8 @@ export async function setupCommand(source) {
     console.log('   rolecraft installs skills into agent skill directories.')
     console.log('   Install an AI coding agent (opencode, claude-code, cursor,')
     console.log('   windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody,')
-    console.log('   continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot, loom) first.')
+    console.log('   continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot,')
+    console.log('   loom, roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory) first.')
     return
   }
 

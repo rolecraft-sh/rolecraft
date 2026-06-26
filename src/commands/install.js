@@ -44,7 +44,7 @@ async function askScope() {
 }
 
 export async function installCommand(source, options) {
-  const hasScopeFlags = options.global || options.project || options.claude || options.cursor || options.windsurf || options.devin || options.codex || options.copilot || options.aider || options.cline || options.gemini || options.cody || options.continue || options.warp || options.codeium || options.fabric || options.goose || options.tabnine || options.supermaven || options['pr-pilot'] || options.loom
+  const hasScopeFlags = options.global || options.project || options.claude || options.cursor || options.windsurf || options.devin || options.codex || options.copilot || options.aider || options.cline || options.gemini || options.cody || options.continue || options.warp || options.codeium || options.fabric || options.goose || options.tabnine || options.supermaven || options['pr-pilot'] || options.loom || options.roo || options.trae || options.hermes || options.kiro || options.augment || options.kilo || options.openhands || options.junie || options.factory
   const scope = hasScopeFlags ? options : await askScope()
 
   if (options.frozenLockfile) {
@@ -92,6 +92,15 @@ export async function installCommand(source, options) {
   if (scope.supermaven) targets.push('supermaven')
   if (scope['pr-pilot']) targets.push('pr-pilot')
   if (scope.loom) targets.push('loom')
+  if (scope.roo) targets.push('roo')
+  if (scope.trae) targets.push('trae')
+  if (scope.hermes) targets.push('hermes')
+  if (scope.kiro) targets.push('kiro')
+  if (scope.augment) targets.push('augment')
+  if (scope.kilo) targets.push('kilo')
+  if (scope.openhands) targets.push('openhands')
+  if (scope.junie) targets.push('junie')
+  if (scope.factory) targets.push('factory')
   if (scope.project) targets.push('project')
 
   const results = await installSkill(resolved, targets, options.symlink ? 'symlink' : 'copy')

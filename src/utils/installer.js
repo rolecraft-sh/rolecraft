@@ -1,7 +1,7 @@
 import { mkdir, cp, writeFile, readFile, access, stat, symlink, unlink } from 'node:fs/promises'
 import { join, basename, relative, dirname } from 'node:path'
 import { homedir } from 'node:os'
-import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, addSkillToLock, getGlobalLockPath, getProjectLockPath } from './lockfile.js'
+import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, addSkillToLock, getGlobalLockPath, getProjectLockPath } from './lockfile.js'
 
 function normalizeSlug(slug) {
   return slug.replace(/\//g, '-')
@@ -114,6 +114,51 @@ export async function installSkill(resolved, targets, mode = 'copy') {
       case 'loom': {
         baseDir = getLoomDir()
         label = '~/.loom/skills/'
+        break
+      }
+      case 'roo': {
+        baseDir = getRooDir()
+        label = '~/.roo/skills/'
+        break
+      }
+      case 'trae': {
+        baseDir = getTraeDir()
+        label = '~/.trae/skills/'
+        break
+      }
+      case 'hermes': {
+        baseDir = getHermesDir()
+        label = '~/.hermes/skills/'
+        break
+      }
+      case 'kiro': {
+        baseDir = getKiroDir()
+        label = '~/.kiro/skills/'
+        break
+      }
+      case 'augment': {
+        baseDir = getAugmentDir()
+        label = '~/.augment/skills/'
+        break
+      }
+      case 'kilo': {
+        baseDir = getKiloDir()
+        label = '~/.kilo/skills/'
+        break
+      }
+      case 'openhands': {
+        baseDir = getOpenHandsDir()
+        label = '~/.openhands/skills/'
+        break
+      }
+      case 'junie': {
+        baseDir = getJunieDir()
+        label = '~/.junie/skills/'
+        break
+      }
+      case 'factory': {
+        baseDir = getFactoryDir()
+        label = '~/.factory/skills/'
         break
       }
       case 'project': {

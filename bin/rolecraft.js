@@ -22,7 +22,7 @@ function usage() {
 rolecraft — Install AI agent skills like roles & behaviors
 
 Zero dependencies, no marketplace required.
-Works with opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody, continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot, loom, and all spec-compliant agents.
+Works with opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody, continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot, loom, roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory, and all spec-compliant agents.
 
 Usage:
   rolecraft install <source>     Install a skill (local path or owner/repo)
@@ -59,6 +59,15 @@ Options for install:
   --supermaven   Also install to ~/.supermaven/skills/
   --pr-pilot     Also install to ~/.pr-pilot/skills/
   --loom         Also install to ~/.loom/skills/
+  --roo          Also install to ~/.roo/skills/
+  --trae         Also install to ~/.trae/skills/
+  --hermes       Also install to ~/.hermes/skills/
+  --kiro         Also install to ~/.kiro/skills/
+  --augment      Also install to ~/.augment/skills/
+  --kilo         Also install to ~/.kilo/skills/
+  --openhands    Also install to ~/.openhands/skills/
+  --junie        Also install to ~/.junie/skills/
+  --factory      Also install to ~/.factory/skills/
   --all          Install to all locations
   --frozen-lockfile  Fail if skill already installed
   --symlink      Install as symlink instead of copy
@@ -85,7 +94,7 @@ export async function main() {
       }
 
       const flags = args.slice(1)
-      const scopeFlags = ['--global', '--project', '--claude', '--cursor', '--windsurf', '--devin', '--codex', '--copilot', '--aider', '--cline', '--gemini', '--cody', '--continue', '--warp', '--codeium', '--fabric', '--goose', '--tabnine', '--supermaven', '--pr-pilot', '--loom', '--all']
+      const scopeFlags = ['--global', '--project', '--claude', '--cursor', '--windsurf', '--devin', '--codex', '--copilot', '--aider', '--cline', '--gemini', '--cody', '--continue', '--warp', '--codeium', '--fabric', '--goose', '--tabnine', '--supermaven', '--pr-pilot', '--loom', '--roo', '--trae', '--hermes', '--kiro', '--augment', '--kilo', '--openhands', '--junie', '--factory', '--all']
       const hasScopeFlag = flags.some(f => scopeFlags.includes(f))
       const options = hasScopeFlag ? {
         global: flags.includes('--global') || flags.includes('--all'),
@@ -108,6 +117,15 @@ export async function main() {
         supermaven: flags.includes('--supermaven') || flags.includes('--all'),
         'pr-pilot': flags.includes('--pr-pilot') || flags.includes('--all'),
         loom: flags.includes('--loom') || flags.includes('--all'),
+        roo: flags.includes('--roo') || flags.includes('--all'),
+        trae: flags.includes('--trae') || flags.includes('--all'),
+        hermes: flags.includes('--hermes') || flags.includes('--all'),
+        kiro: flags.includes('--kiro') || flags.includes('--all'),
+        augment: flags.includes('--augment') || flags.includes('--all'),
+        kilo: flags.includes('--kilo') || flags.includes('--all'),
+        openhands: flags.includes('--openhands') || flags.includes('--all'),
+        junie: flags.includes('--junie') || flags.includes('--all'),
+        factory: flags.includes('--factory') || flags.includes('--all'),
         project: flags.includes('--project') || flags.includes('--all'),
       } : {}
       options.frozenLockfile = flags.includes('--frozen-lockfile')

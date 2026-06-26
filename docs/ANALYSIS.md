@@ -11,7 +11,7 @@
 | **Lockfile**                 | agentskill v3  | None               | Two-tier (global v3 + project v1, SHA hashes) | None            | Config files only          |
 | **Offline capable**          | ✅             | ❌ (registry)      | ✅                                            | ✅              | ✅                         |
 | **Signup required**          | ❌             | ✅ (agentskill.sh) | ❌                                            | ❌              | ❌                         |
-| **Agent count**              | **20**         | 20+                | 68+                                           | 3               | ~10                        |
+| **Agent count**              | **29**          | 12                 | 68+                                           | 1 (+ compat)    | 1 (+ plugins)              |
 | **Project scope default**    | ✅             | N/A                | ✅                                            | N/A             | N/A                        |
 | **Interactive scope prompt** | ✅             | ❌                 | ❌                                            | N/A             | N/A                        |
 | **Provenance (npm)**         | ✅             | ❌                 | ❌                                            | N/A             | N/A                        |
@@ -21,7 +21,7 @@
 | **`search`/`find` command**  | ✅             | ✅ (`ags search`)  | ✅ (`skills find`)                            | ❌              | ❌                         |
 | **Lockfile `ci`/`verify`**   | ❌             | ❌                 | ✅ (`skills ci`, `skills verify`)             | ❌              | ❌                         |
 | **Symlink mode**             | ❌             | ❌                 | ✅                                            | ❌              | ❌                         |
-| **Stars**                    | ~5             | 23                 | 23,476                                        | 14K+            | N/A                        |
+| **Stars**                    | ~5             | 23                 | 23,588                                        | 178K+           | 133K+                      |
 
 ## Strengths
 
@@ -31,11 +31,11 @@
 - **agentskill.sh lockfile compatible** — cross-compatible with ecosystem
 - **Interactive scope prompt** — user-friendly first install
 - **Project scope default** — modern default (v0.2.0)
-- **20 agent targets** — opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody, continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot, loom
+- **29 agent targets** — opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody, continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot, loom, roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory
 
 ## Weaknesses / Gaps
 
-1. **Agent count (20)** — catching up to `ags` (20+) but still far behind `skills` (68+)
+1. **Agent count (29)** — ahead of `ags` (12) but still far behind `skills` (68+), qntx/skill (39)
 2. **No lockfile integrity** — no SHA hash verification, no `ci`/`verify` mode
 3. **No symlink mode** — `skills` supports symlink (default) + copy; rolecraft only copies
 4. **Lockfile SHA only `local`** — doesn't store content hashes
@@ -49,17 +49,25 @@
 - [x] 20+ agent targets (agent count parity with `ags`) — **20 agents**
 - [x] `--frozen-lockfile` flag for install
 
-### v0.4.x — Integrity & Performance
+### v0.4.x — Integrity & Performance ✅
 
-- [ ] Content hash in lockfile (replace `"local"` placeholder with real SHA)
-- [ ] `rolecraft verify` — hash doğrulama (`skills verify` equivalent)
-- [ ] `rolecraft ci` — frozen lockfile install (`skills ci` equivalent)
-- [ ] Symlink mode (`--symlink`/`--copy`)
+- [x] Content hash in lockfile (SHA256 `contentSha`)
+- [x] `rolecraft verify` — hash doğrulama (`skills verify` equivalent)
+- [x] `rolecraft ci` — frozen lockfile install (`skills ci` equivalent)
+- [x] Symlink mode (`--symlink`/`--copy`)
+- [x] 9 new agent targets (roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory) — **29 total**
+
+### v0.5.x — New Agents & UX
+
+- [x] 9 new agents (roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory)
+- [ ] Roo Code, Trae, Hermes, Kiro, Augment, Kilo, OpenHands, Junie, Factory agent targets
+- [ ] `--dry-run` mode — preview installation without copying
 
 ### Future
 
-- [ ] Lockfile version upgrade (v3→v4 with hashes)
-- [ ] TUI for skill browsing
+- [ ] TUI for skill browsing (`search` interactif)
+- [ ] `rolecraft doctor` — system health check
+- [ ] Skill bundle / skillset support
 
 ## Agent Directory Reference
 
@@ -85,6 +93,15 @@
 | supermaven  | `~/.supermaven/skills/`                        |
 | pr-pilot    | `~/.pr-pilot/skills/`                          |
 | loom        | `~/.loom/skills/`                              |
+| roo         | `~/.roo/skills/`                               |
+| trae        | `~/.trae/skills/`                              |
+| hermes      | `~/.hermes/skills/`                            |
+| kiro        | `~/.kiro/skills/`                              |
+| augment     | `~/.augment/skills/`                           |
+| kilo        | `~/.kilo/skills/`                              |
+| openhands   | `~/.openhands/skills/`                         |
+| junie       | `~/.junie/skills/`                             |
+| factory     | `~/.factory/skills/`                           |
 
 ## Competitor Analysis
 
@@ -92,18 +109,18 @@
 
 - **Model**: Centralized registry
 - **Key feature**: 274K+ skills in marketplace, rating/feedback system, `/learn` in-agent command, `ags setup` auto-detection, `ags search`
-- **Weaknesses**: Requires signup, no lockfile, no offline, no local sources, no provenance
+- **Weaknesses**: Requires signup, no lockfile, no offline, no local sources, no provenance, only 12 agents
 - **Deps**: 2
-- **rolecraft advantage**: Zero deps, offline-first, lockfile, provenance, local sources
+- **rolecraft advantage**: Zero deps, offline-first, lockfile, provenance, local sources, 29 agents
 
 ### skills (Vercel Labs)
 
 - **Model**: Decentralized git-based
-- **Key feature**: `skills use`, `skills ci`/`skills verify` (lockfile workflow), `skills find` (interactive search), `skills init` (scaffolding), 68+ agents, 23K stars, 13.1M weekly downloads, symlink mode
+- **Key feature**: `skills use`, `skills ci`/`skills verify` (lockfile workflow), `skills find` (interactive search), `skills init` (scaffolding), 68+ agents, 23K stars, 13.4M weekly downloads, symlink mode
 - **Weaknesses**: 1 dep (`yaml`), no provenance, no `setup` command
 - **Deps**: 1
 - **rolecraft advantage**: Zero deps, provenance, `setup` command
-- **rolecraft gap**: No `ci`/`verify`, lower agent count (20 vs 68+)
+- **rolecraft gap**: Agent count (29 vs 68+), no TUI search, no doctor command
 
 ### OpenCode native
 
@@ -118,6 +135,29 @@
 - **Key feature**: OAuth 2.1, dual skill/MCP system, lazy tool loading
 - **Weakness**: Complex, MCP-focused, not a standalone skill manager
 - **rolecraft advantage**: Simple, focused, zero-dep, standalone
+
+### qntx/skill (Rust)
+
+- **Model**: Rust reimplementation of Vercel Skills CLI
+- **Key feature**: 100% command parity, shell completions, `skills doctor`, `skills upgrade`, dry-run mode, parallel I/O, zero runtime deps (static binary), 39 agents
+- **Weaknesses**: Rust toolchain for development, no provenance, no `setup` command
+- **Deps**: 0 (static binary)
+- **rolecraft advantage**: Zero deps as JS, provenance, `setup` command, interactive scope prompt
+- **rolecraft gap**: No doctor, no upgrade, no dry-run
+
+### Sklm
+
+- **Model**: Centralized global store with per-project symlinks
+- **Key feature**: Auto-sync, per-agent skill variants (`variants/` dir), 30+ agents
+- **Weaknesses**: Early stage, low adoption
+- **rolecraft advantage**: Mature CLI, lockfile, provenance
+
+### skillpm
+
+- **Model**: npm-native package manager for Agent Skills
+- **Key feature**: `skillpm publish` to npm, semver, lockfiles, audit
+- **Weaknesses**: Requires npm infrastructure, depends on `skills` CLI for wiring
+- **rolecraft advantage**: All-in-one, no external deps
 
 ## Key Differentiators
 

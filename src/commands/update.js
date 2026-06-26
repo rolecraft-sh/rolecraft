@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { readLock, getGlobalLockPath, getProjectLockPath, getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir } from '../utils/lockfile.js'
+import { readLock, getGlobalLockPath, getProjectLockPath, getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir } from '../utils/lockfile.js'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 
@@ -77,6 +77,33 @@ function detectTargets(slug, cwd) {
 
   const loomDir = join(getLoomDir(), normSlug)
   if (existsSync(join(loomDir, 'SKILL.md'))) targets.push('loom')
+
+  const rooDir = join(getRooDir(), normSlug)
+  if (existsSync(join(rooDir, 'SKILL.md'))) targets.push('roo')
+
+  const traeDir = join(getTraeDir(), normSlug)
+  if (existsSync(join(traeDir, 'SKILL.md'))) targets.push('trae')
+
+  const hermesDir = join(getHermesDir(), normSlug)
+  if (existsSync(join(hermesDir, 'SKILL.md'))) targets.push('hermes')
+
+  const kiroDir = join(getKiroDir(), normSlug)
+  if (existsSync(join(kiroDir, 'SKILL.md'))) targets.push('kiro')
+
+  const augmentDir = join(getAugmentDir(), normSlug)
+  if (existsSync(join(augmentDir, 'SKILL.md'))) targets.push('augment')
+
+  const kiloDir = join(getKiloDir(), normSlug)
+  if (existsSync(join(kiloDir, 'SKILL.md'))) targets.push('kilo')
+
+  const openhandsDir = join(getOpenHandsDir(), normSlug)
+  if (existsSync(join(openhandsDir, 'SKILL.md'))) targets.push('openhands')
+
+  const junieDir = join(getJunieDir(), normSlug)
+  if (existsSync(join(junieDir, 'SKILL.md'))) targets.push('junie')
+
+  const factoryDir = join(getFactoryDir(), normSlug)
+  if (existsSync(join(factoryDir, 'SKILL.md'))) targets.push('factory')
 
   const projectDir = join(cwd, '.agents', 'skills', normSlug)
   if (existsSync(join(projectDir, 'SKILL.md'))) targets.push('project')

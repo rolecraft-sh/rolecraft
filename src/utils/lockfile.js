@@ -90,6 +90,42 @@ export function getLoomDir() {
   return home('.loom', 'skills')
 }
 
+export function getRooDir() {
+  return home('.roo', 'skills')
+}
+
+export function getTraeDir() {
+  return home('.trae', 'skills')
+}
+
+export function getHermesDir() {
+  return home('.hermes', 'skills')
+}
+
+export function getKiroDir() {
+  return home('.kiro', 'skills')
+}
+
+export function getAugmentDir() {
+  return home('.augment', 'skills')
+}
+
+export function getKiloDir() {
+  return home('.kilo', 'skills')
+}
+
+export function getOpenHandsDir() {
+  return home('.openhands', 'skills')
+}
+
+export function getJunieDir() {
+  return home('.junie', 'skills')
+}
+
+export function getFactoryDir() {
+  return home('.factory', 'skills')
+}
+
 export function getProjectLockPath(cwd) {
   return join(cwd, '.agents', '.skill-lock.json')
 }
