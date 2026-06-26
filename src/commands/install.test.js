@@ -137,14 +137,17 @@ describe('askScope', () => {
   })
 
   it('calls defaultAskQuestion when askQuestion is not overridden', async () => {
+    let called = false
     installModule.setCreateInterface(() => ({
-      question: (query, cb) => { cb('') },
+      question: (query, cb) => { cb(''); called = true },
       close: () => {},
     }))
+    installModule.resetAskQuestion()
 
     const { logs, restore } = capture('log')
     await installModule.installCommand(join(tempDir, 'test-skill'), {})
     assert.ok(logs.some(l => l.includes('Installed')))
+    assert.ok(called, 'defaultAskQuestion should have called createInterface')
     restore()
   })
 

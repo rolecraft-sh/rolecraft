@@ -81,4 +81,24 @@ describe('ci command', () => {
     process.exit = origExit
     assert.ok(logs.some(l => l.includes('installed')))
   })
+
+  it('handles installation failure gracefully', async () => {
+    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
+      version: 3, skills: {
+        'test/fail-install': { slug: 'test/fail-install', source: join(tempDir, 'nonexistent-source-dir'), sourceType: 'local', contentSha: 'hash' },
+      }, dismissed: {}, lastSelectedAgents: [],
+    }))
+
+    const errors = []
+    const origErr = console.error
+    console.error = (...args) => { if (args.length) errors.push(String(args[0])) }
+    const origExit = process.exit
+    process.exit = () => { throw new Error('exit') }
+    try {
+      await ciModule.ciCommand()
+    } catch {}
+    console.error = origErr
+    process.exit = origExit
+    assert.ok(errors.some(l => l.includes('fail-install')))
+  })
 })

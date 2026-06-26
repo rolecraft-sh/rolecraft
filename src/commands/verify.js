@@ -1,4 +1,4 @@
-import { readLock, getProjectLockPath, computeContentHash, computeInstalledHash, getAgentsDir } from '../utils/lockfile.js'
+import { readLock, getProjectLockPath, computeContentHash, getAgentsDir } from '../utils/lockfile.js'
 import { readFile, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 

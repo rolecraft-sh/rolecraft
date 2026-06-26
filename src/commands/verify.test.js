@@ -89,4 +89,21 @@ describe('verify command', () => {
     restore()
     assert.ok(errors.some(l => l.includes('not found')))
   })
+
+  it('reports missing source in frozen mode', async () => {
+    const slug = 'test/frozen-missing'
+    await lockModule.addSkillToLock(slug, {
+      slug, contentSha: 'hash', sourceType: 'local',
+    })
+
+    const origExit = process.exit
+    process.exit = () => { throw new Error('exit') }
+    const { logs: errors, restore } = capture('error')
+    try {
+      await verifyModule.verifyCommand(true)
+    } catch {}
+    process.exit = origExit
+    restore()
+    assert.ok(errors.some(l => l.includes('missing source')))
+  })
 })

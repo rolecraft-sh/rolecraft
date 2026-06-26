@@ -137,34 +137,4 @@ export function computeContentHash(fileContents) {
   return hash.digest('hex')
 }
 
-export async function computeInstalledHash(slug, targets) {
-  const { readFile, readdir } = await import('node:fs/promises')
-  const { join } = await import('node:path')
-  const fileContents = {}
-  for (const target of targets) {
-    const slash = slug.replace(/\//g, '-')
-    let baseDir
-    if (target === 'project') {
-      const { cwd } = process
-      baseDir = join(cwd(), '.agents', 'skills', slash)
-    } else if (target === 'agents') {
-      baseDir = join(process.env.HOME || process.env.HOMEPATH || '/tmp', '.agents', 'skills', slash)
-    } else {
-      continue
-    }
-    try {
-      const entries = await readdir(baseDir, { withFileTypes: true })
-      for (const entry of entries) {
-        if (entry.isFile()) {
-          const filePath = join(baseDir, entry.name)
-          fileContents[entry.name] = await readFile(filePath, 'utf-8')
-        }
-      }
-      break
-    } catch {
-      continue
-    }
-  }
-  if (Object.keys(fileContents).length === 0) return null
-  return computeContentHash(fileContents)
-}
+

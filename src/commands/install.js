@@ -14,6 +14,10 @@ export function setAskQuestion(fn) {
   askQuestion = fn
 }
 
+export function resetAskQuestion() {
+  askQuestion = defaultAskQuestion
+}
+
 function defaultAskQuestion(query) {
   const rl = createInterface({ input, output })
   return new Promise(resolve => {
