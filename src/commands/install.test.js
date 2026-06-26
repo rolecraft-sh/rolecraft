@@ -120,6 +120,17 @@ describe('askScope', () => {
     process.cwd = origCwd
   })
 
+  it('returns both scope for choice 3', async () => {
+    withAnswer('3')
+    const origCwd = process.cwd
+    process.cwd = () => tempDir
+    const { logs, restore } = capture('log')
+    await installModule.installCommand(join(tempDir, 'test-skill'), {})
+    assert.ok(logs.some(l => l.includes('Installed')))
+    restore()
+    process.cwd = origCwd
+  })
+
   it('calls defaultAskQuestion when askQuestion is not overridden', async () => {
     installModule.setCreateInterface(() => ({
       question: (query, cb) => { cb('') },
@@ -128,6 +139,17 @@ describe('askScope', () => {
 
     const { logs, restore } = capture('log')
     await installModule.installCommand(join(tempDir, 'test-skill'), {})
+    assert.ok(logs.some(l => l.includes('Installed')))
+    restore()
+  })
+
+  it('allows fresh install with frozen-lockfile', async () => {
+    const freshSkill = join(tempDir, 'fresh-skill-test')
+    mkdirSync(freshSkill, { recursive: true })
+    writeFileSync(join(freshSkill, 'SKILL.md'), '# slug: test/fresh-lock\nname: fresh-lock\nContent')
+
+    const { logs, restore } = capture('log')
+    await installModule.installCommand(freshSkill, { global: true, frozenLockfile: true })
     assert.ok(logs.some(l => l.includes('Installed')))
     restore()
   })

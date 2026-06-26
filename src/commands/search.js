@@ -1,9 +1,15 @@
+let runFetch = globalThis.fetch
+
+export function setFetch(fn) {
+  runFetch = fn
+}
+
 export async function searchCommand(query) {
   const url = `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}+filename:SKILL.md&per_page=20&sort=stars`
 
   let response
   try {
-    response = await fetch(url, {
+    response = await runFetch(url, {
       headers: { Accept: 'application/vnd.github.v3+json' },
       signal: AbortSignal.timeout(10000),
     })

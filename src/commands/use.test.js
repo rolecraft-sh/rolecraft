@@ -56,4 +56,30 @@ describe('use command', () => {
     assert.ok(contentLogs.some(l => l.includes('SKILL.md')))
     assert.ok(contentLogs.some(l => l.includes('config.json')))
   })
+
+  it('handles content without trailing newline', async () => {
+    const skillDir = join(tempDir, 'no-newline-skill')
+    mkdirSync(skillDir, { recursive: true })
+    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/no-nl\nname: no-nl\ninline')
+
+    capture()
+    await useModule.useCommand(skillDir)
+    restoreLog()
+
+    assert.ok(logs.some(l => l.includes('no-nl')))
+    assert.ok(logs.some(l => l.includes('inline')))
+  })
+
+  it('handles content with trailing newline', async () => {
+    const skillDir = join(tempDir, 'with-newline-skill')
+    mkdirSync(skillDir, { recursive: true })
+    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/with-nl\nname: with-nl\nContent\n')
+
+    capture()
+    await useModule.useCommand(skillDir)
+    restoreLog()
+
+    assert.ok(logs.some(l => l.includes('with-nl')))
+    assert.ok(logs.some(l => l.includes('Content')))
+  })
 })

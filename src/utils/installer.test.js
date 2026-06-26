@@ -131,6 +131,116 @@ describe('installer', () => {
     assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 
+  it('installs skill to gemini directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['gemini'])
+
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'gemini')
+
+    const skillDir = join(tempDir, '.gemini', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to cody directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['cody'])
+
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'cody')
+
+    const skillDir = join(tempDir, '.cody', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to continue directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['continue'])
+
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'continue')
+
+    const skillDir = join(tempDir, '.continue', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to warp directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['warp'])
+
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'warp')
+
+    const skillDir = join(tempDir, '.warp', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to codeium directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['codeium'])
+
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'codeium')
+
+    const skillDir = join(tempDir, '.codeium', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to fabric directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['fabric'])
+
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'fabric')
+
+    const skillDir = join(tempDir, '.fabric', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to goose directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['goose'])
+
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'goose')
+
+    const skillDir = join(tempDir, '.goose', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to tabnine directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['tabnine'])
+
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'tabnine')
+
+    const skillDir = join(tempDir, '.tabnine', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to supermaven directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['supermaven'])
+
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'supermaven')
+
+    const skillDir = join(tempDir, '.supermaven', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to pr-pilot directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['pr-pilot'])
+
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'pr-pilot')
+
+    const skillDir = join(tempDir, '.pr-pilot', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to loom directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['loom'])
+
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'loom')
+
+    const skillDir = join(tempDir, '.loom', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
   it('installs skill to project directory', async () => {
     const origCwd = process.cwd
     process.cwd = () => tempDir

@@ -8,11 +8,6 @@ export async function initCommand(name) {
   const dirName = skillName.replace(/\//g, '-')
   const dir = join(process.cwd(), dirName)
 
-  if (skillName.includes('/') && !name) {
-    console.error('Error: Invalid skill name')
-    process.exit(1)
-  }
-
   await mkdir(dir, { recursive: true })
 
   const content = `# slug: ${slug}

@@ -343,6 +343,20 @@ describe('rolecraft CLI', () => {
     process.cwd = origCwd
   })
 
+  it('runs init command with namespaced name', async () => {
+    const origCwd = process.cwd
+    process.cwd = () => tempDir
+    process.argv = ['node', 'rolecraft', 'init', 'namespace/my-skill']
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l.includes('namespace/my-skill')))
+    assert.ok(logs.some(l => l.includes('namespace-my-skill')))
+    restore()
+    process.cwd = origCwd
+  })
+
   it('errors when search has no query', async () => {
     process.argv = ['node', 'rolecraft', 'search']
     const { logs: errors, restore: restoreErr } = capture('error')
