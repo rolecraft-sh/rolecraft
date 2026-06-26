@@ -25,7 +25,8 @@ Works with **29 agents**: opencode, claude-code, cursor, windsurf, devin, codex,
 | GitHub repo install                      | ✅               | ✅              | ❌                   |
 | Agent targets                            | 29               | 68+             | 12                   |
 | SKILL.md scaffolding                     | ✅               | ✅              | ❌                   |
-| Skill discovery (search)                 | ✅               | ✅              | ✅                   |
+| Skill discovery (search)                 | ✅               | ✅ (TUI)        | ✅                   |
+| Interactive search + install             | ✅               | ❌              | ❌                   |
 | Offline capable                          | ✅               | ❌              | ❌                   |
 | agentskill.sh lockfile compatible        | ✅               | ✅              | ✅                   |
 | Project-level install                    | ✅               | ✅              | ✅                   |
@@ -143,6 +144,13 @@ rolecraft search prompt                       # search for prompt skills
 
 The `search` command queries the GitHub API for repositories containing `SKILL.md` files matching your query. Results include stars, language, and the exact install command.
 
+Use `--interactive` to pick and install a skill directly from the search results:
+
+```bash
+rolecraft search code-review --interactive     # search + pick to install
+rolecraft search "code review" --interactive    # multi-word search + install
+```
+
 ### Preview a skill without installing
 
 ```bash
@@ -248,7 +256,7 @@ rolecraft install ./my-skill --cursor --devin --copilot --gemini --cody
 | ---------------------------- | --------------------------------------------------- |
 | `rolecraft init [<name>]`    | Scaffold a new `SKILL.md`                           |
 | `rolecraft install <source>` | Install a skill (local path or GitHub `owner/repo`) |
-| `rolecraft search <query>`   | Search for skills on GitHub                         |
+| `rolecraft search <query>`   | Search for skills on GitHub (add `--interactive` to install from results) |
 | `rolecraft use <source>`     | Preview a skill's files without installing          |
 | `rolecraft setup [<source>]` | Detect agents, optionally install a skill to all    |
 | `rolecraft list`             | Show all installed skills                           |

@@ -1,4 +1,4 @@
-import { describe, it, before, after } from 'node:test'
+import { describe, it, before, after, afterEach } from 'node:test'
 import assert from 'node:assert/strict'
 
 let searchModule
@@ -27,6 +27,7 @@ function mockFetch(status, body) {
 describe('search command', () => {
   after(() => {
     searchModule.setFetch(globalThis.fetch)
+    searchModule.setAskQuestion(undefined)
   })
 
   it('shows results when items found', async () => {
@@ -86,5 +87,41 @@ describe('search command', () => {
       () => searchModule.searchCommand('test'),
       /Failed to search GitHub/,
     )
+  })
+
+  describe('interactive mode', () => {
+    afterEach(() => {
+      searchModule.setAskQuestion(undefined)
+    })
+
+    it('aborts on q', async () => {
+      searchModule.setAskQuestion(() => Promise.resolve('q'))
+      mockFetch(200, {
+        items: [
+          { full_name: 'user1/skill1', description: 'desc', stargazers_count: 1, language: 'JS' },
+        ],
+      })
+
+      const { logs, restore } = capture('log')
+      await searchModule.searchCommand('test', { interactive: true })
+      restore()
+
+      assert.ok(logs.some(l => l.includes('Aborted')))
+    })
+
+    it('shows invalid choice message', async () => {
+      searchModule.setAskQuestion(() => Promise.resolve('99'))
+      mockFetch(200, {
+        items: [
+          { full_name: 'user1/skill1', description: 'desc', stargazers_count: 1, language: 'JS' },
+        ],
+      })
+
+      const { logs, restore } = capture('log')
+      await searchModule.searchCommand('test', { interactive: true })
+      restore()
+
+      assert.ok(logs.some(l => l.includes('Invalid choice')))
+    })
   })
 })

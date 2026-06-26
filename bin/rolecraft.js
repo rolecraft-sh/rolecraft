@@ -37,6 +37,10 @@ Usage:
   rolecraft ci                   Install all skills from lockfile
   rolecraft help                 Show this help
 
+Options for install and search:
+  --interactive  Prompt to install a skill after search (search only)
+  --dry-run      Preview installation without copying files (install, setup)
+
 Options for install:
   --global       Install to ~/.agents/skills/
   --project      Install to ./.agents/skills/ (default)
@@ -73,6 +77,7 @@ Options for install:
   --symlink      Install as symlink instead of copy
   --copy         Install as copy (default)
   --dry-run      Preview installation without copying files
+  --interactive  Choose and install a skill from search results
 
 Examples:
   rolecraft install ./my-skill
@@ -180,11 +185,12 @@ export async function main() {
 
     case 'search': {
       const query = args[0]
+      const flags = args.slice(1)
       if (!query) {
-        console.error('Usage: rolecraft search <query>')
+        console.error('Usage: rolecraft search <query> [--interactive]')
         process.exit(1)
       }
-      await searchCommand(query)
+      await searchCommand(query, { interactive: flags.includes('--interactive') })
       break
     }
 
