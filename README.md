@@ -27,6 +27,8 @@ Works with **29 agents**: opencode, claude-code, cursor, windsurf, devin, codex,
 | SKILL.md scaffolding                     | ✅               | ✅              | ❌                   |
 | Skill discovery (search)                 | ✅               | ✅ (TUI)        | ✅                   |
 | Interactive search + install             | ✅               | ❌              | ❌                   |
+| Bundle install (`bundle`)                | ✅               | ❌              | ✅ (skillset)        |
+| Bundle create (`bundle create`)          | ✅               | ❌              | ❌                   |
 | Offline capable                          | ✅               | ❌              | ❌                   |
 | agentskill.sh lockfile compatible        | ✅               | ✅              | ✅                   |
 | Project-level install                    | ✅               | ✅              | ✅                   |
@@ -62,6 +64,8 @@ rolecraft verify                                   # verify installed skill inte
 rolecraft ci                                       # re-install all skills from lockfile
 rolecraft remove <slug>                            # remove a skill
 rolecraft update <slug>                            # re-install to latest
+rolecraft bundle owner/skill1 owner/skill2         # install multiple skills
+rolecraft bundle ./team-skills.json                # install from a bundle file
 rolecraft --version                                # show version
 ```
 
@@ -198,6 +202,65 @@ rolecraft install sametcelikbicak/coverage-guard
 
 The CLI clones with `--depth 1`, finds `SKILL.md` recursively, installs it, and cleans up.
 
+### Create a bundle file
+
+```bash
+rolecraft bundle create my-collection              # creates my-collection.json
+rolecraft bundle create                            # interactive: asks for name and path
+```
+
+Creates a JSON bundle file you can edit and share with your team:
+
+```json
+{
+  "name": "my-collection",
+  "skills": [
+    "owner/skill-name"
+  ]
+}
+```
+
+Then install with `rolecraft bundle my-collection.json` or add more skills to the `skills` array.
+
+### Install multiple skills at once
+
+```bash
+rolecraft bundle owner/skill1 owner/skill2 ./local-skill  # inline sources
+rolecraft bundle ./team-skills.json                        # from file
+rolecraft bundle owner/skill1 owner/skill2 --dry-run       # preview only
+```
+
+**Inline sources** — pass multiple sources as arguments:
+
+```bash
+rolecraft bundle owner/react-patterns owner/ts-practices ./css-layout
+```
+
+**From a file** — JSON or text file referencing sources:
+
+JSON array (`skills.json`):
+```json
+["owner/react-patterns", "./local/css-layout", "owner/ts-practices"]
+```
+
+JSON object with a `skills` key:
+```json
+{
+  "name": "frontend-essentials",
+  "skills": ["owner/react-practices", "owner/ts-config"]
+}
+```
+
+Plain text (`skills.txt`), one source per line:
+```yaml
+# comments use #
+owner/react-patterns
+./local/css-layout
+owner/ts-practices
+```
+
+If the file has no extension, rolecraft tries `.json` and `.txt` variants automatically.
+
 ## What it does
 
 1. Reads `SKILL.md` from the source and parses metadata (slug, name, owner)
@@ -256,6 +319,8 @@ rolecraft install ./my-skill --cursor --devin --copilot --gemini --cody
 | ---------------------------- | --------------------------------------------------- |
 | `rolecraft init [<name>]`    | Scaffold a new `SKILL.md`                           |
 | `rolecraft install <source>` | Install a skill (local path or GitHub `owner/repo`) |
+| `rolecraft bundle <sources>` | Install multiple skills from inline sources or file  |
+| `rolecraft bundle create`    | Create a new bundle file                            |
 | `rolecraft search <query>`   | Search for skills on GitHub (add `--interactive` to install from results) |
 | `rolecraft use <source>`     | Preview a skill's files without installing          |
 | `rolecraft setup [<source>]` | Detect agents, optionally install a skill to all    |
@@ -274,16 +339,17 @@ rolecraft/
 ├── bin/rolecraft.js          # CLI entry point
 ├── src/
 │   ├── commands/
-│   │   ├── ci.js             # frozen lockfile install
-│   │   ├── init.js           # SKILL.md scaffolding
-│   │   ├── install.js        # install logic + interactive scope
-│   │   ├── list.js           # list installed skills
-│   │   ├── remove.js         # remove skill + lockfile cleanup
-│   │   ├── search.js         # GitHub skill discovery
-│   │   ├── setup.js          # detect agents + install to all
-│   │   ├── update.js         # re-install skill to latest
-│   │   ├── use.js            # preview skill without installing
-│   │   └── verify.js         # integrity verification
+│   │   ├── bundle.js          # multi-skill install from bundle file
+│   │   ├── ci.js              # frozen lockfile install
+│   │   ├── init.js            # SKILL.md scaffolding
+│   │   ├── install.js         # install logic + interactive scope
+│   │   ├── list.js            # list installed skills
+│   │   ├── remove.js          # remove skill + lockfile cleanup
+│   │   ├── search.js          # GitHub skill discovery
+│   │   ├── setup.js           # detect agents + install to all
+│   │   ├── update.js          # re-install skill to latest
+│   │   ├── use.js             # preview skill without installing
+│   │   └── verify.js          # integrity verification
 │   └── utils/
 │       ├── resolver.js       # source resolver (local / GitHub)
 │       ├── installer.js      # copy/symlink files to target dirs

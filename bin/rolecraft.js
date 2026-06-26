@@ -13,6 +13,7 @@ import { initCommand } from '../src/commands/init.js'
 import { searchCommand } from '../src/commands/search.js'
 import { verifyCommand } from '../src/commands/verify.js'
 import { ciCommand } from '../src/commands/ci.js'
+import { bundleCommand, bundleCreateCommand } from '../src/commands/bundle.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'))
@@ -26,6 +27,8 @@ Works with opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider
 
 Usage:
   rolecraft install <source>     Install a skill (local path or owner/repo)
+  rolecraft bundle <source> [...] Install skills from a file or inline sources
+  rolecraft bundle create [<name>]  Create a new bundle file
   rolecraft use <source>         Preview a skill without installing
   rolecraft list                 List installed skills
   rolecraft remove <slug>        Remove a skill
@@ -83,6 +86,10 @@ Examples:
   rolecraft install ./my-skill
   rolecraft install sametcelikbicak/task-decomposer
   rolecraft install ./skills/my-skill --claude --cursor
+  rolecraft bundle ./team-skills.json
+  rolecraft bundle owner/skill1 owner/skill2 ./local-skill
+  rolecraft bundle owner/skill1 owner/skill2 --dry-run
+  rolecraft bundle create my-collection
   rolecraft list
   rolecraft remove task-decomposer
 `)
@@ -216,6 +223,28 @@ export async function main() {
     case '-v':
       console.log(pkg.version)
       break
+
+    case 'bundle': {
+      if (args.length === 0) {
+        console.error('Usage: rolecraft bundle <source> [...]')
+        console.error('       rolecraft bundle <file>')
+        console.error('       rolecraft bundle create [<name>]')
+        process.exit(1)
+      }
+      if (args[0] === 'create') {
+        await bundleCreateCommand(args[1])
+        break
+      }
+      const flags = args.filter(a => a.startsWith('--'))
+      const sources = args.filter(a => !a.startsWith('--'))
+      const opts = { dryRun: flags.includes('--dry-run') }
+      if (sources.length === 1) {
+        await bundleCommand(sources[0], opts)
+      } else {
+        await bundleCommand(sources, opts)
+      }
+      break
+    }
 
     case 'help':
     case '--help':
