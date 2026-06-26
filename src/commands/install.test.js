@@ -161,4 +161,19 @@ describe('askScope', () => {
     assert.ok(logs.some(l => l.includes('Installed')))
     restore()
   })
+
+  it('dry-run shows plan without installing', async () => {
+    const checkDir = join(tempDir, 'dry-run-skill')
+    mkdirSync(checkDir, { recursive: true })
+    writeFileSync(join(checkDir, 'SKILL.md'), '# slug: test/dry-run\nname: dry-run-skill\nContent')
+
+    const { logs, restore } = capture('log')
+    await installModule.installCommand(checkDir, { global: true, dryRun: true })
+
+    assert.ok(logs.some(l => l.includes('Dry-run')))
+    assert.ok(logs.some(l => l.includes('dry-run-skill')))
+    assert.ok(logs.some(l => l.includes('Targets')))
+    assert.ok(!logs.some(l => l.includes('Installed')))
+    restore()
+  })
 })

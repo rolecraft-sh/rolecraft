@@ -55,7 +55,7 @@ function globalAgentsDir() {
   return join(homedir(), '.agents', 'skills')
 }
 
-export async function setupCommand(source) {
+export async function setupCommand(source, options = {}) {
   const agents = detectAgents()
   const projectDir = join(process.cwd(), '.agents', 'skills')
 
@@ -94,6 +94,16 @@ export async function setupCommand(source) {
 
     const targets = agents.map(a => a.flag)
     targets.push('project')
+
+    if (options.dryRun) {
+      console.log('📋 Dry-run — no files will be copied:\n')
+      console.log(`   Skill:     ${resolved.name} (${resolved.slug})`)
+      console.log(`   Source:    ${source}`)
+      console.log(`   Mode:      copy`)
+      console.log(`   Files:     ${resolved.files.join(', ')}`)
+      console.log(`   Targets:   ${targets.join(', ')}\n`)
+      return
+    }
 
     const results = await installSkill(resolved, targets)
 

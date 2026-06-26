@@ -103,6 +103,17 @@ export async function installCommand(source, options) {
   if (scope.factory) targets.push('factory')
   if (scope.project) targets.push('project')
 
+  if (options.dryRun) {
+    const mode = options.symlink ? 'symlink' : 'copy'
+    console.log('📋 Dry-run — no files will be copied:\n')
+    console.log(`   Skill:     ${resolved.name} (${resolved.slug})`)
+    console.log(`   Source:    ${source}`)
+    console.log(`   Mode:      ${mode}`)
+    console.log(`   Files:     ${resolved.files.join(', ')}`)
+    console.log(`   Targets:   ${targets.join(', ')}\n`)
+    return
+  }
+
   const results = await installSkill(resolved, targets, options.symlink ? 'symlink' : 'copy')
 
   console.log('✅ Installed successfully:\n')
