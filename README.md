@@ -14,7 +14,7 @@
 
 **Zero-dependency** CLI to install AI agent skills as roles & behaviors from any source. No marketplace, no registry, no signup — just point it at a local folder or a GitHub repo and it works.
 
-Works with **20 agents**: opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody, continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot, loom, and all spec-compliant agents.
+Works with **29 agents**: opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody, continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot, loom, roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory, and all spec-compliant agents.
 
 ## Why rolecraft?
 
@@ -23,12 +23,13 @@ Works with **20 agents**: opencode, claude-code, cursor, windsurf, devin, codex,
 | Zero dependencies                        | ✅               | ✅              | ❌ (2)               |
 | Local path install                       | ✅ **1st class** | ❌ GitHub only  | ❌ marketplace only  |
 | GitHub repo install                      | ✅               | ✅              | ❌                   |
-| Agent targets                            | 20               | 68+             | 20+                  |
+| Agent targets                            | 29               | 68+             | 12                   |
 | SKILL.md scaffolding                     | ✅               | ✅              | ❌                   |
 | Skill discovery (search)                 | ✅               | ✅              | ✅                   |
 | Offline capable                          | ✅               | ❌              | ❌                   |
 | agentskill.sh lockfile compatible        | ✅               | ✅              | ✅                   |
 | Project-level install                    | ✅               | ✅              | ✅                   |
+| Dry-run preview (`--dry-run`)            | ✅               | ❌              | ❌                   |
 | Lockfile integrity (`--frozen-lockfile`) | ✅               | ❌              | ❌                   |
 | Content hash verification (`verify`)     | ✅               | ❌              | ❌                   |
 | CI-mode re-install (`ci`)                | ✅               | ❌              | ❌                   |
@@ -100,10 +101,20 @@ rolecraft install ./my-skill --tabnine      # also ~/.tabnine/skills/
 rolecraft install ./my-skill --supermaven   # also ~/.supermaven/skills/
 rolecraft install ./my-skill --pr-pilot     # also ~/.pr-pilot/skills/
 rolecraft install ./my-skill --loom         # also ~/.loom/skills/
+rolecraft install ./my-skill --roo          # also ~/.roo/skills/
+rolecraft install ./my-skill --trae         # also ~/.trae/skills/
+rolecraft install ./my-skill --hermes       # also ~/.hermes/skills/
+rolecraft install ./my-skill --kiro         # also ~/.kiro/skills/
+rolecraft install ./my-skill --augment      # also ~/.augment/skills/
+rolecraft install ./my-skill --kilo         # also ~/.kilo/skills/
+rolecraft install ./my-skill --openhands    # also ~/.openhands/skills/
+rolecraft install ./my-skill --junie        # also ~/.junie/skills/
+rolecraft install ./my-skill --factory      # also ~/.factory/skills/
 rolecraft install ./my-skill --all          # all locations
 rolecraft install ./my-skill --frozen-lockfile  # fail if skill is already installed
 rolecraft install ./my-skill --symlink          # symlink instead of copy
 rolecraft install ./my-skill --copy             # force copy (default)
+rolecraft install ./my-skill --dry-run          # preview without copying files
 ```
 
 Combine flags to install to multiple agents:
@@ -140,6 +151,15 @@ rolecraft use sametcelikbicak/task-decomposer
 ```
 
 The `use` command resolves the source, shows metadata, and prints all file contents to stdout — without writing anything to disk. Useful for inspecting a skill before installing, or piping content into other tools.
+
+### Preview installation without changes
+
+```bash
+rolecraft install ./my-skill --global --dry-run
+rolecraft install sametcelikbicak/task-decomposer --claude --cursor --dry-run
+```
+
+The `--dry-run` flag resolves the source, shows what would be installed and where, but **does not copy any files**. Use it to verify the installation plan before executing.
 
 ### Detect agents and install to all
 
@@ -204,6 +224,15 @@ The CLI clones with `--depth 1`, finds `SKILL.md` recursively, installs it, and 
 | supermaven  | `~/.supermaven/skills/`                        |
 | pr-pilot    | `~/.pr-pilot/skills/`                          |
 | loom        | `~/.loom/skills/`                              |
+| roo         | `~/.roo/skills/`                               |
+| trae        | `~/.trae/skills/`                              |
+| hermes      | `~/.hermes/skills/`                            |
+| kiro        | `~/.kiro/skills/`                              |
+| augment     | `~/.augment/skills/`                           |
+| kilo        | `~/.kilo/skills/`                              |
+| openhands   | `~/.openhands/skills/`                         |
+| junie       | `~/.junie/skills/`                             |
+| factory     | `~/.factory/skills/`                           |
 
 > ⚠️ Windsurf was rebranded to **Devin Desktop** in June 2026. The `--windsurf` flag and `~/.windsurf/skills/` path still work for backward compatibility, but new deployments should use `--devin` / `~/.devin/skills/`.
 
