@@ -451,4 +451,19 @@ describe('rolecraft CLI', () => {
     assert.ok(logs.some(l => l.includes('Installed')))
     restore()
   })
+
+  it('shows dry-run plan without installing', async () => {
+    const skillDir = join(tempDir, 'dry-run-cli-skill')
+    mkdirSync(skillDir, { recursive: true })
+    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/dry-run-cli\nname: dry-run-cli\nContent')
+
+    process.argv = ['node', 'rolecraft', 'install', skillDir, '--global', '--dry-run']
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l.includes('Dry-run')))
+    assert.ok(logs.some(l => l.includes('dry-run-cli')))
+    restore()
+  })
 })

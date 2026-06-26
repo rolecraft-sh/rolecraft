@@ -72,6 +72,7 @@ Options for install:
   --frozen-lockfile  Fail if skill already installed
   --symlink      Install as symlink instead of copy
   --copy         Install as copy (default)
+  --dry-run      Preview installation without copying files
 
 Examples:
   rolecraft install ./my-skill
@@ -130,6 +131,7 @@ export async function main() {
       } : {}
       options.frozenLockfile = flags.includes('--frozen-lockfile')
       options.symlink = flags.includes('--symlink')
+      options.dryRun = flags.includes('--dry-run')
 
       await installCommand(source, options)
       break
@@ -198,7 +200,8 @@ export async function main() {
 
     case 'setup': {
       const source = args[0]
-      await setupCommand(source)
+      const flags = args.slice(1)
+      await setupCommand(source, { dryRun: flags.includes('--dry-run') })
       break
     }
 

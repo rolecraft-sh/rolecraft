@@ -82,4 +82,21 @@ describe('setup command', () => {
     assert.ok(logs.some(l => l.includes('setup-test')))
     assert.ok(logs.some(l => l.includes('Installed')))
   })
+
+  it('dry-run shows plan without installing via setup', async () => {
+    mkdirSync(join(tempDir, '.agents', 'skills'), { recursive: true })
+    mkdirSync(join(tempDir, '.claude', 'skills'), { recursive: true })
+
+    const skillDir = join(tempDir, 'setup-dry-run-skill')
+    mkdirSync(skillDir, { recursive: true })
+    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/setup-dry\nname: setup-dry-test\nContent')
+
+    capture()
+    await setupModule.setupCommand(skillDir, { dryRun: true })
+    restoreLog()
+
+    assert.ok(logs.some(l => l.includes('Dry-run')))
+    assert.ok(logs.some(l => l.includes('setup-dry-test')))
+    assert.ok(!logs.some(l => l.includes('Installed')))
+  })
 })
