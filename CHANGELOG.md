@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.0.0] - 2026-06-27
+
+### Added
+- add bundle command with inline sources and bundle create (#26)
+- add interactive search mode (--interactive) (#25)
+- add --dry-run mode for install and setup commands (#24)
+- add 9 new agent targets (roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory) (#23)
+- v0.4.0 — verify, ci, content hash, symlink mode (#22)
+- v0.3.0 — init, search, 20 agent targets, frozen-lockfile (#21)
+
+### Changed
+- update changelog and version for v0.2.0 [skip ci] (#19)
+
+### Documentation
+- restructure README into modular documentation hub (#28)
+- update ANALYSIS.md and README.md with accurate competitive data (#27)
+- remove test coverage metrics from analysis and update roadmap
+
+### Other
+- Bug fixes and improvements for stable release (#29)
+- add devin (Devin Desktop) agent target with windsurf backward compat (#20)
 ## [v0.2.0] - 2026-06-25
 
 ### Added
