@@ -14,356 +14,118 @@
 
 **Zero-dependency** CLI to install AI agent skills as roles & behaviors from any source. No marketplace, no registry, no signup — just point it at a local folder or a GitHub repo and it works.
 
-Works with **30 install targets** (29 named agents + project-local): opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody, continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot, loom, roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory, and all spec-compliant agents.
+Works with **30+ install targets**: opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody, continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot, loom, roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory, and all spec-compliant agents.
 
-## Why rolecraft?
+---
 
-| Feature                                  | rolecraft        | skills (Vercel)   | @agentskill.sh/cli |
-| ---------------------------------------- | ---------------- | ----------------- | -------------------- |
-| Zero dependencies                        | ✅               | ✅ (1 dep)        | ❌ (2)               |
-| Local path install                       | ✅ **1st class** | ✅                | ❌ marketplace only  |
-| GitHub repo install                      | ✅               | ✅                | ❌                   |
-| GitLab / SSH git URL                     | ❌               | ✅                | ❌                   |
-| npm package source                       | ❌               | ✅                | ❌                   |
-| Agent targets                            | 30               | 55+               | 15+                  |
-| SKILL.md scaffolding                     | ✅               | ✅                | ❌                   |
-| Skill discovery (search)                 | ✅               | ✅ (TUI)          | ✅                   |
-| Interactive search + install             | ✅               | ❌                | ❌                   |
-| Bundle install (`bundle`)                | ✅               | ❌                | ✅ (skillset)        |
-| Bundle create (`bundle create`)          | ✅               | ❌                | ❌                   |
-| Offline capable                          | ✅               | ✅                | ❌                   |
-| Project-level install                    | ✅               | ✅                | ✅                   |
-| Interactive scope prompt                 | ✅               | ❌                | ❌                   |
-| Dry-run preview (`--dry-run`)            | ✅               | ❌                | ❌                   |
-| Lockfile integrity (`--frozen-lockfile`) | ✅               | ✅                | ❌                   |
-| Content hash verification (`verify`)     | ✅               | ✅                | ❌                   |
-| CI-mode re-install (`ci`)                | ✅               | ✅                | ❌                   |
-| Symlink install (`--symlink`)            | ✅               | ✅ (default)      | ❌                   |
-| npm provenance                           | ✅               | ❌                | ❌                   |
-| Shell completions                        | ❌               | ❌                | ❌                   |
-| `doctor` command                         | ❌               | ❌                | ❌                   |
-| Self-upgrade command                     | ❌               | ❌                | ❌                   |
-| File size                                | ~4 KB            | ~465 KB           | ~84 KB               |
+## Table of Contents
 
-## Install
+- [Quick start](#quick-start)
+- [Commands overview](#commands-overview)
+- [Why rolecraft?](#why-rolecraft)
+- [How agents discover skills](#how-agents-discover-skills)
+- [Architecture](#architecture)
+- [Contributing](#contributing)
+- [License](#license)
+
+---
+
+## Quick start
 
 ```bash
 npm install -g rolecraft
-# or
-npx rolecraft install <source>
-```
 
-## Usage
+# scaffold a new skill
+rolecraft init my-skill
 
-```bash
-rolecraft init my-skill                            # scaffold a new SKILL.md
-rolecraft install ./path/to/my-skill               # install from local folder
-rolecraft install sametcelikbicak/task-decomposer  # install from GitHub
-rolecraft install ./my-skill --claude --cursor     # install for specific agents
-rolecraft search code-review                       # search skills on GitHub
-rolecraft use sametcelikbicak/task-decomposer      # preview without installing
-rolecraft setup                                    # detect installed agents
-rolecraft setup ./my-skill                         # detect + install to all agents
-rolecraft list                                     # list installed skills
-rolecraft verify                                   # verify installed skill integrity
-rolecraft ci                                       # re-install all skills from lockfile
-rolecraft remove <slug>                            # remove a skill
-rolecraft update <slug>                            # re-install to latest
-rolecraft bundle owner/skill1 owner/skill2         # install multiple skills
-rolecraft bundle ./team-skills.json                # install from a bundle file
-rolecraft --version                                # show version
-```
-
-### Install scope
-
-When you run `rolecraft install <source>` without flags, it asks where to install:
-
-```
-Where do you want to install this skill?
-  1) Global (~/.agents/skills/)
-  2) Project (./.agents/skills/) [default]
-  3) Both
-```
-
-**Project scope is the default** — installed skills are committed with your repo and shared with your team. Use `--global` for personal skills or flags to target specific agents.
-
-Select specific agents with flags:
-
-```bash
-rolecraft install ./my-skill --project      # ./.agents/skills/ (default)
-rolecraft install ./my-skill --global       # ~/.agents/skills/
-rolecraft install ./my-skill --claude       # also ~/.claude/skills/
-rolecraft install ./my-skill --cursor       # also ~/.cursor/skills/
-rolecraft install ./my-skill --windsurf     # also ~/.windsurf/skills/ (deprecated: use --devin)
-rolecraft install ./my-skill --devin        # also ~/.devin/skills/
-rolecraft install ./my-skill --codex        # also ~/.codex/skills/
-rolecraft install ./my-skill --copilot      # also ~/.copilot/skills/
-rolecraft install ./my-skill --aider        # also ~/.aider/skills/
-rolecraft install ./my-skill --cline        # also ~/.cline/skills/
-rolecraft install ./my-skill --gemini       # also ~/.gemini/skills/
-rolecraft install ./my-skill --cody         # also ~/.cody/skills/
-rolecraft install ./my-skill --continue     # also ~/.continue/skills/
-rolecraft install ./my-skill --warp         # also ~/.warp/skills/
-rolecraft install ./my-skill --codeium      # also ~/.codeium/skills/
-rolecraft install ./my-skill --fabric       # also ~/.fabric/skills/
-rolecraft install ./my-skill --goose        # also ~/.goose/skills/
-rolecraft install ./my-skill --tabnine      # also ~/.tabnine/skills/
-rolecraft install ./my-skill --supermaven   # also ~/.supermaven/skills/
-rolecraft install ./my-skill --pr-pilot     # also ~/.pr-pilot/skills/
-rolecraft install ./my-skill --loom         # also ~/.loom/skills/
-rolecraft install ./my-skill --roo          # also ~/.roo/skills/
-rolecraft install ./my-skill --trae         # also ~/.trae/skills/
-rolecraft install ./my-skill --hermes       # also ~/.hermes/skills/
-rolecraft install ./my-skill --kiro         # also ~/.kiro/skills/
-rolecraft install ./my-skill --augment      # also ~/.augment/skills/
-rolecraft install ./my-skill --kilo         # also ~/.kilo/skills/
-rolecraft install ./my-skill --openhands    # also ~/.openhands/skills/
-rolecraft install ./my-skill --junie        # also ~/.junie/skills/
-rolecraft install ./my-skill --factory      # also ~/.factory/skills/
-rolecraft install ./my-skill --all          # all locations
-rolecraft install ./my-skill --frozen-lockfile  # fail if skill is already installed
-rolecraft install ./my-skill --symlink          # symlink instead of copy
-rolecraft install ./my-skill --copy             # force copy (default)
-rolecraft install ./my-skill --dry-run          # preview without copying files
-```
-
-Combine flags to install to multiple agents:
-
-```bash
-rolecraft install ./my-skill --claude --cursor --devin
-```
-
-### Scaffold a new skill
-
-```bash
-rolecraft init                    # create ./SKILL.md (default: my-skill)
-rolecraft init my-custom-tool     # create ./my-custom-tool/SKILL.md
-rolecraft init namespace/skill    # create ./namespace-skill/SKILL.md
-```
-
-The `init` command generates a ready-to-edit `SKILL.md` with proper slug, name, and owner metadata. Edit it with your skill instructions, then install with `rolecraft install <dir>`.
-
-### Search for skills on GitHub
-
-```bash
-rolecraft search code-review                  # search by keyword
-rolecraft search "code review typescript"     # multi-word search
-rolecraft search prompt                       # search for prompt skills
-```
-
-The `search` command queries the GitHub API for repositories containing `SKILL.md` files matching your query. Results include stars, language, and the exact install command.
-
-Use `--interactive` to pick and install a skill directly from the search results:
-
-```bash
-rolecraft search code-review --interactive     # search + pick to install
-rolecraft search "code review" --interactive    # multi-word search + install
-```
-
-### Preview a skill without installing
-
-```bash
-rolecraft use ./my-skill
-rolecraft use sametcelikbicak/task-decomposer
-```
-
-The `use` command resolves the source, shows metadata, and prints all file contents to stdout — without writing anything to disk. Useful for inspecting a skill before installing, or piping content into other tools.
-
-### Preview installation without changes
-
-```bash
-rolecraft install ./my-skill --global --dry-run
-rolecraft install sametcelikbicak/task-decomposer --claude --cursor --dry-run
-```
-
-The `--dry-run` flag resolves the source, shows what would be installed and where, but **does not copy any files**. Use it to verify the installation plan before executing.
-
-### Detect agents and install to all
-
-```bash
-rolecraft setup                    # detect which agents are available
-rolecraft setup ./my-skill         # detect + install to all detected agents
-rolecraft setup sametcelikbicak/task-decomposer
-```
-
-Run `rolecraft setup` to see which AI agents are installed on your system. Pass a source to automatically install a skill to all detected agents at once.
-
-### Source types
-
-**Local path** — any directory containing `SKILL.md`:
-
-```bash
+# install from local folder or GitHub
 rolecraft install ./my-skill
-rolecraft install ~/projects/my-skill
-rolecraft install /absolute/path/to/skill
-```
-
-**GitHub repo** — shorthand `owner/repo`:
-
-```bash
 rolecraft install sametcelikbicak/task-decomposer
-rolecraft install sametcelikbicak/coverage-guard
+
+# install for specific agents
+rolecraft install ./my-skill --claude --cursor
+
+# search for skills
+rolecraft search code-review --interactive
+
+# list, verify, and manage
+rolecraft list
+rolecraft verify
+rolecraft remove <slug>
+rolecraft update <slug>
 ```
 
-The CLI clones with `--depth 1`, finds `SKILL.md` recursively, installs it, and cleans up.
+> **Requirements:** Node.js >= 20
 
-### Create a bundle file
+[→ Full install details](docs/install.md) — scope flags, source types, `--symlink`, `--dry-run`, `--frozen-lockfile`
+
+---
+
+## Commands overview
+
+| Command                      | Description                                         | Details                          |
+| ---------------------------- | --------------------------------------------------- | -------------------------------- |
+| `rolecraft init [<name>]`    | Scaffold a new `SKILL.md`                           | [docs](docs/commands/init.md)    |
+| `rolecraft install <source>` | Install a skill (local path or GitHub `owner/repo`) | [docs](docs/commands/install.md) |
+| `rolecraft bundle <sources>` | Install multiple skills from inline sources or file | [docs](docs/commands/bundle.md)  |
+| `rolecraft bundle create`    | Create a new bundle file                            | [docs](docs/commands/bundle.md)  |
+| `rolecraft search <query>`   | Search for skills on GitHub                         | [docs](docs/commands/search.md)  |
+| `rolecraft use <source>`     | Preview a skill's files without installing          | [docs](docs/commands/use.md)     |
+| `rolecraft setup [<source>]` | Detect agents, optionally install a skill to all    | [docs](docs/commands/setup.md)   |
+| `rolecraft list`             | Show all installed skills                           | [docs](docs/commands/list.md)    |
+| `rolecraft verify`           | Check installed skill integrity via content hash    | [docs](docs/commands/verify.md)  |
+| `rolecraft ci`               | Re-install all skills from lockfile (CI mode)       | [docs](docs/commands/ci.md)      |
+| `rolecraft remove <slug>`    | Uninstall a skill                                   | [docs](docs/commands/remove.md)  |
+| `rolecraft update <slug>`    | Re-install a skill to latest                        | [docs](docs/commands/update.md)  |
+| `rolecraft --version`        | Show version                                        |                                  |
+
+---
+
+## Why rolecraft?
+
+[→ Full feature comparison](docs/comparison.md)
+
+| Feature                                  | rolecraft   | skills (Vercel) | @agentskill.sh/cli |
+| ---------------------------------------- | ----------- | --------------- | ------------------ |
+| Zero dependencies                        | ✅          | ✅ (1 dep)      | ❌ (2)             |
+| Local path install                       | ✅ 1st class | ✅              | ❌ marketplace only |
+| GitHub repo install                      | ✅          | ✅              | ❌                 |
+| Bundle install + create                  | ✅          | ❌              | ✅ (skillset only) |
+| Interactive search + install             | ✅          | ❌              | ❌                 |
+| Dry-run preview (`--dry-run`)            | ✅          | ❌              | ❌                 |
+| Interactive scope prompt                 | ✅          | ❌              | ❌                 |
+| Content hash verification (`verify`)     | ✅          | ✅              | ❌                 |
+| CI-mode re-install (`ci`)                | ✅          | ✅              | ❌                 |
+| File size                                | ~4 KB       | ~465 KB         | ~84 KB             |
+
+[See full table →](docs/comparison.md)
+
+---
+
+## How agents discover skills
+
+rolecraft knows where each AI agent looks for skills. Use flags like `--claude`, `--cursor`, `--devin` to target specific agents, or `--all` for every supported agent.
+
+[→ Full agent path table](docs/agents.md)
 
 ```bash
-rolecraft bundle create my-collection              # creates my-collection.json
-rolecraft bundle create                            # interactive: asks for name and path
+# Install to multiple agents at once
+rolecraft install ./my-skill --cursor --devin --copilot --gemini --cody
 ```
 
-Creates a JSON bundle file you can edit and share with your team:
+---
 
-```json
-{
-  "name": "my-collection",
-  "skills": [
-    "owner/skill-name"
-  ]
-}
-```
-
-Then install with `rolecraft bundle my-collection.json` or add more skills to the `skills` array.
-
-### Install multiple skills at once
-
-```bash
-rolecraft bundle owner/skill1 owner/skill2 ./local-skill  # inline sources
-rolecraft bundle ./team-skills.json                        # from file
-rolecraft bundle owner/skill1 owner/skill2 --dry-run       # preview only
-```
-
-**Inline sources** — pass multiple sources as arguments:
-
-```bash
-rolecraft bundle owner/react-patterns owner/ts-practices ./css-layout
-```
-
-**From a file** — JSON or text file referencing sources:
-
-JSON array (`skills.json`):
-```json
-["owner/react-patterns", "./local/css-layout", "owner/ts-practices"]
-```
-
-JSON object with a `skills` key:
-```json
-{
-  "name": "frontend-essentials",
-  "skills": ["owner/react-practices", "owner/ts-config"]
-}
-```
-
-Plain text (`skills.txt`), one source per line:
-```yaml
-# comments use #
-owner/react-patterns
-./local/css-layout
-owner/ts-practices
-```
-
-If the file has no extension, rolecraft tries `.json` and `.txt` variants automatically.
-
-## What it does
+## Architecture
 
 1. Reads `SKILL.md` from the source and parses metadata (slug, name, owner)
 2. Copies (or symlinks with `--symlink`) all files alongside `SKILL.md` to the target directory
 3. Computes a SHA256 content hash and stores it in the lockfile
 4. Updates `~/.agents/.skill-lock.json` so agents can discover the skill
-5. `rolecraft verify` checks installed files against the stored hash
-6. `rolecraft ci` re-installs all skills from the lockfile (e.g. in CI pipelines)
-7. Compatible with skills installed by `@agentskill.sh/cli`, `add-skill`, or manual installs
+5. Compatible with skills installed by `@agentskill.sh/cli`, `add-skill`, or manual installs
 
-## How agents discover skills
+[→ Full architecture & project structure](docs/architecture.md)
 
-| Agent       | Directory                                      |
-| ----------- | ---------------------------------------------- |
-| opencode    | `~/.agents/skills/` or `./.agents/skills/`     |
-| claude-code | `~/.claude/skills/` or `./.claude/skills/`     |
-| cursor      | `~/.cursor/skills/` or `./.cursor/skills/`     |
-| windsurf ⚠️ | `~/.windsurf/skills/` or `./.windsurf/skills/` |
-| devin       | `~/.devin/skills/` or `./.devin/skills/`       |
-| codex       | `~/.codex/skills/` or `./.codex/skills/`       |
-| copilot     | `~/.copilot/skills/` or `./.copilot/skills/`   |
-| aider       | `~/.aider/skills/` or `./.aider/skills/`       |
-| cline       | `~/.cline/skills/` or `./.cline/skills/`       |
-| gemini-cli  | `~/.gemini/skills/`                            |
-| cody        | `~/.cody/skills/`                              |
-| continue    | `~/.continue/skills/`                          |
-| warp        | `~/.warp/skills/`                              |
-| codeium     | `~/.codeium/skills/`                           |
-| fabric      | `~/.fabric/skills/`                            |
-| goose       | `~/.goose/skills/`                             |
-| tabnine     | `~/.tabnine/skills/`                           |
-| supermaven  | `~/.supermaven/skills/`                        |
-| pr-pilot    | `~/.pr-pilot/skills/`                          |
-| loom        | `~/.loom/skills/`                              |
-| roo         | `~/.roo/skills/`                               |
-| trae        | `~/.trae/skills/`                              |
-| hermes      | `~/.hermes/skills/`                            |
-| kiro        | `~/.kiro/skills/`                              |
-| augment     | `~/.augment/skills/`                           |
-| kilo        | `~/.kilo/skills/`                              |
-| openhands   | `~/.openhands/skills/`                         |
-| junie       | `~/.junie/skills/`                             |
-| factory     | `~/.factory/skills/`                           |
-
-> ⚠️ Windsurf has been rebranded to **Devin Desktop**. The `--windsurf` flag and `~/.windsurf/skills/` path still work for backward compatibility, but new deployments should use `--devin` / `~/.devin/skills/`.
-
-Install to multiple agents at once:
-
-```bash
-rolecraft install ./my-skill --cursor --devin --copilot --gemini --cody
-```
-
-## Commands
-
-| Command                      | Description                                         |
-| ---------------------------- | --------------------------------------------------- |
-| `rolecraft init [<name>]`    | Scaffold a new `SKILL.md`                           |
-| `rolecraft install <source>` | Install a skill (local path or GitHub `owner/repo`) |
-| `rolecraft bundle <sources>` | Install multiple skills from inline sources or file  |
-| `rolecraft bundle create`    | Create a new bundle file                            |
-| `rolecraft search <query>`   | Search for skills on GitHub (add `--interactive` to install from results) |
-| `rolecraft use <source>`     | Preview a skill's files without installing          |
-| `rolecraft setup [<source>]` | Detect agents, optionally install a skill to all    |
-| `rolecraft list`             | Show all installed skills                           |
-| `rolecraft verify`           | Check installed skill integrity via content hash    |
-| `rolecraft ci`               | Re-install all skills from lockfile (CI mode)       |
-| `rolecraft remove <slug>`    | Uninstall a skill                                   |
-| `rolecraft update <slug>`    | Re-install a skill to latest                        |
-| `rolecraft help`             | Show this help                                      |
-| `rolecraft version`          | Show version (`--version`, `-v`)                    |
-
-## Project structure
-
-```
-rolecraft/
-├── bin/rolecraft.js          # CLI entry point
-├── src/
-│   ├── commands/
-│   │   ├── bundle.js          # multi-skill install from bundle file
-│   │   ├── ci.js              # frozen lockfile install
-│   │   ├── init.js            # SKILL.md scaffolding
-│   │   ├── install.js         # install logic + interactive scope
-│   │   ├── list.js            # list installed skills
-│   │   ├── remove.js          # remove skill + lockfile cleanup
-│   │   ├── search.js          # GitHub skill discovery
-│   │   ├── setup.js           # detect agents + install to all
-│   │   ├── update.js          # re-install skill to latest
-│   │   ├── use.js             # preview skill without installing
-│   │   └── verify.js          # integrity verification
-│   └── utils/
-│       ├── resolver.js       # source resolver (local / GitHub)
-│       ├── installer.js      # copy/symlink files to target dirs
-│       └── lockfile.js       # read/write .skill-lock.json + content hash
-├── package.json
-├── CHANGELOG.md              # Release history
-├── CONTRIBUTING.md           # Contribution guide
-└── README.md
-```
+---
 
 ## Contributing
 
