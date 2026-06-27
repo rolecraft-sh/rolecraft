@@ -2,26 +2,34 @@
 
 ## rolecraft vs Competitors
 
-| Feature                      | rolecraft      | @agentskill.sh/cli | skills (Vercel)                               | OpenCode native | Claude Code                |
-| ---------------------------- | -------------- | ------------------ | --------------------------------------------- | --------------- | -------------------------- |
-| **Runtime deps**             | **0**          | 2                  | 1 (`yaml`)                                    | 0 (built-in)    | 0 (built-in)               |
-| **Package size**             | ~4 KB          | 84 KB              | 465 KB                                        | N/A             | N/A                        |
-| **Source files**             | 10             | 37                 | 14                                            | N/A             | N/A                        |
-| **Source types**             | Local + GitHub | Registry only      | GitHub/GitLab/git URL/Local/npm               | Filesystem only | Filesystem + MCP + plugins |
-| **Lockfile**                 | agentskill v3  | None               | Two-tier (global v3 + project v1, SHA hashes) | None            | Config files only          |
-| **Offline capable**          | ✅             | ❌ (registry)      | ✅                                            | ✅              | ✅                         |
-| **Signup required**          | ❌             | ✅ (agentskill.sh) | ❌                                            | ❌              | ❌                         |
-| **Agent count**              | **29**          | 12                 | 68+                                           | 1 (+ compat)    | 1 (+ plugins)              |
-| **Project scope default**    | ✅             | N/A                | ✅                                            | N/A             | N/A                        |
-| **Interactive scope prompt** | ✅             | ❌                 | ❌                                            | N/A             | N/A                        |
-| **Provenance (npm)**         | ✅             | ❌                 | ❌                                            | N/A             | N/A                        |
-| **`use` command**            | ✅             | ❌                 | ✅                                            | ❌              | ❌                         |
-| **`setup` command**          | ✅             | ✅                 | ❌                                            | ❌              | ❌                         |
-| **`init` command**           | ✅             | ❌                 | ✅                                            | ❌              | ❌                         |
-| **`search`/`find` command**  | ✅             | ✅ (`ags search`)  | ✅ (`skills find`)                            | ❌              | ❌                         |
-| **Lockfile `ci`/`verify`**   | ❌             | ❌                 | ✅ (`skills ci`, `skills verify`)             | ❌              | ❌                         |
-| **Symlink mode**             | ❌             | ❌                 | ✅                                            | ❌              | ❌                         |
-| **Stars**                    | ~5             | 23                 | 23,588                                        | 178K+           | 133K+                      |
+| Feature                      | rolecraft      | skills (Vercel)                           | @agentskill.sh/cli (ags) | openskills        | skills-npm (antfu)  | qntx/skill (Rust) | OpenCode native | Claude Code |
+| ---------------------------- | -------------- | ----------------------------------------- | ------------------------ | ----------------- | ------------------- | ----------------- | --------------- | ----------- |
+| **Runtime deps**             | **0**          | 1 (`yaml`)                                | 2                        | 4                 | 4                   | **0** (static)    | 0 (built-in)    | 0 (built-in) |
+| **Package size**             | ~4 KB          | 465 KB                                    | 84 KB                    | 51 KB             | 36 KB               | ~8 MB binary      | N/A             | N/A         |
+| **Source files**             | 15             | 14                                        | 37                       | —                 | —                   | —                 | N/A             | N/A         |
+| **Source types**             | Local + GitHub | GitHub/GitLab/git URL/Local/npm           | Registry only            | GitHub + Local    | npm packages only   | GitHub/Git/Local  | Filesystem only | Filesystem + MCP + plugins |
+| **Lockfile**                 | agentskill v3  | Two-tier (global v3 + project v1, SHA)    | None                     | None              | None                | ✅                | None            | Config only   |
+| **Offline capable**          | ✅             | ✅                                        | ❌ (registry)             | ✅                | ✅                  | ✅                | ✅              | ✅           |
+| **Signup required**          | ❌             | ❌                                        | ✅ (agentskill.sh)        | ❌                | ❌                  | ❌                | ❌              | ❌           |
+| **Agent count**              | **30**         | 55+                                       | 15+                      | 10+               | 10+                 | 39                | 1 (+ compat)    | 1 (+ plugins) |
+| **Project scope default**    | ✅             | ✅                                        | N/A                      | ❌ (global)        | ✅ (project)        | ✅                | N/A             | N/A         |
+| **Interactive scope prompt** | ✅             | ❌                                        | ❌                       | ❌                | ❌                  | ❌                | N/A             | N/A         |
+| **Provenance (npm)**         | ✅             | ❌                                        | ❌                       | ❌                | ❌                  | ❌                | N/A             | N/A         |
+| **`use` command**            | ✅             | ✅                                        | ❌                       | ✅ (`read`)        | ❌                  | ✅                | ❌              | ❌          |
+| **`setup` command**          | ✅             | ❌                                        | ✅                       | ❌                | ❌                  | ❌                | ❌              | ❌          |
+| **`init` command**           | ✅             | ✅                                        | ❌                       | ❌                | ❌                  | ❌                | ❌              | ❌          |
+| **`search`/`find` command**  | ✅             | ✅ (`skills find`, `vercel skills`)       | ✅ (`ags search`)        | ❌                | ❌                  | ✅                | ❌              | ❌          |
+| **`verify` command**         | ✅             | ✅ (`skills verify`)                      | ❌                       | ❌                | ❌                  | ❌                | ❌              | ❌          |
+| **`ci` command**             | ✅             | ✅ (`skills ci`)                          | ❌                       | ❌                | ❌                  | ❌                | ❌              | ❌          |
+| **`--frozen-lockfile`**      | ✅             | ✅                                        | ❌                       | ❌                | ❌                  | ❌                | ❌              | ❌          |
+| **Symlink mode**             | ✅             | ✅ (default)                              | ❌                       | ❌                | ✅ (only)           | ✅                | ❌              | ❌          |
+| **`--dry-run`**              | ✅             | ❌                                        | ❌                       | ❌                | ❌                  | ✅                | ❌              | ❌          |
+| **Bundle install**           | ✅             | ❌                                        | ✅ (skillset)             | ❌                | ❌                  | ❌                | ❌              | ❌          |
+| **Shell completions**        | ❌             | ❌                                        | ❌                       | ❌                | ❌                  | ✅                | ❌              | ❌          |
+| **`doctor` command**         | ❌             | ❌                                        | ❌                       | ❌                | ❌                  | ✅                | ❌              | ❌          |
+| **`upgrade` (self-update)**  | ❌             | ❌                                        | ❌                       | ❌                | ❌                  | ✅                | ❌              | ❌          |
+| **TUI search**               | ❌             | ✅ (`skills find` interactive)            | ❌                       | ❌                | ❌                  | ❌                | ❌              | ❌          |
+| **Stars**                    | ~5             | 23,588                                    | 23                       | 10,500            | 472                 | ~1                | 178K+           | 133K+       |
 
 ## Strengths
 
@@ -30,15 +38,31 @@
 - **GitHub + Local sources** — fully decentralized
 - **agentskill.sh lockfile compatible** — cross-compatible with ecosystem
 - **Interactive scope prompt** — user-friendly first install
-- **Project scope default** — modern default (v0.2.0)
-- **29 agent targets** — opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody, continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot, loom, roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory
+- **Project scope default** — modern default
+- **30 install targets** — 29 named agents + project-local
+- **SHA256 content hash verification** — `rolecraft verify`
+- **CI mode** — `rolecraft ci` for pipeline installs
+- **Symlink + Copy modes** — `--symlink`/`--copy`
+- **Dry-run preview** — `--dry-run` on install, setup, bundle
+- **Bundle system** — install from JSON/text files or inline sources
 
 ## Weaknesses / Gaps
 
-1. **Agent count (29)** — ahead of `ags` (12) but still far behind `skills` (68+), qntx/skill (39)
-2. **No lockfile integrity** — no SHA hash verification, no `ci`/`verify` mode
-3. **No symlink mode** — `skills` supports symlink (default) + copy; rolecraft only copies
-4. **Lockfile SHA only `local`** — doesn't store content hashes
+### Feature gaps vs competitors
+
+1. **Agent count (30)** — ahead of `ags` (15+), `openskills` (10+), `skills-npm` (10+) but behind `skills` (55+), `qntx/skill` (39)
+2. **No shell completions** — `qntx/skill` has `skills completions bash|zsh|fish`
+3. **No `doctor` command** — `qntx/skill` has `skills doctor` for health checks
+4. **No self-upgrade** — `qntx/skill` has `skills upgrade` (like `bun upgrade`)
+5. **No TUI search** — `skills find` has interactive TUI, rolecraft only has basic `readline` prompt
+6. **No GitLab/Bitbucket/SSH git URL support** — only GitHub `owner/repo` and local paths
+7. **npm package source unsupported** — `skills` supports `npx skills add some-package`, `skills-npm` is built around it
+8. **No AGENTS.md XML injection** — `openskills` generates Claude Code compatible `<available_skills>` XML
+9. **Stars / community adoption very low (~5)** — building trust and visibility
+
+### Technical gaps
+
+10. **Copilot agent path** — Copilot uses `.github/copilot/skills/` but rolecraft targets `~/.copilot/skills/`
 
 ## Roadmap
 
@@ -52,110 +76,103 @@
 ### v0.4.x — Integrity & Performance ✅
 
 - [x] Content hash in lockfile (SHA256 `contentSha`)
-- [x] `rolecraft verify` — hash doğrulama (`skills verify` equivalent)
+- [x] `rolecraft verify` — hash verification (`skills verify` equivalent)
 - [x] `rolecraft ci` — frozen lockfile install (`skills ci` equivalent)
 - [x] Symlink mode (`--symlink`/`--copy`)
 - [x] 9 new agent targets (roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory) — **29 total**
+- [x] `--dry-run` mode — preview installation without copying
+- [x] Interactive search (`search --interactive`)
+- [x] Bundle command (`bundle`, `bundle create`)
 
-### v0.5.x — New Agents & UX
+### v0.5.x — Agent Coverage & Source Expansion
 
-- [x] 9 new agents (roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory)
-- [ ] Roo Code, Trae, Hermes, Kiro, Augment, Kilo, OpenHands, Junie, Factory agent targets
-- [ ] `--dry-run` mode — preview installation without copying
+- [ ] Copilot agent path fix (`.github/copilot/skills/` instead of `~/.copilot/skills/`)
+- [ ] GitLab URL support (`https://gitlab.com/org/repo`)
+- [ ] SSH git URL support (`git@github.com:owner/repo.git`)
+- [ ] Full git URL support (any remote with SKILL.md)
+- [ ] 10+ new agent targets to match `skills` (55+)
+- [ ] `rolecraft doctor` — system health check
 
 ### Future
 
-- [ ] TUI for skill browsing (`search` interactif)
-- [ ] `rolecraft doctor` — system health check
-- [ ] Skill bundle / skillset support
-
-## Agent Directory Reference
-
-| Agent       | Directory                                      |
-| ----------- | ---------------------------------------------- |
-| opencode    | `~/.agents/skills/` or `./.agents/skills/`     |
-| claude-code | `~/.claude/skills/` or `./.claude/skills/`     |
-| cursor      | `~/.cursor/skills/` or `./.cursor/skills/`     |
-| windsurf ⚠️ | `~/.windsurf/skills/` or `./.windsurf/skills/` |
-| devin       | `~/.devin/skills/` or `./.devin/skills/`       |
-| codex       | `~/.codex/skills/` or `./.codex/skills/`       |
-| copilot     | `~/.copilot/skills/` or `./.copilot/skills/`   |
-| aider       | `~/.aider/skills/` or `./.aider/skills/`       |
-| cline       | `~/.cline/skills/` or `./.cline/skills/`       |
-| gemini-cli  | `~/.gemini/skills/`                            |
-| cody        | `~/.cody/skills/`                              |
-| continue    | `~/.continue/skills/`                          |
-| warp        | `~/.warp/skills/`                              |
-| codeium     | `~/.codeium/skills/`                           |
-| fabric      | `~/.fabric/skills/`                            |
-| goose       | `~/.goose/skills/`                             |
-| tabnine     | `~/.tabnine/skills/`                           |
-| supermaven  | `~/.supermaven/skills/`                        |
-| pr-pilot    | `~/.pr-pilot/skills/`                          |
-| loom        | `~/.loom/skills/`                              |
-| roo         | `~/.roo/skills/`                               |
-| trae        | `~/.trae/skills/`                              |
-| hermes      | `~/.hermes/skills/`                            |
-| kiro        | `~/.kiro/skills/`                              |
-| augment     | `~/.augment/skills/`                           |
-| kilo        | `~/.kilo/skills/`                              |
-| openhands   | `~/.openhands/skills/`                         |
-| junie       | `~/.junie/skills/`                             |
-| factory     | `~/.factory/skills/`                           |
+- [ ] `rolecraft upgrade` — self-update command
+- [ ] Shell completions (bash, zsh, fish)
+- [ ] TUI for skill browsing (`search` interactive)
+- [ ] npm package source support (`npx rolecraft install some-package`)
+- [ ] AGENTS.md XML injection for non-Claude agents
+- [ ] Skill bundle / skillset hub
+- [ ] Security scoring for installed skills
+- [ ] Watch mode — auto-sync skills on file change
 
 ## Competitor Analysis
-
-### @agentskill.sh/cli (ags)
-
-- **Model**: Centralized registry
-- **Key feature**: 274K+ skills in marketplace, rating/feedback system, `/learn` in-agent command, `ags setup` auto-detection, `ags search`
-- **Weaknesses**: Requires signup, no lockfile, no offline, no local sources, no provenance, only 12 agents
-- **Deps**: 2
-- **rolecraft advantage**: Zero deps, offline-first, lockfile, provenance, local sources, 29 agents
 
 ### skills (Vercel Labs)
 
 - **Model**: Decentralized git-based
-- **Key feature**: `skills use`, `skills ci`/`skills verify` (lockfile workflow), `skills find` (interactive search), `skills init` (scaffolding), 68+ agents, 23K stars, 13.4M weekly downloads, symlink mode
-- **Weaknesses**: 1 dep (`yaml`), no provenance, no `setup` command
-- **Deps**: 1
-- **rolecraft advantage**: Zero deps, provenance, `setup` command
-- **rolecraft gap**: Agent count (29 vs 68+), no TUI search, no doctor command
+- **Stars**: 23.5K | **Deps**: 1 | **Agents**: 55+
+- **Key features**: `skills use`, `skills ci`/`skills verify` (lockfile workflow), `skills find` (interactive TUI), `skills init`, symlink mode, `vercel skills` built-in, 13.4M weekly downloads, skills.sh directory
+- **Weaknesses**: 1 dep (`yaml`), no provenance, no `setup` command, no dry-run, no bundle
+- **rolecraft advantage**: Zero deps, provenance, `setup` command, dry-run, bundle
+- **rolecraft gap**: Agent count (30 vs 55+), no TUI search, no doctor, no GitLab support
+
+### @agentskill.sh/cli (ags)
+
+- **Model**: Centralized registry
+- **Stars**: 23 | **Deps**: 2 | **Agents**: 15+
+- **Key features**: 274K+ skills in marketplace, security scoring (0-100), `/learn` in-agent command, feedback loop (1-5 rating), `ags setup` auto-detection
+- **Weaknesses**: Requires signup, no lockfile, no offline, no local sources, no provenance
+- **rolecraft advantage**: Zero deps, offline-first, lockfile, provenance, local sources, 30 agents
+
+### openskills (numman-ali)
+
+- **Model**: Universal skill loader with AGENTS.md XML injection
+- **Stars**: 10.5K | **Deps**: 4 | **Agents**: 10+
+- **Key features**: Claude Code exact compatibility, `<available_skills>` XML generation, `npx openskills read <name>`, `npx openskills sync`
+- **Weaknesses**: 4 deps, no lockfile, no provenance, no verify/ci, global default scope
+- **rolecraft advantage**: Zero deps, lockfile, provenance, verify/ci, project scope default
+
+### skills-npm (antfu)
+
+- **Model**: npm-native skill distribution convention
+- **Stars**: 472 | **Deps**: 4 | **Agents**: 10+
+- **Key features**: Ships skills inside npm packages, auto-symlink via `prepare` script, `npx skills-npm setup` wiring
+- **Weaknesses**: Very new (v0.0.2), only npm package sources, no lockfile, no verify
+- **rolecraft advantage**: Zero deps, lockfile, verify, GitHub + Local sources, bundle
+
+### qntx/skill (Rust)
+
+- **Model**: Rust reimplementation of Vercel Skills CLI
+- **Stars**: ~1 | **Deps**: 0 (static binary) | **Agents**: 39
+- **Key features**: 100% command parity, shell completions, `skills doctor`, `skills upgrade`, dry-run mode, parallel I/O
+- **Weaknesses**: Very new, Rust toolchain for dev, no provenance, no `setup`
+- **rolecraft advantage**: Zero deps as JS, provenance, `setup` command, interactive scope prompt
+- **rolecraft gap**: No doctor, no upgrade, no shell completions, no TUI
 
 ### OpenCode native
 
 - **Model**: Passive filesystem discovery
-- **Key feature**: Granular per-agent permissions, native `skill` tool, no CLI needed
+- **Key features**: Granular per-agent permissions, native `skill` tool, no CLI needed
 - **Weakness**: No external source management, no lockfile
 - **rolecraft advantage**: External source management, lockfile, cross-agent compatibility
 
 ### Claude Code
 
 - **Model**: Skills + MCP servers + Plugin marketplace
-- **Key feature**: OAuth 2.1, dual skill/MCP system, lazy tool loading
+- **Key features**: OAuth 2.1, dual skill/MCP system, lazy tool loading
 - **Weakness**: Complex, MCP-focused, not a standalone skill manager
 - **rolecraft advantage**: Simple, focused, zero-dep, standalone
-
-### qntx/skill (Rust)
-
-- **Model**: Rust reimplementation of Vercel Skills CLI
-- **Key feature**: 100% command parity, shell completions, `skills doctor`, `skills upgrade`, dry-run mode, parallel I/O, zero runtime deps (static binary), 39 agents
-- **Weaknesses**: Rust toolchain for development, no provenance, no `setup` command
-- **Deps**: 0 (static binary)
-- **rolecraft advantage**: Zero deps as JS, provenance, `setup` command, interactive scope prompt
-- **rolecraft gap**: No doctor, no upgrade, no dry-run
 
 ### Sklm
 
 - **Model**: Centralized global store with per-project symlinks
-- **Key feature**: Auto-sync, per-agent skill variants (`variants/` dir), 30+ agents
+- **Key features**: Auto-sync, per-agent skill variants (`variants/` dir), 30+ agents
 - **Weaknesses**: Early stage, low adoption
 - **rolecraft advantage**: Mature CLI, lockfile, provenance
 
 ### skillpm
 
 - **Model**: npm-native package manager for Agent Skills
-- **Key feature**: `skillpm publish` to npm, semver, lockfiles, audit
+- **Key features**: `skillpm publish` to npm, semver, lockfiles, audit
 - **Weaknesses**: Requires npm infrastructure, depends on `skills` CLI for wiring
 - **rolecraft advantage**: All-in-one, no external deps
 
@@ -164,3 +181,5 @@
 1. **Zero dependencies** — only npm project in this space with 0 runtime deps
 2. **npm provenance** — only project with SLSA Level 1+ attestations
 3. **Interactive scope prompt** — best UX for first-time users
+4. **Bundle system** — unique multi-skill install from files/inline
+5. **Dry-run + Verify + CI** — complete integrity workflow unmatched by most competitors

@@ -14,31 +14,36 @@
 
 **Zero-dependency** CLI to install AI agent skills as roles & behaviors from any source. No marketplace, no registry, no signup — just point it at a local folder or a GitHub repo and it works.
 
-Works with **29 agents**: opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody, continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot, loom, roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory, and all spec-compliant agents.
+Works with **30 install targets** (29 named agents + project-local): opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody, continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot, loom, roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory, and all spec-compliant agents.
 
 ## Why rolecraft?
 
-| Feature                                  | rolecraft        | `npx add-skill` | `@agentskill.sh/cli` |
-| ---------------------------------------- | ---------------- | --------------- | -------------------- |
-| Zero dependencies                        | ✅               | ✅              | ❌ (2)               |
-| Local path install                       | ✅ **1st class** | ❌ GitHub only  | ❌ marketplace only  |
-| GitHub repo install                      | ✅               | ✅              | ❌                   |
-| Agent targets                            | 29               | 68+             | 12                   |
-| SKILL.md scaffolding                     | ✅               | ✅              | ❌                   |
-| Skill discovery (search)                 | ✅               | ✅ (TUI)        | ✅                   |
-| Interactive search + install             | ✅               | ❌              | ❌                   |
-| Bundle install (`bundle`)                | ✅               | ❌              | ✅ (skillset)        |
-| Bundle create (`bundle create`)          | ✅               | ❌              | ❌                   |
-| Offline capable                          | ✅               | ❌              | ❌                   |
-| agentskill.sh lockfile compatible        | ✅               | ✅              | ✅                   |
-| Project-level install                    | ✅               | ✅              | ✅                   |
-| Dry-run preview (`--dry-run`)            | ✅               | ❌              | ❌                   |
-| Lockfile integrity (`--frozen-lockfile`) | ✅               | ❌              | ❌                   |
-| Content hash verification (`verify`)     | ✅               | ❌              | ❌                   |
-| CI-mode re-install (`ci`)                | ✅               | ❌              | ❌                   |
-| Symlink install (`--symlink`)            | ✅               | ❌              | ❌                   |
-| npm provenance                           | ✅               | ❌              | ❌                   |
-| File size                                | ~4 KB            | ~500 KB+        | ~84 KB               |
+| Feature                                  | rolecraft        | skills (Vercel)   | @agentskill.sh/cli |
+| ---------------------------------------- | ---------------- | ----------------- | -------------------- |
+| Zero dependencies                        | ✅               | ✅ (1 dep)        | ❌ (2)               |
+| Local path install                       | ✅ **1st class** | ✅                | ❌ marketplace only  |
+| GitHub repo install                      | ✅               | ✅                | ❌                   |
+| GitLab / SSH git URL                     | ❌               | ✅                | ❌                   |
+| npm package source                       | ❌               | ✅                | ❌                   |
+| Agent targets                            | 30               | 55+               | 15+                  |
+| SKILL.md scaffolding                     | ✅               | ✅                | ❌                   |
+| Skill discovery (search)                 | ✅               | ✅ (TUI)          | ✅                   |
+| Interactive search + install             | ✅               | ❌                | ❌                   |
+| Bundle install (`bundle`)                | ✅               | ❌                | ✅ (skillset)        |
+| Bundle create (`bundle create`)          | ✅               | ❌                | ❌                   |
+| Offline capable                          | ✅               | ✅                | ❌                   |
+| Project-level install                    | ✅               | ✅                | ✅                   |
+| Interactive scope prompt                 | ✅               | ❌                | ❌                   |
+| Dry-run preview (`--dry-run`)            | ✅               | ❌                | ❌                   |
+| Lockfile integrity (`--frozen-lockfile`) | ✅               | ✅                | ❌                   |
+| Content hash verification (`verify`)     | ✅               | ✅                | ❌                   |
+| CI-mode re-install (`ci`)                | ✅               | ✅                | ❌                   |
+| Symlink install (`--symlink`)            | ✅               | ✅ (default)      | ❌                   |
+| npm provenance                           | ✅               | ❌                | ❌                   |
+| Shell completions                        | ❌               | ❌                | ❌                   |
+| `doctor` command                         | ❌               | ❌                | ❌                   |
+| Self-upgrade command                     | ❌               | ❌                | ❌                   |
+| File size                                | ~4 KB            | ~465 KB           | ~84 KB               |
 
 ## Install
 
@@ -305,7 +310,7 @@ If the file has no extension, rolecraft tries `.json` and `.txt` variants automa
 | junie       | `~/.junie/skills/`                             |
 | factory     | `~/.factory/skills/`                           |
 
-> ⚠️ Windsurf was rebranded to **Devin Desktop** in June 2026. The `--windsurf` flag and `~/.windsurf/skills/` path still work for backward compatibility, but new deployments should use `--devin` / `~/.devin/skills/`.
+> ⚠️ Windsurf has been rebranded to **Devin Desktop**. The `--windsurf` flag and `~/.windsurf/skills/` path still work for backward compatibility, but new deployments should use `--devin` / `~/.devin/skills/`.
 
 Install to multiple agents at once:
 
