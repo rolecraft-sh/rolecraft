@@ -1,63 +1,77 @@
-<div align="center">
- <img src="assets/rolecraft_logo.png" alt="Logo" width="256" height="256">
+<p align="center">
+  <img src="assets/rolecraft_logo.png" alt="RoleCraft" width="200" height="200">
+</p>
 
-# RoleCraft — Simple Skill Installer for AI
+<h1 align="center">RoleCraft</h1>
 
-[![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
-[![npm](https://img.shields.io/npm/v/rolecraft)](https://www.npmjs.com/package/rolecraft)
-[![Tests](https://img.shields.io/github/actions/workflow/status/sametcelikbicak/rolecraft/test.yml?label=tests)](https://github.com/sametcelikbicak/rolecraft/actions/workflows/test.yml)
-[![GitHub Stars](https://img.shields.io/github/stars/sametcelikbicak/rolecraft?style=social)](https://github.com/sametcelikbicak/rolecraft)
-[![Changelog](https://img.shields.io/badge/📜-Changelog-blue)](CHANGELOG.md)
-[![Contributing](https://img.shields.io/badge/🤝-Contributing-green)](CONTRIBUTING.md)
+<p align="center">
+  <b>Install AI agent skills as roles & behaviors — from any source.</b><br>
+  Zero-dependency CLI. No marketplace. No signup.
+</p>
 
- </div>
+<p align="center">
+  <a href="https://awesome.re"><img src="https://awesome.re/badge.svg" alt="Awesome"></a>
+  <a href="https://www.npmjs.com/package/rolecraft"><img src="https://img.shields.io/npm/v/rolecraft" alt="npm"></a>
+  <a href="https://www.npmjs.com/package/rolecraft"><img src="https://img.shields.io/npm/dm/rolecraft" alt="npm downloads"></a>
+  <a href="https://github.com/sametcelikbicak/rolecraft/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/sametcelikbicak/rolecraft/test.yml?label=tests" alt="Tests"></a>
+  <a href="https://github.com/sametcelikbicak/rolecraft"><img src="https://img.shields.io/github/stars/sametcelikbicak/rolecraft?style=social" alt="Stars"></a>
+  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/📜-Changelog-blue" alt="Changelog"></a>
+  <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/🤝-Contributing-green" alt="Contributing"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT"></a>
+</p>
 
-**Zero-dependency** CLI to install AI agent skills as roles & behaviors from any source. No marketplace, no registry, no signup — just point it at a local folder or a GitHub repo and it works.
+<p align="center">
+  Works with <b>30+ AI agents</b>: opencode · claude-code · cursor · windsurf · devin · codex · copilot · aider · cline · gemini-cli · cody · continue · warp · codeium · fabric · goose · tabnine · supermaven · pr-pilot · loom · roo · trae · hermes · kiro · augment · kilo · openhands · junie · factory · and more
+</p>
 
-Works with **30+ install targets**: opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody, continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot, loom, roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory, and all spec-compliant agents.
+<p align="center">
+  <a href="#quick-start">Quick Start</a> ·
+  <a href="#why-rolecraft">Why RoleCraft?</a> ·
+  <a href="#commands-overview">Commands</a> ·
+  <a href="docs/install.md">Install Guide</a> ·
+  <a href="CONTRIBUTING.md">Contribute</a>
+</p>
 
----
-
-## Table of Contents
-
-- [Quick start](#quick-start)
-- [Commands overview](#commands-overview)
-- [Why rolecraft?](#why-rolecraft)
-- [How agents discover skills](#how-agents-discover-skills)
-- [Architecture](#architecture)
-- [Contributing](#contributing)
-- [License](#license)
-
----
+<p align="center">
+  <img src="assets/rolecraft-demo.gif" alt="RoleCraft demo" width="720">
+</p>
 
 ## Quick start
 
 ```bash
+# try without installing
+npx rolecraft --help
+
+# or install globally
 npm install -g rolecraft
 
-# scaffold a new skill
+# create a skill
 rolecraft init my-skill
 
-# install from local folder or GitHub
-rolecraft install ./my-skill
-rolecraft install sametcelikbicak/task-decomposer
+# install it
+rolecraft install ./my-skill           # local folder
+rolecraft install user/repo            # GitHub repo
+rolecraft install ./my-skill --cursor  # specific agent only
 
-# install for specific agents
-rolecraft install ./my-skill --claude --cursor
-
-# search for skills
-rolecraft search code-review --interactive
-
-# list, verify, and manage
+# manage
 rolecraft list
-rolecraft verify
-rolecraft remove <slug>
-rolecraft update <slug>
+rolecraft search code-review
+rolecraft remove my-skill
 ```
 
-> **Requirements:** Node.js >= 20
+**Requirements:** Node.js >= 20 · No other dependencies · [Full install guide →](docs/install.md)
 
-[→ Full install details](docs/install.md) — scope flags, source types, `--symlink`, `--dry-run`, `--frozen-lockfile`
+---
+
+## Features
+
+- **Zero dependencies** — ~4 KB, no bloat
+- **Any source** — local folder, GitHub repo, any URL
+- **30+ agents** — opencode, claude-code, cursor, copilot, aider, devin, gemini-cli, and more
+- **No registry required** — no signup, no marketplace, no vendor lock-in
+- **Content hash verification** — detect tampered or outdated skills
+- **CI-ready** — lockfile-based re-install for pipelines
+- **Dry-run mode** — preview before installing
 
 ---
 
