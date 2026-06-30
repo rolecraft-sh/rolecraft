@@ -40,7 +40,40 @@ function mockSequentialFetch(responses) {
 describe('search command', () => {
   after(() => {
     searchModule.setFetch(globalThis.fetch)
-    searchModule.setAskQuestion(undefined)
+    searchModule.setPickItem(undefined)
+  })
+
+  describe('formatRepo', () => {
+    it('formats a repo with all fields', () => {
+      const result = searchModule.formatRepo({
+        full_name: 'user/skill',
+        description: 'A great skill',
+        stargazers_count: 42,
+        language: 'JavaScript',
+      })
+      assert.ok(result.includes('user/skill'))
+      assert.ok(result.includes('A great skill'))
+      assert.ok(result.includes('42'))
+      assert.ok(result.includes('JavaScript'))
+    })
+
+    it('handles missing fields', () => {
+      const result = searchModule.formatRepo({
+        full_name: 'user/skill',
+        description: null,
+        stargazers_count: null,
+        language: null,
+      })
+      assert.ok(result.includes('No description'))
+      assert.ok(result.includes('N/A'))
+    })
+  })
+
+  describe('defaultPickItem', () => {
+    it('returns null in non-TTY environment', async () => {
+      const result = await searchModule.defaultPickItem([{ full_name: 'test/repo' }])
+      assert.equal(result, null)
+    })
   })
 
   it('shows results when items found', async () => {
@@ -131,13 +164,74 @@ describe('search command', () => {
     assert.ok(logs.some(l => l.includes('No skills found')))
   })
 
-  describe('interactive mode', () => {
-    afterEach(() => {
-      searchModule.setAskQuestion(undefined)
+  it('handles network error in lookup catch block', async () => {
+    let callCount = 0
+    searchModule.setFetch(() => {
+      callCount++
+      if (callCount === 1) return Promise.reject(new Error('network failure'))
+      return Promise.resolve({
+        status: 200, ok: true,
+        json: () => Promise.resolve({ items: [] }),
+      })
     })
 
-    it('aborts on q', async () => {
-      searchModule.setAskQuestion(() => Promise.resolve('q'))
+    const { logs, restore } = capture('log')
+    await searchModule.searchCommand('owner/skill-repo')
+    restore()
+
+    assert.ok(logs.some(l => l.includes('No skills found')))
+  })
+
+  it('throws on network error in broader search fallback', async () => {
+    let callCount = 0
+    searchModule.setFetch(() => {
+      callCount++
+      if (callCount === 1) {
+        return Promise.resolve({
+          status: 200, ok: true,
+          json: () => Promise.resolve({ items: [] }),
+        })
+      }
+      return Promise.reject(new Error('network error'))
+    })
+
+    await assert.rejects(
+      () => searchModule.searchCommand('some-query'),
+      /Failed to search GitHub/,
+    )
+  })
+
+  it('handles rate limit in broader search fallback', async () => {
+    let callCount = 0
+    searchModule.setFetch(() => {
+      callCount++
+      if (callCount === 1) {
+        return Promise.resolve({
+          status: 200, ok: true,
+          json: () => Promise.resolve({ items: [] }),
+        })
+      }
+      return Promise.resolve({
+        status: 403, ok: false,
+        json: () => Promise.resolve({}),
+      })
+    })
+
+    const { logs, restore } = capture('log')
+    await searchModule.searchCommand('some-query')
+    restore()
+
+    assert.ok(logs.some(l => l.includes('rate limit')))
+  })
+
+  describe('interactive mode', () => {
+    afterEach(() => {
+      searchModule.setFetch(globalThis.fetch)
+      searchModule.setPickItem(undefined)
+    })
+
+    it('aborts when picker returns null', async () => {
+      searchModule.setPickItem(() => Promise.resolve(null))
       mockFetch(200, {
         items: [
           { full_name: 'user1/skill1', description: 'desc', stargazers_count: 1, language: 'JS' },
@@ -151,8 +245,13 @@ describe('search command', () => {
       assert.ok(logs.some(l => l.includes('Aborted')))
     })
 
-    it('shows invalid choice message', async () => {
-      searchModule.setAskQuestion(() => Promise.resolve('99'))
+    it('installs selected skill', async () => {
+      searchModule.setPickItem(() => Promise.resolve({
+        full_name: 'user1/skill1',
+        description: 'desc',
+        stargazers_count: 1,
+        language: 'JS',
+      }))
       mockFetch(200, {
         items: [
           { full_name: 'user1/skill1', description: 'desc', stargazers_count: 1, language: 'JS' },
@@ -163,7 +262,7 @@ describe('search command', () => {
       await searchModule.searchCommand('test', { interactive: true })
       restore()
 
-      assert.ok(logs.some(l => l.includes('Invalid choice')))
+      assert.ok(logs.some(l => l.includes('Installing "user1/skill1"')))
     })
   })
 })

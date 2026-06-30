@@ -69,6 +69,8 @@ rolecraft remove my-skill
 - **Any source** — local folder, GitHub repo, any URL
 - **30+ agents** — opencode, claude-code, cursor, copilot, aider, devin, gemini-cli, and more
 - **No registry required** — no signup, no marketplace, no vendor lock-in
+- **Shell completions** — bash, zsh, fish auto-completion
+- **TUI search** — interactive arrow-key skill browser with preview
 - **Content hash verification** — detect tampered or outdated skills
 - **CI-ready** — lockfile-based re-install for pipelines
 - **Dry-run mode** — preview before installing
@@ -83,8 +85,9 @@ rolecraft remove my-skill
 | `rolecraft install <source>` | Install a skill (local path or GitHub `owner/repo`) | [docs](docs/commands/install.md) |
 | `rolecraft bundle <sources>` | Install multiple skills from inline sources or file | [docs](docs/commands/bundle.md)  |
 | `rolecraft bundle create`    | Create a new bundle file                            | [docs](docs/commands/bundle.md)  |
-| `rolecraft search <query>`   | Search for skills on GitHub                         | [docs](docs/commands/search.md)  |
+| `rolecraft search <query>`   | Search for skills on GitHub (TUI with `--interactive`) | [docs](docs/commands/search.md)  |
 | `rolecraft use <source>`     | Preview a skill's files without installing          | [docs](docs/commands/use.md)     |
+| `rolecraft completions bash\|zsh\|fish` | Generate shell completion scripts           | [docs](docs/commands/completions.md) |
 | `rolecraft setup [<source>]` | Detect agents, optionally install a skill to all    | [docs](docs/commands/setup.md)   |
 | `rolecraft list`             | Show all installed skills                           | [docs](docs/commands/list.md)    |
 | `rolecraft verify`           | Check installed skill integrity via content hash    | [docs](docs/commands/verify.md)  |
@@ -105,7 +108,8 @@ rolecraft remove my-skill
 | Local path install                       | ✅ 1st class | ✅              | ❌ marketplace only |
 | GitHub repo install                      | ✅          | ✅              | ❌                 |
 | Bundle install + create                  | ✅          | ❌              | ✅ (skillset only) |
-| Interactive search + install             | ✅          | ❌              | ❌                 |
+| Interactive search + install (TUI)       | ✅          | ❌              | ❌                 |
+| Shell completions (bash/zsh/fish)        | ✅          | ❌              | ❌                 |
 | Dry-run preview (`--dry-run`)            | ✅          | ❌              | ❌                 |
 | Interactive scope prompt                 | ✅          | ❌              | ❌                 |
 | Content hash verification (`verify`)     | ✅          | ✅              | ❌                 |

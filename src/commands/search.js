@@ -1,47 +1,122 @@
-import { createInterface } from 'node:readline'
 import { stdin as input, stdout as output } from 'node:process'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 
 let runFetch = globalThis.fetch
-let askQuestion = defaultAskQuestion
+let pickItem = defaultPickItem
 
 export function setFetch(fn) {
   runFetch = fn
 }
 
-export function setAskQuestion(fn) {
-  askQuestion = fn || defaultAskQuestion
+export function setPickItem(fn) {
+  pickItem = fn || defaultPickItem
 }
 
-function defaultAskQuestion(query) {
-  const rl = createInterface({ input, output })
+const ESC = '\x1b'
+const CSI = `${ESC}[`
+function cursorHide() { output.write(`${CSI}?25l`) }
+function cursorShow() { output.write(`${CSI}?25h`) }
+function clearLine() { output.write(`${CSI}2K\r`) }
+function moveUp(n) { output.write(`${CSI}${n}A`) }
+function moveDown(n) { output.write(`${CSI}${n}B`) }
+function text(color, s) { return `${color}${s}${ESC}[0m` }
+const cyan = s => text(`${CSI}36m`, s)
+const green = s => text(`${CSI}32m`, s)
+const yellow = s => text(`${CSI}33m`, s)
+const dim = s => text(`${CSI}2m`, s)
+const bold = s => text(`${CSI}1m`, s)
+
+export function formatRepo(r) {
+  const desc = r.description || 'No description'
+  const stars = r.stargazers_count || 0
+  const lang = r.language || 'N/A'
+  return `${bold(r.full_name)}\n  ${dim(desc)}  ${yellow(`⭐ ${stars}`)}  ${cyan(lang)}`
+}
+
+function pickAndInstallTUI(items) {
   return new Promise(resolve => {
-    rl.question(query, answer => {
-      rl.close()
-      resolve(answer.trim().toLowerCase())
-    })
+    if (!input.isTTY) {
+      resolve(null)
+      return
+    }
+
+    let selected = 0
+    const total = items.length
+    const startY = output.rows ? output.rows - Math.min(total + 6, output.rows) : 2
+
+    cursorHide()
+    output.write(`\n${bold('Select a skill to install (↑↓ to navigate, Enter to select, q to quit):')}\n\n`)
+
+    let listStartLine = output.cursorTo ? null : 0
+
+    function render() {
+      moveUp(Math.min(total + 4, output.rows || 30))
+      for (let i = 0; i < total; i++) {
+        clearLine()
+        const prefix = i === selected ? `${green('▸')} ${cyan(bold(String(i + 1).padStart(2, ' ')))}` : `  ${dim(String(i + 1).padStart(2, ' '))}`
+        const suffix = i === selected ? ` ${green('◀ install')}` : ''
+        const line = formatRepo(items[i]).split('\n')
+        output.write(`${prefix} ${line[0]}${suffix}\n`)
+        clearLine()
+        output.write(`   ${line[1]}\n`)
+      }
+      clearLine()
+      output.write(`\n  ${dim('q')} quit · ${dim('↑/↓')} navigate · ${dim('Enter')} install\n`)
+    }
+
+    render()
+
+    function onData(key) {
+      if (key === 'q' || key === 'Q') {
+        cleanup()
+        resolve(null)
+        return
+      }
+      if (key === '\x1b[A' || key === 'k') {
+        selected = selected > 0 ? selected - 1 : total - 1
+        render()
+        return
+      }
+      if (key === '\x1b[B' || key === 'j') {
+        selected = selected < total - 1 ? selected + 1 : 0
+        render()
+        return
+      }
+      if (key === '\r' || key === '\n') {
+        cleanup()
+        resolve(items[selected])
+        return
+      }
+    }
+
+    function cleanup() {
+      input.removeListener('data', onData)
+      input.setRawMode(false)
+      cursorShow()
+      output.write('\n')
+    }
+
+    try {
+      input.setRawMode(true)
+      input.resume()
+      input.on('data', onData)
+    } catch {
+      cleanup()
+      resolve(null)
+    }
   })
 }
 
 async function pickAndInstall(items) {
-  console.log()
-  const answer = await askQuestion(`Which skill to install? [1-${items.length}, q to quit]: `)
-
-  if (answer === 'q') {
+  const selected = await pickItem(items)
+  if (!selected) {
     console.log('Aborted.')
     return
   }
 
-  const index = parseInt(answer, 10)
-  if (isNaN(index) || index < 1 || index > items.length) {
-    console.log(`Invalid choice. Enter a number between 1 and ${items.length}.`)
-    return
-  }
-
-  const repo = items[index - 1]
-  const source = repo.full_name
-  console.log(`\n📦 Installing "${source}"...`)
+  const source = selected.full_name
+  console.log(`📦 Installing "${source}"...`)
   try {
     const resolved = await resolveSource(source)
     const targets = ['project']
@@ -50,6 +125,10 @@ async function pickAndInstall(items) {
   } catch (err) {
     console.error(`❌ Failed to install: ${err.message}`)
   }
+}
+
+export function defaultPickItem(items) {
+  return pickAndInstallTUI(items)
 }
 
 function isGitHubRef(source) {

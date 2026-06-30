@@ -14,6 +14,7 @@ import { searchCommand } from '../src/commands/search.js'
 import { verifyCommand } from '../src/commands/verify.js'
 import { ciCommand } from '../src/commands/ci.js'
 import { bundleCommand, bundleCreateCommand } from '../src/commands/bundle.js'
+import { completionsCommand } from '../src/commands/completions.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'))
@@ -38,11 +39,11 @@ Usage:
   rolecraft search <query>       Search for skills on GitHub
   rolecraft verify               Verify installed skill integrity
   rolecraft ci                   Install all skills from lockfile
+  rolecraft completions <shell>  Generate shell completions (bash|zsh|fish)
   rolecraft help                 Show this help
 
-Options for install and search:
-  --interactive  Prompt to install a skill after search (search only)
-  --dry-run      Preview installation without copying files (install, setup)
+Options:
+  --dry-run      Preview installation without copying files (install, setup, bundle)
 
 Options for install:
   --global       Install to ~/.agents/skills/
@@ -198,6 +199,12 @@ export async function main() {
         process.exit(1)
       }
       await searchCommand(query, { interactive: flags.includes('--interactive') })
+      break
+    }
+
+    case 'completions': {
+      const shell = args[0]
+      await completionsCommand(shell)
       break
     }
 

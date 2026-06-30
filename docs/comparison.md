@@ -24,7 +24,7 @@
 | CI-mode re-install (`ci`)                | ✅               | ✅                | ❌                   |
 | Symlink install (`--symlink`)            | ✅               | ✅ (default)      | ❌                   |
 | npm provenance                           | ✅               | ❌                | ❌                   |
-| Shell completions                        | ❌               | ❌                | ❌                   |
+| Shell completions                        | ✅               | ❌                | ❌                   |
 | `doctor` command                         | ❌               | ❌                | ❌                   |
 | Self-upgrade command                     | ❌               | ❌                | ❌                   |
 | File size                                | ~4 KB            | ~465 KB           | ~84 KB               |

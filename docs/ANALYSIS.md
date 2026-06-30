@@ -25,10 +25,10 @@
 | **Symlink mode**             | ✅             | ✅ (default)                              | ❌                       | ❌                | ✅ (only)           | ✅                | ❌              | ❌          |
 | **`--dry-run`**              | ✅             | ❌                                        | ❌                       | ❌                | ❌                  | ✅                | ❌              | ❌          |
 | **Bundle install**           | ✅             | ❌                                        | ✅ (skillset)             | ❌                | ❌                  | ❌                | ❌              | ❌          |
-| **Shell completions**        | ❌             | ❌                                        | ❌                       | ❌                | ❌                  | ✅                | ❌              | ❌          |
-| **`doctor` command**         | ❌             | ❌                                        | ❌                       | ❌                | ❌                  | ✅                | ❌              | ❌          |
+| **Shell completions**        | ✅             | ❌                                        | ❌                       | ❌                | ❌                  | ✅                | ❌              | ❌          |
+| **`doctor` command**             | ❌             | ❌                                        | ❌                       | ❌                | ❌                  | ✅                | ❌              | ❌          |
 | **`upgrade` (self-update)**  | ❌             | ❌                                        | ❌                       | ❌                | ❌                  | ✅                | ❌              | ❌          |
-| **TUI search**               | ❌             | ✅ (`skills find` interactive)            | ❌                       | ❌                | ❌                  | ❌                | ❌              | ❌          |
+| **TUI search**               | ✅             | ✅ (`skills find` interactive)            | ❌                       | ❌                | ❌                  | ❌                | ❌              | ❌          |
 | **Stars**                    | ~5             | 23,588                                    | 23                       | 10,500            | 472                 | ~1                | 178K+           | 133K+       |
 
 ## Strengths
@@ -51,11 +51,9 @@
 ### Feature gaps vs competitors
 
 1. **Agent count (30)** — ahead of `ags` (15+), `openskills` (10+), `skills-npm` (10+) but behind `skills` (55+), `qntx/skill` (39)
-2. **No shell completions** — `qntx/skill` has `skills completions bash|zsh|fish`
-3. **No `doctor` command** — `qntx/skill` has `skills doctor` for health checks
-4. **No self-upgrade** — `qntx/skill` has `skills upgrade` (like `bun upgrade`)
-5. **No TUI search** — `skills find` has interactive TUI, rolecraft only has basic `readline` prompt
-6. **No GitLab/Bitbucket/SSH git URL support** — only GitHub `owner/repo` and local paths
+2. **No `doctor` command** — `qntx/skill` has `skills doctor` for health checks
+3. **No self-upgrade** — `qntx/skill` has `skills upgrade` (like `bun upgrade`)
+4. **No GitLab/Bitbucket/SSH git URL support** — only GitHub `owner/repo` and local paths
 7. **npm package source unsupported** — `skills` supports `npx skills add some-package`, `skills-npm` is built around it
 8. **No AGENTS.md XML injection** — `openskills` generates Claude Code compatible `<available_skills>` XML
 9. **Stars / community adoption very low (~5)** — building trust and visibility
@@ -93,11 +91,11 @@
 - [ ] 10+ new agent targets to match `skills` (55+)
 - [ ] `rolecraft doctor` — system health check
 
-### Future
+### v0.6.x — UX & Shell Integration
 
+- [x] Shell completions (bash, zsh, fish)
+- [x] TUI for skill browsing (`search --interactive`)
 - [ ] `rolecraft upgrade` — self-update command
-- [ ] Shell completions (bash, zsh, fish)
-- [ ] TUI for skill browsing (`search` interactive)
 - [ ] npm package source support (`npx rolecraft install some-package`)
 - [ ] AGENTS.md XML injection for non-Claude agents
 - [ ] Skill bundle / skillset hub
@@ -113,7 +111,7 @@
 - **Key features**: `skills use`, `skills ci`/`skills verify` (lockfile workflow), `skills find` (interactive TUI), `skills init`, symlink mode, `vercel skills` built-in, 13.4M weekly downloads, skills.sh directory
 - **Weaknesses**: 1 dep (`yaml`), no provenance, no `setup` command, no dry-run, no bundle
 - **rolecraft advantage**: Zero deps, provenance, `setup` command, dry-run, bundle
-- **rolecraft gap**: Agent count (30 vs 55+), no TUI search, no doctor, no GitLab support
+- **rolecraft gap**: Agent count (30 vs 55+), no doctor, no GitLab support
 
 ### @agentskill.sh/cli (ags)
 
@@ -146,7 +144,8 @@
 - **Key features**: 100% command parity, shell completions, `skills doctor`, `skills upgrade`, dry-run mode, parallel I/O
 - **Weaknesses**: Very new, Rust toolchain for dev, no provenance, no `setup`
 - **rolecraft advantage**: Zero deps as JS, provenance, `setup` command, interactive scope prompt
-- **rolecraft gap**: No doctor, no upgrade, no shell completions, no TUI
+- **rolecraft advantage**: Shell completions, TUI search
+- **rolecraft gap**: No doctor, no upgrade
 
 ### OpenCode native
 
