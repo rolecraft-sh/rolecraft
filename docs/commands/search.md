@@ -12,7 +12,7 @@ rolecraft search <query> [--interactive]
 
 Queries the GitHub API for repositories containing `SKILL.md` files matching your query. Results include stars, language, and the exact install command.
 
-Use `--interactive` to pick and install a skill directly from the search results.
+Use `--interactive` to open an arrow-key navigable TUI. Browse results with `↑`/`↓`, select with `Enter`, or quit with `q`. A status bar at the bottom shows available commands.
 
 ## Examples
 
@@ -26,7 +26,7 @@ rolecraft search "code review typescript"
 # Search for prompt skills
 rolecraft search prompt
 
-# Search + pick to install
+# Search + pick to install (TUI)
 rolecraft search code-review --interactive
 
 # Multi-word search + install

@@ -1,20 +1,130 @@
-import { createInterface } from 'node:readline'
 import { stdin as input, stdout as output } from 'node:process'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 
 let runFetch = globalThis.fetch
-let askQuestion = defaultAskQuestion
+let promptUser = defaultPrompt
 
 export function setFetch(fn) {
   runFetch = fn
 }
 
-export function setAskQuestion(fn) {
-  askQuestion = fn || defaultAskQuestion
+export function setPromptUser(fn) {
+  promptUser = fn || defaultPrompt
 }
 
-function defaultAskQuestion(query) {
+const CSI = '\x1b['
+const sgr = (n) => `${CSI}${n}m`
+const cursorTo = (r, c) => `${CSI}${r};${c}H`
+const eraseLine = `${CSI}K`
+const hideCursor = `${CSI}?25l`
+const showCursor = `${CSI}?25h`
+const clearScreen = `${CSI}2J${CSI}H`
+
+const text = (code, s) => `${code}${s}${sgr(0)}`
+const cyan = s => text(sgr(36), s)
+const yellow = s => text(sgr(33), s)
+const dim = s => text(sgr(2), s)
+const bold = s => text(sgr(1), s)
+
+export function formatRepo(r) {
+  const desc = r.description || 'No description'
+  const stars = r.stargazers_count || 0
+  const lang = r.language || 'N/A'
+  return `${bold(r.full_name)}\n  ${dim(desc)}  ${yellow(`⭐ ${stars}`)}  ${cyan(lang)}`
+}
+
+const ITEM_LINES = 4
+
+function tuiFormat(item, selected) {
+  const sel = selected ? `${sgr(7)} > ${sgr(0)}` : '   '
+  const name = selected ? bold(item.full_name) : dim(item.full_name)
+  const desc = item.description || 'No description'
+  return [
+    `${sel}${name}`,
+    `   ├─ ${desc}`,
+    `   ├─ ⭐ ${item.stargazers_count}  📝 ${item.language || 'N/A'}`,
+    `   └─ rolecraft install ${item.full_name}`,
+  ]
+}
+
+async function runTUI(items) {
+  const wasRaw = input.isRaw
+  input.setRawMode(true)
+  input.resume()
+
+  let selectedIndex = 0
+  let scrollOffset = 0
+  const termRows = output.rows || 24
+  const reservedRows = 2
+  const availRows = termRows - reservedRows
+  const visibleCount = Math.min(Math.max(1, Math.floor(availRows / ITEM_LINES)), items.length)
+  const statusRow = termRows
+
+  function render() {
+    let out = clearScreen + hideCursor
+    out += '\n'
+    const end = Math.min(scrollOffset + visibleCount, items.length)
+    for (let i = scrollOffset; i < end; i++) {
+      const lines = tuiFormat(items[i], i === selectedIndex)
+      for (const line of lines) out += line + '\n'
+    }
+    out += cursorTo(statusRow, 1) + eraseLine + sgr(7) + '  ↑/↓ move · Enter select · q quit  ' + sgr(0)
+    output.write(out)
+  }
+
+  function ensureVisible(index) {
+    if (index < scrollOffset) {
+      scrollOffset = index
+      return true
+    }
+    if (index >= scrollOffset + visibleCount) {
+      scrollOffset = index - visibleCount + 1
+      return true
+    }
+    return false
+  }
+
+  render()
+
+  return new Promise((resolve) => {
+    function onData(buf) {
+      const key = buf.toString()
+
+      if (key === '\u001b[A') {
+        if (selectedIndex > 0) {
+          selectedIndex--
+          ensureVisible(selectedIndex)
+          render()
+        }
+      } else if (key === '\u001b[B') {
+        if (selectedIndex < items.length - 1) {
+          selectedIndex++
+          ensureVisible(selectedIndex)
+          render()
+        }
+      } else if (key === '\r' || key === '\n') {
+        cleanup()
+        resolve(selectedIndex)
+      } else if (key === '\u0003' || key === 'q' || key === 'Q') {
+        cleanup()
+        resolve(-1)
+      }
+    }
+
+    function cleanup() {
+      input.removeListener('data', onData)
+      input.pause()
+      input.setRawMode(wasRaw)
+      output.write(showCursor)
+    }
+
+    input.on('data', onData)
+  })
+}
+
+async function defaultPrompt(query) {
+  const { createInterface } = await import('node:readline')
   const rl = createInterface({ input, output })
   return new Promise(resolve => {
     rl.question(query, answer => {
@@ -24,22 +134,45 @@ function defaultAskQuestion(query) {
   })
 }
 
-async function pickAndInstall(items) {
+async function promptSelect(items) {
   console.log()
-  const answer = await askQuestion(`Which skill to install? [1-${items.length}, q to quit]: `)
+  for (let i = 0; i < items.length; i++) {
+    const line = formatRepo(items[i]).split('\n')
+    console.log(`  ${bold(cyan(String(i + 1).padStart(2, ' ')))} ${line[0]}`)
+    console.log(`     ${line[1]}`)
+    console.log()
+  }
 
-  if (answer === 'q') {
+  const answer = await promptUser(`Which skill to install? [1-${items.length}, q to quit]: `)
+
+  const trimmed = (answer || '').trim().toLowerCase()
+  if (trimmed === 'q') return -1
+
+  const index = parseInt(trimmed, 10)
+  if (isNaN(index) || index < 1 || index > items.length) {
+    console.log(`Invalid choice. Enter a number between 1 and ${items.length}.`)
+    return -2
+  }
+
+  return index - 1
+}
+
+async function pickAndInstall(items) {
+  let selectedIndex
+
+  if (output.isTTY && items.length > 0) {
+    selectedIndex = await runTUI(items)
+  } else {
+    selectedIndex = await promptSelect(items)
+  }
+
+  if (selectedIndex === -1) {
     console.log('Aborted.')
     return
   }
+  if (selectedIndex === -2) return
 
-  const index = parseInt(answer, 10)
-  if (isNaN(index) || index < 1 || index > items.length) {
-    console.log(`Invalid choice. Enter a number between 1 and ${items.length}.`)
-    return
-  }
-
-  const repo = items[index - 1]
+  const repo = items[selectedIndex]
   const source = repo.full_name
   console.log(`\n📦 Installing "${source}"...`)
   try {
@@ -169,9 +302,9 @@ export async function searchCommand(query, options = {}) {
     console.log(`\nNo skills found with SKILL.md file. Search results for "${query}":\n`)
   }
 
-  displayResults(data, query)
-
   if (options.interactive) {
     await pickAndInstall(data.items)
+  } else {
+    displayResults(data, query)
   }
 }
