@@ -95,7 +95,7 @@
 
 - [x] Shell completions (bash, zsh, fish)
 - [x] Color-highlighted interactive search (`search --interactive` with styled cards)
-- [ ] `rolecraft upgrade` — self-update command
+- [x] `rolecraft upgrade` — self-update command
 - [ ] npm package source support (`npx rolecraft install some-package`)
 - [ ] AGENTS.md XML injection for non-Claude agents
 - [ ] Skill bundle / skillset hub

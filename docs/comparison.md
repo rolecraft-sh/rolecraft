@@ -26,5 +26,5 @@
 | npm provenance                           | ✅               | ❌                | ❌                   |
 | Shell completions                        | ✅               | ❌                | ❌                   |
 | `doctor` command                         | ❌               | ❌                | ❌                   |
-| Self-upgrade command                     | ❌               | ❌                | ❌                   |
+| Self-upgrade command                     | ✅               | ❌                | ❌                   |
 | File size                                | ~4 KB            | ~465 KB           | ~84 KB               |

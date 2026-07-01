@@ -8,7 +8,7 @@ const pkg = JSON.parse(readFileSync(join(__dirname, '..', '..', 'package.json'),
 const COMMANDS = [
   'install', 'bundle', 'use', 'list', 'remove', 'update',
   'setup', 'init', 'search', 'verify', 'ci', 'completions',
-  'help', 'version',
+  'upgrade', 'help', 'version',
 ]
 
 const SCOPE_FLAGS = [
@@ -47,7 +47,7 @@ _rolecraft() {
   fi
 
   case "\${COMP_WORDS[1]}" in
-    install|bundle|use|setup)
+    install|bundle|use|setup|upgrade)
       COMPREPLY=($(compgen -W "$scope_flags $option_flags" -- "$cur"))
       ;;
     search)
@@ -85,6 +85,7 @@ _rolecraft() {
     'verify:Verify installed skill integrity'
     'ci:Install all skills from lockfile'
     'completions:Generate shell completion scripts'
+    'upgrade:Upgrade rolecraft to latest version'
     'help:Show help'
     'version:Show version'
   )
@@ -99,7 +100,7 @@ _rolecraft() {
       ;;
     args)
       case $words[1] in
-        install|bundle|use|setup)
+        install|bundle|use|setup|upgrade)
           _arguments \\
             '--global[Install to ~/.agents/skills/]' \\
             '--project[Install to ./.agents/skills/]' \\
@@ -198,11 +199,12 @@ complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a search    -d 'Se
 complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a verify    -d 'Verify skill integrity'
 complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a ci        -d 'CI mode install'
 complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a completions -d 'Generate completions'
+complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a upgrade    -d 'Upgrade to latest version'
 complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a help      -d 'Show help'
 complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a version   -d 'Show version'
 
 # scope flags for install/bundle/use/setup
-for cmd in install bundle use setup
+for cmd in install bundle use setup upgrade
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l global         -d 'Install to ~/.agents/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l project        -d 'Install to ./.agents/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l claude         -d 'Install to ~/.claude/skills/'

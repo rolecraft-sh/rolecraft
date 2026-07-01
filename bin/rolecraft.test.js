@@ -466,4 +466,14 @@ describe('rolecraft CLI', () => {
     assert.ok(logs.some(l => l.includes('dry-run-cli')))
     restore()
   })
+
+  it('runs upgrade command with dry-run', async () => {
+    process.argv = ['node', 'rolecraft', 'upgrade', '--dry-run']
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l.includes('rolecraft') || l.includes('rolecraft')))
+    restore()
+  })
 })

@@ -15,6 +15,7 @@ import { verifyCommand } from '../src/commands/verify.js'
 import { ciCommand } from '../src/commands/ci.js'
 import { bundleCommand, bundleCreateCommand } from '../src/commands/bundle.js'
 import { completionsCommand } from '../src/commands/completions.js'
+import { upgradeCommand } from '../src/commands/upgrade.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'))
@@ -40,10 +41,14 @@ Usage:
   rolecraft verify               Verify installed skill integrity
   rolecraft ci                   Install all skills from lockfile
   rolecraft completions <shell>  Generate shell completions (bash|zsh|fish)
+  rolecraft upgrade              Upgrade rolecraft to the latest version
   rolecraft help                 Show this help
 
 Options:
-  --dry-run      Preview installation without copying files (install, setup, bundle)
+  --dry-run      Preview installation without copying files (install, setup, bundle, upgrade)
+
+Options for upgrade:
+  --dry-run      Check for updates without actually upgrading
 
 Options for install:
   --global       Install to ~/.agents/skills/
@@ -222,6 +227,12 @@ export async function main() {
       const source = args[0]
       const flags = args.slice(1)
       await setupCommand(source, { dryRun: flags.includes('--dry-run') })
+      break
+    }
+
+    case 'upgrade': {
+      const flags = args
+      await upgradeCommand({ dryRun: flags.includes('--dry-run') })
       break
     }
 

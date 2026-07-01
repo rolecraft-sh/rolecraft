@@ -97,6 +97,7 @@ rolecraft remove my-skill
 | `rolecraft list`             | Show all installed skills                           | [docs](docs/commands/list.md)    |
 | `rolecraft verify`           | Check installed skill integrity via content hash    | [docs](docs/commands/verify.md)  |
 | `rolecraft ci`               | Re-install all skills from lockfile (CI mode)       | [docs](docs/commands/ci.md)      |
+| `rolecraft upgrade`          | Upgrade rolecraft to the latest version              | [docs](docs/commands/upgrade.md) |
 | `rolecraft remove <slug>`    | Uninstall a skill                                   | [docs](docs/commands/remove.md)  |
 | `rolecraft update <slug>`    | Re-install a skill to latest                        | [docs](docs/commands/update.md)  |
 | `rolecraft --version`        | Show version                                        |                                  |
