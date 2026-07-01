@@ -44,29 +44,20 @@ function pickAndInstallTUI(items) {
 
     let selected = 0
     const total = items.length
-    const startY = output.rows ? output.rows - Math.min(total + 6, output.rows) : 2
 
-    cursorHide()
-    output.write(`\n${bold('Select a skill to install (↑↓ to navigate, Enter to select, q to quit):')}\n\n`)
-
-    let listStartLine = output.cursorTo ? null : 0
+    emitKeypressEvents(input)
 
     function render() {
-      moveUp(Math.min(total + 4, output.rows || 30))
+      output.write(`${CSI}u${CSI}J`)
       for (let i = 0; i < total; i++) {
-        clearLine()
         const prefix = i === selected ? `${green('▸')} ${cyan(bold(String(i + 1).padStart(2, ' ')))}` : `  ${dim(String(i + 1).padStart(2, ' '))}`
         const suffix = i === selected ? ` ${green('◀ install')}` : ''
         const line = formatRepo(items[i]).split('\n')
         output.write(`${prefix} ${line[0]}${suffix}\n`)
-        clearLine()
         output.write(`   ${line[1]}\n`)
       }
-      clearLine()
-      output.write(`\n  ${dim('q')} quit · ${dim('↑/↓')} navigate · ${dim('Enter')} install\n`)
+      output.write(`\n  ${dim('q')} quit · ${dim('\u2191/\u2193')} navigate · ${dim('Enter')} install\n`)
     }
-
-    emitKeypressEvents(input)
 
     function onKeypress(str, key) {
       if (!key) return
@@ -95,9 +86,14 @@ function pickAndInstallTUI(items) {
     function cleanup() {
       try { input.off('keypress', onKeypress) } catch {}
       try { input.setRawMode(false) } catch {}
+      try { input.pause() } catch {}
       cursorShow()
-      output.write('\n')
+      output.write(`\n`)
     }
+
+    cursorHide()
+    output.write(`\n${bold('Select a skill to install (\u2191/\u2193 to navigate, Enter to select, q to quit):')}\n\n`)
+    output.write(`${CSI}s`)
 
     try {
       input.setRawMode(true)
@@ -108,6 +104,8 @@ function pickAndInstallTUI(items) {
       cursorShow()
       resolve(null)
     }
+
+    render()
   })
 }
 
