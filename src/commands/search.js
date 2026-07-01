@@ -1,27 +1,21 @@
+import { createInterface } from 'node:readline'
 import { stdin as input, stdout as output } from 'node:process'
-import { emitKeypressEvents } from 'node:readline'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 
 let runFetch = globalThis.fetch
-let pickItem = defaultPickItem
+let promptUser = defaultPrompt
 
 export function setFetch(fn) {
   runFetch = fn
 }
 
-export function setPickItem(fn) {
-  pickItem = fn || defaultPickItem
+export function setPromptUser(fn) {
+  promptUser = fn || defaultPrompt
 }
 
-const ESC = '\x1b'
-const CSI = `${ESC}[`
-function cursorHide() { output.write(`${CSI}?25l`) }
-function cursorShow() { output.write(`${CSI}?25h`) }
-function clearLine() { output.write(`${CSI}2K\r`) }
-function moveUp(n) { output.write(`${CSI}${n}A`) }
-function moveDown(n) { output.write(`${CSI}${n}B`) }
-function text(color, s) { return `${color}${s}${ESC}[0m` }
+const CSI = '\x1b['
+const text = (color, s) => `${color}${s}\x1b[0m`
 const cyan = s => text(`${CSI}36m`, s)
 const green = s => text(`${CSI}32m`, s)
 const yellow = s => text(`${CSI}33m`, s)
@@ -35,94 +29,41 @@ export function formatRepo(r) {
   return `${bold(r.full_name)}\n  ${dim(desc)}  ${yellow(`⭐ ${stars}`)}  ${cyan(lang)}`
 }
 
-function pickAndInstallTUI(items) {
+function defaultPrompt(query) {
+  const rl = createInterface({ input, output })
   return new Promise(resolve => {
-    if (!input.isTTY) {
-      resolve(null)
-      return
-    }
-
-    let selected = 0
-    const total = items.length
-    const altScreen = `${ESC}[?1049h`
-    const normalScreen = `${ESC}[?1049l`
-    const cursorHome = `${ESC}H`
-
-    emitKeypressEvents(input)
-
-    function render() {
-      let buf = cursorHome
-      buf += `${bold('Select a skill (\u2191/\u2193 navigate, Enter install, q quit):')}\n\n`
-      for (let i = 0; i < total; i++) {
-        const prefix = i === selected ? `${green('\u25b6')} ${cyan(bold(String(i + 1).padStart(2, ' ')))}` : `  ${dim(String(i + 1).padStart(2, ' '))}`
-        const suffix = i === selected ? ` ${green('\u25c0 install')}` : ''
-        const line = formatRepo(items[i]).split('\n')
-        buf += `${prefix} ${line[0]}${suffix}\n`
-        buf += `   ${line[1]}\n`
-      }
-      buf += `\n${dim('q')} quit \u2191/\u2193 navigate ${dim('Enter')} install\n`
-      output.write(buf)
-    }
-
-    function onKeypress(str, key) {
-      if (!key) return
-      if (key.name === 'q' || (key.ctrl && key.name === 'c')) {
-        cleanup()
-        resolve(null)
-        return
-      }
-      if (key.name === 'up' || key.name === 'k') {
-        selected = selected > 0 ? selected - 1 : total - 1
-        render()
-        return
-      }
-      if (key.name === 'down' || key.name === 'j') {
-        selected = selected < total - 1 ? selected + 1 : 0
-        render()
-        return
-      }
-      if (key.name === 'return' || key.name === 'enter') {
-        cleanup()
-        resolve(items[selected])
-        return
-      }
-    }
-
-    function cleanup() {
-      try { input.off('keypress', onKeypress) } catch {}
-      try { input.setRawMode(false) } catch {}
-      try { input.pause() } catch {}
-      output.write(normalScreen)
-      cursorShow()
-    }
-
-    try {
-      output.write(altScreen)
-      cursorHide()
-      input.setRawMode(true)
-      input.resume()
-      input.on('keypress', onKeypress)
-    } catch {
-      try { input.pause() } catch {}
-      output.write(normalScreen)
-      cursorShow()
-      resolve(null)
-      return
-    }
-
-    render()
+    rl.question(query, answer => {
+      rl.close()
+      resolve(answer.trim().toLowerCase())
+    })
   })
 }
 
 async function pickAndInstall(items) {
-  const selected = await pickItem(items)
-  if (!selected) {
+  console.log()
+  for (let i = 0; i < items.length; i++) {
+    const line = formatRepo(items[i]).split('\n')
+    console.log(`  ${cyan(bold(String(i + 1).padStart(2, ' ')))} ${line[0]}`)
+    console.log(`     ${line[1]}`)
+    console.log()
+  }
+
+  const answer = await promptUser(`Which skill to install? [1-${items.length}, q to quit]: `)
+
+  if (answer === 'q') {
     console.log('Aborted.')
     return
   }
 
-  const source = selected.full_name
-  console.log(`📦 Installing "${source}"...`)
+  const index = parseInt(answer, 10)
+  if (isNaN(index) || index < 1 || index > items.length) {
+    console.log(`Invalid choice. Enter a number between 1 and ${items.length}.`)
+    return
+  }
+
+  const repo = items[index - 1]
+  const source = repo.full_name
+  console.log(`\n📦 Installing "${source}"...`)
   try {
     const resolved = await resolveSource(source)
     const targets = ['project']
@@ -131,10 +72,6 @@ async function pickAndInstall(items) {
   } catch (err) {
     console.error(`❌ Failed to install: ${err.message}`)
   }
-}
-
-export function defaultPickItem(items) {
-  return pickAndInstallTUI(items)
 }
 
 function isGitHubRef(source) {

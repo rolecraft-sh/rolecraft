@@ -40,7 +40,7 @@ function mockSequentialFetch(responses) {
 describe('search command', () => {
   after(() => {
     searchModule.setFetch(globalThis.fetch)
-    searchModule.setPickItem(undefined)
+    searchModule.setPromptUser(undefined)
   })
 
   describe('formatRepo', () => {
@@ -66,13 +66,6 @@ describe('search command', () => {
       })
       assert.ok(result.includes('No description'))
       assert.ok(result.includes('N/A'))
-    })
-  })
-
-  describe('defaultPickItem', () => {
-    it('returns null in non-TTY environment', async () => {
-      const result = await searchModule.defaultPickItem([{ full_name: 'test/repo' }])
-      assert.equal(result, null)
     })
   })
 
@@ -227,11 +220,11 @@ describe('search command', () => {
   describe('interactive mode', () => {
     afterEach(() => {
       searchModule.setFetch(globalThis.fetch)
-      searchModule.setPickItem(undefined)
+      searchModule.setPromptUser(undefined)
     })
 
-    it('aborts when picker returns null', async () => {
-      searchModule.setPickItem(() => Promise.resolve(null))
+    it('aborts on q', async () => {
+      searchModule.setPromptUser(() => Promise.resolve('q'))
       mockFetch(200, {
         items: [
           { full_name: 'user1/skill1', description: 'desc', stargazers_count: 1, language: 'JS' },
@@ -245,13 +238,8 @@ describe('search command', () => {
       assert.ok(logs.some(l => l.includes('Aborted')))
     })
 
-    it('installs selected skill', async () => {
-      searchModule.setPickItem(() => Promise.resolve({
-        full_name: 'user1/skill1',
-        description: 'desc',
-        stargazers_count: 1,
-        language: 'JS',
-      }))
+    it('shows invalid choice message', async () => {
+      searchModule.setPromptUser(() => Promise.resolve('99'))
       mockFetch(200, {
         items: [
           { full_name: 'user1/skill1', description: 'desc', stargazers_count: 1, language: 'JS' },
@@ -262,7 +250,23 @@ describe('search command', () => {
       await searchModule.searchCommand('test', { interactive: true })
       restore()
 
-      assert.ok(logs.some(l => l.includes('Installing "user1/skill1"')))
+      assert.ok(logs.some(l => l.includes('Invalid choice')))
+    })
+
+    it('shows numbered list before prompt', async () => {
+      searchModule.setPromptUser(() => Promise.resolve('q'))
+      mockFetch(200, {
+        items: [
+          { full_name: 'user1/skill1', description: 'desc', stargazers_count: 1, language: 'JS' },
+        ],
+      })
+
+      const { logs, restore } = capture('log')
+      await searchModule.searchCommand('test', { interactive: true })
+      restore()
+
+      assert.ok(logs.some(l => l.includes('user1/skill1')))
+      assert.ok(logs.some(l => l.includes('1')))
     })
   })
 })

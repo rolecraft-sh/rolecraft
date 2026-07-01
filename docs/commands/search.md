@@ -12,20 +12,7 @@ rolecraft search <query> [--interactive]
 
 Queries the GitHub API for repositories containing `SKILL.md` files matching your query. Results include stars, language, and the exact install command.
 
-Use `--interactive` to open a **TUI (terminal user interface)** — navigate results with arrow keys, preview details, and install with Enter.
-
-## Interactive mode (TUI)
-
-When `--interactive` is used, rolecraft opens a full-screen TUI:
-
-| Key          | Action               |
-| ------------ | -------------------- |
-| `↑` / `k`    | Move selection up    |
-| `↓` / `j`    | Move selection down  |
-| `Enter`      | Install selected     |
-| `q`          | Quit                 |
-
-No external dependencies — built entirely with Node.js built-in modules and ANSI escape codes.
+Use `--interactive` to pick and install a skill directly from the search results — each result is shown with a numbered, color-highlighted card.
 
 ## Examples
 

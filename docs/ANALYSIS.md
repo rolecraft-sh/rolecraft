@@ -28,7 +28,7 @@
 | **Shell completions**        | ✅             | ❌                                        | ❌                       | ❌                | ❌                  | ✅                | ❌              | ❌          |
 | **`doctor` command**             | ❌             | ❌                                        | ❌                       | ❌                | ❌                  | ✅                | ❌              | ❌          |
 | **`upgrade` (self-update)**  | ❌             | ❌                                        | ❌                       | ❌                | ❌                  | ✅                | ❌              | ❌          |
-| **TUI search**               | ✅             | ✅ (`skills find` interactive)            | ❌                       | ❌                | ❌                  | ❌                | ❌              | ❌          |
+| **TUI search**               | ⚠️ (styled)   | ✅ (`skills find` interactive)            | ❌                       | ❌                | ❌                  | ❌                | ❌              | ❌          |
 | **Stars**                    | ~5             | 23,588                                    | 23                       | 10,500            | 472                 | ~1                | 178K+           | 133K+       |
 
 ## Strengths
@@ -94,7 +94,7 @@
 ### v0.6.x — UX & Shell Integration
 
 - [x] Shell completions (bash, zsh, fish)
-- [x] TUI for skill browsing (`search --interactive`)
+- [x] Color-highlighted interactive search (`search --interactive` with styled cards)
 - [ ] `rolecraft upgrade` — self-update command
 - [ ] npm package source support (`npx rolecraft install some-package`)
 - [ ] AGENTS.md XML injection for non-Claude agents
