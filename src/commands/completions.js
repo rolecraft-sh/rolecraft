@@ -17,7 +17,11 @@ const SCOPE_FLAGS = [
   '--gemini', '--cody', '--continue', '--warp', '--codeium',
   '--fabric', '--goose', '--tabnine', '--supermaven', '--pr-pilot',
   '--loom', '--roo', '--trae', '--hermes', '--kiro', '--augment',
-  '--kilo', '--openhands', '--junie', '--factory', '--all',
+  '--kilo', '--openhands', '--junie', '--factory',
+  '--command-code', '--cortex', '--mistral-vibe', '--qwen-code', '--openclaw',
+  '--codebuddy', '--mux', '--pi', '--autohand-code', '--rovo', '--firebender',
+  '--bob', '--aider-desk',
+  '--all',
 ]
 
 const OPTION_FLAGS = [
@@ -130,7 +134,20 @@ _rolecraft() {
             '--kilo[Also install to ~/.kilo/skills/]' \\
             '--openhands[Also install to ~/.openhands/skills/]' \\
             '--junie[Also install to ~/.junie/skills/]' \\
-            '--factory[Also install to ~/.factory/skills/]' \\
+            '--factory[Also install to ~/.factory/skills/]' \
+            '--command-code[Also install to ~/.commandcode/skills/]' \
+            '--cortex[Also install to ~/.snowflake/cortex/skills/]' \
+            '--mistral-vibe[Also install to ~/.vibe/skills/]' \
+            '--qwen-code[Also install to ~/.qwen/skills/]' \
+            '--openclaw[Also install to ~/.openclaw/skills/]' \
+            '--codebuddy[Also install to ~/.codebuddy/skills/]' \
+            '--mux[Also install to ~/.mux/skills/]' \
+            '--pi[Also install to ~/.pi/agent/skills/]' \
+            '--autohand-code[Also install to ~/.autohand/skills/]' \
+            '--rovo[Also install to ~/.rovodev/skills/]' \
+            '--firebender[Also install to ~/.firebender/skills/]' \
+            '--bob[Also install to ~/.bob/skills/]' \
+            '--aider-desk[Also install to ~/.aider-desk/skills/]' \\
             '--all[Install to all locations]' \\
             '--dry-run[Preview without copying]' \\
             '--frozen-lockfile[Fail if already installed]' \\
@@ -233,6 +250,19 @@ for cmd in install bundle use setup
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l openhands      -d 'Install to ~/.openhands/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l junie          -d 'Install to ~/.junie/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l factory        -d 'Install to ~/.factory/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l command-code    -d 'Install to ~/.commandcode/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l cortex          -d 'Install to ~/.snowflake/cortex/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l mistral-vibe    -d 'Install to ~/.vibe/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l qwen-code       -d 'Install to ~/.qwen/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l openclaw        -d 'Install to ~/.openclaw/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l codebuddy       -d 'Install to ~/.codebuddy/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l mux             -d 'Install to ~/.mux/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l pi              -d 'Install to ~/.pi/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l autohand-code   -d 'Install to ~/.autohand/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l rovo            -d 'Install to ~/.rovodev/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l firebender      -d 'Install to ~/.firebender/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l bob             -d 'Install to ~/.bob/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l aider-desk      -d 'Install to ~/.aider-desk/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l all            -d 'Install to all locations'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l dry-run        -d 'Preview without copying'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l frozen-lockfile -d 'Fail if already installed'

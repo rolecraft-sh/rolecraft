@@ -126,6 +126,58 @@ export function getFactoryDir() {
   return home('.factory', 'skills')
 }
 
+export function getCommandCodeDir() {
+  return home('.commandcode', 'skills')
+}
+
+export function getCortexDir() {
+  return home('.snowflake', 'cortex', 'skills')
+}
+
+export function getMistralVibeDir() {
+  return home('.vibe', 'skills')
+}
+
+export function getQwenCodeDir() {
+  return home('.qwen', 'skills')
+}
+
+export function getOpenClawDir() {
+  return home('.openclaw', 'skills')
+}
+
+export function getCodeBuddyDir() {
+  return home('.codebuddy', 'skills')
+}
+
+export function getMuxDir() {
+  return home('.mux', 'skills')
+}
+
+export function getPiDir() {
+  return home('.pi', 'agent', 'skills')
+}
+
+export function getAutohandCodeDir() {
+  return home('.autohand', 'skills')
+}
+
+export function getRovoDevDir() {
+  return home('.rovodev', 'skills')
+}
+
+export function getFirebenderDir() {
+  return home('.firebender', 'skills')
+}
+
+export function getBobDir() {
+  return home('.bob', 'skills')
+}
+
+export function getAiderDeskDir() {
+  return home('.aider-desk', 'skills')
+}
+
 export function getProjectLockPath(cwd) {
   return join(cwd, '.agents', '.skill-lock.json')
 }

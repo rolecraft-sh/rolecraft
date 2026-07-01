@@ -58,6 +58,19 @@ Where do you want to install this skill?
 | `--openhands`   | `~/.openhands/skills/`             |
 | `--junie`       | `~/.junie/skills/`                 |
 | `--factory`     | `~/.factory/skills/`               |
+| `--command-code` | `~/.commandcode/skills/`         |
+| `--cortex`      | `~/.snowflake/cortex/skills/`      |
+| `--mistral-vibe` | `~/.vibe/skills/`                |
+| `--qwen-code`   | `~/.qwen/skills/`                  |
+| `--openclaw`    | `~/.openclaw/skills/`              |
+| `--codebuddy`   | `~/.codebuddy/skills/`             |
+| `--mux`         | `~/.mux/skills/`                   |
+| `--pi`          | `~/.pi/agent/skills/`              |
+| `--autohand-code` | `~/.autohand/skills/`           |
+| `--rovo`        | `~/.rovodev/skills/`               |
+| `--firebender`  | `~/.firebender/skills/`            |
+| `--bob`         | `~/.bob/skills/`                   |
+| `--aider-desk`  | `~/.aider-desk/skills/`            |
 
 Combine flags to install to multiple agents at once:
 

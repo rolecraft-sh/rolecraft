@@ -11,7 +11,7 @@
 | **Lockfile**                 | agentskill v3  | Two-tier (global v3 + project v1, SHA)    | None                     | None              | None                | ✅                | None            | Config only   |
 | **Offline capable**          | ✅             | ✅                                        | ❌ (registry)             | ✅                | ✅                  | ✅                | ✅              | ✅           |
 | **Signup required**          | ❌             | ❌                                        | ✅ (agentskill.sh)        | ❌                | ❌                  | ❌                | ❌              | ❌           |
-| **Agent count**              | **30**         | 55+                                       | 15+                      | 10+               | 10+                 | 39                | 1 (+ compat)    | 1 (+ plugins) |
+| **Agent count**              | **43**         | 72                                        | 15+                      | 10+               | 10+                 | 39                | 1 (+ compat)    | 1 (+ plugins) |
 | **Project scope default**    | ✅             | ✅                                        | N/A                      | ❌ (global)        | ✅ (project)        | ✅                | N/A             | N/A         |
 | **Interactive scope prompt** | ✅             | ❌                                        | ❌                       | ❌                | ❌                  | ❌                | N/A             | N/A         |
 | **Provenance (npm)**         | ✅             | ❌                                        | ❌                       | ❌                | ❌                  | ❌                | N/A             | N/A         |
@@ -39,7 +39,7 @@
 - **agentskill.sh lockfile compatible** — cross-compatible with ecosystem
 - **Interactive scope prompt** — user-friendly first install
 - **Project scope default** — modern default
-- **30 install targets** — 29 named agents + project-local
+- **43 install targets** — 42 named agents + project-local
 - **SHA256 content hash verification** — `rolecraft verify`
 - **CI mode** — `rolecraft ci` for pipeline installs
 - **Symlink + Copy modes** — `--symlink`/`--copy`
@@ -50,17 +50,18 @@
 
 ### Feature gaps vs competitors
 
-1. **Agent count (30)** — ahead of `ags` (15+), `openskills` (10+), `skills-npm` (10+) but behind `skills` (55+), `qntx/skill` (39)
+1. **Agent count (43)** — ahead of `ags` (15+), `openskills` (10+), `skills-npm` (10+), `qntx/skill` (39) but behind `skills` (72)
 2. **No `doctor` command** — `qntx/skill` has `skills doctor` for health checks
-3. **No self-upgrade** — `qntx/skill` has `skills upgrade` (like `bun upgrade`)
-4. **No GitLab/Bitbucket/SSH git URL support** — only GitHub `owner/repo` and local paths
-7. **npm package source unsupported** — `skills` supports `npx skills add some-package`, `skills-npm` is built around it
-8. **No AGENTS.md XML injection** — `openskills` generates Claude Code compatible `<available_skills>` XML
-9. **Stars / community adoption very low (~5)** — building trust and visibility
+3. **No GitLab/Bitbucket/SSH git URL support** — only GitHub `owner/repo` and local paths
+4. **npm package source unsupported** — `skills` supports `npx skills add some-package`, `skills-npm` is built around it
+5. **No AGENTS.md XML injection** — `openskills` generates Claude Code compatible `<available_skills>` XML
+6. **Stars / community adoption very low (~5)** — building trust and visibility
 
-### Technical gaps
+### ✅ Resolved Gaps
 
-10. **Copilot agent path** — Copilot uses `.github/copilot/skills/` but rolecraft targets `~/.copilot/skills/`
+- **Copilot agent path** — now uses `.github/copilot/skills/` (project scope)
+- **Self-upgrade** — `rolecraft upgrade` command added
+- **Agent count (30 → 43)** — 13 new agent targets added
 
 ## Roadmap
 
@@ -84,11 +85,11 @@
 
 ### v0.5.x — Agent Coverage & Source Expansion
 
-- [ ] Copilot agent path fix (`.github/copilot/skills/` instead of `~/.copilot/skills/`)
+- [x] Copilot agent path fix (`.github/copilot/skills/` instead of `~/.copilot/skills/`)
+- [x] 13 new agent targets (command-code, cortex, mistral-vibe, qwen-code, openclaw, codebuddy, mux, pi, autohand-code, rovo, firebender, bob, aider-desk) — **43 total**
 - [ ] GitLab URL support (`https://gitlab.com/org/repo`)
 - [ ] SSH git URL support (`git@github.com:owner/repo.git`)
 - [ ] Full git URL support (any remote with SKILL.md)
-- [ ] 10+ new agent targets to match `skills` (55+)
 - [ ] `rolecraft doctor` — system health check
 
 ### v0.6.x — UX & Shell Integration

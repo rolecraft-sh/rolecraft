@@ -32,7 +32,20 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | kilo        | `~/.kilo/skills/`                              |
 | openhands   | `~/.openhands/skills/`                         |
 | junie       | `~/.junie/skills/`                             |
-| factory     | `~/.factory/skills/`                           |
+| factory     | `~/.factory/skills/`                             |
+| command-code | `~/.commandcode/skills/`                        |
+| cortex      | `~/.snowflake/cortex/skills/`                   |
+| mistral-vibe | `~/.vibe/skills/`                              |
+| qwen-code   | `~/.qwen/skills/`                               |
+| openclaw    | `~/.openclaw/skills/`                           |
+| codebuddy   | `~/.codebuddy/skills/`                          |
+| mux         | `~/.mux/skills/`                                |
+| pi          | `~/.pi/agent/skills/`                           |
+| autohand-code | `~/.autohand/skills/`                         |
+| rovo        | `~/.rovodev/skills/`                            |
+| firebender  | `~/.firebender/skills/`                         |
+| bob         | `~/.bob/skills/`                                |
+| aider-desk  | `~/.aider-desk/skills/`                         |
 
 > ⚠️ Windsurf has been rebranded to **Devin Desktop**. The `--windsurf` flag and `~/.windsurf/skills/` path still work for backward compatibility, but new deployments should use `--devin` / `~/.devin/skills/`.
 

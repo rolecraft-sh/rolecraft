@@ -1,7 +1,7 @@
 import { mkdir, cp, writeFile, readFile, access, stat, symlink, unlink, rm } from 'node:fs/promises'
 import { join, basename, relative, dirname } from 'node:path'
 import { homedir } from 'node:os'
-import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, addSkillToLock, getGlobalLockPath, getProjectLockPath, computeFileHashes } from './lockfile.js'
+import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, getCommandCodeDir, getCortexDir, getMistralVibeDir, getQwenCodeDir, getOpenClawDir, getCodeBuddyDir, getMuxDir, getPiDir, getAutohandCodeDir, getRovoDevDir, getFirebenderDir, getBobDir, getAiderDeskDir, addSkillToLock, getGlobalLockPath, getProjectLockPath, computeFileHashes } from './lockfile.js'
 
 function normalizeSlug(slug) {
   return slug.replace(/\//g, '-')
@@ -37,6 +37,19 @@ const targetToAgentName = {
   openhands: 'openhands',
   junie: 'junie',
   factory: 'factory',
+  'command-code': 'command-code',
+  cortex: 'cortex',
+  'mistral-vibe': 'mistral-vibe',
+  'qwen-code': 'qwen-code',
+  openclaw: 'openclaw',
+  codebuddy: 'codebuddy',
+  mux: 'mux',
+  pi: 'pi',
+  'autohand-code': 'autohand-code',
+  rovo: 'rovo-dev',
+  firebender: 'firebender',
+  bob: 'ibm-bob',
+  'aider-desk': 'aider-desk',
 }
 
 export async function installSkill(resolved, targets, mode = 'copy') {
@@ -193,6 +206,71 @@ export async function installSkill(resolved, targets, mode = 'copy') {
       case 'factory': {
         baseDir = getFactoryDir()
         label = '~/.factory/skills/'
+        break
+      }
+      case 'command-code': {
+        baseDir = getCommandCodeDir()
+        label = '~/.commandcode/skills/'
+        break
+      }
+      case 'cortex': {
+        baseDir = getCortexDir()
+        label = '~/.snowflake/cortex/skills/'
+        break
+      }
+      case 'mistral-vibe': {
+        baseDir = getMistralVibeDir()
+        label = '~/.vibe/skills/'
+        break
+      }
+      case 'qwen-code': {
+        baseDir = getQwenCodeDir()
+        label = '~/.qwen/skills/'
+        break
+      }
+      case 'openclaw': {
+        baseDir = getOpenClawDir()
+        label = '~/.openclaw/skills/'
+        break
+      }
+      case 'codebuddy': {
+        baseDir = getCodeBuddyDir()
+        label = '~/.codebuddy/skills/'
+        break
+      }
+      case 'mux': {
+        baseDir = getMuxDir()
+        label = '~/.mux/skills/'
+        break
+      }
+      case 'pi': {
+        baseDir = getPiDir()
+        label = '~/.pi/agent/skills/'
+        break
+      }
+      case 'autohand-code': {
+        baseDir = getAutohandCodeDir()
+        label = '~/.autohand/skills/'
+        break
+      }
+      case 'rovo': {
+        baseDir = getRovoDevDir()
+        label = '~/.rovodev/skills/'
+        break
+      }
+      case 'firebender': {
+        baseDir = getFirebenderDir()
+        label = '~/.firebender/skills/'
+        break
+      }
+      case 'bob': {
+        baseDir = getBobDir()
+        label = '~/.bob/skills/'
+        break
+      }
+      case 'aider-desk': {
+        baseDir = getAiderDeskDir()
+        label = '~/.aider-desk/skills/'
         break
       }
       case 'project': {

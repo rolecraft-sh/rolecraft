@@ -1,7 +1,7 @@
 import { accessSync, readdirSync, constants } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir } from '../utils/lockfile.js'
+import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, getCommandCodeDir, getCortexDir, getMistralVibeDir, getQwenCodeDir, getOpenClawDir, getCodeBuddyDir, getMuxDir, getPiDir, getAutohandCodeDir, getRovoDevDir, getFirebenderDir, getBobDir, getAiderDeskDir } from '../utils/lockfile.js'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 
@@ -35,6 +35,19 @@ const KNOWN_AGENTS = [
   { flag: 'openhands', label: 'openhands', dir: getOpenHandsDir },
   { flag: 'junie', label: 'junie', dir: getJunieDir },
   { flag: 'factory', label: 'factory', dir: getFactoryDir },
+  { flag: 'command-code', label: 'command-code', dir: getCommandCodeDir },
+  { flag: 'cortex', label: 'cortex', dir: getCortexDir },
+  { flag: 'mistral-vibe', label: 'mistral-vibe', dir: getMistralVibeDir },
+  { flag: 'qwen-code', label: 'qwen-code', dir: getQwenCodeDir },
+  { flag: 'openclaw', label: 'openclaw', dir: getOpenClawDir },
+  { flag: 'codebuddy', label: 'codebuddy', dir: getCodeBuddyDir },
+  { flag: 'mux', label: 'mux', dir: getMuxDir },
+  { flag: 'pi', label: 'pi', dir: getPiDir },
+  { flag: 'autohand-code', label: 'autohand-code', dir: getAutohandCodeDir },
+  { flag: 'rovo', label: 'rovo-dev', dir: getRovoDevDir },
+  { flag: 'firebender', label: 'firebender', dir: getFirebenderDir },
+  { flag: 'bob', label: 'ibm-bob', dir: getBobDir },
+  { flag: 'aider-desk', label: 'aider-desk', dir: getAiderDeskDir },
 ]
 
 export function detectAgents() {
@@ -67,7 +80,7 @@ export async function setupCommand(source, options = {}) {
     console.log('   Install an AI coding agent (opencode, claude-code, cursor,')
     console.log('   windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody,')
     console.log('   continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot,')
-    console.log('   loom, roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory) first.')
+    console.log('   loom, roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory, command-code, cortex, mistral-vibe, qwen-code, openclaw, codebuddy, mux, pi, autohand-code, rovo-dev, firebender, ibm-bob, aider-desk) first.')
     return
   }
 

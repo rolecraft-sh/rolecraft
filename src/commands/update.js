@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { readLock, getGlobalLockPath, getProjectLockPath, getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir } from '../utils/lockfile.js'
+import { readLock, getGlobalLockPath, getProjectLockPath, getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, getCommandCodeDir, getCortexDir, getMistralVibeDir, getQwenCodeDir, getOpenClawDir, getCodeBuddyDir, getMuxDir, getPiDir, getAutohandCodeDir, getRovoDevDir, getFirebenderDir, getBobDir, getAiderDeskDir } from '../utils/lockfile.js'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 
@@ -109,6 +109,45 @@ function detectTargets(slug, cwd) {
 
   const factoryDir = join(getFactoryDir(), normSlug)
   if (existsSync(join(factoryDir, 'SKILL.md'))) targets.push('factory')
+
+  const commandCodeDir = join(getCommandCodeDir(), normSlug)
+  if (existsSync(join(commandCodeDir, 'SKILL.md'))) targets.push('command-code')
+
+  const cortexDir = join(getCortexDir(), normSlug)
+  if (existsSync(join(cortexDir, 'SKILL.md'))) targets.push('cortex')
+
+  const mistralVibeDir = join(getMistralVibeDir(), normSlug)
+  if (existsSync(join(mistralVibeDir, 'SKILL.md'))) targets.push('mistral-vibe')
+
+  const qwenCodeDir = join(getQwenCodeDir(), normSlug)
+  if (existsSync(join(qwenCodeDir, 'SKILL.md'))) targets.push('qwen-code')
+
+  const openClawDir = join(getOpenClawDir(), normSlug)
+  if (existsSync(join(openClawDir, 'SKILL.md'))) targets.push('openclaw')
+
+  const codeBuddyDir = join(getCodeBuddyDir(), normSlug)
+  if (existsSync(join(codeBuddyDir, 'SKILL.md'))) targets.push('codebuddy')
+
+  const muxDir = join(getMuxDir(), normSlug)
+  if (existsSync(join(muxDir, 'SKILL.md'))) targets.push('mux')
+
+  const piDir = join(getPiDir(), normSlug)
+  if (existsSync(join(piDir, 'SKILL.md'))) targets.push('pi')
+
+  const autohandCodeDir = join(getAutohandCodeDir(), normSlug)
+  if (existsSync(join(autohandCodeDir, 'SKILL.md'))) targets.push('autohand-code')
+
+  const rovoDevDir = join(getRovoDevDir(), normSlug)
+  if (existsSync(join(rovoDevDir, 'SKILL.md'))) targets.push('rovo')
+
+  const firebenderDir = join(getFirebenderDir(), normSlug)
+  if (existsSync(join(firebenderDir, 'SKILL.md'))) targets.push('firebender')
+
+  const bobDir = join(getBobDir(), normSlug)
+  if (existsSync(join(bobDir, 'SKILL.md'))) targets.push('bob')
+
+  const aiderDeskDir = join(getAiderDeskDir(), normSlug)
+  if (existsSync(join(aiderDeskDir, 'SKILL.md'))) targets.push('aider-desk')
 
   const projectDir = join(cwd, '.agents', 'skills', normSlug)
   if (existsSync(join(projectDir, 'SKILL.md'))) targets.push('project')

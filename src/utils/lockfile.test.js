@@ -32,6 +32,58 @@ describe('lockfile', () => {
     assert.equal(lockModule.getClaudeDir(), join(tempDir, '.claude', 'skills'))
   })
 
+  it('getCommandCodeDir returns path inside homedir', () => {
+    assert.equal(lockModule.getCommandCodeDir(), join(tempDir, '.commandcode', 'skills'))
+  })
+
+  it('getCortexDir returns path inside homedir', () => {
+    assert.equal(lockModule.getCortexDir(), join(tempDir, '.snowflake', 'cortex', 'skills'))
+  })
+
+  it('getMistralVibeDir returns path inside homedir', () => {
+    assert.equal(lockModule.getMistralVibeDir(), join(tempDir, '.vibe', 'skills'))
+  })
+
+  it('getQwenCodeDir returns path inside homedir', () => {
+    assert.equal(lockModule.getQwenCodeDir(), join(tempDir, '.qwen', 'skills'))
+  })
+
+  it('getOpenClawDir returns path inside homedir', () => {
+    assert.equal(lockModule.getOpenClawDir(), join(tempDir, '.openclaw', 'skills'))
+  })
+
+  it('getCodeBuddyDir returns path inside homedir', () => {
+    assert.equal(lockModule.getCodeBuddyDir(), join(tempDir, '.codebuddy', 'skills'))
+  })
+
+  it('getMuxDir returns path inside homedir', () => {
+    assert.equal(lockModule.getMuxDir(), join(tempDir, '.mux', 'skills'))
+  })
+
+  it('getPiDir returns path inside homedir', () => {
+    assert.equal(lockModule.getPiDir(), join(tempDir, '.pi', 'agent', 'skills'))
+  })
+
+  it('getAutohandCodeDir returns path inside homedir', () => {
+    assert.equal(lockModule.getAutohandCodeDir(), join(tempDir, '.autohand', 'skills'))
+  })
+
+  it('getRovoDevDir returns path inside homedir', () => {
+    assert.equal(lockModule.getRovoDevDir(), join(tempDir, '.rovodev', 'skills'))
+  })
+
+  it('getFirebenderDir returns path inside homedir', () => {
+    assert.equal(lockModule.getFirebenderDir(), join(tempDir, '.firebender', 'skills'))
+  })
+
+  it('getBobDir returns path inside homedir', () => {
+    assert.equal(lockModule.getBobDir(), join(tempDir, '.bob', 'skills'))
+  })
+
+  it('getAiderDeskDir returns path inside homedir', () => {
+    assert.equal(lockModule.getAiderDeskDir(), join(tempDir, '.aider-desk', 'skills'))
+  })
+
   it('readLock returns default when no file exists', async () => {
     const lock = await lockModule.readLock()
     assert.deepEqual(lock, {

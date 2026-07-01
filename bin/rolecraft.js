@@ -24,7 +24,7 @@ function usage() {
 rolecraft — Install AI agent skills like roles & behaviors
 
 Zero dependencies, no marketplace required.
-Works with opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody, continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot, loom, roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory, and all spec-compliant agents.
+Works with opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody, continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot, loom, roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory, command-code, cortex, mistral-vibe, qwen-code, openclaw, codebuddy, mux, pi, autohand-code, rovo, firebender, bob, aider-desk, and all spec-compliant agents.
 
 Usage:
   rolecraft install <source>     Install a skill (local path or owner/repo)
@@ -76,6 +76,19 @@ Options for install:
   --openhands    Also install to ~/.openhands/skills/
   --junie        Also install to ~/.junie/skills/
   --factory      Also install to ~/.factory/skills/
+  --command-code  Also install to ~/.commandcode/skills/
+  --cortex        Also install to ~/.snowflake/cortex/skills/
+  --mistral-vibe  Also install to ~/.vibe/skills/
+  --qwen-code     Also install to ~/.qwen/skills/
+  --openclaw      Also install to ~/.openclaw/skills/
+  --codebuddy     Also install to ~/.codebuddy/skills/
+  --mux           Also install to ~/.mux/skills/
+  --pi            Also install to ~/.pi/agent/skills/
+  --autohand-code Also install to ~/.autohand/skills/
+  --rovo          Also install to ~/.rovodev/skills/
+  --firebender    Also install to ~/.firebender/skills/
+  --bob           Also install to ~/.bob/skills/
+  --aider-desk    Also install to ~/.aider-desk/skills/
   --all          Install to all locations
   --frozen-lockfile  Fail if skill already installed
   --symlink      Install as symlink instead of copy
@@ -108,7 +121,9 @@ export async function main() {
       }
 
       const flags = args.slice(1)
-      const scopeFlags = ['--global', '--project', '--claude', '--cursor', '--windsurf', '--devin', '--codex', '--copilot', '--aider', '--cline', '--gemini', '--cody', '--continue', '--warp', '--codeium', '--fabric', '--goose', '--tabnine', '--supermaven', '--pr-pilot', '--loom', '--roo', '--trae', '--hermes', '--kiro', '--augment', '--kilo', '--openhands', '--junie', '--factory', '--all']
+      const scopeFlags = ['--global', '--project', '--claude', '--cursor', '--windsurf', '--devin', '--codex', '--copilot', '--aider', '--cline', '--gemini', '--cody', '--continue', '--warp', '--codeium', '--fabric', '--goose', '--tabnine', '--supermaven', '--pr-pilot', '--loom', '--roo', '--trae', '--hermes', '--kiro', '--augment', '--kilo', '--openhands', '--junie', '--factory', '--command-code', '--cortex', '--mistral-vibe', '--qwen-code', '--openclaw', '--codebuddy',
+  '--mux', '--pi', '--autohand-code', '--rovo', '--firebender', '--bob', '--aider-desk',
+  '--all']
       const hasScopeFlag = flags.some(f => scopeFlags.includes(f))
       const options = hasScopeFlag ? {
         global: flags.includes('--global') || flags.includes('--all'),
@@ -140,6 +155,19 @@ export async function main() {
         openhands: flags.includes('--openhands') || flags.includes('--all'),
         junie: flags.includes('--junie') || flags.includes('--all'),
         factory: flags.includes('--factory') || flags.includes('--all'),
+        'command-code': flags.includes('--command-code') || flags.includes('--all'),
+        cortex: flags.includes('--cortex') || flags.includes('--all'),
+        'mistral-vibe': flags.includes('--mistral-vibe') || flags.includes('--all'),
+        'qwen-code': flags.includes('--qwen-code') || flags.includes('--all'),
+        openclaw: flags.includes('--openclaw') || flags.includes('--all'),
+        codebuddy: flags.includes('--codebuddy') || flags.includes('--all'),
+        mux: flags.includes('--mux') || flags.includes('--all'),
+        pi: flags.includes('--pi') || flags.includes('--all'),
+        'autohand-code': flags.includes('--autohand-code') || flags.includes('--all'),
+        rovo: flags.includes('--rovo') || flags.includes('--all'),
+        firebender: flags.includes('--firebender') || flags.includes('--all'),
+        bob: flags.includes('--bob') || flags.includes('--all'),
+        'aider-desk': flags.includes('--aider-desk') || flags.includes('--all'),
         project: flags.includes('--project') || flags.includes('--all'),
       } : {}
       options.frozenLockfile = flags.includes('--frozen-lockfile')

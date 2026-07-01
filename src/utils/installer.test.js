@@ -241,6 +241,110 @@ describe('installer', () => {
     assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 
+  it('installs skill to command-code directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['command-code'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'command-code')
+    const skillDir = join(process.env.HOME, '.commandcode', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to cortex directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['cortex'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'cortex')
+    const skillDir = join(process.env.HOME, '.snowflake', 'cortex', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to mistral-vibe directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['mistral-vibe'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'mistral-vibe')
+    const skillDir = join(process.env.HOME, '.vibe', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to qwen-code directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['qwen-code'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'qwen-code')
+    const skillDir = join(process.env.HOME, '.qwen', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to openclaw directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['openclaw'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'openclaw')
+    const skillDir = join(process.env.HOME, '.openclaw', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to codebuddy directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['codebuddy'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'codebuddy')
+    const skillDir = join(process.env.HOME, '.codebuddy', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to mux directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['mux'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'mux')
+    const skillDir = join(process.env.HOME, '.mux', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to pi directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['pi'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'pi')
+    const skillDir = join(process.env.HOME, '.pi', 'agent', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to autohand-code directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['autohand-code'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'autohand-code')
+    const skillDir = join(process.env.HOME, '.autohand', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to rovo directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['rovo'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'rovo')
+    const skillDir = join(process.env.HOME, '.rovodev', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to firebender directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['firebender'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'firebender')
+    const skillDir = join(process.env.HOME, '.firebender', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to bob directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['bob'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'bob')
+    const skillDir = join(process.env.HOME, '.bob', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to aider-desk directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['aider-desk'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'aider-desk')
+    const skillDir = join(process.env.HOME, '.aider-desk', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
   it('installs skill to project directory', async () => {
     const origCwd = process.cwd
     process.cwd = () => tempDir
