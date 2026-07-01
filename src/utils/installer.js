@@ -1,7 +1,7 @@
 import { mkdir, cp, writeFile, readFile, access, stat, symlink, unlink, rm } from 'node:fs/promises'
 import { join, basename, relative, dirname } from 'node:path'
 import { homedir } from 'node:os'
-import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, addSkillToLock, getGlobalLockPath, getProjectLockPath, computeFileHashes } from './lockfile.js'
+import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getCopilotProjectDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, addSkillToLock, getGlobalLockPath, getProjectLockPath, computeFileHashes } from './lockfile.js'
 
 function normalizeSlug(slug) {
   return slug.replace(/\//g, '-')
@@ -76,8 +76,8 @@ export async function installSkill(resolved, targets, mode = 'copy') {
         break
       }
       case 'copilot': {
-        baseDir = getCopilotDir()
-        label = '~/.copilot/skills/'
+        baseDir = getCopilotProjectDir()
+        label = './.github/copilot/skills/'
         break
       }
       case 'aider': {

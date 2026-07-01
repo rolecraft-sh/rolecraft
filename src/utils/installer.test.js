@@ -34,6 +34,7 @@ before(async () => {
 
 after(async () => {
   await rm(tempDir, { recursive: true, force: true })
+  await rm(join(process.cwd(), '.github', 'copilot', 'skills'), { recursive: true, force: true })
 })
 
 describe('installer', () => {
@@ -91,13 +92,13 @@ describe('installer', () => {
     assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 
-  it('installs skill to copilot directory', async () => {
+  it('installs skill to copilot project directory (.github/copilot/skills/)', async () => {
     const results = await installerModule.installSkill(resolvedSkill, ['copilot'])
 
     assert.equal(results.length, 1)
     assert.equal(results[0].target, 'copilot')
 
-    const skillDir = join(tempDir, '.copilot', 'skills', 'test-my-skill')
+    const skillDir = join(process.cwd(), '.github', 'copilot', 'skills', 'test-my-skill')
     assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 

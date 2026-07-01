@@ -10,7 +10,7 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | windsurf ⚠️ | `~/.windsurf/skills/` or `./.windsurf/skills/` |
 | devin       | `~/.devin/skills/` or `./.devin/skills/`       |
 | codex       | `~/.codex/skills/` or `./.codex/skills/`       |
-| copilot     | `~/.copilot/skills/` or `./.copilot/skills/`   |
+| copilot     | `./.github/copilot/skills/` or `~/.copilot/skills/` |
 | aider       | `~/.aider/skills/` or `./.aider/skills/`       |
 | cline       | `~/.cline/skills/` or `./.cline/skills/`       |
 | gemini-cli  | `~/.gemini/skills/`                            |
