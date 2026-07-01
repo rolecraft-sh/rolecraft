@@ -18,15 +18,23 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           fetch-depth: 0
           token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: '22'
+
+      - name: Check version not already published
+        run: |
+          if npm view "rolecraft@${{ github.ref_name }}" version >/dev/null 2>&1; then
+            echo "ERROR: Version ${{ github.ref_name }} is already published on npm. Aborting release."
+            exit 1
+          fi
+          echo "Version ${{ github.ref_name }} is new. Proceeding with release."
 
       - name: Set up Git user
         run: |

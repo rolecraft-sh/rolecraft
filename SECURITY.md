@@ -31,5 +31,5 @@ Only the latest published version on npm receives security updates.
 rolecraft has **zero runtime dependencies**. Security recommendations:
 
 - Always install from the official npm registry
-- Verify the package provenance (available since v0.1.5) via `npm audit --provenance`
+- Verify the package provenance (available since v1.0.0) via `npm audit --provenance`
 - Pin the version in production environments

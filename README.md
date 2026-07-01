@@ -14,6 +14,8 @@
   <a href="https://www.npmjs.com/package/rolecraft"><img src="https://img.shields.io/npm/v/rolecraft" alt="npm"></a>
   <a href="https://www.npmjs.com/package/rolecraft"><img src="https://img.shields.io/npm/dm/rolecraft" alt="npm downloads"></a>
   <a href="https://github.com/sametcelikbicak/rolecraft/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/sametcelikbicak/rolecraft/test.yml?label=tests" alt="Tests"></a>
+  <a href="https://github.com/sametcelikbicak/rolecraft/actions/workflows/codeql.yml"><img src="https://img.shields.io/github/actions/workflow/status/sametcelikbicak/rolecraft/codeql.yml?label=CodeQL" alt="CodeQL"></a>
+  <a href="https://github.com/sametcelikbicak/rolecraft/blob/main/.github/dependabot.yml"><img src="https://img.shields.io/badge/dependabot-enabled-025e8c?logo=Dependabot" alt="Dependabot"></a>
   <a href="https://github.com/sametcelikbicak/rolecraft"><img src="https://img.shields.io/github/stars/sametcelikbicak/rolecraft?style=social" alt="Stars"></a>
   <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/📜-Changelog-blue" alt="Changelog"></a>
   <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/🤝-Contributing-green" alt="Contributing"></a>
