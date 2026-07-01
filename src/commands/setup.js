@@ -1,7 +1,7 @@
 import { accessSync, readdirSync, constants } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir } from '../utils/lockfile.js'
+import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getCopilotProjectDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir } from '../utils/lockfile.js'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 
@@ -11,7 +11,7 @@ const KNOWN_AGENTS = [
   { flag: 'cursor', label: 'cursor', dir: getCursorDir },
   { flag: 'windsurf', label: 'windsurf', dir: getWindsurfDir },
   { flag: 'codex', label: 'codex', dir: getCodexDir },
-  { flag: 'copilot', label: 'copilot', dir: getCopilotDir },
+  { flag: 'copilot', label: 'copilot', dir: () => getCopilotProjectDir() },
   { flag: 'aider', label: 'aider', dir: getAiderDir },
   { flag: 'cline', label: 'cline', dir: getClineDir },
   { flag: 'devin', label: 'devin', dir: getDevinDir },

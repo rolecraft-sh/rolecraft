@@ -34,6 +34,10 @@ export function getCopilotDir() {
   return home('.copilot', 'skills')
 }
 
+export function getCopilotProjectDir() {
+  return join(process.cwd(), '.github', 'copilot', 'skills')
+}
+
 export function getAiderDir() {
   return home('.aider', 'skills')
 }

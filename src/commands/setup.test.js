@@ -5,7 +5,7 @@ import { rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { homedir, tmpdir } from 'node:os'
 
-let tempDir, setupModule, origHome, logs, origLog
+let tempDir, setupModule, origHome, logs, origLog, origCwd, origCwdFn
 
 function capture() {
   logs = []
@@ -17,6 +17,19 @@ function capture() {
 
 function restoreLog() {
   console.log = origLog
+}
+
+function withTempCwd(fn) {
+  return async (...args) => {
+    origCwd = process.cwd
+    origCwdFn = origCwd
+    process.cwd = () => tempDir
+    try {
+      await fn(...args)
+    } finally {
+      process.cwd = origCwd
+    }
+  }
 }
 
 before(async () => {
@@ -33,14 +46,14 @@ after(async () => {
 })
 
 describe('setup command', () => {
-  it('detects no agents when no directories exist', async () => {
+  it('detects no agents when no directories exist', withTempCwd(async () => {
     capture()
     await setupModule.setupCommand()
     restoreLog()
     assert.ok(logs.some(l => l.includes('No supported agents detected')))
-  })
+  }))
 
-  it('detects agents when directories exist', async () => {
+  it('detects agents when directories exist', withTempCwd(async () => {
     mkdirSync(join(tempDir, '.agents', 'skills'), { recursive: true })
     mkdirSync(join(tempDir, '.claude', 'skills'), { recursive: true })
 
@@ -50,24 +63,21 @@ describe('setup command', () => {
 
     assert.ok(logs.some(l => l.includes('opencode')))
     assert.ok(logs.some(l => l.includes('claude-code')))
-  })
+  }))
 
-  it('handles missing project dir when detecting agents', async () => {
+  it('handles missing project dir when detecting agents', withTempCwd(async () => {
     mkdirSync(join(tempDir, '.agents', 'skills'), { recursive: true })
     mkdirSync(join(tempDir, '.claude', 'skills'), { recursive: true })
 
-    const origCwd = process.cwd
-    process.cwd = () => join(tempDir, 'nonexistent')
     capture()
     await setupModule.setupCommand()
     restoreLog()
-    process.cwd = origCwd
 
     assert.ok(logs.some(l => l.includes('opencode')))
     assert.ok(logs.some(l => l.includes('claude-code')))
-  })
+  }))
 
-  it('installs a skill when source is provided', async () => {
+  it('installs a skill when source is provided', withTempCwd(async () => {
     mkdirSync(join(tempDir, '.agents', 'skills'), { recursive: true })
     mkdirSync(join(tempDir, '.claude', 'skills'), { recursive: true })
 
@@ -81,9 +91,9 @@ describe('setup command', () => {
 
     assert.ok(logs.some(l => l.includes('setup-test')))
     assert.ok(logs.some(l => l.includes('Installed')))
-  })
+  }))
 
-  it('dry-run shows plan without installing via setup', async () => {
+  it('dry-run shows plan without installing via setup', withTempCwd(async () => {
     mkdirSync(join(tempDir, '.agents', 'skills'), { recursive: true })
     mkdirSync(join(tempDir, '.claude', 'skills'), { recursive: true })
 
@@ -98,5 +108,5 @@ describe('setup command', () => {
     assert.ok(logs.some(l => l.includes('Dry-run')))
     assert.ok(logs.some(l => l.includes('setup-dry-test')))
     assert.ok(!logs.some(l => l.includes('Installed')))
-  })
+  }))
 })

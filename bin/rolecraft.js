@@ -53,7 +53,7 @@ Options for install:
   --windsurf     Also install to ~/.windsurf/skills/ (deprecated: use --devin)
   --devin        Also install to ~/.devin/skills/
   --codex        Also install to ~/.codex/skills/
-  --copilot      Also install to ~/.copilot/skills/
+  --copilot      Also install to ./.github/copilot/skills/
   --aider        Also install to ~/.aider/skills/
   --cline        Also install to ~/.cline/skills/
   --gemini       Also install to ~/.gemini/skills/

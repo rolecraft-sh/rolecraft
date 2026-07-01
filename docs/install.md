@@ -35,7 +35,7 @@ Where do you want to install this skill?
 | `--windsurf`    | `~/.windsurf/skills/` (legacy)     |
 | `--devin`       | `~/.devin/skills/`                 |
 | `--codex`       | `~/.codex/skills/`                 |
-| `--copilot`     | `~/.copilot/skills/`               |
+| `--copilot`     | `./.github/copilot/skills/`        |
 | `--aider`       | `~/.aider/skills/`                 |
 | `--cline`       | `~/.cline/skills/`                 |
 | `--gemini`      | `~/.gemini/skills/`                |
