@@ -118,6 +118,10 @@ export async function main() {
   const [,, cmd, ...args] = process.argv
   switch (cmd) {
     case 'install': {
+      if (args.includes('--help') || args.includes('-h')) {
+        usage()
+        return
+      }
       const source = args[0]
       if (!source) {
         console.error('Usage: rolecraft install <source>')
@@ -188,6 +192,7 @@ export async function main() {
       break
 
     case 'remove': {
+      if (args.includes('--help') || args.includes('-h')) { usage(); return }
       const slug = args[0]
       if (!slug) {
         console.error('Usage: rolecraft remove <slug>')
@@ -198,6 +203,7 @@ export async function main() {
     }
 
     case 'update': {
+      if (args.includes('--help') || args.includes('-h')) { usage(); return }
       const slug = args[0]
       if (!slug) {
         console.error('Usage: rolecraft update <slug>')
@@ -208,6 +214,7 @@ export async function main() {
     }
 
     case 'use': {
+      if (args.includes('--help') || args.includes('-h')) { usage(); return }
       const source = args[0]
       if (!source) {
         console.error('Usage: rolecraft use <source>')
@@ -219,12 +226,14 @@ export async function main() {
     }
 
     case 'init': {
+      if (args.includes('--help') || args.includes('-h')) { usage(); return }
       const name = args[0]
       await initCommand(name)
       break
     }
 
     case 'search': {
+      if (args.includes('--help') || args.includes('-h')) { usage(); return }
       const query = args[0]
       const flags = args.slice(1)
       if (!query) {
@@ -236,22 +245,26 @@ export async function main() {
     }
 
     case 'completions': {
+      if (args.includes('--help') || args.includes('-h')) { usage(); return }
       const shell = args[0]
       await completionsCommand(shell)
       break
     }
 
     case 'verify': {
+      if (args.includes('--help') || args.includes('-h')) { usage(); return }
       await verifyCommand(true)
       break
     }
 
     case 'ci': {
+      if (args.includes('--help') || args.includes('-h')) { usage(); return }
       await ciCommand()
       break
     }
 
     case 'setup': {
+      if (args.includes('--help') || args.includes('-h')) { usage(); return }
       const source = args[0]
       const flags = args.slice(1)
       await setupCommand(source, { dryRun: flags.includes('--dry-run') })
@@ -259,6 +272,7 @@ export async function main() {
     }
 
     case 'upgrade': {
+      if (args.includes('--help') || args.includes('-h')) { usage(); return }
       const flags = args
       await upgradeCommand({ dryRun: flags.includes('--dry-run') })
       break
@@ -271,6 +285,7 @@ export async function main() {
       break
 
     case 'bundle': {
+      if (args.includes('--help') || args.includes('-h')) { usage(); return }
       if (args.length === 0) {
         console.error('Usage: rolecraft bundle <source> [...]')
         console.error('       rolecraft bundle <file>')
@@ -278,6 +293,7 @@ export async function main() {
         process.exit(1)
       }
       if (args[0] === 'create') {
+        if (args.includes('--help') || args.includes('-h')) { usage(); return }
         await bundleCreateCommand(args[1])
         break
       }
