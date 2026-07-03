@@ -79,3 +79,23 @@ rolecraft install ./my-skill --dry-run
 # Fail if already installed
 rolecraft install ./my-skill --frozen-lockfile
 ```
+
+### Hermes Tweet for Hermes Agent
+
+Install Hermes Tweet directly from its GitHub repository and target the Hermes skills directory:
+
+```bash
+rolecraft install Xquik-dev/hermes-tweet --hermes
+```
+
+Hermes Tweet uses runtime environment variables for live X/Twitter access. Keep key values out of skill files and configure them where Hermes runs:
+
+- `XQUIK_API_KEY` enables live read tools.
+- `HERMES_TWEET_ENABLE_ACTIONS=true` enables gated action tools only after operator approval.
+
+Preview first when validating the target path:
+
+```bash
+rolecraft install Xquik-dev/hermes-tweet --hermes --dry-run
+```
+
