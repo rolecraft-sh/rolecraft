@@ -74,7 +74,7 @@
   "homepage": "https://github.com/sametcelikbicak/rolecraft#readme",
   "scripts": {
     "test": "node --test --test-concurrency=1",
-    "test:coverage": "node --experimental-test-coverage --test"
+    "test:coverage": "node --experimental-test-coverage --test --test-coverage-exclude=\"**/*.test.js\" --test-coverage-include=\"src/**\" --test-coverage-include=\"bin/**\""
   },
   "engines": {
     "node": ">=20"

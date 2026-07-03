@@ -1,5 +1,9 @@
 import { describe, it, before, after, afterEach } from 'node:test'
 import assert from 'node:assert/strict'
+import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
+import { mkdir, rm } from 'node:fs/promises'
+import { join } from 'node:path'
+import { tmpdir } from 'node:os'
 
 let searchModule
 
@@ -267,6 +271,55 @@ describe('search command', () => {
 
       assert.ok(logs.some(l => l.includes('user1/skill1')))
       assert.ok(logs.some(l => l.includes('1')))
+    })
+
+    it('installs selected skill from interactive search', async () => {
+      const testDir = mkdtempSync(join(tmpdir(), 'rolecraft-search-install-'))
+      const origHome = process.env.HOME
+      process.env.HOME = testDir
+      await mkdir(join(testDir, '.agents'), { recursive: true })
+
+      const skillDir = join(testDir, 'interactive-install-skill')
+      mkdirSync(skillDir, { recursive: true })
+      writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/interactive-install\nname: interactive-skill\nContent')
+
+      searchModule.setPromptUser(() => Promise.resolve('1'))
+      mockFetch(200, {
+        items: [
+          { full_name: skillDir, description: 'A test skill', stargazers_count: 1, language: 'JS' },
+        ],
+      })
+
+      const { logs, restore } = capture('log')
+      await searchModule.searchCommand('test', { interactive: true })
+      restore()
+
+      process.env.HOME = origHome
+      await rm(testDir, { recursive: true, force: true })
+
+      assert.ok(logs.some(l => l.includes('Installed')))
+      assert.ok(logs.some(l => l.includes('interactive-skill')))
+    })
+
+    it('handles install failure in interactive search', async () => {
+      const testDir = mkdtempSync(join(tmpdir(), 'rolecraft-search-fail-'))
+      mkdirSync(join(testDir, 'empty-dir'), { recursive: true })
+
+      searchModule.setPromptUser(() => Promise.resolve('1'))
+      mockFetch(200, {
+        items: [
+          { full_name: join(testDir, 'empty-dir'), description: 'Broken', stargazers_count: 0, language: 'N/A' },
+        ],
+      })
+
+      const errCapture = capture('error')
+      const logCapture = capture('log')
+      await searchModule.searchCommand('test', { interactive: true })
+      logCapture.restore()
+      errCapture.restore()
+      await rm(testDir, { recursive: true, force: true })
+
+      assert.ok(errCapture.logs.some(l => l.includes('Failed to install')))
     })
   })
 })

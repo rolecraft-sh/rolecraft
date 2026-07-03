@@ -83,6 +83,10 @@ describe('lockfile', () => {
     assert.equal(lockModule.getAiderDeskDir(), join(tempDir, '.aider-desk', 'skills'))
   })
 
+  it('getCopilotDir returns path inside homedir', () => {
+    assert.equal(lockModule.getCopilotDir(), join(tempDir, '.copilot', 'skills'))
+  })
+
   it('readLock returns default when no file exists', async () => {
     const lock = await lockModule.readLock()
     assert.deepEqual(lock, {

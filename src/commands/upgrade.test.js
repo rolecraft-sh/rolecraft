@@ -98,4 +98,46 @@ describe('upgrade command', () => {
     assert.ok(compareVersions('2.0.0', '1.9.9') > 0)
     assert.ok(compareVersions('1.0.0', '0.9.9') > 0)
   })
+
+  it('dry-run shows message when fetch fails', async () => {
+    const origFetch = globalThis.fetch
+    globalThis.fetch = () => Promise.reject(new Error('network error'))
+
+    captureLog()
+    await upgradeModule.upgradeCommand({ dryRun: true })
+    restoreLog()
+
+    globalThis.fetch = origFetch
+
+    assert.ok(logs.some(l => l.includes('could not fetch')))
+  })
+
+  it('dry-run shows would-install when newer version exists', async () => {
+    const origFetch = globalThis.fetch
+    globalThis.fetch = () => Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({ version: '99.99.99' }),
+    })
+
+    captureLog()
+    await upgradeModule.upgradeCommand({ dryRun: true })
+    restoreLog()
+
+    globalThis.fetch = origFetch
+
+    assert.ok(logs.some(l => l.includes('Would install')))
+  })
+
+  it('shows warning when fetch fails without dry-run', async () => {
+    const origFetch = globalThis.fetch
+    globalThis.fetch = () => Promise.reject(new Error('network error'))
+
+    captureLog()
+    await upgradeModule.upgradeCommand()
+    restoreLog()
+
+    globalThis.fetch = origFetch
+
+    assert.ok(logs.some(l => l.includes('Could not check')))
+  })
 })

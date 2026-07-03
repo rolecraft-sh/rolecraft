@@ -108,4 +108,20 @@ describe('setup command', () => {
     assert.ok(logs.some(l => l.includes('setup-dry-test')))
     assert.ok(!logs.some(l => l.includes('Installed')))
   }))
+
+  it('handles readdir failure in countSkills gracefully', withTempCwd(async () => {
+    const agentsSkills = join(tempDir, '.agents', 'skills')
+    mkdirSync(join(tempDir, '.agents'), { recursive: true })
+    mkdirSync(join(tempDir, '.claude', 'skills'), { recursive: true })
+
+    const { rmSync, writeFileSync } = await import('node:fs')
+    rmSync(agentsSkills, { recursive: true, force: true })
+    writeFileSync(agentsSkills, '')
+
+    capture()
+    await setupModule.setupCommand()
+    restoreLog()
+
+    assert.ok(logs.some(l => l.includes('opencode')))
+  }))
 })
