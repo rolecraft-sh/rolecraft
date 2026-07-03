@@ -6,13 +6,8 @@ import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
 let searchModule
-let tempDir, origHome
 
 before(async () => {
-  tempDir = mkdtempSync(join(tmpdir(), 'rolecraft-search-test-'))
-  origHome = process.env.HOME
-  process.env.HOME = tempDir
-  await mkdir(join(tempDir, '.agents'), { recursive: true })
   searchModule = await import('./search.js')
 })
 
@@ -47,11 +42,9 @@ function mockSequentialFetch(responses) {
 }
 
 describe('search command', () => {
-  after(async () => {
+  after(() => {
     searchModule.setFetch(globalThis.fetch)
     searchModule.setPromptUser(undefined)
-    process.env.HOME = origHome
-    await rm(tempDir, { recursive: true, force: true })
   })
 
   describe('formatRepo', () => {
@@ -281,7 +274,12 @@ describe('search command', () => {
     })
 
     it('installs selected skill from interactive search', async () => {
-      const skillDir = join(tempDir, 'interactive-install-skill')
+      const testDir = mkdtempSync(join(tmpdir(), 'rolecraft-search-install-'))
+      const origHome = process.env.HOME
+      process.env.HOME = testDir
+      await mkdir(join(testDir, '.agents'), { recursive: true })
+
+      const skillDir = join(testDir, 'interactive-install-skill')
       mkdirSync(skillDir, { recursive: true })
       writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/interactive-install\nname: interactive-skill\nContent')
 
@@ -295,6 +293,9 @@ describe('search command', () => {
       const { logs, restore } = capture('log')
       await searchModule.searchCommand('test', { interactive: true })
       restore()
+
+      process.env.HOME = origHome
+      await rm(testDir, { recursive: true, force: true })
 
       assert.ok(logs.some(l => l.includes('Installed')))
       assert.ok(logs.some(l => l.includes('interactive-skill')))
