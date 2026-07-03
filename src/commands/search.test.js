@@ -1,9 +1,18 @@
 import { describe, it, before, after, afterEach } from 'node:test'
 import assert from 'node:assert/strict'
+import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
+import { mkdir, rm } from 'node:fs/promises'
+import { join } from 'node:path'
+import { tmpdir } from 'node:os'
 
 let searchModule
+let tempDir, origHome
 
 before(async () => {
+  tempDir = mkdtempSync(join(tmpdir(), 'rolecraft-search-test-'))
+  origHome = process.env.HOME
+  process.env.HOME = tempDir
+  await mkdir(join(tempDir, '.agents'), { recursive: true })
   searchModule = await import('./search.js')
 })
 
@@ -38,9 +47,11 @@ function mockSequentialFetch(responses) {
 }
 
 describe('search command', () => {
-  after(() => {
+  after(async () => {
     searchModule.setFetch(globalThis.fetch)
     searchModule.setPromptUser(undefined)
+    process.env.HOME = origHome
+    await rm(tempDir, { recursive: true, force: true })
   })
 
   describe('formatRepo', () => {
@@ -267,6 +278,41 @@ describe('search command', () => {
 
       assert.ok(logs.some(l => l.includes('user1/skill1')))
       assert.ok(logs.some(l => l.includes('1')))
+    })
+
+    it('installs selected skill from interactive search', async () => {
+      const skillDir = join(tempDir, 'interactive-install-skill')
+      mkdirSync(skillDir, { recursive: true })
+      writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/interactive-install\nname: interactive-skill\nContent')
+
+      searchModule.setPromptUser(() => Promise.resolve('1'))
+      mockFetch(200, {
+        items: [
+          { full_name: skillDir, description: 'A test skill', stargazers_count: 1, language: 'JS' },
+        ],
+      })
+
+      const { logs, restore } = capture('log')
+      await searchModule.searchCommand('test', { interactive: true })
+      restore()
+
+      assert.ok(logs.some(l => l.includes('Installed')))
+      assert.ok(logs.some(l => l.includes('interactive-skill')))
+    })
+
+    it('handles install failure in interactive search', async () => {
+      searchModule.setPromptUser(() => Promise.resolve('1'))
+      mockFetch(200, {
+        items: [
+          { full_name: '/nonexistent/path/to/skill', description: 'Broken', stargazers_count: 0, language: 'N/A' },
+        ],
+      })
+
+      const { logs: errors, restore } = capture('error')
+      await searchModule.searchCommand('test', { interactive: true })
+      restore()
+
+      assert.ok(errors.some(l => l.includes('Failed to install')))
     })
   })
 })

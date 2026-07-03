@@ -125,6 +125,35 @@ describe('verify command', () => {
     assert.ok(!errors.some(l => l.includes('unchanged.txt')))
   })
 
+  it('reports missing file when fileHash entry not found on disk', async () => {
+    const slug = 'test/verify-missing-file'
+    const normSlug = slug.replace(/\//g, '-')
+    const skillDir = join(tempDir, '.agents', 'skills', normSlug)
+    mkdirSync(skillDir, { recursive: true })
+
+    writeFileSync(join(skillDir, 'SKILL.md'), '# Some content')
+
+    const files = { 'SKILL.md': '# Some content' }
+    const fileHashes = {
+      'SKILL.md': (await import('node:crypto')).createHash('sha256').update('# Some content').digest('hex'),
+      'missing.txt': (await import('node:crypto')).createHash('sha256').update('ghost').digest('hex'),
+    }
+    const hash = lockModule.computeContentHash(files)
+
+    await lockModule.addSkillToLock(slug, {
+      slug, contentSha: hash, fileHashes,
+      source: 'local', sourceType: 'local',
+      agents: ['opencode'],
+    })
+
+    writeFileSync(join(skillDir, 'SKILL.md'), '# Modified content (triggers hash mismatch)')
+
+    const { logs: errors, restore } = capture('error')
+    await verifyModule.verifyCommand()
+    restore()
+    assert.ok(errors.some(l => l.includes('missing.txt')))
+  })
+
   it('reports missing source in frozen mode', async () => {
     const slug = 'test/frozen-missing'
     await lockModule.addSkillToLock(slug, {

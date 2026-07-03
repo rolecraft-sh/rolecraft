@@ -476,4 +476,97 @@ describe('rolecraft CLI', () => {
     assert.ok(logs.some(l => l.includes('rolecraft')))
     restore()
   })
+
+  it('dispatches completions command via CLI', async () => {
+    process.argv = ['node', 'rolecraft', 'completions', 'bash']
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l.includes('complete')))
+    restore()
+  })
+
+  it('dispatches bundle command via CLI with file', async () => {
+    const { mkdirSync, writeFileSync } = await import('node:fs')
+    const skillDir = join(tempDir, 'bundle-cli-skill')
+    mkdirSync(skillDir, { recursive: true })
+    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/bundle-cli\nname: bundle-cli\nContent')
+
+    const bundlePath = join(tempDir, 'bundle-cli.json')
+    writeFileSync(bundlePath, JSON.stringify([skillDir]))
+
+    process.argv = ['node', 'rolecraft', 'bundle', bundlePath]
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l.includes('All 1 skill(s) installed')))
+    restore()
+  })
+
+  it('dispatches bundle create command via CLI', async () => {
+    process.argv = ['node', 'rolecraft', 'bundle', 'create', 'cli-test-bundle']
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l.includes('Created')))
+    restore()
+  })
+
+  it('errors when bundle has no args', async () => {
+    process.argv = ['node', 'rolecraft', 'bundle']
+    const { logs: errors, restore: restoreErr } = capture('error')
+    const restoreExit = mockExit()
+
+    try {
+      await rolecraftModule.main()
+    } catch (e) {
+      assert.ok(e.message.includes('exit:1'))
+    }
+
+    assert.ok(errors.some(e => e.includes('Usage: rolecraft bundle')))
+    restoreErr()
+    restoreExit()
+  })
+
+  it('shows usage for completions with --help', async () => {
+    process.argv = ['node', 'rolecraft', 'completions', '--help']
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l.includes('Usage:')))
+    restore()
+  })
+
+  it('shows usage for bundle with --help', async () => {
+    process.argv = ['node', 'rolecraft', 'bundle', '--help']
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l.includes('Usage:')))
+    restore()
+  })
+
+  it('dispatches bundle with inline sources via CLI', async () => {
+    const skillDir1 = join(tempDir, 'bundle-inline-1')
+    const { mkdirSync, writeFileSync } = await import('node:fs')
+    mkdirSync(skillDir1, { recursive: true })
+    writeFileSync(join(skillDir1, 'SKILL.md'), '# slug: test/inline1\nname: inline1\nContent')
+
+    const skillDir2 = join(tempDir, 'bundle-inline-2')
+    mkdirSync(skillDir2, { recursive: true })
+    writeFileSync(join(skillDir2, 'SKILL.md'), '# slug: test/inline2\nname: inline2\nContent')
+
+    process.argv = ['node', 'rolecraft', 'bundle', skillDir1, skillDir2]
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l.includes('All 2 skill(s) installed')))
+    restore()
+  })
 })

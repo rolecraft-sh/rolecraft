@@ -165,4 +165,42 @@ describe('bundle command', () => {
     assert.equal(content.name, 'test-collection')
     assert.ok(Array.isArray(content.skills))
   })
+
+  it('throws on invalid JSON format', async () => {
+    const bundlePath = join(tempDir, 'invalid-structure.json')
+    writeFileSync(bundlePath, '{"name": "test"}')
+
+    await assert.rejects(
+      () => bundleModule.bundleCommand(bundlePath),
+      /JSON bundle must/,
+    )
+  })
+
+  it('throws on malformed JSON', async () => {
+    const bundlePath = join(tempDir, 'malformed.json')
+    writeFileSync(bundlePath, 'not json')
+
+    await assert.rejects(
+      () => bundleModule.bundleCommand(bundlePath),
+      /JSON/,
+    )
+  })
+
+  it('resolves bundle using candidate paths when arg is a bare name', async () => {
+    const skillDir = join(tempDir, 'bare-skill')
+    mkdirSync(skillDir, { recursive: true })
+    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/bare\nname: bare\nContent')
+
+    const bundlePath = join(tempDir, 'my-bundle.json')
+    writeFileSync(bundlePath, JSON.stringify([skillDir]))
+
+    const origCwd = process.cwd
+    process.cwd = () => tempDir
+    capture()
+    await bundleModule.bundleCommand('my-bundle')
+    restoreLog()
+    process.cwd = origCwd
+
+    assert.ok(logs.some(l => l.includes('All 1 skill(s) installed')))
+  })
 })
