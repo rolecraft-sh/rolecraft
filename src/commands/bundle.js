@@ -1,4 +1,4 @@
-import { readFile, access, writeFile } from 'node:fs/promises'
+import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { createInterface } from 'node:readline'
 import { stdin as input, stdout as output } from 'node:process'
@@ -33,7 +33,7 @@ async function resolveBundleFile(arg) {
     const resolvedPath = arg.startsWith('~') ? join(process.env.HOME || '/tmp', arg.slice(1)) : arg
     for (const candidate of [resolvedPath, join(process.cwd(), arg)]) {
       try {
-        const raw = await readFile(candidate, 'utf-8')
+        await readFile(candidate, 'utf-8')
         return candidate
       } catch {}
     }
@@ -122,15 +122,15 @@ export async function bundleCreateCommand(name) {
   }
 
   try {
-    await access(filePath)
+    await writeFile(filePath, JSON.stringify(template, null, 2) + '\n', 'utf-8')
+  } catch {
     const overwrite = await askQuestion(`\n⚠️  ${filePath} already exists. Overwrite? [y/N]: `)
     if (overwrite.toLowerCase() !== 'y') {
       console.log('Aborted.')
       return
     }
-  } catch {}
-
-  await writeFile(filePath, JSON.stringify(template, null, 2) + '\n', 'utf-8')
+    await writeFile(filePath, JSON.stringify(template, null, 2) + '\n', 'utf-8')
+  }
   console.log(`\n✅ Created ${filePath}`)
   console.log(`\nAdd skills to the "skills" array and install with:\n`)
   console.log(`   rolecraft bundle ${filePath}`)

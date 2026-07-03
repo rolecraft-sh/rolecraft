@@ -6,7 +6,6 @@ import { execSync } from 'node:child_process'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const pkg = JSON.parse(readFileSync(join(__dirname, '..', '..', 'package.json'), 'utf-8'))
 
-const SAFE_NAME = /^@?[\w-]+(\/[\w-]+)?$/
 const SAFE_VERSION = /^\d+\.\d+\.\d+(-[\w.]+)?$/
 
 export function compareVersions(a, b) {
