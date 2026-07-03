@@ -291,6 +291,7 @@ export async function installSkill(resolved, targets, mode = 'copy') {
       await mkdir(dirname(slugDir), { recursive: true })
       await symlink(relPath, slugDir)
     } else {
+      await rm(slugDir, { recursive: true, force: true })
       await mkdir(slugDir, { recursive: true })
       for (const file of resolved.files) {
         const dst = join(slugDir, file)
