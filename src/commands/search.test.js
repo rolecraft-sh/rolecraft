@@ -302,18 +302,24 @@ describe('search command', () => {
     })
 
     it('handles install failure in interactive search', async () => {
+      const testDir = mkdtempSync(join(tmpdir(), 'rolecraft-search-fail-'))
+      mkdirSync(join(testDir, 'empty-dir'), { recursive: true })
+
       searchModule.setPromptUser(() => Promise.resolve('1'))
       mockFetch(200, {
         items: [
-          { full_name: '/nonexistent/path/to/skill', description: 'Broken', stargazers_count: 0, language: 'N/A' },
+          { full_name: join(testDir, 'empty-dir'), description: 'Broken', stargazers_count: 0, language: 'N/A' },
         ],
       })
 
-      const { logs: errors, restore } = capture('error')
+      const errCapture = capture('error')
+      const logCapture = capture('log')
       await searchModule.searchCommand('test', { interactive: true })
-      restore()
+      logCapture.restore()
+      errCapture.restore()
+      await rm(testDir, { recursive: true, force: true })
 
-      assert.ok(errors.some(l => l.includes('Failed to install')))
+      assert.ok(errCapture.logs.some(l => l.includes('Failed to install')))
     })
   })
 })
