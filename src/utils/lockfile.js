@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile, access } from 'node:fs/promises'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join, dirname } from 'node:path'
 import { createHash } from 'node:crypto'
 
@@ -192,7 +192,6 @@ async function ensureParentDir(filePath) {
 
 export async function readLock(lockPath = getGlobalLockPath()) {
   try {
-    await access(lockPath)
     const raw = await readFile(lockPath, 'utf-8')
     return JSON.parse(raw)
   } catch {

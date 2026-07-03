@@ -84,20 +84,24 @@ function scanForSkill(dir, maxDepth = 3) {
 
 async function resolveLocal(source) {
   const expanded = source.replace(/^~/, homedir())
-  const st = await stat(expanded)
 
   let skillDir
-  if (st.isDirectory()) {
-    skillDir = expanded
-  } else if (st.isFile() && basename(expanded) === 'SKILL.md') {
-    skillDir = dirname(expanded)
-  } else {
-    throw new Error(`Source must be a SKILL.md file or a directory containing one`)
+  try {
+    const st = await stat(expanded)
+    if (st.isDirectory()) {
+      skillDir = expanded
+    } else if (st.isFile() && basename(expanded) === 'SKILL.md') {
+      skillDir = dirname(expanded)
+    } else {
+      throw new Error(`Source must be a SKILL.md file or a directory containing one`)
+    }
+  } catch (e) {
+    if (e.message?.startsWith('Source must be')) throw e
+    throw new Error(`Source not found: ${expanded}`)
   }
 
   const directPath = join(skillDir, 'SKILL.md')
   try {
-    await stat(directPath)
     const content = await readFile(directPath, 'utf-8')
     const meta = parseMetadata(content)
     const dirEntries = await readdir(skillDir, { withFileTypes: true })

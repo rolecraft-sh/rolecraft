@@ -20,8 +20,7 @@ export function compareVersions(a, b) {
 
 async function fetchLatestVersion() {
   try {
-    if (!SAFE_NAME.test(pkg.name)) throw new Error(`Invalid package name: ${pkg.name}`)
-    const res = await fetch(`https://registry.npmjs.org/${encodeURIComponent(pkg.name)}/latest`)
+    const res = await fetch('https://registry.npmjs.org/rolecraft/latest')
     if (!res.ok) throw new Error(`npm registry returned ${res.status}`)
     const data = await res.json()
     return data.version

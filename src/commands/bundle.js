@@ -1,4 +1,4 @@
-import { readFile, access, writeFile, stat } from 'node:fs/promises'
+import { readFile, access, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { createInterface } from 'node:readline'
 import { stdin as input, stdout as output } from 'node:process'
@@ -33,8 +33,7 @@ async function resolveBundleFile(arg) {
     const resolvedPath = arg.startsWith('~') ? join(process.env.HOME || '/tmp', arg.slice(1)) : arg
     for (const candidate of [resolvedPath, join(process.cwd(), arg)]) {
       try {
-        const stats = await stat(candidate)
-        if (stats.isDirectory()) return null
+        const raw = await readFile(candidate, 'utf-8')
         return candidate
       } catch {}
     }
@@ -52,7 +51,7 @@ async function resolveBundleFile(arg) {
 
   for (const candidate of candidates) {
     try {
-      await access(candidate)
+      await readFile(candidate, 'utf-8')
       return candidate
     } catch {}
   }
