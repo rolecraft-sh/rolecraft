@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.1.0] - 2026-07-03
+
+### Added
+- security hardening - provenance, CodeQL, Dependabot, action pinning, npm audit (#36)
+- add rolecraft upgrade self-update command (#35)
+- add 13 new agent targets (43 total), update analysis and docs (#34)
+- shell completions + interactive TUI search (#32)
+- improve repo visibility with demo GIF, badges, and enhanced metadata (#31)
+
+### Fixed
+- rolecraft install --help shows help instead of installing; --copy clears previous symlinks (#41)
+- copilot path now uses .github/copilot/skills/ + docs update
+
+### Changed
+- bump github/codeql-action/init
+- bump actions/setup-node from 5.0.0 to 6.4.0
+- bump actions/checkout from 5.0.1 to 7.0.0 (#37)
+- bump github/codeql-action/analyze
+- update changelog and version for v1.0.0 [skip ci] (#30)
+
+### Documentation
+- add Product Hunt badge, Node version badge
 ## [v1.0.0] - 2026-06-27
 
 ### Added
