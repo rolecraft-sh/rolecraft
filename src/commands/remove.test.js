@@ -1,6 +1,6 @@
 import { describe, it, before, after, mock } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, writeFileSync, mkdirSync } from 'node:fs'
+import { mkdtempSync, mkdirSync } from 'node:fs'
 import { mkdir, rm, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'

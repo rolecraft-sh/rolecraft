@@ -9,7 +9,6 @@ let tempDir, lockModule
 
 before(async () => {
   tempDir = mkdtempSync(join(tmpdir(), 'rolecraft-lock-test-'))
-  const oldHome = process.env.HOME
   process.env.HOME = tempDir
   await mkdir(join(tempDir, '.agents'), { recursive: true })
   lockModule = await import('./lockfile.js')

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
 import { rm } from 'node:fs/promises'
 import { join } from 'node:path'
-import { homedir, tmpdir } from 'node:os'
+import { tmpdir } from 'node:os'
 
 let tempDir, setupModule, origHome, logs, origLog, origCwd, origCwdFn
 
@@ -33,8 +33,7 @@ function withTempCwd(fn) {
 }
 
 before(async () => {
-  tempDir = join(tmpdir(), 'rolecraft-setup-test-' + Date.now())
-  mkdirSync(tempDir, { recursive: true })
+  tempDir = mkdtempSync(join(tmpdir(), 'rolecraft-setup-test-'))
   origHome = process.env.HOME
   process.env.HOME = tempDir
   setupModule = await import('./setup.js')

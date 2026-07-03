@@ -6,6 +6,9 @@ import { execSync } from 'node:child_process'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const pkg = JSON.parse(readFileSync(join(__dirname, '..', '..', 'package.json'), 'utf-8'))
 
+const SAFE_NAME = /^@?[\w-]+(\/[\w-]+)?$/
+const SAFE_VERSION = /^\d+\.\d+\.\d+(-[\w.]+)?$/
+
 export function compareVersions(a, b) {
   const pa = a.split('.').map(Number)
   const pb = b.split('.').map(Number)
@@ -17,7 +20,8 @@ export function compareVersions(a, b) {
 
 async function fetchLatestVersion() {
   try {
-    const res = await fetch(`https://registry.npmjs.org/${pkg.name}/latest`)
+    if (!SAFE_NAME.test(pkg.name)) throw new Error(`Invalid package name: ${pkg.name}`)
+    const res = await fetch(`https://registry.npmjs.org/${encodeURIComponent(pkg.name)}/latest`)
     if (!res.ok) throw new Error(`npm registry returned ${res.status}`)
     const data = await res.json()
     return data.version
@@ -68,6 +72,9 @@ export async function upgradeCommand(options = {}) {
   console.log(`   ⬆️  Upgrading to v${latest}...\n`)
 
   try {
+    if (!SAFE_VERSION.test(latest)) {
+      throw new Error(`Invalid version: ${latest}`)
+    }
     execSync(`npm install -g ${pkg.name}@${latest}`, {
       stdio: 'inherit',
       env: { ...process.env, npm_config_fund: 'false', npm_config_audit: 'false' },

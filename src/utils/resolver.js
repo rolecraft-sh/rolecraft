@@ -4,7 +4,7 @@ import { tmpdir, homedir } from 'node:os'
 import { execSync as defaultExecSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { readdirSync, readFileSync } from 'node:fs'
-import { computeContentHash, computeFileHashes } from './lockfile.js'
+import { computeContentHash } from './lockfile.js'
 
 let runExec = defaultExecSync
 

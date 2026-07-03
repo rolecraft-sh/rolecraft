@@ -473,7 +473,7 @@ describe('rolecraft CLI', () => {
 
     await rolecraftModule.main()
 
-    assert.ok(logs.some(l => l.includes('rolecraft') || l.includes('rolecraft')))
+    assert.ok(logs.some(l => l.includes('rolecraft')))
     restore()
   })
 })

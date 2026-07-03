@@ -1,7 +1,6 @@
-import { mkdir, cp, writeFile, readFile, access, stat, symlink, unlink, rm } from 'node:fs/promises'
-import { join, basename, relative, dirname } from 'node:path'
-import { homedir } from 'node:os'
-import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getCopilotProjectDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, getCommandCodeDir, getCortexDir, getMistralVibeDir, getQwenCodeDir, getOpenClawDir, getCodeBuddyDir, getMuxDir, getPiDir, getAutohandCodeDir, getRovoDevDir, getFirebenderDir, getBobDir, getAiderDeskDir, addSkillToLock, getGlobalLockPath, getProjectLockPath, computeFileHashes } from './lockfile.js'
+import { mkdir, cp, writeFile, stat, symlink, rm } from 'node:fs/promises'
+import { join, relative, dirname } from 'node:path'
+import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotProjectDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, getCommandCodeDir, getCortexDir, getMistralVibeDir, getQwenCodeDir, getOpenClawDir, getCodeBuddyDir, getMuxDir, getPiDir, getAutohandCodeDir, getRovoDevDir, getFirebenderDir, getBobDir, getAiderDeskDir, addSkillToLock, getGlobalLockPath, getProjectLockPath, computeFileHashes } from './lockfile.js'
 
 function normalizeSlug(slug) {
   return slug.replace(/\//g, '-')
@@ -283,7 +282,6 @@ export async function installSkill(resolved, targets, mode = 'copy') {
     }
 
     const slugDir = join(baseDir, normalizeSlug(slug))
-    const destSkillPath = join(slugDir, 'SKILL.md')
 
     if (mode === 'symlink' && resolved.skillDir) {
       const relPath = relative(dirname(slugDir), resolved.skillDir)

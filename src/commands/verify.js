@@ -1,4 +1,4 @@
-import { readLock, getProjectLockPath, computeContentHash, computeFileHashes, getAgentsDir, getClaudeDir, getCursorDir, getDevinDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir } from '../utils/lockfile.js'
+import { readLock, getProjectLockPath, computeContentHash, getAgentsDir, getClaudeDir, getCursorDir, getDevinDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir } from '../utils/lockfile.js'
 import { readFile, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { createHash } from 'node:crypto'
