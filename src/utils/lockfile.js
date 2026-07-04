@@ -182,6 +182,22 @@ export function getAiderDeskDir() {
   return home('.aider-desk', 'skills')
 }
 
+export function getZapDir() {
+  return home('.zap', 'skills')
+}
+
+export function getCodeepDir() {
+  return home('.codeep', 'skills')
+}
+
+export function getKimiCodeDir() {
+  return home('.kimi-code', 'skills')
+}
+
+export function getZCodeDir() {
+  return home('.zcode', 'skills')
+}
+
 export function getProjectLockPath(cwd) {
   return join(cwd, '.agents', '.skill-lock.json')
 }
