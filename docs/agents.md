@@ -46,6 +46,10 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | firebender  | `~/.firebender/skills/`                         |
 | bob         | `~/.bob/skills/`                                |
 | aider-desk  | `~/.aider-desk/skills/`                         |
+| zap         | `~/.zap/skills/`                                |
+| codeep      | `~/.codeep/skills/`                             |
+| kimi-code   | `~/.kimi-code/skills/`                          |
+| zcode       | `~/.zcode/skills/`                              |
 
 > ⚠️ Windsurf has been rebranded to **Devin Desktop**. The `--windsurf` flag and `~/.windsurf/skills/` path still work for backward compatibility, but new deployments should use `--devin` / `~/.devin/skills/`.
 

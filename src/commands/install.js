@@ -44,7 +44,7 @@ async function askScope() {
 }
 
 export async function installCommand(source, options) {
-  const hasScopeFlags = options.global || options.project || options.claude || options.cursor || options.windsurf || options.devin || options.codex || options.copilot || options.aider || options.cline || options.gemini || options.cody || options.continue || options.warp || options.codeium || options.fabric || options.goose || options.tabnine || options.supermaven || options['pr-pilot'] || options.loom || options.roo || options.trae || options.hermes || options.kiro || options.augment || options.kilo || options.openhands || options.junie || options.factory || options['command-code'] || options.cortex || options['mistral-vibe'] || options['qwen-code'] || options.openclaw || options.codebuddy || options.mux || options.pi || options['autohand-code'] || options.rovo || options.firebender || options.bob || options['aider-desk']
+  const hasScopeFlags = options.global || options.project || options.claude || options.cursor || options.windsurf || options.devin || options.codex || options.copilot || options.aider || options.cline || options.gemini || options.cody || options.continue || options.warp || options.codeium || options.fabric || options.goose || options.tabnine || options.supermaven || options['pr-pilot'] || options.loom || options.roo || options.trae || options.hermes || options.kiro || options.augment || options.kilo || options.openhands || options.junie || options.factory || options['command-code'] || options.cortex || options['mistral-vibe'] || options['qwen-code'] || options.openclaw || options.codebuddy || options.mux || options.pi || options['autohand-code'] || options.rovo || options.firebender || options.bob || options['aider-desk'] || options.zap || options.codeep || options['kimi-code'] || options.zcode
   const scope = hasScopeFlags ? options : await askScope()
 
   if (options.frozenLockfile) {
@@ -114,6 +114,10 @@ export async function installCommand(source, options) {
   if (scope.firebender) targets.push('firebender')
   if (scope.bob) targets.push('bob')
   if (scope['aider-desk']) targets.push('aider-desk')
+  if (scope.zap) targets.push('zap')
+  if (scope.codeep) targets.push('codeep')
+  if (scope['kimi-code']) targets.push('kimi-code')
+  if (scope.zcode) targets.push('zcode')
   if (scope.project) targets.push('project')
 
   if (options.dryRun) {

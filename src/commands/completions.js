@@ -14,6 +14,7 @@ const SCOPE_FLAGS = [
   '--command-code', '--cortex', '--mistral-vibe', '--qwen-code', '--openclaw',
   '--codebuddy', '--mux', '--pi', '--autohand-code', '--rovo', '--firebender',
   '--bob', '--aider-desk',
+  '--zap', '--codeep', '--kimi-code', '--zcode',
   '--all',
 ]
 
@@ -142,6 +143,10 @@ _rolecraft() {
             '--firebender[Also install to ~/.firebender/skills/]' \
             '--bob[Also install to ~/.bob/skills/]' \
             '--aider-desk[Also install to ~/.aider-desk/skills/]' \\
+            '--zap[Also install to ~/.zap/skills/]' \\
+            '--codeep[Also install to ~/.codeep/skills/]' \\
+            '--kimi-code[Also install to ~/.kimi-code/skills/]' \\
+            '--zcode[Also install to ~/.zcode/skills/]' \\
             '--all[Install to all locations]' \\
             '--dry-run[Preview without copying]' \\
             '--frozen-lockfile[Fail if already installed]' \\
@@ -258,6 +263,10 @@ for cmd in install bundle use setup upgrade
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l firebender      -d 'Install to ~/.firebender/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l bob             -d 'Install to ~/.bob/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l aider-desk      -d 'Install to ~/.aider-desk/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l zap             -d 'Install to ~/.zap/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l codeep          -d 'Install to ~/.codeep/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l kimi-code       -d 'Install to ~/.kimi-code/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l zcode           -d 'Install to ~/.zcode/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l all            -d 'Install to all locations'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l dry-run        -d 'Preview without copying'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l frozen-lockfile -d 'Fail if already installed'

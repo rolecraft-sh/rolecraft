@@ -1,6 +1,6 @@
 import { mkdir, cp, writeFile, stat, symlink, rm } from 'node:fs/promises'
 import { join, relative, dirname } from 'node:path'
-import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotProjectDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, getCommandCodeDir, getCortexDir, getMistralVibeDir, getQwenCodeDir, getOpenClawDir, getCodeBuddyDir, getMuxDir, getPiDir, getAutohandCodeDir, getRovoDevDir, getFirebenderDir, getBobDir, getAiderDeskDir, addSkillToLock, getGlobalLockPath, getProjectLockPath, computeFileHashes } from './lockfile.js'
+import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotProjectDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, getCommandCodeDir, getCortexDir, getMistralVibeDir, getQwenCodeDir, getOpenClawDir, getCodeBuddyDir, getMuxDir, getPiDir, getAutohandCodeDir, getRovoDevDir, getFirebenderDir, getBobDir, getAiderDeskDir, getZapDir, getCodeepDir, getKimiCodeDir, getZCodeDir, addSkillToLock, getGlobalLockPath, getProjectLockPath, computeFileHashes } from './lockfile.js'
 
 function normalizeSlug(slug) {
   return slug.replace(/\//g, '-')
@@ -49,6 +49,10 @@ const targetToAgentName = {
   firebender: 'firebender',
   bob: 'ibm-bob',
   'aider-desk': 'aider-desk',
+  zap: 'zap',
+  codeep: 'codeep',
+  'kimi-code': 'kimi-code',
+  zcode: 'zcode',
 }
 
 export async function installSkill(resolved, targets, mode = 'copy') {
@@ -270,6 +274,26 @@ export async function installSkill(resolved, targets, mode = 'copy') {
       case 'aider-desk': {
         baseDir = getAiderDeskDir()
         label = '~/.aider-desk/skills/'
+        break
+      }
+      case 'zap': {
+        baseDir = getZapDir()
+        label = '~/.zap/skills/'
+        break
+      }
+      case 'codeep': {
+        baseDir = getCodeepDir()
+        label = '~/.codeep/skills/'
+        break
+      }
+      case 'kimi-code': {
+        baseDir = getKimiCodeDir()
+        label = '~/.kimi-code/skills/'
+        break
+      }
+      case 'zcode': {
+        baseDir = getZCodeDir()
+        label = '~/.zcode/skills/'
         break
       }
       case 'project': {
