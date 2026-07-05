@@ -33,6 +33,7 @@
 | **`upgrade` (self-update)**  | ✅             | ❌                                     | ❌                       | ❌             | ❌                 | ✅                | ❌              | ❌                         |
 | **TUI search**               | ⚠️ (styled)    | ✅ (`skills find` interactive)         | ❌                       | ❌             | ❌                 | ❌                | ❌              | ❌                         |
 | **Stars**                    | 36             | 24,613                                 | 23                       | 10,525         | 480                | ~1                | 13K+            | 135K+                      |
+| **skills.sh listed**         | ✅             | ✅                                     | ❌                       | ❌             | ❌                 | ❌                | ❌              | ❌                         |
 
 ## Strengths
 
@@ -62,7 +63,12 @@
 4. **No AGENTS.md XML injection** — `openskills` generates Claude Code compatible `<available_skills>` XML
 5. **Stars / community adoption very low (~5)** — building trust and visibility
 
-### ✅ Resolved Gaps
+### ✅ Resolved Gaps (Phase 2)
+
+- **SKILL.md created** — `npx skills add sametcelikbicak/rolecraft` works; rolecraft listed on skills.sh leaderboard
+- **skills.sh badge** — README now shows install count badge from skills.sh
+
+### ✅ Resolved Gaps (Phase 1)
 
 - **Copilot agent path** — now uses `.github/copilot/skills/` (project scope)
 - **Self-upgrade** — `rolecraft upgrade` command added
@@ -73,12 +79,21 @@
 
 ## Roadmap
 
+### ✅ Done
+
+- [x] **SKILL.md published** — `npx skills add sametcelikbicak/rolecraft` live on skills.sh
+- [x] **skills.sh badge** — install count visible in README
+
+### ❌ Next
+
 - [ ] `rolecraft doctor` — system health check
 - [ ] npm package source support (`npx rolecraft install some-package`)
+- [ ] **PR to vercel-labs/skills** — add rolecraft as recognized agent in `src/agents.ts`
 - [ ] AGENTS.md XML injection for non-Claude agents
 - [ ] Skill bundle / skillset hub
 - [ ] Security scoring for installed skills
 - [ ] Watch mode — auto-sync skills on file change
+- [ ] **skills.sh telemetry** — optional reporting when `rolecraft install` runs
 
 ## Competitor Analysis
 
