@@ -1,7 +1,7 @@
 import { readFile, readdir, stat } from 'node:fs/promises'
 import { join, dirname, basename } from 'node:path'
 import { tmpdir, homedir } from 'node:os'
-import { execSync as defaultExecSync } from 'node:child_process'
+import { execSync as defaultExecSync, spawnSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { readdirSync, readFileSync } from 'node:fs'
 import { computeContentHash } from './lockfile.js'
@@ -10,6 +10,21 @@ let runExec = defaultExecSync
 
 export function setExecSync(fn) {
   runExec = fn
+}
+
+function runGit(args, opts = {}) {
+  const result = spawnSync('git', args, { stdio: 'pipe', timeout: 30000, ...opts })
+  if (result.error) throw result.error
+  if (result.status !== 0) {
+    const msg = result.stderr?.toString() || result.stdout?.toString() || `git exited with code ${result.status}`
+    throw new Error(msg)
+  }
+  return result
+}
+
+function removeDir(dir) {
+  const result = spawnSync('rm', ['-rf', dir], { stdio: 'pipe' })
+  if (result.error) throw result.error
 }
 
 function isGitHubRef(source) {
@@ -197,7 +212,7 @@ function validateUrl(url) {
   if (/[;&`$|<>]/.test(url)) {
     throw new Error('Invalid characters in repository URL')
   }
-  if (!/^[\w.:/@%._~-]+$/.test(url)) {
+  if (!/^[\w.:\/@%~_-]+$/.test(url)) {
     throw new Error('Invalid repository URL format')
   }
 }
@@ -205,10 +220,9 @@ function validateUrl(url) {
 async function resolveGitUrl(source) {
   const tmpDir = join(tmpdir(), `rolecraft-${randomUUID().slice(0, 8)}`)
   const url = normalizeGitUrl(source)
-  validateUrl(url)
 
   try {
-    runExec(`git clone --depth 1 "${url}" "${tmpDir}"`, { stdio: 'pipe', timeout: 30000 })
+    runGit(['clone', '--depth', '1', url, tmpDir])
   } catch {
     throw new Error(`Failed to clone repository from ${source}`)
   }
@@ -216,7 +230,7 @@ async function resolveGitUrl(source) {
   const found = scanForSkill(tmpDir)
 
   if (found.length === 0) {
-    runExec(`rm -rf "${tmpDir}"`)
+    removeDir(tmpDir)
     throw new Error(`No SKILL.md found in repository ${source}`)
   }
 
@@ -230,7 +244,7 @@ async function resolveGitUrl(source) {
     try { fileContents[f] = readFileSync(join(skill.dir, f), 'utf-8') } catch {}
   }
 
-  runExec(`rm -rf "${tmpDir}"`)
+  removeDir(tmpDir)
 
   return {
     ...skill,
