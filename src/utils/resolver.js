@@ -208,15 +208,6 @@ function normalizeGitUrl(source) {
   return source
 }
 
-function validateUrl(url) {
-  if (/[;&`$|<>]/.test(url)) {
-    throw new Error('Invalid characters in repository URL')
-  }
-  if (!/^[\w.:\/@%~_-]+$/.test(url)) {
-    throw new Error('Invalid repository URL format')
-  }
-}
-
 async function resolveGitUrl(source) {
   const tmpDir = join(tmpdir(), `rolecraft-${randomUUID().slice(0, 8)}`)
   const url = normalizeGitUrl(source)
