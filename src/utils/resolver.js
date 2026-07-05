@@ -180,25 +180,32 @@ async function resolveGitHub(source) {
 }
 
 function isGitUrl(source) {
-  return /^https?:\/\/(gitlab|bitbucket)\.com\//.test(source)
-    || /^git@[\w.-]+:/.test(source)
-    || /^ssh:\/\//.test(source)
-    || /^https?:\/\/[\w.-]+\/[\w.-]+\/[\w.-]+\.git$/.test(source)
+  if (/^https?:\/\/(gitlab|bitbucket)\.com\//.test(source)) return true
+  if (/^git@[\w.-]+:[\w.-]+\/[\w.-]+(\.git)?$/.test(source)) return true
+  if (/^https?:\/\/[\w.-]+\/[\w.-]+\/[\w.-]+(\.git)?$/.test(source)) return true
+  return false
 }
 
 function normalizeGitUrl(source) {
   if (/^git@/.test(source)) {
     return source.replace(/^git@([^:]+):/, 'https://$1/')
   }
-  if (/^ssh:\/\//.test(source)) {
-    return source.replace(/^ssh:\/\/([^@]+@)?/, 'https://')
-  }
   return source
+}
+
+function validateUrl(url) {
+  if (/[;&`$|<>]/.test(url)) {
+    throw new Error('Invalid characters in repository URL')
+  }
+  if (!/^[\w.:/@%._~-]+$/.test(url)) {
+    throw new Error('Invalid repository URL format')
+  }
 }
 
 async function resolveGitUrl(source) {
   const tmpDir = join(tmpdir(), `rolecraft-${randomUUID().slice(0, 8)}`)
   const url = normalizeGitUrl(source)
+  validateUrl(url)
 
   try {
     runExec(`git clone --depth 1 "${url}" "${tmpDir}"`, { stdio: 'pipe', timeout: 30000 })
