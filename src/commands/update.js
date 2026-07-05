@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { readLock, getProjectLockPath, getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotProjectDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, getCommandCodeDir, getCortexDir, getMistralVibeDir, getQwenCodeDir, getOpenClawDir, getCodeBuddyDir, getMuxDir, getPiDir, getAutohandCodeDir, getRovoDevDir, getFirebenderDir, getBobDir, getAiderDeskDir } from '../utils/lockfile.js'
+import { readLock, getProjectLockPath, getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotProjectDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, getCommandCodeDir, getCortexDir, getMistralVibeDir, getQwenCodeDir, getOpenClawDir, getCodeBuddyDir, getMuxDir, getPiDir, getAutohandCodeDir, getRovoDevDir, getFirebenderDir, getBobDir, getAiderDeskDir, getCodeArtsDoerDir, getCodeMakerDir, getCodeStudioDir, getCrushDir, getEveDir, getForgeDir, getInferenceShDir, getJazzDir, getIFlowDir, getKiloCodeDir, getKodeDir, getLingmaDir, getMcpJamDir, getMoxbyDir, getOnaDir, getQoderDir, getReasonixDir, getTerraMindDir, getTinyCloudDir, getZencoderDir } from '../utils/lockfile.js'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 
@@ -148,6 +148,66 @@ function detectTargets(slug, cwd) {
 
   const aiderDeskDir = join(getAiderDeskDir(), normSlug)
   if (existsSync(join(aiderDeskDir, 'SKILL.md'))) targets.push('aider-desk')
+
+  const codeArtsDoerDir = join(getCodeArtsDoerDir(), normSlug)
+  if (existsSync(join(codeArtsDoerDir, 'SKILL.md'))) targets.push('code-arts-doer')
+
+  const codeMakerDir = join(getCodeMakerDir(), normSlug)
+  if (existsSync(join(codeMakerDir, 'SKILL.md'))) targets.push('code-maker')
+
+  const codeStudioDir = join(getCodeStudioDir(), normSlug)
+  if (existsSync(join(codeStudioDir, 'SKILL.md'))) targets.push('code-studio')
+
+  const crushDir = join(getCrushDir(), normSlug)
+  if (existsSync(join(crushDir, 'SKILL.md'))) targets.push('crush')
+
+  const eveDir = join(getEveDir(), normSlug)
+  if (existsSync(join(eveDir, 'SKILL.md'))) targets.push('eve')
+
+  const forgeDir = join(getForgeDir(), normSlug)
+  if (existsSync(join(forgeDir, 'SKILL.md'))) targets.push('forge')
+
+  const inferenceShDir = join(getInferenceShDir(), normSlug)
+  if (existsSync(join(inferenceShDir, 'SKILL.md'))) targets.push('inference-sh')
+
+  const jazzDir = join(getJazzDir(), normSlug)
+  if (existsSync(join(jazzDir, 'SKILL.md'))) targets.push('jazz')
+
+  const iFlowDir = join(getIFlowDir(), normSlug)
+  if (existsSync(join(iFlowDir, 'SKILL.md'))) targets.push('iflow')
+
+  const kiloCodeDir = join(getKiloCodeDir(), normSlug)
+  if (existsSync(join(kiloCodeDir, 'SKILL.md'))) targets.push('kilo-code')
+
+  const kodeDir = join(getKodeDir(), normSlug)
+  if (existsSync(join(kodeDir, 'SKILL.md'))) targets.push('kode')
+
+  const lingmaDir = join(getLingmaDir(), normSlug)
+  if (existsSync(join(lingmaDir, 'SKILL.md'))) targets.push('lingma')
+
+  const mcpJamDir = join(getMcpJamDir(), normSlug)
+  if (existsSync(join(mcpJamDir, 'SKILL.md'))) targets.push('mcp-jam')
+
+  const moxbyDir = join(getMoxbyDir(), normSlug)
+  if (existsSync(join(moxbyDir, 'SKILL.md'))) targets.push('moxby')
+
+  const onaDir = join(getOnaDir(), normSlug)
+  if (existsSync(join(onaDir, 'SKILL.md'))) targets.push('ona')
+
+  const qoderDir = join(getQoderDir(), normSlug)
+  if (existsSync(join(qoderDir, 'SKILL.md'))) targets.push('qoder')
+
+  const reasonixDir = join(getReasonixDir(), normSlug)
+  if (existsSync(join(reasonixDir, 'SKILL.md'))) targets.push('reasonix')
+
+  const terraMindDir = join(getTerraMindDir(), normSlug)
+  if (existsSync(join(terraMindDir, 'SKILL.md'))) targets.push('terra-mind')
+
+  const tinyCloudDir = join(getTinyCloudDir(), normSlug)
+  if (existsSync(join(tinyCloudDir, 'SKILL.md'))) targets.push('tiny-cloud')
+
+  const zencoderDir = join(getZencoderDir(), normSlug)
+  if (existsSync(join(zencoderDir, 'SKILL.md'))) targets.push('zencoder')
 
   const projectDir = join(cwd, '.agents', 'skills', normSlug)
   if (existsSync(join(projectDir, 'SKILL.md'))) targets.push('project')

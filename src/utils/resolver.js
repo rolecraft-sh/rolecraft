@@ -179,6 +179,64 @@ async function resolveGitHub(source) {
   }
 }
 
+function isGitUrl(source) {
+  return /^https?:\/\/(gitlab|bitbucket)\.com\//.test(source)
+    || /^git@[\w.-]+:/.test(source)
+    || /^ssh:\/\//.test(source)
+    || /^https?:\/\/[\w.-]+\/[\w.-]+\/[\w.-]+\.git$/.test(source)
+}
+
+function normalizeGitUrl(source) {
+  if (/^git@/.test(source)) {
+    return source.replace(/^git@([^:]+):/, 'https://$1/')
+  }
+  if (/^ssh:\/\//.test(source)) {
+    return source.replace(/^ssh:\/\/([^@]+@)?/, 'https://')
+  }
+  return source
+}
+
+async function resolveGitUrl(source) {
+  const tmpDir = join(tmpdir(), `rolecraft-${randomUUID().slice(0, 8)}`)
+  const url = normalizeGitUrl(source)
+
+  try {
+    runExec(`git clone --depth 1 "${url}" "${tmpDir}"`, { stdio: 'pipe', timeout: 30000 })
+  } catch {
+    throw new Error(`Failed to clone repository from ${source}`)
+  }
+
+  const found = scanForSkill(tmpDir)
+
+  if (found.length === 0) {
+    runExec(`rm -rf "${tmpDir}"`)
+    throw new Error(`No SKILL.md found in repository ${source}`)
+  }
+
+  const skill = found[0]
+  const files = readdirSync(skill.dir, { withFileTypes: true })
+    .filter(e => e.name !== '.git')
+    .map(e => e.name)
+
+  const fileContents = {}
+  for (const f of files) {
+    try { fileContents[f] = readFileSync(join(skill.dir, f), 'utf-8') } catch {}
+  }
+
+  runExec(`rm -rf "${tmpDir}"`)
+
+  return {
+    ...skill,
+    owner: skill.owner === 'local' ? 'remote' : skill.owner,
+    slug: skill.slug === 'unknown' || skill.slug === skill.name ? `remote/${skill.name}` : skill.slug,
+    files,
+    fileContents,
+    contentSha: computeContentHash(fileContents),
+    sourcePath: source,
+    sourceType: 'git',
+  }
+}
+
 export async function resolveSource(source) {
   if (isGitHubRef(source)) {
     return await resolveGitHub(source)
@@ -186,5 +244,8 @@ export async function resolveSource(source) {
   if (isLocalPath(source)) {
     return await resolveLocal(source)
   }
-  throw new Error(`Invalid source: "${source}". Use a local path (./, /, ~) or GitHub ref (owner/repo)`)
+  if (isGitUrl(source)) {
+    return await resolveGitUrl(source)
+  }
+  throw new Error(`Invalid source: "${source}". Use a local path (./, /, ~), GitHub ref (owner/repo), or git URL`)
 }

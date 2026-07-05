@@ -28,7 +28,7 @@
 </p>
 
 <p align="center">
-  Works with <b>30+ AI agents</b>: opencode · claude-code · cursor · windsurf · devin · codex · copilot · aider · cline · gemini-cli · cody · continue · warp · codeium · fabric · goose · tabnine · supermaven · pr-pilot · loom · roo · trae · hermes · kiro · augment · kilo · openhands · junie · factory · and more
+  Works with <b>65+ AI agents</b>: opencode · claude-code · cursor · windsurf · devin · codex · copilot · aider · cline · gemini-cli · cody · continue · warp · codeium · fabric · goose · tabnine · supermaven · pr-pilot · loom · roo · trae · hermes · kiro · augment · kilo · openhands · junie · factory · command-code · cortex · mistral-vibe · qwen-code · openclaw · codebuddy · mux · pi · autohand-code · rovo · firebender · bob · aider-desk · and more
 </p>
 
 <p align="center">
@@ -49,7 +49,7 @@
 # try without installing
 npx rolecraft --help
 
-# or install globally
+# or install globally (works with npm, pnpm, yarn, bun)
 npm install -g rolecraft
 
 # create a skill
@@ -110,19 +110,24 @@ rolecraft remove my-skill
 
 [→ Full feature comparison](docs/comparison.md)
 
-| Feature                                  | rolecraft   | skills (Vercel) | @agentskill.sh/cli |
-| ---------------------------------------- | ----------- | --------------- | ------------------ |
-| Zero dependencies                        | ✅          | ✅ (1 dep)      | ❌ (2)             |
-| Local path install                       | ✅ 1st class | ✅              | ❌ marketplace only |
-| GitHub repo install                      | ✅          | ✅              | ❌                 |
-| Bundle install + create                  | ✅          | ❌              | ✅ (skillset only) |
-| Interactive search + install (TUI)       | ✅          | ❌              | ❌                 |
-| Shell completions (bash/zsh/fish)        | ✅          | ❌              | ❌                 |
-| Dry-run preview (`--dry-run`)            | ✅          | ❌              | ❌                 |
-| Interactive scope prompt                 | ✅          | ❌              | ❌                 |
-| Content hash verification (`verify`)     | ✅          | ✅              | ❌                 |
-| CI-mode re-install (`ci`)                | ✅          | ✅              | ❌                 |
-| File size                                | ~4 KB       | ~465 KB         | ~84 KB             |
+| Feature                                  | rolecraft       | skills (Vercel)  | @agentskill.sh/cli |
+| ---------------------------------------- | --------------- | ---------------- | ------------------ |
+| Zero dependencies                        | ✅              | ✅ (1 dep)       | ❌ (2)             |
+| Local path install                       | ✅ **1st class** | ✅               | ❌ marketplace only |
+| GitHub repo install                      | ✅              | ✅               | ❌                 |
+| GitLab / SSH git URL                     | ✅              | ✅               | ❌                 |
+| Agent targets                            | **66**          | 55+              | 15+                |
+| Bundle install + create                  | ✅              | ❌               | ✅ (skillset only) |
+| Interactive TUI search + install         | ✅              | ✅               | ❌                 |
+| Non-interactive flag (`--yes`/`-y`)      | ✅              | ✅               | ❌                 |
+| Skill update check (`check`)             | ✅              | ❌               | ❌                 |
+| Shell completions (bash/zsh/fish)        | ✅              | ❌               | ❌                 |
+| Dry-run preview (`--dry-run`)            | ✅              | ❌               | ❌                 |
+| Interactive scope prompt                 | ✅              | ✅               | ❌                 |
+| Content hash verification (`verify`)     | ✅              | ✅               | ❌                 |
+| CI-mode re-install (`ci`)                | ✅              | ✅               | ❌                 |
+| Self-upgrade command                     | ✅              | ❌               | ❌                 |
+| File size                                | ~4 KB           | ~465 KB          | ~84 KB             |
 
 [See full table →](docs/comparison.md)
 

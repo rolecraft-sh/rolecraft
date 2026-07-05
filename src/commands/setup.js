@@ -1,7 +1,7 @@
 import { accessSync, readdirSync, constants } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotProjectDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, getCommandCodeDir, getCortexDir, getMistralVibeDir, getQwenCodeDir, getOpenClawDir, getCodeBuddyDir, getMuxDir, getPiDir, getAutohandCodeDir, getRovoDevDir, getFirebenderDir, getBobDir, getAiderDeskDir, getZapDir, getCodeepDir, getKimiCodeDir, getZCodeDir } from '../utils/lockfile.js'
+import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotProjectDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, getCommandCodeDir, getCortexDir, getMistralVibeDir, getQwenCodeDir, getOpenClawDir, getCodeBuddyDir, getMuxDir, getPiDir, getAutohandCodeDir, getRovoDevDir, getFirebenderDir, getBobDir, getAiderDeskDir, getCodeArtsDoerDir, getCodeMakerDir, getCodeStudioDir, getCrushDir, getEveDir, getForgeDir, getInferenceShDir, getJazzDir, getIFlowDir, getKiloCodeDir, getKodeDir, getLingmaDir, getMcpJamDir, getMoxbyDir, getOnaDir, getQoderDir, getReasonixDir, getTerraMindDir, getTinyCloudDir, getZencoderDir, getZapDir, getCodeepDir, getKimiCodeDir, getZCodeDir } from '../utils/lockfile.js'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 
@@ -48,6 +48,26 @@ const KNOWN_AGENTS = [
   { flag: 'firebender', label: 'firebender', dir: getFirebenderDir },
   { flag: 'bob', label: 'ibm-bob', dir: getBobDir },
   { flag: 'aider-desk', label: 'aider-desk', dir: getAiderDeskDir },
+  { flag: 'code-arts-doer', label: 'code-arts-doer', dir: getCodeArtsDoerDir },
+  { flag: 'code-maker', label: 'code-maker', dir: getCodeMakerDir },
+  { flag: 'code-studio', label: 'code-studio', dir: getCodeStudioDir },
+  { flag: 'crush', label: 'crush', dir: getCrushDir },
+  { flag: 'eve', label: 'eve', dir: getEveDir },
+  { flag: 'forge', label: 'forge', dir: getForgeDir },
+  { flag: 'inference-sh', label: 'inference-sh', dir: getInferenceShDir },
+  { flag: 'jazz', label: 'jazz', dir: getJazzDir },
+  { flag: 'iflow', label: 'iflow', dir: getIFlowDir },
+  { flag: 'kilo-code', label: 'kilo-code', dir: getKiloCodeDir },
+  { flag: 'kode', label: 'kode', dir: getKodeDir },
+  { flag: 'lingma', label: 'lingma', dir: getLingmaDir },
+  { flag: 'mcp-jam', label: 'mcp-jam', dir: getMcpJamDir },
+  { flag: 'moxby', label: 'moxby', dir: getMoxbyDir },
+  { flag: 'ona', label: 'ona', dir: getOnaDir },
+  { flag: 'qoder', label: 'qoder', dir: getQoderDir },
+  { flag: 'reasonix', label: 'reasonix', dir: getReasonixDir },
+  { flag: 'terra-mind', label: 'terra-mind', dir: getTerraMindDir },
+  { flag: 'tiny-cloud', label: 'tiny-cloud', dir: getTinyCloudDir },
+  { flag: 'zencoder', label: 'zencoder', dir: getZencoderDir },
   { flag: 'zap', label: 'zap', dir: getZapDir },
   { flag: 'codeep', label: 'codeep', dir: getCodeepDir },
   { flag: 'kimi-code', label: 'kimi-code', dir: getKimiCodeDir },
@@ -84,7 +104,8 @@ export async function setupCommand(source, options = {}) {
     console.log('   Install an AI coding agent (opencode, claude-code, cursor,')
     console.log('   windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody,')
     console.log('   continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot,')
-    console.log('   loom, roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory, command-code, cortex, mistral-vibe, qwen-code, openclaw, codebuddy, mux, pi, autohand-code, rovo-dev, firebender, ibm-bob, aider-desk) first.')
+    console.log('   loom, roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory, command-code, cortex, mistral-vibe, qwen-code, openclaw, codebuddy, mux, pi, autohand-code, rovo-dev, firebender, ibm-bob, aider-desk, code-arts-doer, code-maker, code-studio,')
+    console.log('   crush, eve, forge, inference-sh, jazz, iflow, kilo-code, kode, lingma, mcp-jam, moxby, ona, qoder, reasonix, terra-mind, tiny-cloud, zencoder) first.')
     return
   }
 
@@ -112,7 +133,9 @@ export async function setupCommand(source, options = {}) {
     const targets = agents.map(a => a.flag)
     targets.push('project')
 
-    if (options.dryRun) {
+    if (options.yes) {
+      // skip confirmation, proceed with install
+    } else if (options.dryRun) {
       console.log('📋 Dry-run — no files will be copied:\n')
       console.log(`   Skill:     ${resolved.name} (${resolved.slug})`)
       console.log(`   Source:    ${source}`)

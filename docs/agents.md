@@ -46,10 +46,30 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | firebender  | `~/.firebender/skills/`                         |
 | bob         | `~/.bob/skills/`                                |
 | aider-desk  | `~/.aider-desk/skills/`                         |
-| zap         | `~/.zap/skills/`                                |
-| codeep      | `~/.codeep/skills/`                             |
-| kimi-code   | `~/.kimi-code/skills/`                          |
-| zcode       | `~/.zcode/skills/`                              |
+| zap             | `~/.zap/skills/`                                  |
+| codeep          | `~/.codeep/skills/`                               |
+| kimi-code       | `~/.kimi-code/skills/`                            |
+| zcode           | `~/.zcode/skills/`                                |
+| code-arts-doer  | `~/.codeartsdoer/skills/`                         |
+| code-maker      | `~/.codemaker/skills/`                            |
+| code-studio     | `~/.codestudio/skills/`                           |
+| crush           | `~/.crush/skills/`                                |
+| eve             | `./agent/skills/`                                 |
+| forge           | `~/.forge/skills/`                                |
+| inference-sh    | `~/.inferencesh/skills/`                          |
+| jazz            | `~/.jazz/skills/`                                 |
+| iflow           | `~/.iflow/skills/`                                |
+| kilo-code       | `~/.kilocode/skills/`                             |
+| kode            | `~/.kode/skills/`                                 |
+| lingma          | `~/.lingma/skills/`                               |
+| mcp-jam         | `~/.mcpjam/skills/`                               |
+| moxby           | `~/.moxby/skills/`                                |
+| ona             | `~/.ona/skills/`                                  |
+| qoder           | `~/.qoder/skills/`                                |
+| reasonix        | `~/.reasonix/skills/`                             |
+| terra-mind      | `~/.terramind/skills/`                            |
+| tiny-cloud      | `~/.tinycloud/skills/`                            |
+| zencoder        | `~/.zencoder/skills/`                             |
 
 > ⚠️ Windsurf has been rebranded to **Devin Desktop**. The `--windsurf` flag and `~/.windsurf/skills/` path still work for backward compatibility, but new deployments should use `--devin` / `~/.devin/skills/`.
 
