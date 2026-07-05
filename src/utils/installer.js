@@ -1,6 +1,6 @@
 import { mkdir, cp, writeFile, stat, symlink, rm } from 'node:fs/promises'
 import { join, relative, dirname } from 'node:path'
-import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotProjectDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, getCommandCodeDir, getCortexDir, getMistralVibeDir, getQwenCodeDir, getOpenClawDir, getCodeBuddyDir, getMuxDir, getPiDir, getAutohandCodeDir, getRovoDevDir, getFirebenderDir, getBobDir, getAiderDeskDir, getZapDir, getCodeepDir, getKimiCodeDir, getZCodeDir, addSkillToLock, getGlobalLockPath, getProjectLockPath, computeFileHashes } from './lockfile.js'
+import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotProjectDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, getCommandCodeDir, getCortexDir, getMistralVibeDir, getQwenCodeDir, getOpenClawDir, getCodeBuddyDir, getMuxDir, getPiDir, getAutohandCodeDir, getRovoDevDir, getFirebenderDir, getBobDir, getAiderDeskDir, getCodeArtsDoerDir, getCodeMakerDir, getCodeStudioDir, getCrushDir, getEveDir, getForgeDir, getInferenceShDir, getJazzDir, getIFlowDir, getKiloCodeDir, getKodeDir, getLingmaDir, getMcpJamDir, getMoxbyDir, getOnaDir, getQoderDir, getReasonixDir, getTerraMindDir, getTinyCloudDir, getZencoderDir, getZapDir, getCodeepDir, getKimiCodeDir, getZCodeDir, addSkillToLock, getGlobalLockPath, getProjectLockPath, computeFileHashes } from './lockfile.js'
 
 function normalizeSlug(slug) {
   return slug.replace(/\//g, '-')
@@ -49,6 +49,26 @@ const targetToAgentName = {
   firebender: 'firebender',
   bob: 'ibm-bob',
   'aider-desk': 'aider-desk',
+  'code-arts-doer': 'code-arts-doer',
+  'code-maker': 'code-maker',
+  'code-studio': 'code-studio',
+  crush: 'crush',
+  eve: 'eve',
+  forge: 'forge',
+  'inference-sh': 'inference-sh',
+  jazz: 'jazz',
+  iflow: 'iflow',
+  'kilo-code': 'kilo-code',
+  kode: 'kode',
+  lingma: 'lingma',
+  'mcp-jam': 'mcp-jam',
+  moxby: 'moxby',
+  ona: 'ona',
+  qoder: 'qoder',
+  reasonix: 'reasonix',
+  'terra-mind': 'terra-mind',
+  'tiny-cloud': 'tiny-cloud',
+  zencoder: 'zencoder',
   zap: 'zap',
   codeep: 'codeep',
   'kimi-code': 'kimi-code',
@@ -274,6 +294,106 @@ export async function installSkill(resolved, targets, mode = 'copy') {
       case 'aider-desk': {
         baseDir = getAiderDeskDir()
         label = '~/.aider-desk/skills/'
+        break
+      }
+      case 'code-arts-doer': {
+        baseDir = getCodeArtsDoerDir()
+        label = '~/.codeartsdoer/skills/'
+        break
+      }
+      case 'code-maker': {
+        baseDir = getCodeMakerDir()
+        label = '~/.codemaker/skills/'
+        break
+      }
+      case 'code-studio': {
+        baseDir = getCodeStudioDir()
+        label = '~/.codestudio/skills/'
+        break
+      }
+      case 'crush': {
+        baseDir = getCrushDir()
+        label = '~/.crush/skills/'
+        break
+      }
+      case 'eve': {
+        baseDir = getEveDir()
+        label = './agent/skills/'
+        break
+      }
+      case 'forge': {
+        baseDir = getForgeDir()
+        label = '~/.forge/skills/'
+        break
+      }
+      case 'inference-sh': {
+        baseDir = getInferenceShDir()
+        label = '~/.inferencesh/skills/'
+        break
+      }
+      case 'jazz': {
+        baseDir = getJazzDir()
+        label = '~/.jazz/skills/'
+        break
+      }
+      case 'iflow': {
+        baseDir = getIFlowDir()
+        label = '~/.iflow/skills/'
+        break
+      }
+      case 'kilo-code': {
+        baseDir = getKiloCodeDir()
+        label = '~/.kilocode/skills/'
+        break
+      }
+      case 'kode': {
+        baseDir = getKodeDir()
+        label = '~/.kode/skills/'
+        break
+      }
+      case 'lingma': {
+        baseDir = getLingmaDir()
+        label = '~/.lingma/skills/'
+        break
+      }
+      case 'mcp-jam': {
+        baseDir = getMcpJamDir()
+        label = '~/.mcpjam/skills/'
+        break
+      }
+      case 'moxby': {
+        baseDir = getMoxbyDir()
+        label = '~/.moxby/skills/'
+        break
+      }
+      case 'ona': {
+        baseDir = getOnaDir()
+        label = '~/.ona/skills/'
+        break
+      }
+      case 'qoder': {
+        baseDir = getQoderDir()
+        label = '~/.qoder/skills/'
+        break
+      }
+      case 'reasonix': {
+        baseDir = getReasonixDir()
+        label = '~/.reasonix/skills/'
+        break
+      }
+      case 'terra-mind': {
+        baseDir = getTerraMindDir()
+        label = '~/.terramind/skills/'
+        break
+      }
+      case 'tiny-cloud': {
+        baseDir = getTinyCloudDir()
+        label = '~/.tinycloud/skills/'
+        break
+      }
+      case 'zencoder': {
+        baseDir = getZencoderDir()
+        label = '~/.zencoder/skills/'
         break
       }
       case 'zap': {

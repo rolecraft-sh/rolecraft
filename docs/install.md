@@ -6,6 +6,11 @@
 npm install -g rolecraft
 # or run without installing:
 npx rolecraft install <source>
+
+# also works with pnpm, yarn, bun:
+pnpm add -g rolecraft
+yarn global add rolecraft
+bun add -g rolecraft
 ```
 
 > **Requirements:** Node.js >= 20
@@ -69,8 +74,28 @@ Where do you want to install this skill?
 | `--autohand-code` | `~/.autohand/skills/`           |
 | `--rovo`        | `~/.rovodev/skills/`               |
 | `--firebender`  | `~/.firebender/skills/`            |
-| `--bob`         | `~/.bob/skills/`                   |
-| `--aider-desk`  | `~/.aider-desk/skills/`            |
+| `--bob`             | `~/.bob/skills/`                   |
+| `--aider-desk`      | `~/.aider-desk/skills/`            |
+| `--code-arts-doer`  | `~/.codeartsdoer/skills/`          |
+| `--code-maker`      | `~/.codemaker/skills/`             |
+| `--code-studio`     | `~/.codestudio/skills/`            |
+| `--crush`           | `~/.crush/skills/`                 |
+| `--eve`             | `./agent/skills/`                  |
+| `--forge`           | `~/.forge/skills/`                 |
+| `--inference-sh`    | `~/.inferencesh/skills/`           |
+| `--jazz`            | `~/.jazz/skills/`                  |
+| `--iflow`           | `~/.iflow/skills/`                 |
+| `--kilo-code`       | `~/.kilocode/skills/`              |
+| `--kode`            | `~/.kode/skills/`                  |
+| `--lingma`          | `~/.lingma/skills/`                |
+| `--mcp-jam`         | `~/.mcpjam/skills/`                |
+| `--moxby`           | `~/.moxby/skills/`                 |
+| `--ona`             | `~/.ona/skills/`                   |
+| `--qoder`           | `~/.qoder/skills/`                 |
+| `--reasonix`        | `~/.reasonix/skills/`              |
+| `--terra-mind`      | `~/.terramind/skills/`             |
+| `--tiny-cloud`      | `~/.tinycloud/skills/`             |
+| `--zencoder`        | `~/.zencoder/skills/`              |
 
 Combine flags to install to multiple agents at once:
 
@@ -86,6 +111,7 @@ rolecraft install ./my-skill --claude --cursor --devin
 | `--copy`              | Force copy (default)                       |
 | `--dry-run`           | Preview without copying files              |
 | `--frozen-lockfile`   | Fail if skill is already installed         |
+| `--yes` / `-y`        | Skip all confirmation prompts, use defaults |
 
 ## Source types
 
@@ -109,3 +135,13 @@ rolecraft install sametcelikbicak/coverage-guard
 ```
 
 The CLI clones with `--depth 1`, finds `SKILL.md` recursively, installs it, and cleans up.
+
+### Git URL (GitLab, Bitbucket, SSH)
+
+Any public git repository with `SKILL.md`:
+
+```bash
+rolecraft install https://gitlab.com/org/project
+rolecraft install https://bitbucket.org/org/project
+rolecraft install git@github.com:owner/repo.git
+```

@@ -44,8 +44,8 @@ async function askScope() {
 }
 
 export async function installCommand(source, options) {
-  const hasScopeFlags = options.global || options.project || options.claude || options.cursor || options.windsurf || options.devin || options.codex || options.copilot || options.aider || options.cline || options.gemini || options.cody || options.continue || options.warp || options.codeium || options.fabric || options.goose || options.tabnine || options.supermaven || options['pr-pilot'] || options.loom || options.roo || options.trae || options.hermes || options.kiro || options.augment || options.kilo || options.openhands || options.junie || options.factory || options['command-code'] || options.cortex || options['mistral-vibe'] || options['qwen-code'] || options.openclaw || options.codebuddy || options.mux || options.pi || options['autohand-code'] || options.rovo || options.firebender || options.bob || options['aider-desk'] || options.zap || options.codeep || options['kimi-code'] || options.zcode
-  const scope = hasScopeFlags ? options : await askScope()
+  const hasScopeFlags = options.global || options.project || options.claude || options.cursor || options.windsurf || options.devin || options.codex || options.copilot || options.aider || options.cline || options.gemini || options.cody || options.continue || options.warp || options.codeium || options.fabric || options.goose || options.tabnine || options.supermaven || options['pr-pilot'] || options.loom || options.roo || options.trae || options.hermes || options.kiro || options.augment || options.kilo || options.openhands || options.junie || options.factory || options['command-code'] || options.cortex || options['mistral-vibe'] || options['qwen-code'] || options.openclaw || options.codebuddy || options.mux || options.pi || options['autohand-code'] || options.rovo || options.firebender || options.bob || options['aider-desk'] || options['code-arts-doer'] || options['code-maker'] || options['code-studio'] || options.crush || options.eve || options.forge || options['inference-sh'] || options.jazz || options.iflow || options['kilo-code'] || options.kode || options.lingma || options['mcp-jam'] || options.moxby || options.ona || options.qoder || options.reasonix || options['terra-mind'] || options['tiny-cloud'] || options.zencoder || options.zap || options.codeep || options['kimi-code'] || options.zcode
+  const scope = hasScopeFlags ? options : options.yes ? { global: false, project: true } : await askScope()
 
   if (options.frozenLockfile) {
     const { readLock, getProjectLockPath } = await import('../utils/lockfile.js')
@@ -114,6 +114,26 @@ export async function installCommand(source, options) {
   if (scope.firebender) targets.push('firebender')
   if (scope.bob) targets.push('bob')
   if (scope['aider-desk']) targets.push('aider-desk')
+  if (scope['code-arts-doer']) targets.push('code-arts-doer')
+  if (scope['code-maker']) targets.push('code-maker')
+  if (scope['code-studio']) targets.push('code-studio')
+  if (scope.crush) targets.push('crush')
+  if (scope.eve) targets.push('eve')
+  if (scope.forge) targets.push('forge')
+  if (scope['inference-sh']) targets.push('inference-sh')
+  if (scope.jazz) targets.push('jazz')
+  if (scope.iflow) targets.push('iflow')
+  if (scope['kilo-code']) targets.push('kilo-code')
+  if (scope.kode) targets.push('kode')
+  if (scope.lingma) targets.push('lingma')
+  if (scope['mcp-jam']) targets.push('mcp-jam')
+  if (scope.moxby) targets.push('moxby')
+  if (scope.ona) targets.push('ona')
+  if (scope.qoder) targets.push('qoder')
+  if (scope.reasonix) targets.push('reasonix')
+  if (scope['terra-mind']) targets.push('terra-mind')
+  if (scope['tiny-cloud']) targets.push('tiny-cloud')
+  if (scope.zencoder) targets.push('zencoder')
   if (scope.zap) targets.push('zap')
   if (scope.codeep) targets.push('codeep')
   if (scope['kimi-code']) targets.push('kimi-code')

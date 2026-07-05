@@ -198,6 +198,86 @@ export function getZCodeDir() {
   return home('.zcode', 'skills')
 }
 
+export function getCodeArtsDoerDir() {
+  return home('.codeartsdoer', 'skills')
+}
+
+export function getCodeMakerDir() {
+  return home('.codemaker', 'skills')
+}
+
+export function getCodeStudioDir() {
+  return home('.codestudio', 'skills')
+}
+
+export function getCrushDir() {
+  return home('.crush', 'skills')
+}
+
+export function getEveDir() {
+  return join(process.cwd(), 'agent', 'skills')
+}
+
+export function getForgeDir() {
+  return home('.forge', 'skills')
+}
+
+export function getInferenceShDir() {
+  return home('.inferencesh', 'skills')
+}
+
+export function getJazzDir() {
+  return home('.jazz', 'skills')
+}
+
+export function getIFlowDir() {
+  return home('.iflow', 'skills')
+}
+
+export function getKiloCodeDir() {
+  return home('.kilocode', 'skills')
+}
+
+export function getKodeDir() {
+  return home('.kode', 'skills')
+}
+
+export function getLingmaDir() {
+  return home('.lingma', 'skills')
+}
+
+export function getMcpJamDir() {
+  return home('.mcpjam', 'skills')
+}
+
+export function getMoxbyDir() {
+  return home('.moxby', 'skills')
+}
+
+export function getOnaDir() {
+  return home('.ona', 'skills')
+}
+
+export function getQoderDir() {
+  return home('.qoder', 'skills')
+}
+
+export function getReasonixDir() {
+  return home('.reasonix', 'skills')
+}
+
+export function getTerraMindDir() {
+  return home('.terramind', 'skills')
+}
+
+export function getTinyCloudDir() {
+  return home('.tinycloud', 'skills')
+}
+
+export function getZencoderDir() {
+  return home('.zencoder', 'skills')
+}
+
 export function getProjectLockPath(cwd) {
   return join(cwd, '.agents', '.skill-lock.json')
 }

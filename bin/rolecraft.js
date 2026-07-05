@@ -12,6 +12,7 @@ import { setupCommand } from '../src/commands/setup.js'
 import { initCommand } from '../src/commands/init.js'
 import { searchCommand } from '../src/commands/search.js'
 import { verifyCommand } from '../src/commands/verify.js'
+import { checkCommand } from '../src/commands/check.js'
 import { ciCommand } from '../src/commands/ci.js'
 import { bundleCommand, bundleCreateCommand } from '../src/commands/bundle.js'
 import { completionsCommand } from '../src/commands/completions.js'
@@ -25,7 +26,7 @@ function usage() {
 rolecraft — Install AI agent skills like roles & behaviors
 
 Zero dependencies, no marketplace required.
-Works with opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody, continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot, loom, roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory, command-code, cortex, mistral-vibe, qwen-code, openclaw, codebuddy, mux, pi, autohand-code, rovo, firebender, bob, aider-desk, and all spec-compliant agents.
+Works with 65+ agents: opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody, continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot, loom, roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory, command-code, cortex, mistral-vibe, qwen-code, openclaw, codebuddy, mux, pi, autohand-code, rovo, firebender, bob, aider-desk, code-arts-doer, code-maker, code-studio, crush, eve, forge, inference-sh, jazz, iflow, kilo-code, kode, lingma, mcp-jam, moxby, ona, qoder, reasonix, terra-mind, tiny-cloud, zencoder, and all spec-compliant agents.
 
 Usage:
   rolecraft install <source>     Install a skill (local path or owner/repo)
@@ -38,6 +39,7 @@ Usage:
   rolecraft setup [<source>]     Detect agents and optionally install a skill
   rolecraft init [<name>]        Scaffold a new SKILL.md
   rolecraft search <query>       Search for skills on GitHub
+  rolecraft check                Check for available skill updates
   rolecraft verify               Verify installed skill integrity
   rolecraft ci                   Install all skills from lockfile
   rolecraft completions <shell>  Generate shell completions (bash|zsh|fish)
@@ -45,6 +47,7 @@ Usage:
   rolecraft help                 Show this help
 
 Options:
+  --yes, -y     Non-interactive: accept all defaults (install, setup)
   --dry-run      Preview installation without copying files (install, setup, bundle, upgrade)
 
 Options for upgrade:
@@ -132,6 +135,7 @@ export async function main() {
       const flags = args.slice(1)
       const scopeFlags = ['--global', '--project', '--claude', '--cursor', '--windsurf', '--devin', '--codex', '--copilot', '--aider', '--cline', '--gemini', '--cody', '--continue', '--warp', '--codeium', '--fabric', '--goose', '--tabnine', '--supermaven', '--pr-pilot', '--loom', '--roo', '--trae', '--hermes', '--kiro', '--augment', '--kilo', '--openhands', '--junie', '--factory', '--command-code', '--cortex', '--mistral-vibe', '--qwen-code', '--openclaw', '--codebuddy',
   '--mux', '--pi', '--autohand-code', '--rovo', '--firebender', '--bob', '--aider-desk',
+  '--code-arts-doer', '--code-maker', '--code-studio', '--crush', '--eve', '--forge', '--inference-sh', '--jazz', '--iflow', '--kilo-code', '--kode', '--lingma', '--mcp-jam', '--moxby', '--ona', '--qoder', '--reasonix', '--terra-mind', '--tiny-cloud', '--zencoder',
   '--all']
       const hasScopeFlag = flags.some(f => scopeFlags.includes(f))
       const options = hasScopeFlag ? {
@@ -177,11 +181,32 @@ export async function main() {
         firebender: flags.includes('--firebender') || flags.includes('--all'),
         bob: flags.includes('--bob') || flags.includes('--all'),
         'aider-desk': flags.includes('--aider-desk') || flags.includes('--all'),
+        'code-arts-doer': flags.includes('--code-arts-doer') || flags.includes('--all'),
+        'code-maker': flags.includes('--code-maker') || flags.includes('--all'),
+        'code-studio': flags.includes('--code-studio') || flags.includes('--all'),
+        crush: flags.includes('--crush') || flags.includes('--all'),
+        eve: flags.includes('--eve') || flags.includes('--all'),
+        forge: flags.includes('--forge') || flags.includes('--all'),
+        'inference-sh': flags.includes('--inference-sh') || flags.includes('--all'),
+        jazz: flags.includes('--jazz') || flags.includes('--all'),
+        iflow: flags.includes('--iflow') || flags.includes('--all'),
+        'kilo-code': flags.includes('--kilo-code') || flags.includes('--all'),
+        kode: flags.includes('--kode') || flags.includes('--all'),
+        lingma: flags.includes('--lingma') || flags.includes('--all'),
+        'mcp-jam': flags.includes('--mcp-jam') || flags.includes('--all'),
+        moxby: flags.includes('--moxby') || flags.includes('--all'),
+        ona: flags.includes('--ona') || flags.includes('--all'),
+        qoder: flags.includes('--qoder') || flags.includes('--all'),
+        reasonix: flags.includes('--reasonix') || flags.includes('--all'),
+        'terra-mind': flags.includes('--terra-mind') || flags.includes('--all'),
+        'tiny-cloud': flags.includes('--tiny-cloud') || flags.includes('--all'),
+        zencoder: flags.includes('--zencoder') || flags.includes('--all'),
         project: flags.includes('--project') || flags.includes('--all'),
       } : {}
       options.frozenLockfile = flags.includes('--frozen-lockfile')
       options.symlink = flags.includes('--symlink')
       options.dryRun = flags.includes('--dry-run')
+      options.yes = flags.includes('--yes') || flags.includes('-y')
 
       await installCommand(source, options)
       break
@@ -257,6 +282,13 @@ export async function main() {
       break
     }
 
+    case 'check':
+    case 'check-updates': {
+      if (args.includes('--help') || args.includes('-h')) { usage(); return }
+      await checkCommand()
+      break
+    }
+
     case 'ci': {
       if (args.includes('--help') || args.includes('-h')) { usage(); return }
       await ciCommand()
@@ -267,7 +299,7 @@ export async function main() {
       if (args.includes('--help') || args.includes('-h')) { usage(); return }
       const source = args[0]
       const flags = args.slice(1)
-      await setupCommand(source, { dryRun: flags.includes('--dry-run') })
+      await setupCommand(source, { dryRun: flags.includes('--dry-run'), yes: flags.includes('--yes') || flags.includes('-y') })
       break
     }
 

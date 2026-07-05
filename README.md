@@ -28,7 +28,7 @@
 </p>
 
 <p align="center">
-  Works with <b>30+ AI agents</b>: opencode · claude-code · cursor · windsurf · devin · codex · copilot · aider · cline · gemini-cli · cody · continue · warp · codeium · fabric · goose · tabnine · supermaven · pr-pilot · loom · roo · trae · hermes · kiro · augment · kilo · openhands · junie · factory · and more
+  Works with <b>65+ AI agents</b>: opencode · claude-code · cursor · windsurf · devin · codex · copilot · aider · cline · gemini-cli · cody · continue · warp · codeium · fabric · goose · tabnine · supermaven · pr-pilot · loom · roo · trae · hermes · kiro · augment · kilo · openhands · junie · factory · command-code · cortex · mistral-vibe · qwen-code · openclaw · codebuddy · mux · pi · autohand-code · rovo · firebender · bob · aider-desk · and more
 </p>
 
 <p align="center">
@@ -49,33 +49,38 @@
 # try without installing
 npx rolecraft --help
 
-# or install globally
+# or install globally (works with npm, pnpm, yarn, bun)
 npm install -g rolecraft
 
 # create a skill
 rolecraft init my-skill
 
 # install it
-rolecraft install ./my-skill           # local folder
-rolecraft install user/repo            # GitHub repo
-rolecraft install ./my-skill --cursor  # specific agent only
+rolecraft install ./my-skill                      # local folder
+rolecraft install user/repo                       # GitHub repo
+rolecraft install https://gitlab.com/org/project  # GitLab repo
+rolecraft install git@github.com:user/repo.git    # SSH URL
+rolecraft install ./my-skill --cursor             # specific agent only
 
 # manage
 rolecraft list
 rolecraft search code-review
+rolecraft check
 rolecraft remove my-skill
 ```
 
-**Requirements:** Node.js >= 20 · No other dependencies · [Full install guide →](docs/install.md)
+**Requirements:** Node.js >= 20 · No other dependencies · 65+ agents supported · [Full install guide →](docs/install.md)
 
 ---
 
 ## Features
 
 - **Zero dependencies** — ~4 KB, no bloat
-- **Any source** — local folder, GitHub repo, any URL
-- **30+ agents** — opencode, claude-code, cursor, copilot, aider, devin, gemini-cli, and more
+- **Any source** — local folder, GitHub/GitLab/Bitbucket repo, SSH git URL
+- **65+ agents** — opencode, claude-code, cursor, copilot, aider, devin, gemini-cli, and more
 - **No registry required** — no signup, no marketplace, no vendor lock-in
+- **Non-interactive mode** — `--yes` / `-y` flag for automation/CI pipelines
+- **Update checking** — `rolecraft check` to see which skills have updates
 - **Shell completions** — bash, zsh, fish auto-completion
 - **TUI search** — interactive arrow-key skill browser with preview
 - **Content hash verification** — detect tampered or outdated skills
@@ -89,10 +94,11 @@ rolecraft remove my-skill
 | Command                      | Description                                         | Details                          |
 | ---------------------------- | --------------------------------------------------- | -------------------------------- |
 | `rolecraft init [<name>]`    | Scaffold a new `SKILL.md`                           | [docs](docs/commands/init.md)    |
-| `rolecraft install <source>` | Install a skill (local path or GitHub `owner/repo`) | [docs](docs/commands/install.md) |
+| `rolecraft install <source>` | Install a skill (local path, GitHub/GitLab/SSH URL)    | [docs](docs/commands/install.md) |
 | `rolecraft bundle <sources>` | Install multiple skills from inline sources or file | [docs](docs/commands/bundle.md)  |
 | `rolecraft bundle create`    | Create a new bundle file                            | [docs](docs/commands/bundle.md)  |
 | `rolecraft search <query>`   | Search for skills on GitHub (TUI with `--interactive`) | [docs](docs/commands/search.md)  |
+| `rolecraft check`            | Check installed skills for available updates            | [docs](docs/commands/check.md)  |
 | `rolecraft use <source>`     | Preview a skill's files without installing          | [docs](docs/commands/use.md)     |
 | `rolecraft completions bash\|zsh\|fish` | Generate shell completion scripts           | [docs](docs/commands/completions.md) |
 | `rolecraft setup [<source>]` | Detect agents, optionally install a skill to all    | [docs](docs/commands/setup.md)   |
@@ -110,19 +116,24 @@ rolecraft remove my-skill
 
 [→ Full feature comparison](docs/comparison.md)
 
-| Feature                                  | rolecraft   | skills (Vercel) | @agentskill.sh/cli |
-| ---------------------------------------- | ----------- | --------------- | ------------------ |
-| Zero dependencies                        | ✅          | ✅ (1 dep)      | ❌ (2)             |
-| Local path install                       | ✅ 1st class | ✅              | ❌ marketplace only |
-| GitHub repo install                      | ✅          | ✅              | ❌                 |
-| Bundle install + create                  | ✅          | ❌              | ✅ (skillset only) |
-| Interactive search + install (TUI)       | ✅          | ❌              | ❌                 |
-| Shell completions (bash/zsh/fish)        | ✅          | ❌              | ❌                 |
-| Dry-run preview (`--dry-run`)            | ✅          | ❌              | ❌                 |
-| Interactive scope prompt                 | ✅          | ❌              | ❌                 |
-| Content hash verification (`verify`)     | ✅          | ✅              | ❌                 |
-| CI-mode re-install (`ci`)                | ✅          | ✅              | ❌                 |
-| File size                                | ~4 KB       | ~465 KB         | ~84 KB             |
+| Feature                                  | rolecraft       | skills (Vercel)  | @agentskill.sh/cli |
+| ---------------------------------------- | --------------- | ---------------- | ------------------ |
+| Zero dependencies                        | ✅              | ✅ (1 dep)       | ❌ (2)             |
+| Local path install                       | ✅ **1st class** | ✅               | ❌ marketplace only |
+| GitHub repo install                      | ✅              | ✅               | ❌                 |
+| GitLab / SSH git URL                     | ✅              | ✅               | ❌                 |
+| Agent targets                            | **66**          | 55+              | 15+                |
+| Bundle install + create                  | ✅              | ❌               | ✅ (skillset only) |
+| Interactive TUI search + install         | ✅              | ✅               | ❌                 |
+| Non-interactive flag (`--yes`/`-y`)      | ✅              | ✅               | ❌                 |
+| Skill update check (`check`)             | ✅              | ❌               | ❌                 |
+| Shell completions (bash/zsh/fish)        | ✅              | ❌               | ❌                 |
+| Dry-run preview (`--dry-run`)            | ✅              | ❌               | ❌                 |
+| Interactive scope prompt                 | ✅              | ✅               | ❌                 |
+| Content hash verification (`verify`)     | ✅              | ✅               | ❌                 |
+| CI-mode re-install (`ci`)                | ✅              | ✅               | ❌                 |
+| Self-upgrade command                     | ✅              | ❌               | ❌                 |
+| File size                                | ~4 KB           | ~465 KB          | ~84 KB             |
 
 [See full table →](docs/comparison.md)
 

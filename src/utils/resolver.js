@@ -1,7 +1,7 @@
 import { readFile, readdir, stat } from 'node:fs/promises'
 import { join, dirname, basename } from 'node:path'
 import { tmpdir, homedir } from 'node:os'
-import { execSync as defaultExecSync } from 'node:child_process'
+import { execSync as defaultExecSync, spawnSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { readdirSync, readFileSync } from 'node:fs'
 import { computeContentHash } from './lockfile.js'
@@ -10,6 +10,21 @@ let runExec = defaultExecSync
 
 export function setExecSync(fn) {
   runExec = fn
+}
+
+function runGit(args, opts = {}) {
+  const result = spawnSync('git', args, { stdio: 'pipe', timeout: 30000, ...opts })
+  if (result.error) throw result.error
+  if (result.status !== 0) {
+    const msg = result.stderr?.toString() || result.stdout?.toString() || `git exited with code ${result.status}`
+    throw new Error(msg)
+  }
+  return result
+}
+
+function removeDir(dir) {
+  const result = spawnSync('rm', ['-rf', dir], { stdio: 'pipe' })
+  if (result.error) throw result.error
 }
 
 function isGitHubRef(source) {
@@ -179,6 +194,61 @@ async function resolveGitHub(source) {
   }
 }
 
+function isGitUrl(source) {
+  if (/^https?:\/\/(gitlab|bitbucket)\.com\//.test(source)) return true
+  if (/^git@[\w.-]+:[\w.-]+\/[\w.-]+(\.git)?$/.test(source)) return true
+  if (/^https?:\/\/[\w.-]+\/[\w.-]+\/[\w.-]+(\.git)?$/.test(source)) return true
+  return false
+}
+
+function normalizeGitUrl(source) {
+  if (/^git@/.test(source)) {
+    return source.replace(/^git@([^:]+):/, 'https://$1/')
+  }
+  return source
+}
+
+async function resolveGitUrl(source) {
+  const tmpDir = join(tmpdir(), `rolecraft-${randomUUID().slice(0, 8)}`)
+  const url = normalizeGitUrl(source)
+
+  try {
+    runGit(['clone', '--depth', '1', url, tmpDir])
+  } catch {
+    throw new Error(`Failed to clone repository from ${source}`)
+  }
+
+  const found = scanForSkill(tmpDir)
+
+  if (found.length === 0) {
+    removeDir(tmpDir)
+    throw new Error(`No SKILL.md found in repository ${source}`)
+  }
+
+  const skill = found[0]
+  const files = readdirSync(skill.dir, { withFileTypes: true })
+    .filter(e => e.name !== '.git')
+    .map(e => e.name)
+
+  const fileContents = {}
+  for (const f of files) {
+    try { fileContents[f] = readFileSync(join(skill.dir, f), 'utf-8') } catch {}
+  }
+
+  removeDir(tmpDir)
+
+  return {
+    ...skill,
+    owner: skill.owner === 'local' ? 'remote' : skill.owner,
+    slug: skill.slug === 'unknown' || skill.slug === skill.name ? `remote/${skill.name}` : skill.slug,
+    files,
+    fileContents,
+    contentSha: computeContentHash(fileContents),
+    sourcePath: source,
+    sourceType: 'git',
+  }
+}
+
 export async function resolveSource(source) {
   if (isGitHubRef(source)) {
     return await resolveGitHub(source)
@@ -186,5 +256,8 @@ export async function resolveSource(source) {
   if (isLocalPath(source)) {
     return await resolveLocal(source)
   }
-  throw new Error(`Invalid source: "${source}". Use a local path (./, /, ~) or GitHub ref (owner/repo)`)
+  if (isGitUrl(source)) {
+    return await resolveGitUrl(source)
+  }
+  throw new Error(`Invalid source: "${source}". Use a local path (./, /, ~), GitHub ref (owner/repo), or git URL`)
 }
