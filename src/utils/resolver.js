@@ -18,9 +18,19 @@ export function setHttpsGet(fn) {
   runHttpsGet = fn
 }
 
+let runSpawn = spawnSync
+
+export function setSpawnSync(fn) {
+  runSpawn = fn
+}
+
 function runGit(args, opts = {}) {
-  const cmd = 'git ' + args.map(a => JSON.stringify(a)).join(' ')
-  const result = runExec(cmd, { stdio: 'pipe', timeout: 30000, ...opts })
+  const result = runSpawn('git', args, { stdio: 'pipe', timeout: 30000, ...opts })
+  if (result.error) throw result.error
+  if (result.status !== 0) {
+    const msg = result.stderr?.toString() || result.stdout?.toString() || `git exited with code ${result.status}`
+    throw new Error(msg)
+  }
   return result
 }
 
@@ -352,7 +362,9 @@ async function resolveNpm(source) {
   try {
     mkdirSync(tmpDir, { recursive: true })
     await downloadFile(tarballUrl, tarballPath)
-    runExec(`tar -xzf "${tarballPath}" -C "${tmpDir}"`, { stdio: 'pipe', timeout: 30000 })
+    const tarResult = runSpawn('tar', ['-xzf', tarballPath, '-C', tmpDir], { stdio: 'pipe', timeout: 30000 })
+    if (tarResult.error) throw tarResult.error
+    if (tarResult.status !== 0) throw new Error(`tar extraction failed with code ${tarResult.status}`)
   } catch (e) {
     removeDir(tmpDir)
     throw new Error(`Failed to download/extract npm package "${pkgName}@${ver}": ${e.message}`)
