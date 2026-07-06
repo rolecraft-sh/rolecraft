@@ -41,18 +41,29 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Import GPG signing key
+      - name: Import signing key (SSH or GPG)
         env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
         run: |
-          if [ -z "$GPG_PRIVATE_KEY" ]; then
-            echo "No GPG key configured — tag will not be re-signed"
-            exit 0
+          if [ -n "$SSH_PRIVATE_KEY" ]; then
+            mkdir -p ~/.ssh
+            echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_signing
+            chmod 600 ~/.ssh/id_signing
+            ssh-keygen -y -f ~/.ssh/id_signing > ~/.ssh/id_signing.pub
+            eval "$(ssh-agent -s)" > /dev/null
+            ssh-add ~/.ssh/id_signing
+            git config gpg.format ssh
+            git config user.signingkey ~/.ssh/id_signing.pub
+            git config tag.gpgsign true
+          elif [ -n "$GPG_PRIVATE_KEY" ]; then
+            echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+            git config user.signingkey "$GPG_KEY_ID"
+            git config tag.gpgsign true
+          else
+            echo "No signing key configured — tag will not be re-signed"
           fi
-          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
-          git config user.signingkey "$GPG_KEY_ID"
-          git config tag.gpgsign true
 
       - name: Run release preparation script
         run: |
