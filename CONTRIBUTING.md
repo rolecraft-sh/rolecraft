@@ -50,24 +50,45 @@ chore: bump dependencies
 
 Only maintainers can create releases:
 
-### 1. Prerequisites — GPG Key in CI
+### 1. Prerequisites — Signing Key in CI
 
-The release workflow re-signs the tag when moving it to the changelog commit. For the tag to show a **Verified** badge on GitHub, the GPG private key must be added as a GitHub secret.
+The release workflow re-signs the tag when moving it to the changelog commit. For the tag to show a **Verified** badge on GitHub, a signing key must be added as a GitHub secret.
 
-First, find your GPG key ID:
+The workflow supports both **SSH** and **GPG** signing keys. SSH is recommended if you already have it configured.
+
+#### Option A: SSH (recommended)
+
+Use your existing SSH private key. First verify you have one:
+
+```bash
+ls ~/.ssh/id_ed25519   # or ~/.ssh/id_rsa
+```
+
+If you already sign commits (check with `git config --global gpg.format`), use that same key. Export the private key:
+
+```bash
+cat ~/.ssh/id_ed25519 | pbcopy
+# or on Linux: cat ~/.ssh/id_ed25519 | xclip -sel clip
+```
+
+Add these secrets to the repository at `https://github.com/sametcelikbicak/rolecraft/settings/secrets/actions`:
+
+| Secret | Value |
+|--------|-------|
+| `SSH_PRIVATE_KEY` | The SSH private key (starts with `-----BEGIN OPENSSH PRIVATE KEY-----`) |
+
+Also add your SSH **public** key (`~/.ssh/id_ed25519.pub`) to GitHub as a **Signing Key** at `https://github.com/settings/ssh/new` — select "Signing Key" as the key type.
+
+#### Option B: GPG
+
+If you prefer GPG, find your key ID and export it:
+
 ```bash
 gpg --list-secret-keys --keyid-format=long | grep sec
 # e.g. sec   ed25519/3AA5C34371567BD2  ...
 # Key ID: 3AA5C34371567BD2
-```
-
-Export the private key (you'll be prompted for your passphrase):
-```bash
 gpg --armor --export-secret-keys 3AA5C34371567BD2 | pbcopy
-# or on Linux:  gpg --armor --export-secret-keys 3AA5C34371567BD2 | xclip -sel clip
 ```
-
-Add these secrets to the repository at `https://github.com/sametcelikbicak/rolecraft/settings/secrets/actions`:
 
 | Secret | Value |
 |--------|-------|
@@ -87,7 +108,7 @@ git push origin v0.X.Y
 
 GitHub Actions:
 - Generates the changelog and bumps the version
-- Re-signs the tag on the new commit (uses the GPG key from secrets)
+- Re-signs the tag on the new commit (uses the SSH or GPG key from secrets)
 - Creates a release PR
 - After the PR is merged, the package is published to npm
 
