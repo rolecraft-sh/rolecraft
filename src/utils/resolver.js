@@ -3,7 +3,7 @@ import { join, dirname, basename } from 'node:path'
 import { tmpdir, homedir } from 'node:os'
 import { execSync as defaultExecSync, spawnSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
-import { readdirSync, readFileSync, writeFileSync, mkdirSync, mkdtempSync } from 'node:fs'
+import { readdirSync, readFileSync, writeFileSync, mkdtempSync } from 'node:fs'
 import { get as defaultHttpsGet } from 'node:https'
 import { computeContentHash } from './lockfile.js'
 
