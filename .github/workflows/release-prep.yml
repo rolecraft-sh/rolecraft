@@ -41,6 +41,19 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+      - name: Import GPG signing key
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
+        run: |
+          if [ -z "$GPG_PRIVATE_KEY" ]; then
+            echo "No GPG key configured — tag will not be re-signed"
+            exit 0
+          fi
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+          git config user.signingkey "$GPG_KEY_ID"
+          git config tag.gpgsign true
+
       - name: Run release preparation script
         run: |
           bash .github/scripts/release-prep.sh "${{ github.ref_name }}"
@@ -54,10 +67,16 @@ jobs:
           git commit -m "chore: update changelog and version for ${{ github.ref_name }} [skip ci]"
           git push origin "$BRANCH_NAME"
 
-      - name: Update tag to release commit
+      - name: Update tag to release commit (re-signed)
         run: |
-          git tag -f "${{ github.ref_name }}"
-          git push origin "${{ github.ref_name }}" --force
+          TAG_NAME="${{ github.ref_name }}"
+          TAG_MESSAGE="chore: release $TAG_NAME"
+          if git config tag.gpgsign | grep -q true; then
+            git tag -f -s "$TAG_NAME" -m "$TAG_MESSAGE"
+          else
+            git tag -f "$TAG_NAME"
+          fi
+          git push origin "$TAG_NAME" --force
 
       - name: Create Pull Request
         run: |
