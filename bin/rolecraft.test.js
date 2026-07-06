@@ -1,4 +1,4 @@
-import { describe, it, before, after } from 'node:test'
+import { describe, it, before, after, mock } from 'node:test'
 import assert from 'node:assert/strict'
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync } from 'node:fs'
 import { mkdir, rm } from 'node:fs/promises'
@@ -43,9 +43,7 @@ function capture(name, obj = console) {
 }
 
 function mockExit() {
-  const orig = process.exit
-  process.exit = (code) => { throw new Error(`exit:${code}`) }
-  return () => { process.exit = orig }
+  mock.method(process, 'exit', (code) => { throw new Error(`exit:${code}`) })
 }
 
 describe('rolecraft CLI', () => {
@@ -82,7 +80,7 @@ describe('rolecraft CLI', () => {
   it('errors when install has no source', async () => {
     process.argv = ['node', 'rolecraft', 'install']
     const { logs: errors, restore: restoreErr } = capture('error')
-    const restoreExit = mockExit()
+    mockExit()
 
     try {
       await rolecraftModule.main()
@@ -92,7 +90,6 @@ describe('rolecraft CLI', () => {
 
     assert.ok(errors.some(e => e.includes('Usage: rolecraft install <source>')))
     restoreErr()
-    restoreExit()
   })
 
   it('runs install with --global flag', async () => {
@@ -112,7 +109,7 @@ describe('rolecraft CLI', () => {
   it('errors when remove has no slug', async () => {
     process.argv = ['node', 'rolecraft', 'remove']
     const { logs: errors, restore: restoreErr } = capture('error')
-    const restoreExit = mockExit()
+    mockExit()
 
     try {
       await rolecraftModule.main()
@@ -122,15 +119,16 @@ describe('rolecraft CLI', () => {
 
     assert.ok(errors.some(e => e.includes('Usage: rolecraft remove <slug>')))
     restoreErr()
-    restoreExit()
   })
 
   it('dispatches list command without errors', async () => {
     process.argv = ['node', 'rolecraft', 'list']
+    const { logs, restore } = capture('log')
 
     await rolecraftModule.main()
 
-    assert.ok(true)
+    assert.ok(logs.length > 0)
+    restore()
   })
 
   it('runs remove command with existing skill', async () => {
@@ -153,7 +151,7 @@ describe('rolecraft CLI', () => {
   it('runs remove command with nonexistent skill', async () => {
     process.argv = ['node', 'rolecraft', 'remove', 'nonexistent']
     const { logs: errors, restore: restoreErr } = capture('error')
-    const restoreExit = mockExit()
+    mockExit()
 
     try {
       await rolecraftModule.main()
@@ -163,13 +161,12 @@ describe('rolecraft CLI', () => {
 
     assert.ok(errors.some(e => e.includes('not found')))
     restoreErr()
-    restoreExit()
   })
 
   it('errors when update has no slug', async () => {
     process.argv = ['node', 'rolecraft', 'update']
     const { logs: errors, restore: restoreErr } = capture('error')
-    const restoreExit = mockExit()
+    mockExit()
 
     try {
       await rolecraftModule.main()
@@ -179,7 +176,6 @@ describe('rolecraft CLI', () => {
 
     assert.ok(errors.some(e => e.includes('Usage: rolecraft update <slug>')))
     restoreErr()
-    restoreExit()
   })
 
   it('runs update command with existing skill', async () => {
@@ -202,7 +198,7 @@ describe('rolecraft CLI', () => {
   it('run() catches errors', async () => {
     process.argv = ['node', 'rolecraft', 'install']
     const { logs: errors, restore: restoreErr } = capture('error')
-    const restoreExit = mockExit()
+    mockExit()
 
     try {
       await rolecraftModule.run()
@@ -212,7 +208,6 @@ describe('rolecraft CLI', () => {
 
     assert.ok(errors.some(e => e.includes('Usage: rolecraft install <source>')))
     restoreErr()
-    restoreExit()
   })
 
   it('shows version for version command', async () => {
@@ -268,7 +263,7 @@ describe('rolecraft CLI', () => {
   it('errors when use has no source', async () => {
     process.argv = ['node', 'rolecraft', 'use']
     const { logs: errors, restore: restoreErr } = capture('error')
-    const restoreExit = mockExit()
+    mockExit()
 
     try {
       await rolecraftModule.main()
@@ -278,7 +273,6 @@ describe('rolecraft CLI', () => {
 
     assert.ok(errors.some(e => e.includes('Usage: rolecraft use <source>')))
     restoreErr()
-    restoreExit()
   })
 
   it('runs use command with existing source', async () => {
@@ -356,7 +350,7 @@ describe('rolecraft CLI', () => {
   it('errors when search has no query', async () => {
     process.argv = ['node', 'rolecraft', 'search']
     const { logs: errors, restore: restoreErr } = capture('error')
-    const restoreExit = mockExit()
+    mockExit()
 
     try {
       await rolecraftModule.main()
@@ -366,7 +360,6 @@ describe('rolecraft CLI', () => {
 
     assert.ok(errors.some(e => e.includes('Usage: rolecraft search <query>')))
     restoreErr()
-    restoreExit()
   })
 
   it('handles search rate limit gracefully', async () => {
@@ -403,7 +396,7 @@ describe('rolecraft CLI', () => {
 
     process.argv = ['node', 'rolecraft', 'install', skillDir, '--global', '--frozen-lockfile']
     const { logs: errors, restore: restoreErr } = capture('error')
-    const restoreExit = mockExit()
+    mockExit()
 
     try {
       await rolecraftModule.main()
@@ -413,7 +406,6 @@ describe('rolecraft CLI', () => {
 
     assert.ok(errors.some(e => e.includes('already installed')), `Expected 'already installed' in: ${errors.join(', ')}`)
     restoreErr()
-    restoreExit()
   })
 
   it('runs verify command with no skills', async () => {
@@ -518,7 +510,7 @@ describe('rolecraft CLI', () => {
   it('errors when bundle has no args', async () => {
     process.argv = ['node', 'rolecraft', 'bundle']
     const { logs: errors, restore: restoreErr } = capture('error')
-    const restoreExit = mockExit()
+    mockExit()
 
     try {
       await rolecraftModule.main()
@@ -528,7 +520,6 @@ describe('rolecraft CLI', () => {
 
     assert.ok(errors.some(e => e.includes('Usage: rolecraft bundle')))
     restoreErr()
-    restoreExit()
   })
 
   it('shows usage for completions with --help', async () => {
@@ -568,5 +559,39 @@ describe('rolecraft CLI', () => {
 
     assert.ok(logs.some(l => l.includes('All 2 skill(s) installed')))
     restore()
+  })
+
+  it('dispatches check command via CLI', async () => {
+    process.argv = ['node', 'rolecraft', 'check']
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l.includes('No installed skills found') || l.includes('Checking') || l.includes('up to date') || l.includes('All skills are up to date')))
+    restore()
+  })
+
+  it('dispatches check-updates command via CLI', async () => {
+    process.argv = ['node', 'rolecraft', 'check-updates']
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l.includes('No installed skills found') || l.includes('Checking') || l.includes('up to date') || l.includes('All skills are up to date')))
+    restore()
+  })
+
+  it('entry point catch handler handles rejected promise from run()', async () => {
+    const { execSync } = await import('node:child_process')
+    const binPath = new URL('./rolecraft.js', import.meta.url).pathname
+    try {
+      execSync(`node "${binPath}" install`, {
+        encoding: 'utf-8',
+        env: { ...process.env, HOME: tempDir },
+      })
+      assert.fail('should have thrown')
+    } catch (e) {
+      assert.ok(e.stderr?.includes('Usage: rolecraft install <source>'))
+    }
   })
 })

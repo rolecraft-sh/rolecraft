@@ -5,10 +5,11 @@ import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
-let tempDir, lockModule
+let tempDir, lockModule, origHome
 
 before(async () => {
   tempDir = mkdtempSync(join(tmpdir(), 'rolecraft-lock-test-'))
+  origHome = process.env.HOME
   process.env.HOME = tempDir
   await mkdir(join(tempDir, '.agents'), { recursive: true })
   lockModule = await import('./lockfile.js')
@@ -16,6 +17,7 @@ before(async () => {
 
 after(async () => {
   await rm(tempDir, { recursive: true, force: true })
+  process.env.HOME = origHome
 })
 
 describe('lockfile', () => {

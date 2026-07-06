@@ -7,11 +7,29 @@ import { rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { EventEmitter } from 'node:events'
+import { execSync, spawnSync } from 'node:child_process'
 
 let tempDir, resolverModule
 
 async function freshImport() {
   resolverModule = await import('./resolver.js')
+  resolverModule.setExecSync(execSync)
+  resolverModule.setSpawnSync(spawnSync)
+  resolverModule.setHttpsGet((url, opts, cb) => {
+    if (typeof opts === 'function') {
+      cb = opts
+    }
+    const req = new EventEmitter()
+    process.nextTick(() => {
+      const res = new EventEmitter()
+      res.statusCode = 200
+      res.headers = {}
+      res.resume = () => {}
+      cb(res)
+      process.nextTick(() => res.emit('end'))
+    })
+    return req
+  })
 }
 
 describe('resolver', () => {
@@ -53,6 +71,41 @@ describe('resolver', () => {
 
       const result = await resolverModule.resolveSource(skillDir)
       assert.equal(result.name, 'abs-skill')
+    })
+
+    it('resolves a git SSH URL', async () => {
+      await freshImport()
+      resolverModule.setSpawnSync((cmd, args) => {
+        if (cmd === 'git' && args[0] === 'clone') {
+          const d = args[4]
+          mkdirSync(d, { recursive: true })
+          writeFileSync(join(d, 'SKILL.md'), '# slug: test/git-skill\nname: git-skill\nContent')
+        }
+        return { status: 0, stdout: '', stderr: '' }
+      })
+      const result = await resolverModule.resolveSource('git@github.com:owner/repo.git')
+      assert.equal(result.name, 'git-skill')
+      assert.equal(result.slug, 'test/git-skill')
+      assert.equal(result.owner, 'remote')
+      assert.equal(result.sourceType, 'git')
+      assert.equal(result.sourcePath, 'git@github.com:owner/repo.git')
+      assert.ok(result.files.includes('SKILL.md'))
+    })
+
+    it('throws when no SKILL.md found in git repo', async () => {
+      await freshImport()
+      resolverModule.setSpawnSync((cmd, args) => {
+        if (cmd === 'git' && args[0] === 'clone') {
+          const d = args[4]
+          mkdirSync(d, { recursive: true })
+          // Don't create SKILL.md
+        }
+        return { status: 0, stdout: '', stderr: '' }
+      })
+      await assert.rejects(
+        () => resolverModule.resolveSource('git@github.com:owner/empty.git'),
+        /No SKILL.md found/,
+      )
     })
   })
 
@@ -269,15 +322,15 @@ Just content
 
     it('resolves a GitHub repo successfully', async () => {
       await freshImport()
-      resolverModule.setExecSync((cmd) => {
-        const match = cmd.match(/"([^"]+)"$/)
-        if (match) {
-          const d = match[1]
+      resolverModule.setSpawnSync((cmd, args) => {
+        if (cmd === 'git' && args[0] === 'clone') {
+          const d = args[4]
           mkdirSync(d, { recursive: true })
           writeFileSync(join(d, 'SKILL.md'), '# slug: test/skill\nname: test-skill\nContent')
           writeFileSync(join(d, 'helper.js'), 'x')
           try { symlinkSync('/nonexistent-target', join(d, 'broken.txt')) } catch {}
         }
+        return { status: 0, stdout: '', stderr: '' }
       })
 
       const result = await resolverModule.resolveSource('user/repo')
@@ -294,13 +347,13 @@ Just content
 
     it('throws when no SKILL.md found in cloned repo', async () => {
       await freshImport()
-      resolverModule.setExecSync((cmd) => {
-        const match = cmd.match(/"([^"]+)"$/)
-        if (match) {
-          const d = match[1]
+      resolverModule.setSpawnSync((cmd, args) => {
+        if (cmd === 'git' && args[0] === 'clone') {
+          const d = args[4]
           mkdirSync(d, { recursive: true })
           writeFileSync(join(d, 'README.md'), 'no skill here')
         }
+        return { status: 0, stdout: '', stderr: '' }
       })
 
       await assert.rejects(
@@ -354,15 +407,15 @@ Just content
       await freshImport()
       mockHttps(resolverModule)
 
-      resolverModule.setExecSync((cmd) => {
-        const tarMatch = cmd.match(/tar -xzf "[^"]+" -C "([^"]+)"/)
-        if (tarMatch) {
-          const extractDir = tarMatch[1]
+      resolverModule.setSpawnSync((cmd, args) => {
+        if (cmd === 'tar' && args[0] === '-xzf') {
+          const extractDir = args[3]
           const packageDir = join(extractDir, 'package')
           mkdirSync(packageDir, { recursive: true })
           writeFileSync(join(packageDir, 'SKILL.md'), '# slug: test/npm-skill\nname: npm-skill\nContent')
           writeFileSync(join(packageDir, 'helper.js'), 'x')
         }
+        return { status: 0, stdout: '', stderr: '' }
       })
 
       const result = await resolverModule.resolveSource('npm:test-pkg')
@@ -381,14 +434,14 @@ Just content
       await freshImport()
       mockHttps(resolverModule)
 
-      resolverModule.setExecSync((cmd) => {
-        const tarMatch = cmd.match(/tar -xzf "[^"]+" -C "([^"]+)"/)
-        if (tarMatch) {
-          const extractDir = tarMatch[1]
+      resolverModule.setSpawnSync((cmd, args) => {
+        if (cmd === 'tar' && args[0] === '-xzf') {
+          const extractDir = args[3]
           const packageDir = join(extractDir, 'package')
           mkdirSync(packageDir, { recursive: true })
           writeFileSync(join(packageDir, 'SKILL.md'), '---\nname: my-skill\nslug: org/skill\n---\nContent')
         }
+        return { status: 0, stdout: '', stderr: '' }
       })
 
       const result = await resolverModule.resolveSource('npm:test-pkg@1.0.0')
@@ -402,14 +455,14 @@ Just content
       await freshImport()
       mockHttps(resolverModule)
 
-      resolverModule.setExecSync((cmd) => {
-        const tarMatch = cmd.match(/tar -xzf "[^"]+" -C "([^"]+)"/)
-        if (tarMatch) {
-          const extractDir = tarMatch[1]
+      resolverModule.setSpawnSync((cmd, args) => {
+        if (cmd === 'tar' && args[0] === '-xzf') {
+          const extractDir = args[3]
           const packageDir = join(extractDir, 'package')
           mkdirSync(packageDir, { recursive: true })
           writeFileSync(join(packageDir, 'SKILL.md'), '# slug: s/skill\nname: scoped-skill\nContent')
         }
+        return { status: 0, stdout: '', stderr: '' }
       })
 
       const result = await resolverModule.resolveSource('npm:@scope/test-pkg')
@@ -422,13 +475,13 @@ Just content
       await freshImport()
       mockHttps(resolverModule)
 
-      resolverModule.setExecSync((cmd) => {
-        const tarMatch = cmd.match(/tar -xzf "[^"]+" -C "([^"]+)"/)
-        if (tarMatch) {
-          const extractDir = tarMatch[1]
+      resolverModule.setSpawnSync((cmd, args) => {
+        if (cmd === 'tar' && args[0] === '-xzf') {
+          const extractDir = args[3]
           mkdirSync(join(extractDir, 'package'), { recursive: true })
           writeFileSync(join(extractDir, 'package', 'README.md'), 'no skill here')
         }
+        return { status: 0, stdout: '', stderr: '' }
       })
 
       await assert.rejects(
@@ -445,6 +498,210 @@ Just content
         () => resolverModule.resolveSource('npm:'),
         /Invalid npm reference/,
       )
+    })
+
+    it('throws when npm registry returns non-200', async () => {
+      await freshImport()
+      resolverModule.setHttpsGet((...args) => {
+        const cb = args[args.length - 1]
+        const req = new EventEmitter()
+        process.nextTick(() => {
+          const res = new EventEmitter()
+          res.statusCode = 404
+          res.headers = {}
+          res.resume = () => {}
+          cb(res)
+          res.emit('end')
+        })
+        return req
+      })
+      await assert.rejects(
+        () => resolverModule.resolveSource('npm:test-pkg'),
+        /Failed to fetch npm package/,
+      )
+    })
+
+    it('throws when tarball download returns non-200', async () => {
+      await freshImport()
+      let callCount = 0
+      resolverModule.setHttpsGet((...args) => {
+        const cb = args[args.length - 1]
+        const req = new EventEmitter()
+        callCount++
+        process.nextTick(() => {
+          const res = new EventEmitter()
+          res.headers = {}
+          res.resume = () => {}
+          cb(res)
+          if (callCount === 1) {
+            res.statusCode = 200
+            const data = Buffer.from(JSON.stringify({
+              'dist-tags': { latest: '1.0.0' },
+              versions: {
+                '1.0.0': {
+                  dist: { tarball: 'https://registry.npmjs.org/test-pkg/-/test-pkg-1.0.0.tgz' },
+                },
+              },
+            }))
+            res.emit('data', data)
+          } else {
+            res.statusCode = 500
+          }
+          res.emit('end')
+        })
+        return req
+      })
+      await assert.rejects(
+        () => resolverModule.resolveSource('npm:test-pkg'),
+        /Failed to download/,
+      )
+    })
+
+    it('throws when dist-tags.latest is missing', async () => {
+      await freshImport()
+      resolverModule.setHttpsGet((...args) => {
+        const cb = args[args.length - 1]
+        const req = new EventEmitter()
+        process.nextTick(() => {
+          const res = new EventEmitter()
+          res.statusCode = 200
+          res.headers = {}
+          res.resume = () => {}
+          cb(res)
+          res.emit('data', Buffer.from(JSON.stringify({
+            'dist-tags': {},
+            versions: {},
+          })))
+          res.emit('end')
+        })
+        return req
+      })
+      await assert.rejects(
+        () => resolverModule.resolveSource('npm:test-pkg'),
+        /No "latest" tag found/,
+      )
+    })
+
+    it('throws when version not found in versions', async () => {
+      await freshImport()
+      resolverModule.setHttpsGet((...args) => {
+        const cb = args[args.length - 1]
+        const req = new EventEmitter()
+        process.nextTick(() => {
+          const res = new EventEmitter()
+          res.statusCode = 200
+          res.headers = {}
+          res.resume = () => {}
+          cb(res)
+          res.emit('data', Buffer.from(JSON.stringify({
+            'dist-tags': { latest: '2.0.0' },
+            versions: {},
+          })))
+          res.emit('end')
+        })
+        return req
+      })
+      await assert.rejects(
+        () => resolverModule.resolveSource('npm:test-pkg'),
+        /Version "2.0.0" not found/,
+      )
+    })
+
+    it('resolves scoped npm package with version', async () => {
+      await freshImport()
+      mockHttps(resolverModule)
+      resolverModule.setSpawnSync((cmd, args) => {
+        if (cmd === 'tar' && args[0] === '-xzf') {
+          const extractDir = args[3]
+          const packageDir = join(extractDir, 'package')
+          mkdirSync(packageDir, { recursive: true })
+          writeFileSync(join(packageDir, 'SKILL.md'), '# slug: s/skill\nname: scoped-version-skill\nContent')
+        }
+        return { status: 0, stdout: '', stderr: '' }
+      })
+      const result = await resolverModule.resolveSource('npm:@scope/test-pkg@1.0.0')
+      assert.equal(result.name, 'scoped-version-skill')
+      assert.equal(result.sourceType, 'npm')
+    })
+  })
+
+  describe('isGitUrl', () => {
+    it('detects GitLab HTTPS URL', async () => {
+      await freshImport()
+      resolverModule.setSpawnSync(() => { throw new Error('mock') })
+      await assert.rejects(
+        () => resolverModule.resolveSource('https://gitlab.com/owner/repo'),
+        /Failed to clone/,
+      )
+    })
+
+    it('detects Bitbucket HTTPS URL', async () => {
+      await freshImport()
+      resolverModule.setSpawnSync(() => { throw new Error('mock') })
+      await assert.rejects(
+        () => resolverModule.resolveSource('https://bitbucket.com/owner/repo'),
+        /Failed to clone/,
+      )
+    })
+
+    it('detects SSH git URL', async () => {
+      await freshImport()
+      resolverModule.setSpawnSync(() => { throw new Error('mock') })
+      await assert.rejects(
+        () => resolverModule.resolveSource('git@github.com:owner/repo.git'),
+        /Failed to clone/,
+      )
+    })
+
+    it('detects generic HTTPS git URL', async () => {
+      await freshImport()
+      resolverModule.setSpawnSync(() => { throw new Error('mock') })
+      await assert.rejects(
+        () => resolverModule.resolveSource('https://example.com/owner/repo.git'),
+        /Failed to clone/,
+      )
+    })
+
+    it('rejects invalid URL as not a git URL', async () => {
+      await freshImport()
+      await assert.rejects(
+        () => resolverModule.resolveSource('not-a-git-url'),
+        /Invalid source/,
+      )
+    })
+  })
+
+  describe('normalizeGitUrl', () => {
+    it('converts SSH URL to HTTPS', async () => {
+      await freshImport()
+      let cloneUrl
+      resolverModule.setSpawnSync((cmd, args) => {
+        if (cmd === 'git' && args[0] === 'clone') {
+          cloneUrl = args[3]
+        }
+        throw new Error('mock')
+      })
+      await assert.rejects(
+        () => resolverModule.resolveSource('git@github.com:owner/repo.git'),
+        /Failed to clone/,
+      )
+      assert.equal(cloneUrl, 'https://github.com/owner/repo.git')
+    })
+
+    it('passes HTTPS URL through unchanged', async () => {
+      await freshImport()
+      let cloneUrl
+      resolverModule.setSpawnSync((cmd, args) => {
+        if (cmd === 'git' && args[0] === 'clone') {
+          cloneUrl = args[3]
+        }
+        throw new Error('mock')
+      })
+      await assert.rejects(
+        () => resolverModule.resolveSource('https://gitlab.com/owner/repo'),
+        /Failed to clone/,
+      )
+      assert.equal(cloneUrl, 'https://gitlab.com/owner/repo')
     })
   })
 })

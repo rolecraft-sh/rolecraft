@@ -11,18 +11,23 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const pkg = JSON.parse(readFileSync(join(__dirname, '..', '..', 'package.json'), 'utf-8'))
 const VERSION = pkg.version
 
-let tempDir, upgradeModule, logs, origLog, origExit
+let tempDir, upgradeModule, logs, origLog, origExit, origError
 
 function captureLog() {
   logs = []
   origLog = console.log
+  origError = console.error
   console.log = (...args) => {
+    if (args.length) logs.push(String(args[0]))
+  }
+  console.error = (...args) => {
     if (args.length) logs.push(String(args[0]))
   }
 }
 
 function restoreLog() {
   console.log = origLog
+  console.error = origError
 }
 
 function mockExit() {
@@ -139,5 +144,47 @@ describe('upgrade command', () => {
     globalThis.fetch = origFetch
 
     assert.ok(logs.some(l => l.includes('Could not check')))
+  })
+
+  it('executes upgrade when newer version exists on npm', async () => {
+    const origFetch = globalThis.fetch
+    globalThis.fetch = () => Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({ version: '99.99.99' }),
+    })
+
+    captureLog()
+    await upgradeModule.upgradeCommand({ execSync: () => {} })
+    restoreLog()
+
+    globalThis.fetch = origFetch
+
+    assert.ok(logs.some(l => l.includes('Upgraded to')))
+    assert.ok(logs.some(l => l.includes('Restart your terminal')))
+  })
+
+  it('shows upgrade failed message when execSync throws', async () => {
+    const origFetch = globalThis.fetch
+    globalThis.fetch = () => Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({ version: '99.99.99' }),
+    })
+
+    captureLog()
+    mockExit()
+    try {
+      await upgradeModule.upgradeCommand({
+        execSync: () => { throw new Error('install failed') },
+      })
+    } catch (e) {
+      if (!e.message.startsWith('exit:')) throw e
+    }
+    restoreLog()
+    restoreExit()
+
+    globalThis.fetch = origFetch
+
+    assert.ok(logs.some(l => l.includes('Upgrade failed')))
+    assert.ok(logs.some(l => l.includes('Try running manually')))
   })
 })

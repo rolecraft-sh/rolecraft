@@ -5,10 +5,11 @@ import { mkdir, rm, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
-let tempDir, removeModule
+let tempDir, removeModule, origHome
 
 before(async () => {
   tempDir = mkdtempSync(join(tmpdir(), 'rolecraft-remove-test-'))
+  origHome = process.env.HOME
   process.env.HOME = tempDir
 
   await mkdir(join(tempDir, '.agents', 'skills', 'test-skill'), { recursive: true })
@@ -30,6 +31,7 @@ before(async () => {
 
 after(async () => {
   await rm(tempDir, { recursive: true, force: true })
+  process.env.HOME = origHome
 })
 
 describe('remove command', () => {

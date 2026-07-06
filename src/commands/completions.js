@@ -129,19 +129,19 @@ _rolecraft() {
             '--kilo[Also install to ~/.kilo/skills/]' \\
             '--openhands[Also install to ~/.openhands/skills/]' \\
             '--junie[Also install to ~/.junie/skills/]' \\
-            '--factory[Also install to ~/.factory/skills/]' \
-            '--command-code[Also install to ~/.commandcode/skills/]' \
-            '--cortex[Also install to ~/.snowflake/cortex/skills/]' \
-            '--mistral-vibe[Also install to ~/.vibe/skills/]' \
-            '--qwen-code[Also install to ~/.qwen/skills/]' \
-            '--openclaw[Also install to ~/.openclaw/skills/]' \
-            '--codebuddy[Also install to ~/.codebuddy/skills/]' \
-            '--mux[Also install to ~/.mux/skills/]' \
-            '--pi[Also install to ~/.pi/agent/skills/]' \
-            '--autohand-code[Also install to ~/.autohand/skills/]' \
-            '--rovo[Also install to ~/.rovodev/skills/]' \
-            '--firebender[Also install to ~/.firebender/skills/]' \
-            '--bob[Also install to ~/.bob/skills/]' \
+             '--factory[Also install to ~/.factory/skills/]' \\
+             '--command-code[Also install to ~/.commandcode/skills/]' \\
+             '--cortex[Also install to ~/.snowflake/cortex/skills/]' \\
+             '--mistral-vibe[Also install to ~/.vibe/skills/]' \\
+             '--qwen-code[Also install to ~/.qwen/skills/]' \\
+             '--openclaw[Also install to ~/.openclaw/skills/]' \\
+             '--codebuddy[Also install to ~/.codebuddy/skills/]' \\
+             '--mux[Also install to ~/.mux/skills/]' \\
+             '--pi[Also install to ~/.pi/agent/skills/]' \\
+             '--autohand-code[Also install to ~/.autohand/skills/]' \\
+             '--rovo[Also install to ~/.rovodev/skills/]' \\
+             '--firebender[Also install to ~/.firebender/skills/]' \\
+             '--bob[Also install to ~/.bob/skills/]' \\
             '--aider-desk[Also install to ~/.aider-desk/skills/]' \\
             '--zap[Also install to ~/.zap/skills/]' \\
             '--codeep[Also install to ~/.codeep/skills/]' \\
