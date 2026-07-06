@@ -13,6 +13,7 @@
 9. `git add ... && git commit -m "type: message"` — commit
 10. `git push -u origin <branch>` — push
 11. `gh pr create` — open PR
+12. Before merging, wait for all GitHub Actions checks to pass (`gh run watch` or check PR status). Never merge while checks are running.
 
 ## Workflow
 - Before starting any task, ensure you're on `main` with latest changes (`git checkout main && git pull`), then create a new branch specific to the task (`git checkout -b feat/my-feature` or `fix/my-bug`)
@@ -23,6 +24,7 @@
 - Update documentation (README, CONTRIBUTING, docs/) when needed
 - Test the `--dry-run` flag if the feature supports it
 - After tests pass, commit the changes, push the branch, and open a PR
+- Before merging, wait for all GitHub Actions checks to pass (`gh run watch` or check PR status). Never merge while checks are running.
 
 ## Code style
 - Keep the zero-dependency principle (don't add new dependencies to package.json)
