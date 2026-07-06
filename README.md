@@ -96,6 +96,7 @@ rolecraft remove my-skill
 - **Content hash verification** — detect tampered or outdated skills
 - **CI-ready** — lockfile-based re-install for pipelines
 - **Dry-run mode** — preview before installing
+- **System health check** — `rolecraft doctor` diagnoses Node.js, agent directories, lockfiles, and skill integrity
 
 ---
 
@@ -113,6 +114,7 @@ rolecraft remove my-skill
 | `rolecraft completions bash\|zsh\|fish` | Generate shell completion scripts                        | [docs](docs/commands/completions.md) |
 | `rolecraft setup [<source>]`            | Detect agents, optionally install a skill to all         | [docs](docs/commands/setup.md)       |
 | `rolecraft list`                        | Show all installed skills                                | [docs](docs/commands/list.md)        |
+| `rolecraft doctor`                      | Run system health check                                  | [docs](docs/commands/doctor.md)      |
 | `rolecraft verify`                      | Check installed skill integrity via content hash         | [docs](docs/commands/verify.md)      |
 | `rolecraft ci`                          | Re-install all skills from lockfile (CI mode)            | [docs](docs/commands/ci.md)          |
 | `rolecraft upgrade`                     | Upgrade rolecraft to the latest version                  | [docs](docs/commands/upgrade.md)     |
@@ -128,7 +130,7 @@ rolecraft remove my-skill
 
 | Feature                              | rolecraft        | skills (Vercel) | @agentskill.sh/cli  |
 | ------------------------------------ | ---------------- | --------------- | ------------------- |
-| Zero dependencies                    | ✅               | ✅ (1 dep)      | ❌ (2)              |
+| Zero dependencies                    | ✅ **0**         | ✅ (1 dep)      | ❌ (2)              |
 | Local path install                   | ✅ **1st class** | ✅              | ❌ marketplace only |
 | GitHub repo install                  | ✅               | ✅              | ❌                  |
 | GitLab / SSH git URL                 | ✅               | ✅              | ❌                  |
@@ -145,6 +147,7 @@ rolecraft remove my-skill
 | Interactive scope prompt             | ✅               | ✅              | ❌                  |
 | Content hash verification (`verify`) | ✅               | ✅              | ❌                  |
 | CI-mode re-install (`ci`)            | ✅               | ✅              | ❌                  |
+| System health check (`doctor`)       | ✅               | ❌              | ❌                  |
 | Self-upgrade command                 | ✅               | ❌              | ❌                  |
 | File size                            | ~4 KB            | ~465 KB         | ~84 KB              |
 

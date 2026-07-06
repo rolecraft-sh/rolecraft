@@ -14,6 +14,7 @@ Install and manage AI agent skills across 66+ agents with a single command. Zero
 - **Install skills** — from local folders, GitHub repos, GitLab projects, or SSH git URLs
 - **Manage skills** — list, update, remove, and verify installed skills
 - **CI/CD pipelines** — lockfile-based re-install with `rolecraft ci`
+- **Troubleshooting** — `rolecraft doctor` to diagnose agent detection, lockfile, and Node.js issues
 - **Team onboarding** — bundle install with a single command
 - **Cross-agent setup** — install the same skill to multiple agents at once
 
@@ -38,6 +39,9 @@ npx rolecraft install user/repo --cursor --devin
 # Check for updates
 npx rolecraft check
 
+# Run system health check
+npx rolecraft doctor
+
 # List installed skills
 npx rolecraft list
 ```
@@ -56,6 +60,7 @@ npx rolecraft list
 | `rolecraft ci` | Re-install from lockfile (CI mode) |
 | `rolecraft verify` | Check skill integrity via content hash |
 | `rolecraft search <query>` | Search skills on GitHub |
+| `rolecraft doctor` | Run system health check |
 | `rolecraft use <source>` | Preview without installing |
 | `rolecraft completions bash\|zsh\|fish` | Generate shell completions |
 
