@@ -2,12 +2,12 @@
 name: rolecraft
 description: >-
   Install AI agent skills as roles & behaviors from any source — local folder,
-  GitHub, GitLab, SSH git URL. Zero-dependency CLI with 66+ agent targets.
+  GitHub, GitLab, SSH git URL. Zero-dependency CLI with 82+ agent targets.
 ---
 
 # rolecraft
 
-Install and manage AI agent skills across 66+ agents with a single command. Zero dependencies. No registry required.
+Install and manage AI agent skills across 82+ agents with a single command. Zero dependencies. No registry required.
 
 ## When to use
 
@@ -75,7 +75,7 @@ npx rolecraft list
 | `--symlink` | Symlink instead of copy |
 | `--global` / `--project` | Scope selection |
 
-## Supported agents (66+)
+## Supported agents (82+)
 
 `opencode`, `claude-code`, `cursor`, `windsurf`, `devin`, `codex`, `copilot`, `aider`, `cline`, `gemini-cli`, `cody`, `continue`, `warp`, `codeium`, `fabric`, `goose`, `tabnine`, `supermaven`, `pr-pilot`, `loom`, `roo`, `trae`, `hermes`, `kiro`, `augment`, `kilo`, `openhands`, `junie`, `factory`, `command-code`, `cortex`, `mistral-vibe`, `qwen-code`, `openclaw`, `codebuddy`, `mux`, `pi`, `autohand-code`, `rovo`, `firebender`, `bob`, `aider-desk`, and 25+ more.
 

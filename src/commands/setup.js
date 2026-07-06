@@ -1,7 +1,7 @@
 import { accessSync, readdirSync, constants } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotProjectDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, getCommandCodeDir, getCortexDir, getMistralVibeDir, getQwenCodeDir, getOpenClawDir, getCodeBuddyDir, getMuxDir, getPiDir, getAutohandCodeDir, getRovoDevDir, getFirebenderDir, getBobDir, getAiderDeskDir, getCodeArtsDoerDir, getCodeMakerDir, getCodeStudioDir, getCrushDir, getEveDir, getForgeDir, getInferenceShDir, getJazzDir, getIFlowDir, getKiloCodeDir, getKodeDir, getLingmaDir, getMcpJamDir, getMoxbyDir, getOnaDir, getQoderDir, getReasonixDir, getTerraMindDir, getTinyCloudDir, getZencoderDir, getZapDir, getCodeepDir, getKimiCodeDir, getZCodeDir } from '../utils/lockfile.js'
+import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotProjectDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, getCommandCodeDir, getCortexDir, getMistralVibeDir, getQwenCodeDir, getOpenClawDir, getCodeBuddyDir, getMuxDir, getPiDir, getAutohandCodeDir, getRovoDevDir, getFirebenderDir, getBobDir, getAiderDeskDir, getCodeArtsDoerDir, getCodeMakerDir, getCodeStudioDir, getCrushDir, getEveDir, getForgeDir, getInferenceShDir, getJazzDir, getIFlowDir, getKiloCodeDir, getKodeDir, getLingmaDir, getMcpJamDir, getMoxbyDir, getOnaDir, getQoderDir, getReasonixDir, getTerraMindDir, getTinyCloudDir, getZencoderDir, getZapDir, getCodeepDir, getKimiCodeDir, getZCodeDir, getAstrbotDir, getQoderCnDir, getTraeCnDir, getZenflowDir, getNeovateDir, getPochiDir, getAdalDir } from '../utils/lockfile.js'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 
@@ -72,6 +72,22 @@ const KNOWN_AGENTS = [
   { flag: 'codeep', label: 'codeep', dir: getCodeepDir },
   { flag: 'kimi-code', label: 'kimi-code', dir: getKimiCodeDir },
   { flag: 'zcode', label: 'zcode', dir: getZCodeDir },
+  { flag: 'amp', label: 'amp', dir: getAgentsDir },
+  { flag: 'antigravity', label: 'antigravity', dir: getAgentsDir },
+  { flag: 'antigravity-cli', label: 'antigravity-cli', dir: getAgentsDir },
+  { flag: 'deepagents', label: 'deep-agents', dir: getAgentsDir },
+  { flag: 'dexto', label: 'dexto', dir: getAgentsDir },
+  { flag: 'loaf', label: 'loaf', dir: getAgentsDir },
+  { flag: 'replit', label: 'replit', dir: getAgentsDir },
+  { flag: 'zed', label: 'zed', dir: getAgentsDir },
+  { flag: 'promptscript', label: 'promptscript', dir: getEveDir },
+  { flag: 'astrbot', label: 'astrbot', dir: getAstrbotDir },
+  { flag: 'qoder-cn', label: 'qoder-cn', dir: getQoderCnDir },
+  { flag: 'trae-cn', label: 'trae-cn', dir: getTraeCnDir },
+  { flag: 'zenflow', label: 'zenflow', dir: getZenflowDir },
+  { flag: 'neovate', label: 'neovate', dir: getNeovateDir },
+  { flag: 'pochi', label: 'pochi', dir: getPochiDir },
+  { flag: 'adal', label: 'adal', dir: getAdalDir },
 ]
 
 export function detectAgents() {
@@ -105,7 +121,8 @@ export async function setupCommand(source, options = {}) {
     console.log('   windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody,')
     console.log('   continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot,')
     console.log('   loom, roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory, command-code, cortex, mistral-vibe, qwen-code, openclaw, codebuddy, mux, pi, autohand-code, rovo-dev, firebender, ibm-bob, aider-desk, code-arts-doer, code-maker, code-studio,')
-    console.log('   crush, eve, forge, inference-sh, jazz, iflow, kilo-code, kode, lingma, mcp-jam, moxby, ona, qoder, reasonix, terra-mind, tiny-cloud, zencoder) first.')
+    console.log('   crush, eve, forge, inference-sh, jazz, iflow, kilo-code, kode, lingma, mcp-jam, moxby, ona, qoder, reasonix, terra-mind, tiny-cloud, zencoder,')
+    console.log('   amp, antigravity, antigravity-cli, deepagents, dexto, loaf, replit, zed, promptscript, astrbot, qoder-cn, trae-cn, zenflow, neovate, pochi, adal) first.')
     return
   }
 

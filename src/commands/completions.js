@@ -15,6 +15,9 @@ const SCOPE_FLAGS = [
   '--codebuddy', '--mux', '--pi', '--autohand-code', '--rovo', '--firebender',
   '--bob', '--aider-desk',
   '--zap', '--codeep', '--kimi-code', '--zcode',
+  '--amp', '--antigravity', '--antigravity-cli', '--deepagents', '--dexto',
+  '--loaf', '--replit', '--zed', '--promptscript',
+  '--astrbot', '--qoder-cn', '--trae-cn', '--zenflow', '--neovate', '--pochi', '--adal',
   '--all',
 ]
 

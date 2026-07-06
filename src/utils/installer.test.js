@@ -699,4 +699,60 @@ describe('installer', () => {
     const skillDir = join(process.env.HOME, '.zcode', 'skills', 'test-my-skill')
     assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
+
+  it('installs skill to astrbot directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['astrbot'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'astrbot')
+    const skillDir = join(process.env.HOME, '.astrbot', 'data', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to qoder-cn directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['qoder-cn'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'qoder-cn')
+    const skillDir = join(process.env.HOME, '.qoder-cn', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to trae-cn directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['trae-cn'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'trae-cn')
+    const skillDir = join(process.env.HOME, '.trae-cn', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to zenflow directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['zenflow'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'zenflow')
+    const skillDir = join(process.env.HOME, '.zencoder', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to neovate directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['neovate'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'neovate')
+    const skillDir = join(process.env.HOME, '.neovate', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to pochi directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['pochi'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'pochi')
+    const skillDir = join(process.env.HOME, '.pochi', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to adal directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['adal'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'adal')
+    const skillDir = join(process.env.HOME, '.adal', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
 })

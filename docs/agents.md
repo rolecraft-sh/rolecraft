@@ -70,6 +70,22 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | terra-mind      | `~/.terramind/skills/`                            |
 | tiny-cloud      | `~/.tinycloud/skills/`                            |
 | zencoder        | `~/.zencoder/skills/`                             |
+| amp             | `~/.agents/skills/`                               |
+| antigravity     | `~/.agents/skills/`                               |
+| antigravity-cli | `~/.agents/skills/`                               |
+| deep-agents     | `~/.agents/skills/`                               |
+| dexto           | `~/.agents/skills/`                               |
+| loaf            | `~/.agents/skills/`                               |
+| replit          | `~/.agents/skills/`                               |
+| zed             | `~/.agents/skills/`                               |
+| promptscript    | `./agent/skills/`                                 |
+| astrbot         | `~/.astrbot/data/skills/`                         |
+| qoder-cn        | `~/.qoder-cn/skills/`                             |
+| trae-cn         | `~/.trae-cn/skills/`                              |
+| zenflow         | `~/.zencoder/skills/`                             |
+| neovate         | `~/.neovate/skills/`                              |
+| pochi           | `~/.pochi/skills/`                                |
+| adal            | `~/.adal/skills/`                                 |
 
 > ⚠️ Windsurf has been rebranded to **Devin Desktop**. The `--windsurf` flag and `~/.windsurf/skills/` path still work for backward compatibility, but new deployments should use `--devin` / `~/.devin/skills/`.
 

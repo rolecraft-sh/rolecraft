@@ -89,6 +89,34 @@ describe('lockfile', () => {
     assert.equal(lockModule.getCopilotDir(), join(tempDir, '.copilot', 'skills'))
   })
 
+  it('getAstrbotDir returns path inside homedir', () => {
+    assert.equal(lockModule.getAstrbotDir(), join(tempDir, '.astrbot', 'data', 'skills'))
+  })
+
+  it('getQoderCnDir returns path inside homedir', () => {
+    assert.equal(lockModule.getQoderCnDir(), join(tempDir, '.qoder-cn', 'skills'))
+  })
+
+  it('getTraeCnDir returns path inside homedir', () => {
+    assert.equal(lockModule.getTraeCnDir(), join(tempDir, '.trae-cn', 'skills'))
+  })
+
+  it('getZenflowDir returns path inside homedir', () => {
+    assert.equal(lockModule.getZenflowDir(), join(tempDir, '.zencoder', 'skills'))
+  })
+
+  it('getNeovateDir returns path inside homedir', () => {
+    assert.equal(lockModule.getNeovateDir(), join(tempDir, '.neovate', 'skills'))
+  })
+
+  it('getPochiDir returns path inside homedir', () => {
+    assert.equal(lockModule.getPochiDir(), join(tempDir, '.pochi', 'skills'))
+  })
+
+  it('getAdalDir returns path inside homedir', () => {
+    assert.equal(lockModule.getAdalDir(), join(tempDir, '.adal', 'skills'))
+  })
+
   it('readLock returns default when no file exists', async () => {
     const lock = await lockModule.readLock()
     assert.deepEqual(lock, {

@@ -30,7 +30,7 @@
 </p>
 
 <p align="center">
-  Works with <b>65+ AI agents</b>: opencode · claude-code · cursor · windsurf · devin · codex · copilot · aider · cline · gemini-cli · cody · continue · warp · codeium · fabric · goose · tabnine · supermaven · pr-pilot · loom · roo · trae · hermes · kiro · augment · kilo · openhands · junie · factory · command-code · cortex · mistral-vibe · qwen-code · openclaw · codebuddy · mux · pi · autohand-code · rovo · firebender · bob · aider-desk · and more
+  Works with <b>82+ AI agents</b>: opencode · claude-code · cursor · windsurf · devin · codex · copilot · aider · cline · gemini-cli · cody · continue · warp · codeium · fabric · goose · tabnine · supermaven · pr-pilot · loom · roo · trae · hermes · kiro · augment · kilo · openhands · junie · factory · command-code · cortex · mistral-vibe · qwen-code · openclaw · codebuddy · mux · pi · autohand-code · rovo · firebender · bob · aider-desk · and more
 </p>
 
 <p align="center">
@@ -77,7 +77,7 @@ rolecraft check
 rolecraft remove my-skill
 ```
 
-**Requirements:** Node.js >= 20 · No other dependencies · 65+ agents supported · [Full install guide →](docs/install.md)
+**Requirements:** Node.js >= 20 · No other dependencies · 82+ agents supported · [Full install guide →](docs/install.md)
 
 ---
 
@@ -85,7 +85,7 @@ rolecraft remove my-skill
 
 - **Zero dependencies** — ~4 KB, no bloat
 - **Any source** — local folder, GitHub/GitLab/Bitbucket repo, SSH git URL, npm package
-- **66+ agents** — opencode, claude-code, cursor, copilot, aider, devin, gemini-cli, and more
+- **82+ agents** — opencode, claude-code, cursor, copilot, aider, devin, gemini-cli, and more
 - **skills.sh compatible** — installable via `npx skills add sametcelikbicak/rolecraft`
 - **No registry required** — no signup, no marketplace, no vendor lock-in
 - **Security scoring** — static analysis on install: detects prompt injection, command injection, obfuscated code, credential harvesting, and sensitive file access. Scores 0–100. Blocks dangerous skills unless `--yes`
@@ -135,7 +135,7 @@ rolecraft remove my-skill
 | GitHub repo install                  | ✅               | ✅              | ❌                  |
 | GitLab / SSH git URL                 | ✅               | ✅              | ❌                  |
 | npm package source                   | ✅               | ✅              | ❌                  |
-| Agent targets                        | **66**           | 72              | 15+                 |
+| Agent targets                        | **82**           | 72              | 15+                 |
 | Skills.sh listed                     | ✅               | ✅              | ⚠️ (registry only)  |
 | Bundle install + create              | ✅               | ❌              | ✅ (skillset only)  |
 | Interactive TUI search + install     | ✅               | ✅              | ❌                  |

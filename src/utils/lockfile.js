@@ -278,6 +278,34 @@ export function getZencoderDir() {
   return home('.zencoder', 'skills')
 }
 
+export function getAstrbotDir() {
+  return home('.astrbot', 'data', 'skills')
+}
+
+export function getQoderCnDir() {
+  return home('.qoder-cn', 'skills')
+}
+
+export function getTraeCnDir() {
+  return home('.trae-cn', 'skills')
+}
+
+export function getZenflowDir() {
+  return home('.zencoder', 'skills')
+}
+
+export function getNeovateDir() {
+  return home('.neovate', 'skills')
+}
+
+export function getPochiDir() {
+  return home('.pochi', 'skills')
+}
+
+export function getAdalDir() {
+  return home('.adal', 'skills')
+}
+
 export function getProjectLockPath(cwd) {
   return join(cwd, '.agents', '.skill-lock.json')
 }
