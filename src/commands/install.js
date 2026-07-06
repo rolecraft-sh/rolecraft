@@ -2,6 +2,7 @@ import { createInterface as defaultCreateInterface } from 'node:readline'
 import { stdin as input, stdout as output } from 'node:process'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
+import { scanSkill, formatSecurityReport } from '../utils/security.js'
 
 let createInterface = defaultCreateInterface
 let askQuestion = defaultAskQuestion
@@ -69,6 +70,24 @@ export async function installCommand(source, options) {
   console.log(`   Slug:     ${resolved.slug}`)
   console.log(`   Owner:    ${resolved.owner}`)
   console.log(`   Files:    ${resolved.files.join(', ')}`)
+
+  const security = scanSkill(resolved)
+  console.log(formatSecurityReport(security))
+  const level = security.score >= 90 ? 'safe' : security.score >= 70 ? 'review' : 'danger'
+
+  if (level === 'danger' && !options.yes) {
+    console.error('\n❌ Install blocked by security scan. Use --yes to force install.')
+    process.exit(1)
+  }
+
+  if (level === 'review' && !options.yes) {
+    const answer = await askQuestion('\n⚠️  Continue with installation? [y/N] ')
+    if (answer !== 'y' && answer !== 'yes') {
+      console.log('Install cancelled.')
+      process.exit(0)
+    }
+  }
+
   console.log()
 
   const targets = []

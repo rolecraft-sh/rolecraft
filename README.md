@@ -22,6 +22,7 @@
   <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/🤝-Contributing-green" alt="Contributing"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT"></a>
   <a href="package.json"><img src="https://img.shields.io/node/v/rolecraft" alt="Node"></a>
+  <a href="docs/security.md"><img src="https://img.shields.io/badge/🔒-security%20scoring-brightgreen" alt="Security scoring"></a>
 </p>
 
 <p align="center">
@@ -37,6 +38,7 @@
   <a href="#why-rolecraft">Why RoleCraft?</a> ·
   <a href="#commands-overview">Commands</a> ·
   <a href="docs/install.md">Install Guide</a> ·
+  <a href="docs/security.md">Security</a> ·
   <a href="CONTRIBUTING.md">Contribute</a>
 </p>
 
@@ -86,6 +88,7 @@ rolecraft remove my-skill
 - **66+ agents** — opencode, claude-code, cursor, copilot, aider, devin, gemini-cli, and more
 - **skills.sh compatible** — installable via `npx skills add sametcelikbicak/rolecraft`
 - **No registry required** — no signup, no marketplace, no vendor lock-in
+- **Security scoring** — static analysis on install: detects prompt injection, command injection, obfuscated code, credential harvesting, and sensitive file access. Scores 0–100. Blocks dangerous skills unless `--yes`
 - **Non-interactive mode** — `--yes` / `-y` flag for automation/CI pipelines
 - **Update checking** — `rolecraft check` to see which skills have updates
 - **Shell completions** — bash, zsh, fish auto-completion
@@ -101,7 +104,7 @@ rolecraft remove my-skill
 | Command                                 | Description                                              | Details                              |
 | --------------------------------------- | -------------------------------------------------------- | ------------------------------------ |
 | `rolecraft init [<name>]`               | Scaffold a new `SKILL.md`                                | [docs](docs/commands/init.md)        |
-| `rolecraft install <source>`            | Install a skill (local path, GitHub/GitLab/SSH URL, npm) | [docs](docs/commands/install.md)     |
+| `rolecraft install <source>`            | Install a skill with security scan (local path, GitHub/GitLab/SSH URL, npm) | [docs](docs/commands/install.md)     |
 | `rolecraft bundle <sources>`            | Install multiple skills from inline sources or file      | [docs](docs/commands/bundle.md)      |
 | `rolecraft bundle create`               | Create a new bundle file                                 | [docs](docs/commands/bundle.md)      |
 | `rolecraft search <query>`              | Search for skills on GitHub (TUI with `--interactive`)   | [docs](docs/commands/search.md)      |
@@ -134,6 +137,7 @@ rolecraft remove my-skill
 | Skills.sh listed                     | ✅               | ✅              | ⚠️ (registry only)  |
 | Bundle install + create              | ✅               | ❌              | ✅ (skillset only)  |
 | Interactive TUI search + install     | ✅               | ✅              | ❌                  |
+| Security scoring (0–100)             | ✅               | ✅ (Snyk)       | ✅ (server + local) |
 | Non-interactive flag (`--yes`/`-y`)  | ✅               | ✅              | ❌                  |
 | Skill update check (`check`)         | ✅               | ❌              | ❌                  |
 | Shell completions (bash/zsh/fish)    | ✅               | ❌              | ❌                  |
@@ -164,11 +168,12 @@ rolecraft install ./my-skill --cursor --devin --copilot --gemini --cody
 ## Architecture
 
 1. Reads `SKILL.md` from the source and parses metadata (slug, name, owner)
-2. Copies (or symlinks with `--symlink`) all files alongside `SKILL.md` to the target directory
-3. Computes a SHA256 content hash and stores it in the lockfile
-4. Updates `~/.agents/.skill-lock.json` so agents can discover the skill
-5. Compatible with skills installed by `@agentskill.sh/cli`, `add-skill`, or manual installs
-6. Installable as a skill itself via `npx skills add sametcelikbicak/rolecraft`
+2. Runs a **security scan** on all skill files — checks for prompt injection, command injection, obfuscated code, credential harvesting, and sensitive file access. Scores 0–100. Blocks dangerous skills unless `--yes`
+3. Copies (or symlinks with `--symlink`) all files alongside `SKILL.md` to the target directory
+4. Computes a SHA256 content hash and stores it in the lockfile
+5. Updates `~/.agents/.skill-lock.json` so agents can discover the skill
+6. Compatible with skills installed by `@agentskill.sh/cli`, `add-skill`, or manual installs
+7. Installable as a skill itself via `npx skills add sametcelikbicak/rolecraft`
 
 [→ Full architecture & project structure](docs/architecture.md)
 

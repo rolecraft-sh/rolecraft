@@ -27,6 +27,7 @@
 | **Symlink mode**             | ✅                                | ✅ (default)                           | ❌                       | ❌             | ✅ (only)          | ✅                | ❌              | ❌                         |
 | **`--dry-run`**              | ✅                                | ❌                                     | ❌                       | ❌             | ❌                 | ✅                | ❌              | ❌                         |
 | **`--yes` / `-y`**           | ✅                                | ❌                                     | ❌                       | ❌             | ❌                 | ❌                | ❌              | ❌                         |
+| **Security scoring**         | ✅                                | ✅ (Snyk audit)                        | ✅ (0–100 server-side)   | ❌             | ❌                 | ❌                | ❌              | ❌                         |
 | **Bundle install**           | ✅                                | ❌                                     | ✅ (skillset)            | ❌             | ❌                 | ❌                | ❌              | ❌                         |
 | **Shell completions**        | ✅                                | ❌                                     | ❌                       | ❌             | ❌                 | ✅                | ❌              | ❌                         |
 | **`doctor` command**         | ❌                                | ❌                                     | ❌                       | ❌             | ❌                 | ✅                | ❌              | ❌                         |
@@ -52,6 +53,7 @@
 - **Bundle system** — install from JSON/text files or inline sources
 - **`--yes` / `-y` flag** — non-interactive mode for automation pipelines
 - **`rolecraft check` command** — check for available updates
+- **Security scoring** — 0–100 static analysis scanning for prompt injection, command injection, sensitive file access, credential harvesting, and more; blocks DANGER skills unless `--yes`
 
 ## Weaknesses / Gaps
 
@@ -59,16 +61,20 @@
 
 1. **Agent count (66)** — ahead of `ags` (15+), `openskills` (10+), `skills-npm` (10+), `qntx/skill` (39) but behind `skills` (72)
 2. **No `doctor` command** — `qntx/skill` has `skills doctor` for health checks
+3. **Security scoring (done)** — matches `ags` 0–100 scoring, `skills` Snyk audit. rolecraft: zero-dep static analysis with prompt injection, command injection, obfuscated code, credential harvesting, and sensitive file access detection.
 3. **No AGENTS.md XML injection** — `openskills` generates Claude Code compatible `<available_skills>` XML
 4. **Stars / community adoption very low** — building trust and visibility
 
 ## Roadmap
 
+### ✅ Done
+
+- [x] Security scoring for installed skills — `rolecraft install` scans skill files for prompt injection, command injection, obfuscated code, sensitive file access, data exfiltration, and more. Scores 0–100: SAFE (90+), REVIEW (70–89), DANGER (<70). DANGER blocks install unless `--yes`. REVIEW prompts for confirmation. Zero dependencies.
+
 ### ❌ Next
 
 - [ ] `rolecraft doctor` — system health check
 - [ ] AGENTS.md XML injection for non-Claude agents
-- [ ] Security scoring for installed skills
 - [ ] Watch mode — auto-sync skills on file change
 - [ ] **skills.sh telemetry** — optional reporting when `rolecraft install` runs
 
