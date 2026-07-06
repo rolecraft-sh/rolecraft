@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.2.0] - 2026-07-06
+
+### Added
+- add SKILL.md for skills.sh leaderboard visibility (#50)
+- add --yes flag, check command, GitLab/SSH URL support, and 20 new agents
+
+### Fixed
+- remaining 5 code scanning alerts (unused vars, file-system-race)
+- resolve remaining CodeQL alerts
+- allow workflow_dispatch in publish job condition
+- add workflow_dispatch to release-publish workflow (#43)
+
+### Changed
+- improve coverage to 95% - add missing tests, fix coverage config (#46)
+- upgrade Node to 24, migrate CodeQL to v4, fix code scanning alerts
+- update changelog and version for v1.1.0 [skip ci] (#42)
+
+### Documentation
+- add startup checklist to AGENTS.md (#51)
+- update AGENTS.md workflow instructions
+- add AGENTS.md with development guidelines
 ## [v1.1.0] - 2026-07-03
 
 ### Added
