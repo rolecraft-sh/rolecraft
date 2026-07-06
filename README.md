@@ -11,6 +11,7 @@
 
 <p align="center">
   <a href="https://awesome.re"><img src="https://awesome.re/badge.svg" alt="Awesome"></a>
+  <a href="https://skills.sh/sametcelikbicak/rolecraft"><img src="https://skills.sh/b/sametcelikbicak/rolecraft" alt="skills.sh"></a>
   <a href="https://www.npmjs.com/package/rolecraft"><img src="https://img.shields.io/npm/v/rolecraft" alt="npm"></a>
   <a href="https://www.npmjs.com/package/rolecraft"><img src="https://img.shields.io/npm/dm/rolecraft" alt="npm downloads"></a>
   <a href="https://github.com/sametcelikbicak/rolecraft/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/sametcelikbicak/rolecraft/test.yml?label=tests" alt="Tests"></a>
@@ -62,6 +63,9 @@ rolecraft install https://gitlab.com/org/project  # GitLab repo
 rolecraft install git@github.com:user/repo.git    # SSH URL
 rolecraft install ./my-skill --cursor             # specific agent only
 
+# or install the rolecraft skill (teaches AI agents to use rolecraft)
+npx skills add sametcelikbicak/rolecraft
+
 # manage
 rolecraft list
 rolecraft search code-review
@@ -77,7 +81,8 @@ rolecraft remove my-skill
 
 - **Zero dependencies** — ~4 KB, no bloat
 - **Any source** — local folder, GitHub/GitLab/Bitbucket repo, SSH git URL
-- **65+ agents** — opencode, claude-code, cursor, copilot, aider, devin, gemini-cli, and more
+- **66+ agents** — opencode, claude-code, cursor, copilot, aider, devin, gemini-cli, and more
+- **skills.sh compatible** — installable via `npx skills add sametcelikbicak/rolecraft`
 - **No registry required** — no signup, no marketplace, no vendor lock-in
 - **Non-interactive mode** — `--yes` / `-y` flag for automation/CI pipelines
 - **Update checking** — `rolecraft check` to see which skills have updates
@@ -122,7 +127,8 @@ rolecraft remove my-skill
 | Local path install                       | ✅ **1st class** | ✅               | ❌ marketplace only |
 | GitHub repo install                      | ✅              | ✅               | ❌                 |
 | GitLab / SSH git URL                     | ✅              | ✅               | ❌                 |
-| Agent targets                            | **66**          | 55+              | 15+                |
+| Agent targets                            | **66**          | 72               | 15+                |
+| Skills.sh listed                         | ✅             | ✅               | ⚠️ (registry only) |
 | Bundle install + create                  | ✅              | ❌               | ✅ (skillset only) |
 | Interactive TUI search + install         | ✅              | ✅               | ❌                 |
 | Non-interactive flag (`--yes`/`-y`)      | ✅              | ✅               | ❌                 |
@@ -159,6 +165,7 @@ rolecraft install ./my-skill --cursor --devin --copilot --gemini --cody
 3. Computes a SHA256 content hash and stores it in the lockfile
 4. Updates `~/.agents/.skill-lock.json` so agents can discover the skill
 5. Compatible with skills installed by `@agentskill.sh/cli`, `add-skill`, or manual installs
+6. Installable as a skill itself via `npx skills add sametcelikbicak/rolecraft`
 
 [→ Full architecture & project structure](docs/architecture.md)
 

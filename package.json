@@ -29,6 +29,8 @@
     "skill-installer",
     "skill-manager",
     "agent-skills",
+    "skills-sh",
+    "skills.sh",
     "mcp",
     "gemini-cli",
     "codex",
