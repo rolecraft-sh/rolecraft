@@ -8,7 +8,7 @@
 | Local path install                       | ✅ **1st class** | ✅                | ❌ marketplace only |
 | GitHub repo install                      | ✅               | ✅                | ❌                  |
 | GitLab / SSH git URL                     | ✅               | ✅                | ❌                  |
-| npm package source                       | ❌               | ✅                | ❌                  |
+| npm package source                       | ✅               | ✅                | ❌                  |
 | Agent targets                            | **66**           | 55+               | 15+                 |
 | SKILL.md scaffolding (`init`)            | ✅               | ✅                | ❌                  |
 | Skill preview (`use`)                    | ✅               | ✅                | ❌                  |

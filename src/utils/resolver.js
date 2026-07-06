@@ -3,13 +3,19 @@ import { join, dirname, basename } from 'node:path'
 import { tmpdir, homedir } from 'node:os'
 import { execSync as defaultExecSync, spawnSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
-import { readdirSync, readFileSync } from 'node:fs'
+import { readdirSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
+import { get as defaultHttpsGet } from 'node:https'
 import { computeContentHash } from './lockfile.js'
 
 let runExec = defaultExecSync
+let runHttpsGet = defaultHttpsGet
 
 export function setExecSync(fn) {
   runExec = fn
+}
+
+export function setHttpsGet(fn) {
+  runHttpsGet = fn
 }
 
 function runGit(args, opts = {}) {
@@ -249,7 +255,145 @@ async function resolveGitUrl(source) {
   }
 }
 
+function isNpmRef(source) {
+  return source.startsWith('npm:')
+}
+
+function parseNpmRef(source) {
+  const npmPart = source.slice(4)
+  if (!npmPart) throw new Error(`Invalid npm reference: "${source}"`)
+  let pkgName, version
+
+  if (npmPart.startsWith('@')) {
+    const slashIdx = npmPart.indexOf('/')
+    if (slashIdx === -1) throw new Error(`Invalid npm reference: "${source}"`)
+    const rest = npmPart.slice(slashIdx + 1)
+    const atIdx = rest.indexOf('@')
+    if (atIdx > 0) {
+      pkgName = npmPart.slice(0, slashIdx + 1 + atIdx)
+      version = rest.slice(atIdx + 1)
+    } else {
+      pkgName = npmPart
+      version = 'latest'
+    }
+  } else {
+    const atIdx = npmPart.lastIndexOf('@')
+    if (atIdx > 0) {
+      pkgName = npmPart.slice(0, atIdx)
+      version = npmPart.slice(atIdx + 1)
+    } else {
+      pkgName = npmPart
+      version = 'latest'
+    }
+  }
+
+  return { pkgName, version }
+}
+
+function fetchJson(url) {
+  return new Promise((resolve, reject) => {
+    const req = runHttpsGet(url, { headers: { Accept: 'application/json' } }, (res) => {
+      let data = ''
+      res.on('data', (chunk) => { data += chunk.toString() })
+      res.on('end', () => {
+        if (res.statusCode !== 200) {
+          reject(new Error(`npm registry returned HTTP ${res.statusCode} for ${url}`))
+          return
+        }
+        try { resolve(JSON.parse(data)) } catch (e) { reject(new Error(`Invalid JSON from npm registry: ${e.message}`)) }
+      })
+    })
+    req.on('error', reject)
+  })
+}
+
+function downloadFile(url, dest) {
+  return new Promise((resolve, reject) => {
+    const req = runHttpsGet(url, (res) => {
+      if (res.statusCode !== 200) {
+        reject(new Error(`Failed to download: HTTP ${res.statusCode}`))
+        res.resume()
+        return
+      }
+      const chunks = []
+      res.on('data', (chunk) => chunks.push(chunk))
+      res.on('end', () => {
+        writeFileSync(dest, Buffer.concat(chunks))
+        resolve()
+      })
+    })
+    req.on('error', reject)
+  })
+}
+
+async function resolveNpm(source) {
+  const { pkgName, version } = parseNpmRef(source)
+  const encodedName = pkgName.replace(/\//g, '%2F')
+
+  let metadata
+  try {
+    metadata = await fetchJson(`https://registry.npmjs.org/${encodedName}`)
+  } catch (e) {
+    throw new Error(`Failed to fetch npm package "${pkgName}": ${e.message}`)
+  }
+
+  const ver = version === 'latest' ? metadata['dist-tags']?.latest : version
+  if (!ver) throw new Error(`No "latest" tag found for npm package "${pkgName}"`)
+
+  const pkgVersionData = metadata.versions?.[ver]
+  if (!pkgVersionData) throw new Error(`Version "${ver}" not found for npm package "${pkgName}"`)
+
+  const tarballUrl = pkgVersionData.dist?.tarball
+  if (!tarballUrl) throw new Error(`No tarball URL found for ${pkgName}@${ver}`)
+
+  const tmpDir = join(tmpdir(), `rolecraft-npm-${randomUUID().slice(0, 8)}`)
+  const tarballPath = join(tmpDir, 'package.tgz')
+
+  try {
+    mkdirSync(tmpDir, { recursive: true })
+    await downloadFile(tarballUrl, tarballPath)
+    runExec(`tar -xzf "${tarballPath}" -C "${tmpDir}"`, { stdio: 'pipe', timeout: 30000 })
+  } catch (e) {
+    removeDir(tmpDir)
+    throw new Error(`Failed to download/extract npm package "${pkgName}@${ver}": ${e.message}`)
+  }
+
+  const packageDir = join(tmpDir, 'package')
+  const found = scanForSkill(packageDir)
+
+  if (found.length === 0) {
+    removeDir(tmpDir)
+    throw new Error(`No SKILL.md found in npm package ${pkgName}@${ver}`)
+  }
+
+  const skill = found[0]
+  const files = readdirSync(skill.dir, { withFileTypes: true })
+    .filter(e => e.name !== '.git')
+    .map(e => e.name)
+
+  const fileContents = {}
+  for (const f of files) {
+    try { fileContents[f] = readFileSync(join(skill.dir, f), 'utf-8') } catch {}
+  }
+
+  removeDir(tmpDir)
+
+  return {
+    ...skill,
+    owner: skill.owner === 'local' ? pkgName : skill.owner,
+    slug: skill.slug === 'unknown' || skill.slug === skill.name ? `${pkgName}/${skill.name}` : skill.slug,
+    files,
+    fileContents,
+    contentSha: computeContentHash(fileContents),
+    sourcePath: source,
+    sourceType: 'npm',
+  }
+}
+
 export async function resolveSource(source) {
+  if (isNpmRef(source)) {
+    return await resolveNpm(source)
+  }
   if (isGitHubRef(source)) {
     return await resolveGitHub(source)
   }
@@ -259,5 +403,5 @@ export async function resolveSource(source) {
   if (isGitUrl(source)) {
     return await resolveGitUrl(source)
   }
-  throw new Error(`Invalid source: "${source}". Use a local path (./, /, ~), GitHub ref (owner/repo), or git URL`)
+  throw new Error(`Invalid source: "${source}". Use a local path (./, /, ~), GitHub ref (owner/repo), git URL, or npm package (npm:package)`)
 }

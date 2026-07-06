@@ -29,7 +29,7 @@ Zero dependencies, no marketplace required.
 Works with 65+ agents: opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody, continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot, loom, roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory, command-code, cortex, mistral-vibe, qwen-code, openclaw, codebuddy, mux, pi, autohand-code, rovo, firebender, bob, aider-desk, code-arts-doer, code-maker, code-studio, crush, eve, forge, inference-sh, jazz, iflow, kilo-code, kode, lingma, mcp-jam, moxby, ona, qoder, reasonix, terra-mind, tiny-cloud, zencoder, and all spec-compliant agents.
 
 Usage:
-  rolecraft install <source>     Install a skill (local path or owner/repo)
+  rolecraft install <source>     Install a skill (local path, owner/repo, or npm:package)
   rolecraft bundle <source> [...] Install skills from a file or inline sources
   rolecraft bundle create [<name>]  Create a new bundle file
   rolecraft use <source>         Preview a skill without installing
@@ -107,6 +107,8 @@ Options for install:
 Examples:
   rolecraft install ./my-skill
   rolecraft install sametcelikbicak/task-decomposer
+  rolecraft install npm:lodash
+  rolecraft install npm:@scope/package@1.0.0
   rolecraft install ./skills/my-skill --claude --cursor
   rolecraft bundle ./team-skills.json
   rolecraft bundle owner/skill1 owner/skill2 ./local-skill
@@ -128,7 +130,7 @@ export async function main() {
       const source = args[0]
       if (!source) {
         console.error('Usage: rolecraft install <source>')
-        console.error('Source can be a local path (./, /, ~) or a GitHub ref (owner/repo)')
+        console.error('Source can be a local path (./, /, ~), GitHub ref (owner/repo), or npm package (npm:package)')
         process.exit(1)
       }
 
@@ -243,7 +245,7 @@ export async function main() {
       const source = args[0]
       if (!source) {
         console.error('Usage: rolecraft use <source>')
-        console.error('Source can be a local path (./, /, ~) or a GitHub ref (owner/repo)')
+        console.error('Source can be a local path (./, /, ~), GitHub ref (owner/repo), or npm package (npm:package)')
         process.exit(1)
       }
       await useCommand(source)

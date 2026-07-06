@@ -1,6 +1,6 @@
 # `rolecraft install`
 
-Install a skill from a local path or GitHub repository.
+Install a skill from a local path, GitHub repository, or npm package.
 
 ## Usage
 
@@ -31,6 +31,19 @@ rolecraft install sametcelikbicak/coverage-guard
 
 The CLI clones with `--depth 1`, finds `SKILL.md` recursively, installs it, and cleans up.
 
+### npm package
+
+Install any npm package that contains a `SKILL.md`:
+
+```bash
+rolecraft install npm:lodash
+rolecraft install npm:@scope/package
+rolecraft install npm:package@1.0.0
+rolecraft install npm:@scope/package@latest
+```
+
+The CLI fetches package metadata from the npm registry, downloads and extracts the tarball, finds `SKILL.md` recursively, installs it, and cleans up.
+
 ## Scope flags
 
 | Flag            | Target directory                   |
@@ -60,6 +73,10 @@ rolecraft install ./my-skill
 
 # Install from GitHub
 rolecraft install sametcelikbicak/task-decomposer
+
+# Install from npm
+rolecraft install npm:some-skill-package
+rolecraft install npm:@org/skill-package@1.0.0
 
 # Install for specific agents
 rolecraft install ./my-skill --claude --cursor

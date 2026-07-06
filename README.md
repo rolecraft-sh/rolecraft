@@ -61,6 +61,8 @@ rolecraft install ./my-skill                      # local folder
 rolecraft install user/repo                       # GitHub repo
 rolecraft install https://gitlab.com/org/project  # GitLab repo
 rolecraft install git@github.com:user/repo.git    # SSH URL
+rolecraft install npm:some-package                # npm package
+rolecraft install npm:@scope/package@1.0.0        # npm with version
 rolecraft install ./my-skill --cursor             # specific agent only
 
 # or install the rolecraft skill (teaches AI agents to use rolecraft)
@@ -80,7 +82,7 @@ rolecraft remove my-skill
 ## Features
 
 - **Zero dependencies** — ~4 KB, no bloat
-- **Any source** — local folder, GitHub/GitLab/Bitbucket repo, SSH git URL
+- **Any source** — local folder, GitHub/GitLab/Bitbucket repo, SSH git URL, npm package
 - **66+ agents** — opencode, claude-code, cursor, copilot, aider, devin, gemini-cli, and more
 - **skills.sh compatible** — installable via `npx skills add sametcelikbicak/rolecraft`
 - **No registry required** — no signup, no marketplace, no vendor lock-in
@@ -96,24 +98,24 @@ rolecraft remove my-skill
 
 ## Commands overview
 
-| Command                      | Description                                         | Details                          |
-| ---------------------------- | --------------------------------------------------- | -------------------------------- |
-| `rolecraft init [<name>]`    | Scaffold a new `SKILL.md`                           | [docs](docs/commands/init.md)    |
-| `rolecraft install <source>` | Install a skill (local path, GitHub/GitLab/SSH URL)    | [docs](docs/commands/install.md) |
-| `rolecraft bundle <sources>` | Install multiple skills from inline sources or file | [docs](docs/commands/bundle.md)  |
-| `rolecraft bundle create`    | Create a new bundle file                            | [docs](docs/commands/bundle.md)  |
-| `rolecraft search <query>`   | Search for skills on GitHub (TUI with `--interactive`) | [docs](docs/commands/search.md)  |
-| `rolecraft check`            | Check installed skills for available updates            | [docs](docs/commands/check.md)  |
-| `rolecraft use <source>`     | Preview a skill's files without installing          | [docs](docs/commands/use.md)     |
-| `rolecraft completions bash\|zsh\|fish` | Generate shell completion scripts           | [docs](docs/commands/completions.md) |
-| `rolecraft setup [<source>]` | Detect agents, optionally install a skill to all    | [docs](docs/commands/setup.md)   |
-| `rolecraft list`             | Show all installed skills                           | [docs](docs/commands/list.md)    |
-| `rolecraft verify`           | Check installed skill integrity via content hash    | [docs](docs/commands/verify.md)  |
-| `rolecraft ci`               | Re-install all skills from lockfile (CI mode)       | [docs](docs/commands/ci.md)      |
-| `rolecraft upgrade`          | Upgrade rolecraft to the latest version              | [docs](docs/commands/upgrade.md) |
-| `rolecraft remove <slug>`    | Uninstall a skill                                   | [docs](docs/commands/remove.md)  |
-| `rolecraft update <slug>`    | Re-install a skill to latest                        | [docs](docs/commands/update.md)  |
-| `rolecraft --version`        | Show version                                        |                                  |
+| Command                                 | Description                                              | Details                              |
+| --------------------------------------- | -------------------------------------------------------- | ------------------------------------ |
+| `rolecraft init [<name>]`               | Scaffold a new `SKILL.md`                                | [docs](docs/commands/init.md)        |
+| `rolecraft install <source>`            | Install a skill (local path, GitHub/GitLab/SSH URL, npm) | [docs](docs/commands/install.md)     |
+| `rolecraft bundle <sources>`            | Install multiple skills from inline sources or file      | [docs](docs/commands/bundle.md)      |
+| `rolecraft bundle create`               | Create a new bundle file                                 | [docs](docs/commands/bundle.md)      |
+| `rolecraft search <query>`              | Search for skills on GitHub (TUI with `--interactive`)   | [docs](docs/commands/search.md)      |
+| `rolecraft check`                       | Check installed skills for available updates             | [docs](docs/commands/check.md)       |
+| `rolecraft use <source>`                | Preview a skill's files without installing               | [docs](docs/commands/use.md)         |
+| `rolecraft completions bash\|zsh\|fish` | Generate shell completion scripts                        | [docs](docs/commands/completions.md) |
+| `rolecraft setup [<source>]`            | Detect agents, optionally install a skill to all         | [docs](docs/commands/setup.md)       |
+| `rolecraft list`                        | Show all installed skills                                | [docs](docs/commands/list.md)        |
+| `rolecraft verify`                      | Check installed skill integrity via content hash         | [docs](docs/commands/verify.md)      |
+| `rolecraft ci`                          | Re-install all skills from lockfile (CI mode)            | [docs](docs/commands/ci.md)          |
+| `rolecraft upgrade`                     | Upgrade rolecraft to the latest version                  | [docs](docs/commands/upgrade.md)     |
+| `rolecraft remove <slug>`               | Uninstall a skill                                        | [docs](docs/commands/remove.md)      |
+| `rolecraft update <slug>`               | Re-install a skill to latest                             | [docs](docs/commands/update.md)      |
+| `rolecraft --version`                   | Show version                                             |                                      |
 
 ---
 
@@ -121,25 +123,26 @@ rolecraft remove my-skill
 
 [→ Full feature comparison](docs/comparison.md)
 
-| Feature                                  | rolecraft       | skills (Vercel)  | @agentskill.sh/cli |
-| ---------------------------------------- | --------------- | ---------------- | ------------------ |
-| Zero dependencies                        | ✅              | ✅ (1 dep)       | ❌ (2)             |
-| Local path install                       | ✅ **1st class** | ✅               | ❌ marketplace only |
-| GitHub repo install                      | ✅              | ✅               | ❌                 |
-| GitLab / SSH git URL                     | ✅              | ✅               | ❌                 |
-| Agent targets                            | **66**          | 72               | 15+                |
-| Skills.sh listed                         | ✅             | ✅               | ⚠️ (registry only) |
-| Bundle install + create                  | ✅              | ❌               | ✅ (skillset only) |
-| Interactive TUI search + install         | ✅              | ✅               | ❌                 |
-| Non-interactive flag (`--yes`/`-y`)      | ✅              | ✅               | ❌                 |
-| Skill update check (`check`)             | ✅              | ❌               | ❌                 |
-| Shell completions (bash/zsh/fish)        | ✅              | ❌               | ❌                 |
-| Dry-run preview (`--dry-run`)            | ✅              | ❌               | ❌                 |
-| Interactive scope prompt                 | ✅              | ✅               | ❌                 |
-| Content hash verification (`verify`)     | ✅              | ✅               | ❌                 |
-| CI-mode re-install (`ci`)                | ✅              | ✅               | ❌                 |
-| Self-upgrade command                     | ✅              | ❌               | ❌                 |
-| File size                                | ~4 KB           | ~465 KB          | ~84 KB             |
+| Feature                              | rolecraft        | skills (Vercel) | @agentskill.sh/cli  |
+| ------------------------------------ | ---------------- | --------------- | ------------------- |
+| Zero dependencies                    | ✅               | ✅ (1 dep)      | ❌ (2)              |
+| Local path install                   | ✅ **1st class** | ✅              | ❌ marketplace only |
+| GitHub repo install                  | ✅               | ✅              | ❌                  |
+| GitLab / SSH git URL                 | ✅               | ✅              | ❌                  |
+| npm package source                   | ✅               | ✅              | ❌                  |
+| Agent targets                        | **66**           | 72              | 15+                 |
+| Skills.sh listed                     | ✅               | ✅              | ⚠️ (registry only)  |
+| Bundle install + create              | ✅               | ❌              | ✅ (skillset only)  |
+| Interactive TUI search + install     | ✅               | ✅              | ❌                  |
+| Non-interactive flag (`--yes`/`-y`)  | ✅               | ✅              | ❌                  |
+| Skill update check (`check`)         | ✅               | ❌              | ❌                  |
+| Shell completions (bash/zsh/fish)    | ✅               | ❌              | ❌                  |
+| Dry-run preview (`--dry-run`)        | ✅               | ❌              | ❌                  |
+| Interactive scope prompt             | ✅               | ✅              | ❌                  |
+| Content hash verification (`verify`) | ✅               | ✅              | ❌                  |
+| CI-mode re-install (`ci`)            | ✅               | ✅              | ❌                  |
+| Self-upgrade command                 | ✅               | ❌              | ❌                  |
+| File size                            | ~4 KB            | ~465 KB         | ~84 KB              |
 
 [See full table →](docs/comparison.md)
 

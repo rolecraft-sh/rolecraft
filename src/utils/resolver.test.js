@@ -6,6 +6,7 @@ import {
 import { rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
+import { EventEmitter } from 'node:events'
 
 let tempDir, resolverModule
 
@@ -309,5 +310,141 @@ Just content
     })
 
 
+  })
+
+  describe('resolveNpm', () => {
+    function mockHttps(resolver) {
+      let callCount = 0
+      resolver.setHttpsGet((...args) => {
+        const cb = args[args.length - 1]
+        const req = new EventEmitter()
+
+        callCount++
+        process.nextTick(() => {
+          const res = new EventEmitter()
+          res.statusCode = 200
+          res.headers = {}
+          res.resume = () => {}
+
+          cb(res)
+
+          if (callCount === 1) {
+            // First call: metadata fetch
+            const data = Buffer.from(JSON.stringify({
+              'dist-tags': { latest: '1.0.0' },
+              versions: {
+                '1.0.0': {
+                  dist: { tarball: 'https://registry.npmjs.org/test-pkg/-/test-pkg-1.0.0.tgz' },
+                },
+              },
+            }))
+            res.emit('data', data)
+          } else {
+            // Second call: tarball download
+            res.emit('data', Buffer.from('fake-tarball'))
+          }
+          res.emit('end')
+        })
+
+        return req
+      })
+    }
+
+    it('resolves an npm package', async () => {
+      await freshImport()
+      mockHttps(resolverModule)
+
+      resolverModule.setExecSync((cmd) => {
+        const tarMatch = cmd.match(/tar -xzf "[^"]+" -C "([^"]+)"/)
+        if (tarMatch) {
+          const extractDir = tarMatch[1]
+          const packageDir = join(extractDir, 'package')
+          mkdirSync(packageDir, { recursive: true })
+          writeFileSync(join(packageDir, 'SKILL.md'), '# slug: test/npm-skill\nname: npm-skill\nContent')
+          writeFileSync(join(packageDir, 'helper.js'), 'x')
+        }
+      })
+
+      const result = await resolverModule.resolveSource('npm:test-pkg')
+
+      assert.equal(result.name, 'npm-skill')
+      assert.equal(result.slug, 'test/npm-skill')
+      assert.equal(result.owner, 'test-pkg')
+      assert.equal(result.sourceType, 'npm')
+      assert.equal(result.sourcePath, 'npm:test-pkg')
+      assert.ok(result.files.includes('SKILL.md'))
+      assert.ok(result.files.includes('helper.js'))
+      assert.ok(result.fileContents)
+    })
+
+    it('resolves an npm package with version', async () => {
+      await freshImport()
+      mockHttps(resolverModule)
+
+      resolverModule.setExecSync((cmd) => {
+        const tarMatch = cmd.match(/tar -xzf "[^"]+" -C "([^"]+)"/)
+        if (tarMatch) {
+          const extractDir = tarMatch[1]
+          const packageDir = join(extractDir, 'package')
+          mkdirSync(packageDir, { recursive: true })
+          writeFileSync(join(packageDir, 'SKILL.md'), '---\nname: my-skill\nslug: org/skill\n---\nContent')
+        }
+      })
+
+      const result = await resolverModule.resolveSource('npm:test-pkg@1.0.0')
+
+      assert.equal(result.name, 'my-skill')
+      assert.equal(result.slug, 'org/skill')
+      assert.equal(result.sourceType, 'npm')
+    })
+
+    it('resolves scoped npm package', async () => {
+      await freshImport()
+      mockHttps(resolverModule)
+
+      resolverModule.setExecSync((cmd) => {
+        const tarMatch = cmd.match(/tar -xzf "[^"]+" -C "([^"]+)"/)
+        if (tarMatch) {
+          const extractDir = tarMatch[1]
+          const packageDir = join(extractDir, 'package')
+          mkdirSync(packageDir, { recursive: true })
+          writeFileSync(join(packageDir, 'SKILL.md'), '# slug: s/skill\nname: scoped-skill\nContent')
+        }
+      })
+
+      const result = await resolverModule.resolveSource('npm:@scope/test-pkg')
+
+      assert.equal(result.name, 'scoped-skill')
+      assert.equal(result.sourceType, 'npm')
+    })
+
+    it('throws when no SKILL.md found in npm package', async () => {
+      await freshImport()
+      mockHttps(resolverModule)
+
+      resolverModule.setExecSync((cmd) => {
+        const tarMatch = cmd.match(/tar -xzf "[^"]+" -C "([^"]+)"/)
+        if (tarMatch) {
+          const extractDir = tarMatch[1]
+          mkdirSync(join(extractDir, 'package'), { recursive: true })
+          writeFileSync(join(extractDir, 'package', 'README.md'), 'no skill here')
+        }
+      })
+
+      await assert.rejects(
+        () => resolverModule.resolveSource('npm:test-pkg'),
+        /No SKILL.md found/,
+      )
+    })
+
+    it('throws for invalid npm ref', async () => {
+      await freshImport()
+      mockHttps(resolverModule)
+
+      await assert.rejects(
+        () => resolverModule.resolveSource('npm:'),
+        /Invalid npm reference/,
+      )
+    })
   })
 })
