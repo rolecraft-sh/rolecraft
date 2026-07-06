@@ -5,10 +5,11 @@ import { mkdir, rm, writeFile, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
-let tempDir, updateModule
+let tempDir, updateModule, origHome
 
 before(async () => {
   tempDir = mkdtempSync(join(tmpdir(), 'rolecraft-update-test-'))
+  origHome = process.env.HOME
   process.env.HOME = tempDir
 
   await mkdir(join(tempDir, '.agents', 'skills', 'test-skill'), { recursive: true })
@@ -38,6 +39,7 @@ before(async () => {
 
 after(async () => {
   await rm(tempDir, { recursive: true, force: true })
+  process.env.HOME = origHome
 })
 
 describe('update command', () => {

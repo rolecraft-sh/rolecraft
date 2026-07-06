@@ -19,12 +19,8 @@ export function setHttpsGet(fn) {
 }
 
 function runGit(args, opts = {}) {
-  const result = spawnSync('git', args, { stdio: 'pipe', timeout: 30000, ...opts })
-  if (result.error) throw result.error
-  if (result.status !== 0) {
-    const msg = result.stderr?.toString() || result.stdout?.toString() || `git exited with code ${result.status}`
-    throw new Error(msg)
-  }
+  const cmd = 'git ' + args.map(a => JSON.stringify(a)).join(' ')
+  const result = runExec(cmd, { stdio: 'pipe', timeout: 30000, ...opts })
   return result
 }
 
@@ -159,44 +155,46 @@ async function resolveGitHub(source) {
   const url = `https://github.com/${source}.git`
 
   try {
-    runExec(`git clone --depth 1 "${url}" "${tmpDir}"`, { stdio: 'pipe', timeout: 30000 })
+    runGit(['clone', '--depth', '1', url, tmpDir])
   } catch {
+    removeDir(tmpDir)
     throw new Error(`Failed to clone GitHub repo ${source}`)
   }
 
-  const found = scanForSkill(tmpDir)
+  try {
+    const found = scanForSkill(tmpDir)
 
-  if (found.length === 0) {
-    runExec(`rm -rf "${tmpDir}"`)
-    throw new Error(`No SKILL.md found in GitHub repo ${source}`)
-  }
-
-  const skill = found[0]
-  const files = readdirSync(skill.dir, { withFileTypes: true })
-    .filter(e => e.name !== '.git')
-    .map(e => e.name)
-
-  const fileContents = {}
-  for (const f of files) {
-    try {
-      fileContents[f] = readFileSync(join(skill.dir, f), 'utf-8')
-    } catch {
-      // skip unreadable files
+    if (found.length === 0) {
+      throw new Error(`No SKILL.md found in GitHub repo ${source}`)
     }
-  }
 
-  runExec(`rm -rf "${tmpDir}"`)
+    const skill = found[0]
+    const files = readdirSync(skill.dir, { withFileTypes: true })
+      .filter(e => e.name !== '.git')
+      .map(e => e.name)
 
-  const owner = source.split('/')[0]
-  return {
-    ...skill,
-    owner: skill.owner === 'local' ? owner : skill.owner,
-    slug: skill.slug === 'unknown' || skill.slug === skill.name ? `${owner}/${skill.name}` : skill.slug,
-    files,
-    fileContents,
-    contentSha: computeContentHash(fileContents),
-    sourcePath: source,
-    sourceType: 'github',
+    const fileContents = {}
+    for (const f of files) {
+      try {
+        fileContents[f] = readFileSync(join(skill.dir, f), 'utf-8')
+      } catch {
+        // skip unreadable files
+      }
+    }
+
+    const owner = source.split('/')[0]
+    return {
+      ...skill,
+      owner: skill.owner === 'local' ? owner : skill.owner,
+      slug: skill.slug === 'unknown' || skill.slug === skill.name ? `${owner}/${skill.name}` : skill.slug,
+      files,
+      fileContents,
+      contentSha: computeContentHash(fileContents),
+      sourcePath: source,
+      sourceType: 'github',
+    }
+  } finally {
+    removeDir(tmpDir)
   }
 }
 
@@ -302,6 +300,7 @@ function fetchJson(url) {
         }
         try { resolve(JSON.parse(data)) } catch (e) { reject(new Error(`Invalid JSON from npm registry: ${e.message}`)) }
       })
+      res.on('error', reject)
     })
     req.on('error', reject)
   })
@@ -321,6 +320,7 @@ function downloadFile(url, dest) {
         writeFileSync(dest, Buffer.concat(chunks))
         resolve()
       })
+      res.on('error', reject)
     })
     req.on('error', reject)
   })
@@ -358,35 +358,37 @@ async function resolveNpm(source) {
     throw new Error(`Failed to download/extract npm package "${pkgName}@${ver}": ${e.message}`)
   }
 
-  const packageDir = join(tmpDir, 'package')
-  const found = scanForSkill(packageDir)
+  let packageDir
+  try {
+    packageDir = join(tmpDir, 'package')
+    const found = scanForSkill(packageDir)
 
-  if (found.length === 0) {
+    if (found.length === 0) {
+      throw new Error(`No SKILL.md found in npm package ${pkgName}@${ver}`)
+    }
+
+    const skill = found[0]
+    const files = readdirSync(skill.dir, { withFileTypes: true })
+      .filter(e => e.name !== '.git')
+      .map(e => e.name)
+
+    const fileContents = {}
+    for (const f of files) {
+      try { fileContents[f] = readFileSync(join(skill.dir, f), 'utf-8') } catch {}
+    }
+
+    return {
+      ...skill,
+      owner: skill.owner === 'local' ? pkgName : skill.owner,
+      slug: skill.slug === 'unknown' || skill.slug === skill.name ? `${pkgName}/${skill.name}` : skill.slug,
+      files,
+      fileContents,
+      contentSha: computeContentHash(fileContents),
+      sourcePath: source,
+      sourceType: 'npm',
+    }
+  } finally {
     removeDir(tmpDir)
-    throw new Error(`No SKILL.md found in npm package ${pkgName}@${ver}`)
-  }
-
-  const skill = found[0]
-  const files = readdirSync(skill.dir, { withFileTypes: true })
-    .filter(e => e.name !== '.git')
-    .map(e => e.name)
-
-  const fileContents = {}
-  for (const f of files) {
-    try { fileContents[f] = readFileSync(join(skill.dir, f), 'utf-8') } catch {}
-  }
-
-  removeDir(tmpDir)
-
-  return {
-    ...skill,
-    owner: skill.owner === 'local' ? pkgName : skill.owner,
-    slug: skill.slug === 'unknown' || skill.slug === skill.name ? `${pkgName}/${skill.name}` : skill.slug,
-    files,
-    fileContents,
-    contentSha: computeContentHash(fileContents),
-    sourcePath: source,
-    sourceType: 'npm',
   }
 }
 

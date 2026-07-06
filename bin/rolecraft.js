@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readFileSync } from 'node:fs'
+import { readFileSync, realpathSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { installCommand } from '../src/commands/install.js'
@@ -351,13 +351,11 @@ export async function main() {
   }
 }
 
-import { realpathSync } from 'node:fs'
-
 export async function run() {
   try {
     await main()
   } catch (err) {
-    console.error(`Error: ${err.message}`)
+    console.error(err.stack || err.message)
     process.exit(1)
   }
 }
@@ -366,5 +364,8 @@ const isEntryPoint = process.argv[1]
   && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))
 
 if (isEntryPoint) {
-  run()
+  run().catch((err) => {
+    console.error(err.stack || err.message)
+    process.exit(1)
+  })
 }

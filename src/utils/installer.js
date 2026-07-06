@@ -437,7 +437,7 @@ export async function installSkill(resolved, targets, mode = 'copy') {
       await mkdir(slugDir, { recursive: true })
       for (const file of resolved.files) {
         const dst = join(slugDir, file)
-        if (resolved.fileContents?.[file]) {
+        if (Object.hasOwn(resolved.fileContents || {}, file)) {
           await writeFile(dst, resolved.fileContents[file])
         } else if (resolved.skillDir) {
           const src = join(resolved.skillDir, file)
