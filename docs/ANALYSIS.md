@@ -30,7 +30,7 @@
 | **Security scoring**         | ✅                                | ✅ (Snyk audit)                        | ✅ (0–100 server-side)   | ❌             | ❌                 | ❌                | ❌              | ❌                         |
 | **Bundle install**           | ✅                                | ❌                                     | ✅ (skillset)            | ❌             | ❌                 | ❌                | ❌              | ❌                         |
 | **Shell completions**        | ✅                                | ❌                                     | ❌                       | ❌             | ❌                 | ✅                | ❌              | ❌                         |
-| **`doctor` command**         | ❌                                | ❌                                     | ❌                       | ❌             | ❌                 | ✅                | ❌              | ❌                         |
+| **`doctor` command**         | ✅                                | ❌                                     | ❌                       | ❌             | ❌                 | ✅                | ❌              | ❌                         |
 | **`upgrade` (self-update)**  | ✅                                | ❌                                     | ❌                       | ❌             | ❌                 | ✅                | ❌              | ❌                         |
 | **TUI search**               | ⚠️ (styled)                       | ✅ (`skills find` interactive)         | ❌                       | ❌             | ❌                 | ❌                | ❌              | ❌                         |
 | **Stars**                    | 36                                | 24,613                                 | 23                       | 10,525         | 480                | ~1                | 13K+            | 135K+                      |
@@ -53,6 +53,7 @@
 - **Bundle system** — install from JSON/text files or inline sources
 - **`--yes` / `-y` flag** — non-interactive mode for automation pipelines
 - **`rolecraft check` command** — check for available updates
+- **`rolecraft doctor` command** — system health check: Node.js version, agent detection, lockfile integrity, skill file verification
 - **Security scoring** — 0–100 static analysis scanning for prompt injection, command injection, sensitive file access, credential harvesting, and more; blocks DANGER skills unless `--yes`
 
 ## Weaknesses / Gaps
@@ -60,8 +61,7 @@
 ### Feature gaps vs competitors
 
 1. **Agent count (66)** — ahead of `ags` (15+), `openskills` (10+), `skills-npm` (10+), `qntx/skill` (39) but behind `skills` (72)
-2. **No `doctor` command** — `qntx/skill` has `skills doctor` for health checks
-3. **Security scoring (done)** — matches `ags` 0–100 scoring, `skills` Snyk audit. rolecraft: zero-dep static analysis with prompt injection, command injection, obfuscated code, credential harvesting, and sensitive file access detection.
+2. **Security scoring (done)** — matches `ags` 0–100 scoring, `skills` Snyk audit. rolecraft: zero-dep static analysis with prompt injection, command injection, obfuscated code, credential harvesting, and sensitive file access detection.
 3. **No AGENTS.md XML injection** — `openskills` generates Claude Code compatible `<available_skills>` XML
 4. **Stars / community adoption very low** — building trust and visibility
 
@@ -70,10 +70,10 @@
 ### ✅ Done
 
 - [x] Security scoring for installed skills — `rolecraft install` scans skill files for prompt injection, command injection, obfuscated code, sensitive file access, data exfiltration, and more. Scores 0–100: SAFE (90+), REVIEW (70–89), DANGER (<70). DANGER blocks install unless `--yes`. REVIEW prompts for confirmation. Zero dependencies.
+- [x] `rolecraft doctor` — system health check: Node.js version, agent detection, lockfile integrity, skill directory and hash verification
 
 ### ❌ Next
 
-- [ ] `rolecraft doctor` — system health check
 - [ ] AGENTS.md XML injection for non-Claude agents
 - [ ] Watch mode — auto-sync skills on file change
 - [ ] **skills.sh telemetry** — optional reporting when `rolecraft install` runs
@@ -86,8 +86,8 @@
 - **Stars**: 23.5K | **Deps**: 1 | **Agents**: 55+
 - **Key features**: `skills use`, `skills ci`/`skills verify` (lockfile workflow), `skills find` (interactive TUI), `skills init`, symlink mode, `vercel skills` built-in, 13.4M weekly downloads, skills.sh directory
 - **Weaknesses**: 1 dep (`yaml`), no provenance, no `setup` command, no dry-run, no bundle
-- **rolecraft advantage**: Zero deps, provenance, `setup` command, dry-run, bundle
-- **rolecraft gap**: Agent count (66 vs 72), no doctor
+- **rolecraft advantage**: Zero deps, provenance, `setup` command, dry-run, bundle, doctor
+- **rolecraft gap**: Agent count (66 vs 72)
 
 ### @agentskill.sh/cli (ags)
 
@@ -120,8 +120,7 @@
 - **Key features**: 100% command parity, shell completions, `skills doctor`, `skills upgrade`, dry-run mode, parallel I/O
 - **Weaknesses**: Very new, Rust toolchain for dev, no provenance, no `setup`
 - **rolecraft advantage**: Zero deps as JS, provenance, `setup` command, interactive scope prompt
-- **rolecraft advantage**: Shell completions, TUI search, self-upgrade
-- **rolecraft gap**: No doctor
+- **rolecraft advantage**: Shell completions, TUI search, self-upgrade, doctor
 
 ### OpenCode native
 
@@ -157,5 +156,5 @@
 2. **npm provenance** — only project with SLSA Level 1+ attestations
 3. **Interactive scope prompt** — best UX for first-time users
 4. **Bundle system** — unique multi-skill install from files/inline
-5. **Dry-run + Verify + CI** — complete integrity workflow unmatched by most competitors
+5. **Dry-run + Verify + CI + Doctor** — complete integrity and health workflow unmatched by most competitors
 6. **Corrected Copilot path** — now uses `.github/copilot/skills/` matching GitHub's official standard

@@ -1,7 +1,7 @@
 const COMMANDS = [
   'install', 'bundle', 'use', 'list', 'remove', 'update',
   'setup', 'init', 'search', 'verify', 'ci', 'completions',
-  'upgrade', 'help', 'version',
+  'doctor', 'upgrade', 'help', 'version',
 ]
 
 const SCOPE_FLAGS = [

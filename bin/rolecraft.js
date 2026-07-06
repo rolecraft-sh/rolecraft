@@ -17,6 +17,7 @@ import { ciCommand } from '../src/commands/ci.js'
 import { bundleCommand, bundleCreateCommand } from '../src/commands/bundle.js'
 import { completionsCommand } from '../src/commands/completions.js'
 import { upgradeCommand } from '../src/commands/upgrade.js'
+import { doctorCommand } from '../src/commands/doctor.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'))
@@ -43,6 +44,7 @@ Usage:
   rolecraft verify               Verify installed skill integrity
   rolecraft ci                   Install all skills from lockfile
   rolecraft completions <shell>  Generate shell completions (bash|zsh|fish)
+  rolecraft doctor               Run system health check
   rolecraft upgrade              Upgrade rolecraft to the latest version
   rolecraft help                 Show this help
 
@@ -311,6 +313,11 @@ export async function main() {
       await upgradeCommand({ dryRun: flags.includes('--dry-run') })
       break
     }
+
+    case 'doctor':
+      if (args.includes('--help') || args.includes('-h')) { usage(); return }
+      await doctorCommand()
+      break
 
     case 'version':
     case '--version':
