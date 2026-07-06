@@ -78,6 +78,7 @@ export async function installCommand(source, options) {
   if (level === 'danger' && !options.yes) {
     console.error('\n❌ Install blocked by security scan. Use --yes to force install.')
     process.exit(1)
+    return
   }
 
   if (level === 'review' && !options.yes) {
@@ -85,6 +86,7 @@ export async function installCommand(source, options) {
     if (answer !== 'y' && answer !== 'yes') {
       console.log('Install cancelled.')
       process.exit(0)
+      return
     }
   }
 
