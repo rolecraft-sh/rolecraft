@@ -1,4 +1,4 @@
-import { readLock, getProjectLockPath, computeContentHash, getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getDevinDir, getCodexDir, getCopilotProjectDir, getAiderDir, getClineDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, getCommandCodeDir, getCortexDir, getMistralVibeDir, getQwenCodeDir, getOpenClawDir, getCodeBuddyDir, getMuxDir, getPiDir, getAutohandCodeDir, getRovoDevDir, getFirebenderDir, getBobDir, getAiderDeskDir, getCodeArtsDoerDir, getCodeMakerDir, getCodeStudioDir, getCrushDir, getEveDir, getForgeDir, getInferenceShDir, getJazzDir, getIFlowDir, getKiloCodeDir, getKodeDir, getLingmaDir, getMcpJamDir, getMoxbyDir, getOnaDir, getQoderDir, getReasonixDir, getTerraMindDir, getTinyCloudDir, getZencoderDir, getZapDir, getCodeepDir, getKimiCodeDir, getZCodeDir } from '../utils/lockfile.js'
+import { readLock, getProjectLockPath, computeContentHash, getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getDevinDir, getCodexDir, getCopilotProjectDir, getAiderDir, getClineDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, getCommandCodeDir, getCortexDir, getMistralVibeDir, getQwenCodeDir, getOpenClawDir, getCodeBuddyDir, getMuxDir, getPiDir, getAutohandCodeDir, getRovoDevDir, getFirebenderDir, getBobDir, getAiderDeskDir, getCodeArtsDoerDir, getCodeMakerDir, getCodeStudioDir, getCrushDir, getEveDir, getForgeDir, getInferenceShDir, getJazzDir, getIFlowDir, getKiloCodeDir, getKodeDir, getLingmaDir, getMcpJamDir, getMoxbyDir, getOnaDir, getQoderDir, getReasonixDir, getTerraMindDir, getTinyCloudDir, getZencoderDir, getZapDir, getCodeepDir, getKimiCodeDir, getZCodeDir, getAstrbotDir, getQoderCnDir, getTraeCnDir, getZenflowDir, getNeovateDir, getPochiDir, getAdalDir } from '../utils/lockfile.js'
 import { readFile, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { createHash } from 'node:crypto'
@@ -70,6 +70,22 @@ const agentDirMap = {
   'codeep': getCodeepDir,
   'kimi-code': getKimiCodeDir,
   'zcode': getZCodeDir,
+  'amp': getAgentsDir,
+  'antigravity': getAgentsDir,
+  'antigravity-cli': getAgentsDir,
+  'deep-agents': getAgentsDir,
+  'dexto': getAgentsDir,
+  'loaf': getAgentsDir,
+  'replit': getAgentsDir,
+  'zed': getAgentsDir,
+  'promptscript': getEveDir,
+  'astrbot': getAstrbotDir,
+  'qoder-cn': getQoderCnDir,
+  'trae-cn': getTraeCnDir,
+  'zenflow': getZenflowDir,
+  'neovate': getNeovateDir,
+  'pochi': getPochiDir,
+  'adal': getAdalDir,
 }
 
 async function readFilesFromDir(dir) {

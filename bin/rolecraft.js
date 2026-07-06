@@ -27,7 +27,7 @@ function usage() {
 rolecraft — Install AI agent skills like roles & behaviors
 
 Zero dependencies, no marketplace required.
-Works with 65+ agents: opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody, continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot, loom, roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory, command-code, cortex, mistral-vibe, qwen-code, openclaw, codebuddy, mux, pi, autohand-code, rovo, firebender, bob, aider-desk, code-arts-doer, code-maker, code-studio, crush, eve, forge, inference-sh, jazz, iflow, kilo-code, kode, lingma, mcp-jam, moxby, ona, qoder, reasonix, terra-mind, tiny-cloud, zencoder, and all spec-compliant agents.
+Works with 82+ agents: opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody, continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot, loom, roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory, command-code, cortex, mistral-vibe, qwen-code, openclaw, codebuddy, mux, pi, autohand-code, rovo, firebender, bob, aider-desk, code-arts-doer, code-maker, code-studio, crush, eve, forge, inference-sh, jazz, iflow, kilo-code, kode, lingma, mcp-jam, moxby, ona, qoder, reasonix, terra-mind, tiny-cloud, zencoder, amp, antigravity, antigravity-cli, deepagents, dexto, loaf, replit, zed, promptscript, astrbot, qoder-cn, trae-cn, zenflow, neovate, pochi, adal, and all spec-compliant agents.
 
 Usage:
   rolecraft install <source>     Install a skill (local path, owner/repo, or npm:package)
@@ -140,6 +140,9 @@ export async function main() {
       const scopeFlags = ['--global', '--project', '--claude', '--cursor', '--windsurf', '--devin', '--codex', '--copilot', '--aider', '--cline', '--gemini', '--cody', '--continue', '--warp', '--codeium', '--fabric', '--goose', '--tabnine', '--supermaven', '--pr-pilot', '--loom', '--roo', '--trae', '--hermes', '--kiro', '--augment', '--kilo', '--openhands', '--junie', '--factory', '--command-code', '--cortex', '--mistral-vibe', '--qwen-code', '--openclaw', '--codebuddy',
   '--mux', '--pi', '--autohand-code', '--rovo', '--firebender', '--bob', '--aider-desk',
   '--code-arts-doer', '--code-maker', '--code-studio', '--crush', '--eve', '--forge', '--inference-sh', '--jazz', '--iflow', '--kilo-code', '--kode', '--lingma', '--mcp-jam', '--moxby', '--ona', '--qoder', '--reasonix', '--terra-mind', '--tiny-cloud', '--zencoder',
+  '--amp', '--antigravity', '--antigravity-cli', '--deepagents', '--dexto',
+  '--loaf', '--replit', '--zed', '--promptscript',
+  '--astrbot', '--qoder-cn', '--trae-cn', '--zenflow', '--neovate', '--pochi', '--adal',
   '--all']
       const hasScopeFlag = flags.some(f => scopeFlags.includes(f))
       const options = hasScopeFlag ? {
@@ -205,6 +208,22 @@ export async function main() {
         'terra-mind': flags.includes('--terra-mind') || flags.includes('--all'),
         'tiny-cloud': flags.includes('--tiny-cloud') || flags.includes('--all'),
         zencoder: flags.includes('--zencoder') || flags.includes('--all'),
+        amp: flags.includes('--amp') || flags.includes('--all'),
+        antigravity: flags.includes('--antigravity') || flags.includes('--all'),
+        'antigravity-cli': flags.includes('--antigravity-cli') || flags.includes('--all'),
+        deepagents: flags.includes('--deepagents') || flags.includes('--all'),
+        dexto: flags.includes('--dexto') || flags.includes('--all'),
+        loaf: flags.includes('--loaf') || flags.includes('--all'),
+        replit: flags.includes('--replit') || flags.includes('--all'),
+        zed: flags.includes('--zed') || flags.includes('--all'),
+        promptscript: flags.includes('--promptscript') || flags.includes('--all'),
+        astrbot: flags.includes('--astrbot') || flags.includes('--all'),
+        'qoder-cn': flags.includes('--qoder-cn') || flags.includes('--all'),
+        'trae-cn': flags.includes('--trae-cn') || flags.includes('--all'),
+        zenflow: flags.includes('--zenflow') || flags.includes('--all'),
+        neovate: flags.includes('--neovate') || flags.includes('--all'),
+        pochi: flags.includes('--pochi') || flags.includes('--all'),
+        adal: flags.includes('--adal') || flags.includes('--all'),
         project: flags.includes('--project') || flags.includes('--all'),
       } : {}
       options.frozenLockfile = flags.includes('--frozen-lockfile')

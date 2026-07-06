@@ -9,7 +9,7 @@
 | GitHub repo install                      | ✅               | ✅                | ❌                  |
 | GitLab / SSH git URL                     | ✅               | ✅                | ❌                  |
 | npm package source                       | ✅               | ✅                | ❌                  |
-| Agent targets                            | **66**           | **72**            | 15+                 |
+| Agent targets                            | **82**           | **72**            | 15+                 |
 | SKILL.md scaffolding (`init`)            | ✅               | ✅                | ❌                  |
 | Skill preview (`use`)                    | ✅               | ✅                | ❌                  |
 | Agent auto-detect + install (`setup`)    | ✅               | ❌                | ✅                  |

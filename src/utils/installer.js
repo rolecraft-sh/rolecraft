@@ -1,6 +1,6 @@
 import { mkdir, cp, writeFile, stat, symlink, rm } from 'node:fs/promises'
 import { join, relative, dirname } from 'node:path'
-import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotProjectDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, getCommandCodeDir, getCortexDir, getMistralVibeDir, getQwenCodeDir, getOpenClawDir, getCodeBuddyDir, getMuxDir, getPiDir, getAutohandCodeDir, getRovoDevDir, getFirebenderDir, getBobDir, getAiderDeskDir, getCodeArtsDoerDir, getCodeMakerDir, getCodeStudioDir, getCrushDir, getEveDir, getForgeDir, getInferenceShDir, getJazzDir, getIFlowDir, getKiloCodeDir, getKodeDir, getLingmaDir, getMcpJamDir, getMoxbyDir, getOnaDir, getQoderDir, getReasonixDir, getTerraMindDir, getTinyCloudDir, getZencoderDir, getZapDir, getCodeepDir, getKimiCodeDir, getZCodeDir, addSkillToLock, getGlobalLockPath, getProjectLockPath, computeFileHashes } from './lockfile.js'
+import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotProjectDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, getCommandCodeDir, getCortexDir, getMistralVibeDir, getQwenCodeDir, getOpenClawDir, getCodeBuddyDir, getMuxDir, getPiDir, getAutohandCodeDir, getRovoDevDir, getFirebenderDir, getBobDir, getAiderDeskDir, getCodeArtsDoerDir, getCodeMakerDir, getCodeStudioDir, getCrushDir, getEveDir, getForgeDir, getInferenceShDir, getJazzDir, getIFlowDir, getKiloCodeDir, getKodeDir, getLingmaDir, getMcpJamDir, getMoxbyDir, getOnaDir, getQoderDir, getReasonixDir, getTerraMindDir, getTinyCloudDir, getZencoderDir, getZapDir, getCodeepDir, getKimiCodeDir, getZCodeDir, getAstrbotDir, getQoderCnDir, getTraeCnDir, getZenflowDir, getNeovateDir, getPochiDir, getAdalDir, addSkillToLock, getGlobalLockPath, getProjectLockPath, computeFileHashes } from './lockfile.js'
 
 function normalizeSlug(slug) {
   return slug.replace(/\//g, '-')
@@ -73,6 +73,22 @@ const targetToAgentName = {
   codeep: 'codeep',
   'kimi-code': 'kimi-code',
   zcode: 'zcode',
+  amp: 'amp',
+  antigravity: 'antigravity',
+  'antigravity-cli': 'antigravity-cli',
+  deepagents: 'deep-agents',
+  dexto: 'dexto',
+  loaf: 'loaf',
+  replit: 'replit',
+  zed: 'zed',
+  promptscript: 'promptscript',
+  astrbot: 'astrbot',
+  'qoder-cn': 'qoder-cn',
+  'trae-cn': 'trae-cn',
+  zenflow: 'zenflow',
+  neovate: 'neovate',
+  pochi: 'pochi',
+  adal: 'adal',
 }
 
 export async function installSkill(resolved, targets, mode = 'copy') {
@@ -414,6 +430,41 @@ export async function installSkill(resolved, targets, mode = 'copy') {
       case 'zcode': {
         baseDir = getZCodeDir()
         label = '~/.zcode/skills/'
+        break
+      }
+      case 'astrbot': {
+        baseDir = getAstrbotDir()
+        label = '~/.astrbot/data/skills/'
+        break
+      }
+      case 'qoder-cn': {
+        baseDir = getQoderCnDir()
+        label = '~/.qoder-cn/skills/'
+        break
+      }
+      case 'trae-cn': {
+        baseDir = getTraeCnDir()
+        label = '~/.trae-cn/skills/'
+        break
+      }
+      case 'zenflow': {
+        baseDir = getZenflowDir()
+        label = '~/.zencoder/skills/'
+        break
+      }
+      case 'neovate': {
+        baseDir = getNeovateDir()
+        label = '~/.neovate/skills/'
+        break
+      }
+      case 'pochi': {
+        baseDir = getPochiDir()
+        label = '~/.pochi/skills/'
+        break
+      }
+      case 'adal': {
+        baseDir = getAdalDir()
+        label = '~/.adal/skills/'
         break
       }
       case 'project': {

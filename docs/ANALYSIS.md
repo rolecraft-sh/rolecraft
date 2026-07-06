@@ -12,7 +12,7 @@
 | **Lockfile**                 | agentskill v3                     | Two-tier (global v3 + project v1, SHA) | None                     | None           | None               | ✅                | None            | Config only                |
 | **Offline capable**          | ✅                                | ✅                                     | ❌ (registry)            | ✅             | ✅                 | ✅                | ✅              | ✅                         |
 | **Signup required**          | ❌                                | ❌                                     | ✅ (agentskill.sh)       | ❌             | ❌                 | ❌                | ❌              | ❌                         |
-| **Agent count**              | **66**                            | 72                                     | 15+                      | 10+            | 10+                | 39                | 1 (+ compat)    | 1 (+ plugins)              |
+| **Agent count**              | **82**                            | 72                                     | 15+                      | 10+            | 10+                | 39                | 1 (+ compat)    | 1 (+ plugins)              |
 | **Project scope default**    | ✅                                | ✅                                     | N/A                      | ❌ (global)    | ✅ (project)       | ✅                | N/A             | N/A                        |
 | **Interactive scope prompt** | ✅                                | ✅                                     | ❌                       | ❌             | ❌                 | ❌                | N/A             | N/A                        |
 | **Provenance (npm)**         | ✅                                | ❌                                     | ❌                       | ❌             | ❌                 | ❌                | N/A             | N/A                        |
@@ -45,7 +45,7 @@
 - **agentskill.sh lockfile compatible** — cross-compatible with ecosystem
 - **Interactive scope prompt** — user-friendly first install
 - **Project scope default** — modern default
-- **66 install targets** — 65 named agents + project-local
+- **82 install targets** — 81 named agents + project-local
 - **SHA256 content hash verification** — `rolecraft verify`
 - **CI mode** — `rolecraft ci` for pipeline installs
 - **Symlink + Copy modes** — `--symlink`/`--copy`
@@ -60,7 +60,7 @@
 
 ### Feature gaps vs competitors
 
-1. **Agent count (66)** — ahead of `ags` (15+), `openskills` (10+), `skills-npm` (10+), `qntx/skill` (39) but behind `skills` (72)
+1. ~~Agent count (66)~~ — **now 82**, surpassing Vercel's 72
 2. **Security scoring (done)** — matches `ags` 0–100 scoring, `skills` Snyk audit. rolecraft: zero-dep static analysis with prompt injection, command injection, obfuscated code, credential harvesting, and sensitive file access detection.
 3. **No AGENTS.md XML injection** — `openskills` generates Claude Code compatible `<available_skills>` XML
 4. **Stars / community adoption very low** — building trust and visibility
@@ -86,8 +86,7 @@
 - **Stars**: 23.5K | **Deps**: 1 | **Agents**: 55+
 - **Key features**: `skills use`, `skills ci`/`skills verify` (lockfile workflow), `skills find` (interactive TUI), `skills init`, symlink mode, `vercel skills` built-in, 13.4M weekly downloads, skills.sh directory
 - **Weaknesses**: 1 dep (`yaml`), no provenance, no `setup` command, no dry-run, no bundle
-- **rolecraft advantage**: Zero deps, provenance, `setup` command, dry-run, bundle, doctor
-- **rolecraft gap**: Agent count (66 vs 72)
+- **rolecraft advantage**: Zero deps, provenance, `setup` command, dry-run, bundle, doctor, **highest agent count (82 vs 72)**
 
 ### @agentskill.sh/cli (ags)
 
@@ -95,7 +94,7 @@
 - **Stars**: 23 | **Deps**: 2 | **Agents**: 15+
 - **Key features**: 274K+ skills in marketplace, security scoring (0-100), `/learn` in-agent command, feedback loop (1-5 rating), `ags setup` auto-detection
 - **Weaknesses**: Requires signup, no lockfile, no offline, no local sources, no provenance
-- **rolecraft advantage**: Zero deps, offline-first, lockfile, provenance, local sources, 66 agents
+- **rolecraft advantage**: Zero deps, offline-first, lockfile, provenance, local sources, 82 agents
 
 ### openskills (numman-ali)
 
