@@ -3,7 +3,7 @@ import { join, dirname, basename } from 'node:path'
 import { tmpdir, homedir } from 'node:os'
 import { execSync as defaultExecSync, spawnSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
-import { readdirSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
+import { readdirSync, readFileSync, writeFileSync, mkdirSync, mkdtempSync } from 'node:fs'
 import { get as defaultHttpsGet } from 'node:https'
 import { computeContentHash } from './lockfile.js'
 
@@ -356,11 +356,10 @@ async function resolveNpm(source) {
   const tarballUrl = pkgVersionData.dist?.tarball
   if (!tarballUrl) throw new Error(`No tarball URL found for ${pkgName}@${ver}`)
 
-  const tmpDir = join(tmpdir(), `rolecraft-npm-${randomUUID().slice(0, 8)}`)
+  const tmpDir = mkdtempSync(join(tmpdir(), 'rolecraft-npm-'))
   const tarballPath = join(tmpDir, 'package.tgz')
 
   try {
-    mkdirSync(tmpDir, { recursive: true })
     await downloadFile(tarballUrl, tarballPath)
     const tarResult = runSpawn('tar', ['-xzf', tarballPath, '-C', tmpDir], { stdio: 'pipe', timeout: 30000 })
     if (tarResult.error) throw tarResult.error
