@@ -67,13 +67,15 @@ export async function upgradeCommand(options = {}) {
     return
   }
 
-  console.log(`   ⬆️  Upgrading to v${latest}...\n`)
+    console.log(`   ⬆️  Upgrading to v${latest}...\n`)
+
+  const runExecSync = options.execSync || execSync
 
   try {
     if (!SAFE_VERSION.test(latest)) {
       throw new Error(`Invalid version: ${latest}`)
     }
-    execSync(`npm install -g ${pkg.name}@${latest}`, {
+    runExecSync(`npm install -g ${pkg.name}@${latest}`, {
       stdio: 'inherit',
       env: { ...process.env, npm_config_fund: 'false', npm_config_audit: 'false' },
     })

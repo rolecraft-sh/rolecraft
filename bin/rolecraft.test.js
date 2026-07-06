@@ -560,4 +560,38 @@ describe('rolecraft CLI', () => {
     assert.ok(logs.some(l => l.includes('All 2 skill(s) installed')))
     restore()
   })
+
+  it('dispatches check command via CLI', async () => {
+    process.argv = ['node', 'rolecraft', 'check']
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l.includes('No installed skills found') || l.includes('Checking') || l.includes('up to date') || l.includes('All skills are up to date')))
+    restore()
+  })
+
+  it('dispatches check-updates command via CLI', async () => {
+    process.argv = ['node', 'rolecraft', 'check-updates']
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l.includes('No installed skills found') || l.includes('Checking') || l.includes('up to date') || l.includes('All skills are up to date')))
+    restore()
+  })
+
+  it('entry point catch handler handles rejected promise from run()', async () => {
+    const { execSync } = await import('node:child_process')
+    const binPath = new URL('./rolecraft.js', import.meta.url).pathname
+    try {
+      execSync(`node "${binPath}" install`, {
+        encoding: 'utf-8',
+        env: { ...process.env, HOME: tempDir },
+      })
+      assert.fail('should have thrown')
+    } catch (e) {
+      assert.ok(e.stderr?.includes('Usage: rolecraft install <source>'))
+    }
+  })
 })

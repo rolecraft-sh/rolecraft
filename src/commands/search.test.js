@@ -71,6 +71,18 @@ describe('search command', () => {
       assert.ok(result.includes('No description'))
       assert.ok(result.includes('N/A'))
     })
+
+    it('handles empty strings and zero values', () => {
+      const result = searchModule.formatRepo({
+        full_name: 'user/skill',
+        description: '',
+        stargazers_count: 0,
+        language: '',
+      })
+      assert.ok(result.includes('No description'))
+      assert.ok(result.includes('⭐ 0'))
+      assert.ok(result.includes('N/A'))
+    })
   })
 
   it('shows results when items found', async () => {
@@ -221,6 +233,23 @@ describe('search command', () => {
     assert.ok(logs.some(l => l.includes('rate limit')))
   })
 
+  it('displays results when interactive is explicitly false', async () => {
+    mockFetch(200, {
+      items: [
+        { full_name: 'org/repo', description: 'A repo', stargazers_count: 10, language: 'Go' },
+      ],
+    })
+
+    const { logs, restore } = capture('log')
+    await searchModule.searchCommand('go-skill', { interactive: false })
+    restore()
+
+    assert.ok(logs.some(l => l.includes('org/repo')))
+    assert.ok(logs.some(l => l.includes('A repo')))
+    assert.ok(logs.some(l => l.includes('10')))
+    assert.ok(logs.some(l => l.includes('1 result(s) found')))
+  })
+
   describe('interactive mode', () => {
     afterEach(() => {
       searchModule.setFetch(globalThis.fetch)
@@ -320,6 +349,28 @@ describe('search command', () => {
       await rm(testDir, { recursive: true, force: true })
 
       assert.ok(errCapture.logs.some(l => l.includes('Failed to install')))
+    })
+
+    it('uses promptSelect when output is not a TTY', async () => {
+      const origIsTTY = process.stdout.isTTY
+      process.stdout.isTTY = false
+
+      try {
+        searchModule.setPromptUser(() => Promise.resolve('q'))
+        mockFetch(200, {
+          items: [
+            { full_name: 'user/skill1', description: 'A test', stargazers_count: 5, language: 'JS' },
+          ],
+        })
+
+        const { logs, restore } = capture('log')
+        await searchModule.searchCommand('test', { interactive: true })
+        restore()
+
+        assert.ok(logs.some(l => l.includes('Aborted')))
+      } finally {
+        process.stdout.isTTY = origIsTTY
+      }
     })
   })
 })
