@@ -189,6 +189,17 @@ rolecraft install ./my-skill --cursor --devin --copilot --gemini --cody
 
 Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
+## Contributors
+
+Thanks to everyone who has contributed to RoleCraft!
+
+| Avatar | Name | Role |
+|--------|------|------|
+| <img src="https://github.com/sametcelikbicak.png" width="40" height="40" alt="sametcelikbicak"> | [Samet ÇELİKBIÇAK](https://github.com/sametcelikbicak) | Owner & Maintainer |
+| <img src="https://github.com/fengjikui.png" width="40" height="40" alt="fengjikui"> | [冯基魁](https://github.com/fengjikui) | [Contributor](https://github.com/sametcelikbicak/rolecraft/pull/62) |
+
+Want to contribute? See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
 ## License
 
 MIT
