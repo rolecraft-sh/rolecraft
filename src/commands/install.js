@@ -60,6 +60,7 @@ export async function installCommand(source, options) {
     if (existing) {
       console.error(`Skill "${slug}" already installed. Use \`rolecraft update ${slug}\` to update or omit --frozen-lockfile to overwrite.`)
       process.exit(1)
+      return
     }
   }
 
