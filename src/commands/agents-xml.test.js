@@ -217,7 +217,7 @@ More content.
       }, dismissed: {}, lastSelectedAgents: [],
     }))
 
-    const { logs, restore } = capture()
+    const { restore } = capture()
     try {
       await xmlModule.agentsXmlCommand(true)
     } finally {
