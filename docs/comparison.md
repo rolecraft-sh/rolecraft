@@ -35,6 +35,7 @@
 | Skill rating / feedback                  | ❌               | ❌                | ✅                  |
 | Skill diff / compose                     | ❌               | ❌                | ❌                  |
 | System health check (`doctor`)           | ✅               | ❌                | ❌                  |
+| AGENTS.md XML generation                 | ✅               | ❌                | ❌                  |
 | Security scanning (0–100)                | ✅               | ✅ (Snyk)         | ✅                  |
 | Telemetry / leaderboard                  | ❌               | ✅                | ❌                  |
 | File size                                | ~4 KB            | ~465 KB           | ~84 KB              |

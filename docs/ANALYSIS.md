@@ -71,10 +71,11 @@
 
 - [x] Security scoring for installed skills — `rolecraft install` scans skill files for prompt injection, command injection, obfuscated code, sensitive file access, data exfiltration, and more. Scores 0–100: SAFE (90+), REVIEW (70–89), DANGER (<70). DANGER blocks install unless `--yes`. REVIEW prompts for confirmation. Zero dependencies.
 - [x] `rolecraft doctor` — system health check: Node.js version, agent detection, lockfile integrity, skill directory and hash verification
+- [x] AGENTS.md XML generation — `rolecraft agents-xml` outputs `<skills_system>` XML for Claude Code and spec-compliant agents
 
 ### ❌ Next
 
-- [ ] AGENTS.md XML injection for non-Claude agents
+- [ ] Watch mode — auto-sync skills on file change
 - [ ] Watch mode — auto-sync skills on file change
 - [ ] **skills.sh telemetry** — optional reporting when `rolecraft install` runs
 

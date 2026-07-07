@@ -61,6 +61,7 @@ npx rolecraft list
 | `rolecraft verify` | Check skill integrity via content hash |
 | `rolecraft search <query>` | Search skills on GitHub |
 | `rolecraft doctor` | Run system health check |
+| `rolecraft agents-xml [--write]` | Generate skills XML for AGENTS.md |
 | `rolecraft use <source>` | Preview without installing |
 | `rolecraft completions bash\|zsh\|fish` | Generate shell completions |
 
