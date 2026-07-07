@@ -97,6 +97,7 @@ rolecraft remove my-skill
 - **CI-ready** — lockfile-based re-install for pipelines
 - **Dry-run mode** — preview before installing
 - **System health check** — `rolecraft doctor` diagnoses Node.js, agent directories, lockfiles, and skill integrity
+- **AGENTS.md XML generation** — `rolecraft agents-xml` generates Claude Code-compatible `<skills_system>` XML for agent discovery
 
 ---
 
@@ -115,6 +116,7 @@ rolecraft remove my-skill
 | `rolecraft setup [<source>]`            | Detect agents, optionally install a skill to all         | [docs](docs/commands/setup.md)       |
 | `rolecraft list`                        | Show all installed skills                                | [docs](docs/commands/list.md)        |
 | `rolecraft doctor`                      | Run system health check                                  | [docs](docs/commands/doctor.md)      |
+| `rolecraft agents-xml [--write]`        | Generate skills XML for AGENTS.md                        | [docs](docs/commands/agents-xml.md)  |
 | `rolecraft verify`                      | Check installed skill integrity via content hash         | [docs](docs/commands/verify.md)      |
 | `rolecraft ci`                          | Re-install all skills from lockfile (CI mode)            | [docs](docs/commands/ci.md)          |
 | `rolecraft upgrade`                     | Upgrade rolecraft to the latest version                  | [docs](docs/commands/upgrade.md)     |
@@ -148,6 +150,7 @@ rolecraft remove my-skill
 | Content hash verification (`verify`) | ✅               | ✅              | ❌                  |
 | CI-mode re-install (`ci`)            | ✅               | ✅              | ❌                  |
 | System health check (`doctor`)       | ✅               | ❌              | ❌                  |
+| AGENTS.md XML generation             | ✅               | ❌              | ❌                  |
 | Self-upgrade command                 | ✅               | ❌              | ❌                  |
 | File size                            | ~4 KB            | ~465 KB         | ~84 KB              |
 

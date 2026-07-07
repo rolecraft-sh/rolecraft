@@ -75,6 +75,7 @@
   },
   "homepage": "https://github.com/sametcelikbicak/rolecraft#readme",
   "scripts": {
+    "lint": "node --check bin/rolecraft.js src/**/*.js",
     "test": "node --test --test-concurrency=1",
     "test:coverage": "node --experimental-test-coverage --test --test-coverage-exclude=\"**/*.test.js\" --test-coverage-include=\"src/**\" --test-coverage-include=\"bin/**\""
   },

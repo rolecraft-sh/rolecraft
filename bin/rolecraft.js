@@ -18,6 +18,7 @@ import { bundleCommand, bundleCreateCommand } from '../src/commands/bundle.js'
 import { completionsCommand } from '../src/commands/completions.js'
 import { upgradeCommand } from '../src/commands/upgrade.js'
 import { doctorCommand } from '../src/commands/doctor.js'
+import { agentsXmlCommand } from '../src/commands/agents-xml.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'))
@@ -45,6 +46,8 @@ Usage:
   rolecraft ci                   Install all skills from lockfile
   rolecraft completions <shell>  Generate shell completions (bash|zsh|fish)
   rolecraft doctor               Run system health check
+  rolecraft agents-xml           Generate skills XML for AGENTS.md
+  rolecraft agents-xml --write   Write skills XML to AGENTS.md
   rolecraft upgrade              Upgrade rolecraft to the latest version
   rolecraft help                 Show this help
 
@@ -336,6 +339,11 @@ export async function main() {
     case 'doctor':
       if (args.includes('--help') || args.includes('-h')) { usage(); return }
       await doctorCommand()
+      break
+
+    case 'agents-xml':
+      if (args.includes('--help') || args.includes('-h')) { usage(); return }
+      await agentsXmlCommand(args.includes('--write'))
       break
 
     case 'version':
