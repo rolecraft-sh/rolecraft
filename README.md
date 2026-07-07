@@ -23,6 +23,8 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT"></a>
   <a href="package.json"><img src="https://img.shields.io/node/v/rolecraft" alt="Node"></a>
   <a href="docs/security.md"><img src="https://img.shields.io/badge/🔒-security%20scoring-brightgreen" alt="Security scoring"></a>
+  <a href="CODE_OF_CONDUCT.md"><img src="https://img.shields.io/badge/📖-Code%20of%20Conduct-orange" alt="Code of Conduct"></a>
+  <a href="SUPPORT.md"><img src="https://img.shields.io/badge/💬-Support-blue" alt="Support"></a>
 </p>
 
 <p align="center">
@@ -38,6 +40,7 @@
   <a href="#why-rolecraft">Why RoleCraft?</a> ·
   <a href="#commands-overview">Commands</a> ·
   <a href="docs/install.md">Install Guide</a> ·
+  <a href="docs/comparison.md">Compare</a> ·
   <a href="docs/security.md">Security</a> ·
   <a href="CONTRIBUTING.md">Contribute</a>
 </p>
@@ -45,6 +48,20 @@
 <p align="center">
   <img src="assets/rolecraft-demo.gif" alt="RoleCraft demo" width="720">
 </p>
+
+---
+
+<p align="center">
+  <b>⚡ Zero dependencies</b> · <b>📦 4 KB</b> · <b>🤖 82+ agents</b> · <b>🔒 No telemetry</b> · <b>🌐 Offline-first</b> · <b>🔧 Any source</b>
+</p>
+
+<p align="center">
+  <a href="docs/comparison.md"><b>Compare with alternatives →</b></a>
+    
+  <a href="docs/migration-from-skills.md"><b>Migrate from Vercel skills →</b></a>
+</p>
+
+---
 
 ## Quick start
 

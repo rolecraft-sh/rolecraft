@@ -157,7 +157,7 @@ All notable changes to this project will be documented in this file.
 
 - Update README
 
-## [v0.1.0] - 2025-01-01
+## [v0.1.0] - 2026-06-14
 
 ### Added
 
