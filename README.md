@@ -38,9 +38,9 @@
 <p align="center">
   <a href="#quick-start">Quick Start</a> ·
   <a href="#why-rolecraft">Why RoleCraft?</a> ·
+  <a href="#features">Features</a> ·
   <a href="#commands-overview">Commands</a> ·
   <a href="docs/install.md">Install Guide</a> ·
-  <a href="docs/comparison.md">Compare</a> ·
   <a href="docs/security.md">Security</a> ·
   <a href="CONTRIBUTING.md">Contribute</a>
 </p>
@@ -56,7 +56,9 @@
 </p>
 
 <p align="center">
-  <a href="docs/comparison.md"><b>Compare with alternatives →</b></a>
+  <a href="benchmark/RESULTS.md"><b>Benchmark: 434x faster than Vercel →</b></a>
+    
+  <a href="docs/comparison.md"><b>Full feature comparison →</b></a>
     
   <a href="docs/migration-from-skills.md"><b>Migrate from Vercel skills →</b></a>
 </p>
