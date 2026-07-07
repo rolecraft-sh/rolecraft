@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.3.0] - 2026-07-07
+
+### Added
+- add agents-xml command for AGENTS.md XML generation (#63)
+- add 16 new agent targets, surpass Vercel (82 vs 72 agents) (#61)
+- add rolecraft doctor command for system health checks (#60)
+- add security scoring for installed skills (0-100 static analysis) (#57)
+- add npm package source support (npm:package) (#53)
+
+### Fixed
+- add missing return after process.exit in frozenLockfile, update, and remove blocks (#66)
+- stop after blocked installs (#62)
+- support SSH signing in release-prep workflow + update docs (#59)
+- preserve GPG signature when release-prep moves tag to changelog commit (#58)
+- remove unused mkdirSync import (CodeQL #42) + AGENTS.md merge rule
+- use mkdtempSync for npm temp dir (CodeQL insecure-temporary-file)
+- resolve CodeQL audit findings and improve test hygiene
+
+### Changed
+- release v1.2.0
+
+### Documentation
+- improve repo quality - code of conduct, support, benchmark, migration guide (#67)
+- reorganize Contributing and Contributors sections in README
+- add contributors section to README (#65)
 ## [v1.2.0] - 2026-07-06
 
 ### Added
