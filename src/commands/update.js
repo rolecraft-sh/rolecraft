@@ -237,6 +237,7 @@ export async function updateCommand(slug) {
   } else {
     console.error(`Skill "${slug}" not found.`)
     process.exit(1)
+    return
   }
 
   const targets = detectTargets(actualSlug, process.cwd())
