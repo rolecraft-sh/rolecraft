@@ -3,3 +3,5 @@ node_modules/
 .github/copilot/skills/
 opencode.json
 .opencode/
+docs/.vitepress/dist
+docs/.vitepress/cache

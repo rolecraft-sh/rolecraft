@@ -21,7 +21,8 @@
   <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/📜-Changelog-blue" alt="Changelog"></a>
   <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/🤝-Contributing-green" alt="Contributing"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT"></a>
-  <a href="package.json"><img src="https://img.shields.io/node/v/rolecraft" alt="Node"></a>
+   <a href="https://sametcelikbicak.github.io/rolecraft/"><img src="https://img.shields.io/badge/📖-Docs%20site-blue" alt="Docs"></a>
+   <a href="package.json"><img src="https://img.shields.io/node/v/rolecraft" alt="Node"></a>
   <a href="docs/security.md"><img src="https://img.shields.io/badge/🔒-security%20scoring-brightgreen" alt="Security scoring"></a>
   <a href="CODE_OF_CONDUCT.md"><img src="https://img.shields.io/badge/📖-Code%20of%20Conduct-orange" alt="Code of Conduct"></a>
   <a href="SUPPORT.md"><img src="https://img.shields.io/badge/💬-Support-blue" alt="Support"></a>
@@ -40,9 +41,10 @@
   <a href="#why-rolecraft">Why RoleCraft?</a> ·
   <a href="#features">Features</a> ·
   <a href="#commands-overview">Commands</a> ·
-  <a href="docs/install.md">Install Guide</a> ·
-  <a href="docs/security.md">Security</a> ·
-  <a href="CONTRIBUTING.md">Contribute</a>
+   <a href="docs/install.md">Install Guide</a> ·
+   <a href="https://sametcelikbicak.github.io/rolecraft/">Docs Site</a> ·
+   <a href="docs/security.md">Security</a> ·
+   <a href="CONTRIBUTING.md">Contribute</a>
 </p>
 
 <p align="center">
@@ -212,6 +214,31 @@ rolecraft install ./my-skill --cursor --devin --copilot --gemini --cody
 [→ Full architecture & project structure](docs/architecture.md)
 
 ---
+
+## Development
+
+Clone the repo and test locally without publishing to npm:
+
+```bash
+git clone https://github.com/sametcelikbicak/rolecraft.git
+cd rolecraft
+
+# link globally
+npm link
+
+# now `rolecraft` runs from your local checkout
+rolecraft --help
+
+# for the docs site (VitePress)
+npm install
+npm run docs:dev        # local preview at http://localhost:5173/rolecraft/
+npm run docs:build      # production build to docs/.vitepress/dist/
+
+# unlink when done
+npm unlink -g rolecraft
+```
+
+All commands work the same as the installed version. No npm publish needed.
 
 ## Contributing
 
