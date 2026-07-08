@@ -257,4 +257,46 @@ describe('askScope', () => {
     assert.ok(logs.some(l => l.includes('Installed')))
     restore()
   })
+
+  it('installs MCP servers from SKILL.md mcp_servers', async () => {
+    const mcpSkill = join(tempDir, 'mcp-combo-skill')
+    mkdirSync(mcpSkill, { recursive: true })
+    writeFileSync(join(mcpSkill, 'SKILL.md'), [
+      '---',
+      'slug: test/mcp-combo',
+      'name: mcp-combo-skill',
+      'mcp_servers:',
+      '  - name: my-test-mcp',
+      '    source: npm:@test/combo-mcp',
+      '---',
+    ].join('\n'))
+
+    const { logs, restore } = capture('log')
+    await installModule.installCommand(mcpSkill, { claude: true })
+    restore()
+
+    assert.ok(logs.some(l => l.includes('Installed')))
+    assert.ok(logs.some(l => l.includes('my-test-mcp')))
+  })
+
+  it('--no-mcp skips MCP server installation', async () => {
+    const noMcpSkill = join(tempDir, 'no-mcp-skill')
+    mkdirSync(noMcpSkill, { recursive: true })
+    writeFileSync(join(noMcpSkill, 'SKILL.md'), [
+      '---',
+      'slug: test/no-mcp',
+      'name: no-mcp-skill',
+      'mcp_servers:',
+      '  - name: should-not-install',
+      '    source: npm:@test/skipped',
+      '---',
+    ].join('\n'))
+
+    const { logs, restore } = capture('log')
+    await installModule.installCommand(noMcpSkill, { claude: true, noMcp: true })
+    restore()
+
+    assert.ok(logs.some(l => l.includes('Installed')))
+    assert.ok(!logs.some(l => l.includes('should-not-install')))
+  })
 })

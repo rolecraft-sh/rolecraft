@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotProjectDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, getCommandCodeDir, getCortexDir, getMistralVibeDir, getQwenCodeDir, getOpenClawDir, getCodeBuddyDir, getMuxDir, getPiDir, getAutohandCodeDir, getRovoDevDir, getFirebenderDir, getBobDir, getAiderDeskDir, getCodeArtsDoerDir, getCodeMakerDir, getCodeStudioDir, getCrushDir, getEveDir, getForgeDir, getInferenceShDir, getJazzDir, getIFlowDir, getKiloCodeDir, getKodeDir, getLingmaDir, getMcpJamDir, getMoxbyDir, getOnaDir, getQoderDir, getReasonixDir, getTerraMindDir, getTinyCloudDir, getZencoderDir, getZapDir, getCodeepDir, getKimiCodeDir, getZCodeDir, getAstrbotDir, getQoderCnDir, getTraeCnDir, getZenflowDir, getNeovateDir, getPochiDir, getAdalDir } from '../utils/lockfile.js'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
+import { parseMcpServersFromSkill, resolveMcpSource, addMcpServer, getSupportedMcpAgents } from '../utils/mcp.js'
 
 const KNOWN_AGENTS = [
   { flag: 'agents', label: 'opencode', dir: getAgentsDir },
@@ -167,6 +168,24 @@ export async function setupCommand(source, options = {}) {
     console.log('✅ Installed to all detected agents:\n')
     for (const r of results) {
       console.log(`   ${r.label} → ${r.path}`)
+    }
+
+    if (resolved.content) {
+      const mcpServers = parseMcpServersFromSkill(resolved.content)
+      if (mcpServers.length > 0) {
+        console.log(`\n🔧 Skill includes ${mcpServers.length} MCP server(s). Installing...`)
+        const supported = getSupportedMcpAgents()
+        const mcpTargets = agents.filter(a => supported.includes(a.flag)).map(a => a.flag)
+        for (const server of mcpServers) {
+          const resolvedMcp = resolveMcpSource(server.source)
+          let installedCount = 0
+          for (const agent of mcpTargets) {
+            const ok = await addMcpServer(agent, server.name, resolvedMcp)
+            if (ok) installedCount++
+          }
+          console.log(`   ${installedCount}/${mcpTargets.length} agents: MCP server "${server.name}" installed`)
+        }
+      }
     }
   } else {
     console.log('To install a skill to all detected agents:')

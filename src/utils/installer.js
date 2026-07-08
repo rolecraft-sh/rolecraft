@@ -467,6 +467,51 @@ export async function installSkill(resolved, targets, mode = 'copy') {
         label = '~/.adal/skills/'
         break
       }
+      case 'amp': {
+        baseDir = getAgentsDir()
+        label = '~/.agents/skills/'
+        break
+      }
+      case 'antigravity': {
+        baseDir = getAgentsDir()
+        label = '~/.agents/skills/'
+        break
+      }
+      case 'antigravity-cli': {
+        baseDir = getAgentsDir()
+        label = '~/.agents/skills/'
+        break
+      }
+      case 'deepagents': {
+        baseDir = getAgentsDir()
+        label = '~/.agents/skills/'
+        break
+      }
+      case 'dexto': {
+        baseDir = getAgentsDir()
+        label = '~/.agents/skills/'
+        break
+      }
+      case 'loaf': {
+        baseDir = getAgentsDir()
+        label = '~/.agents/skills/'
+        break
+      }
+      case 'replit': {
+        baseDir = getAgentsDir()
+        label = '~/.agents/skills/'
+        break
+      }
+      case 'zed': {
+        baseDir = getAgentsDir()
+        label = '~/.agents/skills/'
+        break
+      }
+      case 'promptscript': {
+        baseDir = getEveDir()
+        label = './agent/skills/'
+        break
+      }
       case 'project': {
         baseDir = join(process.cwd(), '.agents', 'skills')
         label = './.agents/skills/'

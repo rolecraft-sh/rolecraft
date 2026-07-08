@@ -1,5 +1,7 @@
 # rolecraft — Development Guidelines
 
+> 📖 Agent discovery paths are in [`docs/agents.md`](./docs/agents.md)
+
 ## ⚠️ STARTUP CHECKLIST (read before every task)
 
 1. `git checkout main && git pull` — start from latest main

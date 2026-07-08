@@ -3,6 +3,7 @@ import { stdin as input, stdout as output } from 'node:process'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 import { scanSkill, formatSecurityReport } from '../utils/security.js'
+import { parseMcpServersFromSkill, resolveMcpSource, addMcpServer, getSupportedMcpAgents } from '../utils/mcp.js'
 
 let createInterface = defaultCreateInterface
 let askQuestion = defaultAskQuestion
@@ -45,7 +46,7 @@ async function askScope() {
 }
 
 export async function installCommand(source, options) {
-  const hasScopeFlags = options.global || options.project || options.claude || options.cursor || options.windsurf || options.devin || options.codex || options.copilot || options.aider || options.cline || options.gemini || options.cody || options.continue || options.warp || options.codeium || options.fabric || options.goose || options.tabnine || options.supermaven || options['pr-pilot'] || options.loom || options.roo || options.trae || options.hermes || options.kiro || options.augment || options.kilo || options.openhands || options.junie || options.factory || options['command-code'] || options.cortex || options['mistral-vibe'] || options['qwen-code'] || options.openclaw || options.codebuddy || options.mux || options.pi || options['autohand-code'] || options.rovo || options.firebender || options.bob || options['aider-desk'] || options['code-arts-doer'] || options['code-maker'] || options['code-studio'] || options.crush || options.eve || options.forge || options['inference-sh'] || options.jazz || options.iflow || options['kilo-code'] || options.kode || options.lingma || options['mcp-jam'] || options.moxby || options.ona || options.qoder || options.reasonix || options['terra-mind'] || options['tiny-cloud'] || options.zencoder || options.zap || options.codeep || options['kimi-code'] || options.zcode
+  const hasScopeFlags = options.global || options.project || options.claude || options.cursor || options.windsurf || options.devin || options.codex || options.copilot || options.aider || options.cline || options.gemini || options.cody || options.continue || options.warp || options.codeium || options.fabric || options.goose || options.tabnine || options.supermaven || options['pr-pilot'] || options.loom || options.roo || options.trae || options.hermes || options.kiro || options.augment || options.kilo || options.openhands || options.junie || options.factory || options['command-code'] || options.cortex || options['mistral-vibe'] || options['qwen-code'] || options.openclaw || options.codebuddy || options.mux || options.pi || options['autohand-code'] || options.rovo || options.firebender || options.bob || options['aider-desk'] || options['code-arts-doer'] || options['code-maker'] || options['code-studio'] || options.crush || options.eve || options.forge || options['inference-sh'] || options.jazz || options.iflow || options['kilo-code'] || options.kode || options.lingma || options['mcp-jam'] || options.moxby || options.ona || options.qoder || options.reasonix || options['terra-mind'] || options['tiny-cloud'] || options.zencoder || options.zap || options.codeep || options['kimi-code'] || options.zcode || options.amp || options.antigravity || options['antigravity-cli'] || options.deepagents || options.dexto || options.loaf || options.replit || options.zed || options.promptscript || options.astrbot || options['qoder-cn'] || options['trae-cn'] || options.zenflow || options.neovate || options.pochi || options.adal
   const scope = hasScopeFlags ? options : options.yes ? { global: false, project: true } : await askScope()
 
   if (options.frozenLockfile) {
@@ -160,6 +161,22 @@ export async function installCommand(source, options) {
   if (scope.codeep) targets.push('codeep')
   if (scope['kimi-code']) targets.push('kimi-code')
   if (scope.zcode) targets.push('zcode')
+  if (scope.amp) targets.push('amp')
+  if (scope.antigravity) targets.push('antigravity')
+  if (scope['antigravity-cli']) targets.push('antigravity-cli')
+  if (scope.deepagents) targets.push('deepagents')
+  if (scope.dexto) targets.push('dexto')
+  if (scope.loaf) targets.push('loaf')
+  if (scope.replit) targets.push('replit')
+  if (scope.zed) targets.push('zed')
+  if (scope.promptscript) targets.push('promptscript')
+  if (scope.astrbot) targets.push('astrbot')
+  if (scope['qoder-cn']) targets.push('qoder-cn')
+  if (scope['trae-cn']) targets.push('trae-cn')
+  if (scope.zenflow) targets.push('zenflow')
+  if (scope.neovate) targets.push('neovate')
+  if (scope.pochi) targets.push('pochi')
+  if (scope.adal) targets.push('adal')
   if (scope.project) targets.push('project')
 
   if (options.dryRun) {
@@ -178,5 +195,23 @@ export async function installCommand(source, options) {
   console.log('✅ Installed successfully:\n')
   for (const r of results) {
     console.log(`   ${r.label} → ${r.path}`)
+  }
+
+  if (resolved.content && !options.noMcp) {
+    const mcpServers = parseMcpServersFromSkill(resolved.content)
+    if (mcpServers.length > 0) {
+      console.log(`\n🔧 Skill includes ${mcpServers.length} MCP server(s). Installing...`)
+      const supportedAgents = getSupportedMcpAgents()
+      const mcpTargets = targets.filter(t => t !== 'project' && supportedAgents.includes(t))
+      for (const server of mcpServers) {
+        const resolvedMcp = resolveMcpSource(server.source)
+        let installedCount = 0
+        for (const agent of mcpTargets) {
+          const ok = await addMcpServer(agent, server.name, resolvedMcp)
+          if (ok) installedCount++
+        }
+        console.log(`   ${installedCount}/${mcpTargets.length} agents: MCP server "${server.name}" installed`)
+      }
+    }
   }
 }
