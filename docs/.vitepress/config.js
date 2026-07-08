@@ -10,12 +10,13 @@ export default defineConfig({
     ['style', {}, ':root { --vp-nav-logo-height: 48px; }'],
   ],
   themeConfig: {
-    logo: '/logo.png',
+    logo: '/rolecraft_logo.png',
     siteTitle: 'RoleCraft',
     nav: [
       { text: 'Guide', link: '/install' },
       { text: 'Commands', link: '/commands/install' },
       { text: 'MCP', link: '/mcp' },
+      { text: 'Benchmark', link: '/benchmark/RESULTS' },
       { text: 'Security', link: '/security' },
     ],
     sidebar: {
@@ -46,9 +47,9 @@ export default defineConfig({
         },
         { text: 'MCP Server Management', link: '/mcp' },
         { text: 'Security', link: '/security' },
+        { text: 'Benchmark', link: '/benchmark/RESULTS' },
         { text: 'Architecture', link: '/architecture' },
         { text: 'Agent Discovery', link: '/agents' },
-        { text: 'Analysis', link: '/ANALYSIS' },
         { text: 'Comparison', link: '/comparison' },
         { text: 'Migration Guide', link: '/migration-from-skills' },
       ],
