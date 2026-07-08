@@ -58,7 +58,7 @@ async function resolveBundleFile(arg) {
   return null
 }
 
-async function installSources(sources, label, options) {
+async function installSources(sources, label, options, noMcp = false) {
   if (sources.length === 0) {
     console.log('No skills to install.')
     return
@@ -76,7 +76,7 @@ async function installSources(sources, label, options) {
     if (options.dryRun) continue
 
     try {
-      await installCommand(source, { ...options, global: true, project: true })
+      await installCommand(source, { global: true, project: true, noMcp: noMcp, dryRun: options.dryRun })
       successCount++
     } catch (err) {
       console.error(`   ❌ ${source}: ${err.message}`)
@@ -142,12 +142,12 @@ export async function bundleCommand(sources, options = {}) {
     if (filePath) {
       const raw = await readFile(filePath, 'utf-8')
       const parsed = parseSources(raw, filePath)
-      await installSources(parsed, ` from ${filePath}`, options)
+      await installSources(parsed, ` from ${filePath}`, options, options.noMcp)
       return
     }
-    await installSources([sources], '', options)
+    await installSources([sources], '', options, options.noMcp)
     return
   }
 
-  await installSources(sources, '', options)
+  await installSources(sources, '', options, options.noMcp)
 }

@@ -117,6 +117,214 @@ describe('lockfile', () => {
     assert.equal(lockModule.getAdalDir(), join(tempDir, '.adal', 'skills'))
   })
 
+  it('getCursorDir returns path inside homedir', () => {
+    assert.equal(lockModule.getCursorDir(), join(tempDir, '.cursor', 'skills'))
+  })
+
+  it('getWindsurfDir returns path inside homedir', () => {
+    assert.equal(lockModule.getWindsurfDir(), join(tempDir, '.windsurf', 'skills'))
+  })
+
+  it('getCodexDir returns path inside homedir', () => {
+    assert.equal(lockModule.getCodexDir(), join(tempDir, '.codex', 'skills'))
+  })
+
+  it('getCopilotProjectDir returns path relative to cwd', () => {
+    assert.equal(lockModule.getCopilotProjectDir(), join(process.cwd(), '.github', 'copilot', 'skills'))
+  })
+
+  it('getAiderDir returns path inside homedir', () => {
+    assert.equal(lockModule.getAiderDir(), join(tempDir, '.aider', 'skills'))
+  })
+
+  it('getClineDir returns path inside homedir', () => {
+    assert.equal(lockModule.getClineDir(), join(tempDir, '.cline', 'skills'))
+  })
+
+  it('getDevinDir returns path inside homedir', () => {
+    assert.equal(lockModule.getDevinDir(), join(tempDir, '.devin', 'skills'))
+  })
+
+  it('getGeminiDir returns path inside homedir', () => {
+    assert.equal(lockModule.getGeminiDir(), join(tempDir, '.gemini', 'skills'))
+  })
+
+  it('getCodyDir returns path inside homedir', () => {
+    assert.equal(lockModule.getCodyDir(), join(tempDir, '.cody', 'skills'))
+  })
+
+  it('getContinueDir returns path inside homedir', () => {
+    assert.equal(lockModule.getContinueDir(), join(tempDir, '.continue', 'skills'))
+  })
+
+  it('getWarpDir returns path inside homedir', () => {
+    assert.equal(lockModule.getWarpDir(), join(tempDir, '.warp', 'skills'))
+  })
+
+  it('getCodeiumDir returns path inside homedir', () => {
+    assert.equal(lockModule.getCodeiumDir(), join(tempDir, '.codeium', 'skills'))
+  })
+
+  it('getFabricDir returns path inside homedir', () => {
+    assert.equal(lockModule.getFabricDir(), join(tempDir, '.fabric', 'skills'))
+  })
+
+  it('getGooseDir returns path inside homedir', () => {
+    assert.equal(lockModule.getGooseDir(), join(tempDir, '.goose', 'skills'))
+  })
+
+  it('getTabnineDir returns path inside homedir', () => {
+    assert.equal(lockModule.getTabnineDir(), join(tempDir, '.tabnine', 'skills'))
+  })
+
+  it('getSupermavenDir returns path inside homedir', () => {
+    assert.equal(lockModule.getSupermavenDir(), join(tempDir, '.supermaven', 'skills'))
+  })
+
+  it('getPrPilotDir returns path inside homedir', () => {
+    assert.equal(lockModule.getPrPilotDir(), join(tempDir, '.pr-pilot', 'skills'))
+  })
+
+  it('getLoomDir returns path inside homedir', () => {
+    assert.equal(lockModule.getLoomDir(), join(tempDir, '.loom', 'skills'))
+  })
+
+  it('getRooDir returns path inside homedir', () => {
+    assert.equal(lockModule.getRooDir(), join(tempDir, '.roo', 'skills'))
+  })
+
+  it('getTraeDir returns path inside homedir', () => {
+    assert.equal(lockModule.getTraeDir(), join(tempDir, '.trae', 'skills'))
+  })
+
+  it('getHermesDir returns path inside homedir', () => {
+    assert.equal(lockModule.getHermesDir(), join(tempDir, '.hermes', 'skills'))
+  })
+
+  it('getKiroDir returns path inside homedir', () => {
+    assert.equal(lockModule.getKiroDir(), join(tempDir, '.kiro', 'skills'))
+  })
+
+  it('getAugmentDir returns path inside homedir', () => {
+    assert.equal(lockModule.getAugmentDir(), join(tempDir, '.augment', 'skills'))
+  })
+
+  it('getKiloDir returns path inside homedir', () => {
+    assert.equal(lockModule.getKiloDir(), join(tempDir, '.kilo', 'skills'))
+  })
+
+  it('getOpenHandsDir returns path inside homedir', () => {
+    assert.equal(lockModule.getOpenHandsDir(), join(tempDir, '.openhands', 'skills'))
+  })
+
+  it('getJunieDir returns path inside homedir', () => {
+    assert.equal(lockModule.getJunieDir(), join(tempDir, '.junie', 'skills'))
+  })
+
+  it('getFactoryDir returns path inside homedir', () => {
+    assert.equal(lockModule.getFactoryDir(), join(tempDir, '.factory', 'skills'))
+  })
+
+  it('getZapDir returns path inside homedir', () => {
+    assert.equal(lockModule.getZapDir(), join(tempDir, '.zap', 'skills'))
+  })
+
+  it('getCodeepDir returns path inside homedir', () => {
+    assert.equal(lockModule.getCodeepDir(), join(tempDir, '.codeep', 'skills'))
+  })
+
+  it('getKimiCodeDir returns path inside homedir', () => {
+    assert.equal(lockModule.getKimiCodeDir(), join(tempDir, '.kimi-code', 'skills'))
+  })
+
+  it('getZCodeDir returns path inside homedir', () => {
+    assert.equal(lockModule.getZCodeDir(), join(tempDir, '.zcode', 'skills'))
+  })
+
+  it('getCodeArtsDoerDir returns path inside homedir', () => {
+    assert.equal(lockModule.getCodeArtsDoerDir(), join(tempDir, '.codeartsdoer', 'skills'))
+  })
+
+  it('getCodeMakerDir returns path inside homedir', () => {
+    assert.equal(lockModule.getCodeMakerDir(), join(tempDir, '.codemaker', 'skills'))
+  })
+
+  it('getCodeStudioDir returns path inside homedir', () => {
+    assert.equal(lockModule.getCodeStudioDir(), join(tempDir, '.codestudio', 'skills'))
+  })
+
+  it('getCrushDir returns path inside homedir', () => {
+    assert.equal(lockModule.getCrushDir(), join(tempDir, '.crush', 'skills'))
+  })
+
+  it('getEveDir returns path relative to cwd', () => {
+    assert.equal(lockModule.getEveDir(), join(process.cwd(), 'agent', 'skills'))
+  })
+
+  it('getForgeDir returns path inside homedir', () => {
+    assert.equal(lockModule.getForgeDir(), join(tempDir, '.forge', 'skills'))
+  })
+
+  it('getInferenceShDir returns path inside homedir', () => {
+    assert.equal(lockModule.getInferenceShDir(), join(tempDir, '.inferencesh', 'skills'))
+  })
+
+  it('getJazzDir returns path inside homedir', () => {
+    assert.equal(lockModule.getJazzDir(), join(tempDir, '.jazz', 'skills'))
+  })
+
+  it('getIFlowDir returns path inside homedir', () => {
+    assert.equal(lockModule.getIFlowDir(), join(tempDir, '.iflow', 'skills'))
+  })
+
+  it('getKiloCodeDir returns path inside homedir', () => {
+    assert.equal(lockModule.getKiloCodeDir(), join(tempDir, '.kilocode', 'skills'))
+  })
+
+  it('getKodeDir returns path inside homedir', () => {
+    assert.equal(lockModule.getKodeDir(), join(tempDir, '.kode', 'skills'))
+  })
+
+  it('getLingmaDir returns path inside homedir', () => {
+    assert.equal(lockModule.getLingmaDir(), join(tempDir, '.lingma', 'skills'))
+  })
+
+  it('getMcpJamDir returns path inside homedir', () => {
+    assert.equal(lockModule.getMcpJamDir(), join(tempDir, '.mcpjam', 'skills'))
+  })
+
+  it('getMoxbyDir returns path inside homedir', () => {
+    assert.equal(lockModule.getMoxbyDir(), join(tempDir, '.moxby', 'skills'))
+  })
+
+  it('getOnaDir returns path inside homedir', () => {
+    assert.equal(lockModule.getOnaDir(), join(tempDir, '.ona', 'skills'))
+  })
+
+  it('getQoderDir returns path inside homedir', () => {
+    assert.equal(lockModule.getQoderDir(), join(tempDir, '.qoder', 'skills'))
+  })
+
+  it('getReasonixDir returns path inside homedir', () => {
+    assert.equal(lockModule.getReasonixDir(), join(tempDir, '.reasonix', 'skills'))
+  })
+
+  it('getTerraMindDir returns path inside homedir', () => {
+    assert.equal(lockModule.getTerraMindDir(), join(tempDir, '.terramind', 'skills'))
+  })
+
+  it('getTinyCloudDir returns path inside homedir', () => {
+    assert.equal(lockModule.getTinyCloudDir(), join(tempDir, '.tinycloud', 'skills'))
+  })
+
+  it('getZencoderDir returns path inside homedir', () => {
+    assert.equal(lockModule.getZencoderDir(), join(tempDir, '.zencoder', 'skills'))
+  })
+
+  it('getProjectLockPath returns path relative to cwd', () => {
+    assert.equal(lockModule.getProjectLockPath(process.cwd()), join(process.cwd(), '.agents', '.skill-lock.json'))
+  })
+
   it('readLock returns default when no file exists', async () => {
     const lock = await lockModule.readLock()
     assert.deepEqual(lock, {

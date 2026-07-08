@@ -755,4 +755,79 @@ describe('installer', () => {
     const skillDir = join(process.env.HOME, '.adal', 'skills', 'test-my-skill')
     assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
+
+  it('installs skill to amp directory (~/.agents/skills/)', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['amp'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'amp')
+    const skillDir = join(process.env.HOME, '.agents', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to antigravity directory (~/.agents/skills/)', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['antigravity'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'antigravity')
+    const skillDir = join(process.env.HOME, '.agents', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to antigravity-cli directory (~/.agents/skills/)', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['antigravity-cli'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'antigravity-cli')
+    const skillDir = join(process.env.HOME, '.agents', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to deepagents directory (~/.agents/skills/)', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['deepagents'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'deepagents')
+    const skillDir = join(process.env.HOME, '.agents', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to dexto directory (~/.agents/skills/)', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['dexto'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'dexto')
+    const skillDir = join(process.env.HOME, '.agents', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to loaf directory (~/.agents/skills/)', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['loaf'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'loaf')
+    const skillDir = join(process.env.HOME, '.agents', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to replit directory (~/.agents/skills/)', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['replit'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'replit')
+    const skillDir = join(process.env.HOME, '.agents', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to zed directory (~/.agents/skills/)', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['zed'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'zed')
+    const skillDir = join(process.env.HOME, '.agents', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to promptscript directory (./agent/skills/)', async () => {
+    const origCwd = process.cwd
+    process.cwd = () => tempDir
+    const results = await installerModule.installSkill(resolvedSkill, ['promptscript'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'promptscript')
+    const skillDir = join(tempDir, 'agent', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+    process.cwd = origCwd
+  })
 })

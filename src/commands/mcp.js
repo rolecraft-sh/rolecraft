@@ -1,0 +1,214 @@
+import { addMcpServer, removeMcpServer, updateMcpServer, listMcpServers, getSupportedMcpAgents, resolveMcpSource } from '../utils/mcp.js'
+
+export async function mcpInstallCommand(source, options) {
+  const resolved = resolveMcpSource(source)
+
+  const targets = options.agents && options.agents.length > 0
+    ? options.agents
+    : getSupportedMcpAgents()
+
+  if (options.dryRun) {
+    console.log(`📋 Would install MCP server from: ${source}`)
+    console.log(`   Command: ${resolved.command} ${resolved.args.join(' ')}`)
+    console.log(`   Targets: ${targets.join(', ')}`)
+    return
+  }
+
+  const name = options.name || resolved.packageName || resolved.repo || resolved.path?.split('/').pop() || 'mcp-server'
+
+  const results = []
+  for (const agent of targets) {
+    const success = await addMcpServer(agent, name, resolved)
+    results.push({ agent, name, success })
+    if (success) {
+      console.log(`   ✅ ${agent}: MCP server "${name}" installed`)
+    } else {
+      console.log(`   ⚠️  ${agent}: not supported`)
+    }
+  }
+
+  const succeeded = results.filter(r => r.success).length
+  console.log(`\n✅ Installed MCP server "${name}" to ${succeeded}/${targets.length} agents`)
+  return results
+}
+
+export async function mcpListCommand(options) {
+  const targets = options.agents && options.agents.length > 0
+    ? options.agents
+    : getSupportedMcpAgents()
+
+  let total = 0
+  for (const agent of targets) {
+    const servers = await listMcpServers(agent)
+    if (servers.length > 0) {
+      console.log(`\n${agent}:`)
+      for (const s of servers) {
+        console.log(`   - ${s.name} (${s.command} ${s.args.join(' ')})`)
+        total++
+      }
+    }
+  }
+
+  if (total === 0) {
+    console.log('No MCP servers configured.')
+  }
+}
+
+export async function mcpUpdateCommand(source, options) {
+  const resolved = resolveMcpSource(source)
+
+  const targets = options.agents && options.agents.length > 0
+    ? options.agents
+    : getSupportedMcpAgents()
+
+  if (options.dryRun) {
+    console.log(`📋 Would update MCP server from: ${source}`)
+    console.log(`   Command: ${resolved.command} ${resolved.args.join(' ')}`)
+    console.log(`   Targets: ${targets.join(', ')}`)
+    return
+  }
+
+  const name = options.name || resolved.packageName || resolved.repo || resolved.path?.split('/').pop() || 'mcp-server'
+
+  const results = []
+  for (const agent of targets) {
+    const success = await updateMcpServer(agent, name, resolved)
+    results.push({ agent, name, success })
+    if (success) {
+      console.log(`   ✅ ${agent}: MCP server "${name}" updated`)
+    } else {
+      console.log(`   ⚠️  ${agent}: not supported`)
+    }
+  }
+
+  const succeeded = results.filter(r => r.success).length
+  console.log(`\n✅ Updated MCP server "${name}" on ${succeeded}/${targets.length} agents`)
+  return results
+}
+
+export async function mcpRemoveCommand(name, options) {
+  const targets = options.agents && options.agents.length > 0
+    ? options.agents
+    : getSupportedMcpAgents()
+
+  const results = []
+  for (const agent of targets) {
+    const success = await removeMcpServer(agent, name)
+    results.push({ agent, name, success })
+    if (success) {
+      console.log(`   ✅ ${agent}: MCP server "${name}" removed`)
+    } else {
+      console.log(`   ⚠️  ${agent}: not supported`)
+    }
+  }
+
+  const succeeded = results.filter(r => r.success).length
+  if (succeeded === 0) {
+    console.log(`No MCP server "${name}" found to remove.`)
+  } else {
+    console.log(`\n✅ Removed MCP server "${name}" from ${succeeded}/${targets.length} agents`)
+  }
+  return results
+}
+
+export async function mcpCommand(args) {
+  const subcommand = args[0]
+  const rest = args.slice(1)
+
+  const agentFlags = ['--agents', '--claude', '--cursor', '--windsurf', '--devin', '--codex', '--copilot', '--aider', '--cline', '--gemini', '--cody', '--continue', '--warp', '--codeium', '--fabric', '--goose', '--tabnine', '--supermaven', '--pr-pilot', '--loom', '--roo', '--trae', '--hermes', '--kiro', '--augment', '--kilo', '--openhands', '--junie', '--factory', '--command-code', '--cortex', '--mistral-vibe', '--qwen-code', '--openclaw', '--codebuddy', '--mux', '--pi', '--autohand-code', '--rovo', '--firebender', '--bob', '--aider-desk', '--all']
+
+  const agentMap = {
+    '--agents': 'agents', '--claude': 'claude', '--cursor': 'cursor',
+    '--windsurf': 'windsurf', '--devin': 'devin', '--codex': 'codex',
+    '--copilot': 'copilot', '--aider': 'aider', '--cline': 'cline',
+    '--gemini': 'gemini', '--cody': 'cody', '--continue': 'continue',
+    '--warp': 'warp', '--codeium': 'codeium', '--fabric': 'fabric',
+    '--goose': 'goose', '--tabnine': 'tabnine', '--supermaven': 'supermaven',
+    '--pr-pilot': 'pr-pilot', '--loom': 'loom', '--roo': 'roo',
+    '--trae': 'trae', '--hermes': 'hermes', '--kiro': 'kiro',
+    '--augment': 'augment', '--kilo': 'kilo', '--openhands': 'openhands',
+    '--junie': 'junie', '--factory': 'factory', '--command-code': 'command-code',
+    '--cortex': 'cortex', '--mistral-vibe': 'mistral-vibe', '--qwen-code': 'qwen-code',
+    '--openclaw': 'openclaw', '--codebuddy': 'codebuddy', '--mux': 'mux',
+    '--pi': 'pi', '--autohand-code': 'autohand-code', '--rovo': 'rovo',
+    '--firebender': 'firebender', '--bob': 'bob', '--aider-desk': 'aider-desk',
+  }
+
+  const options = {
+    dryRun: rest.includes('--dry-run'),
+    name: null,
+    agents: [],
+  }
+
+  const nameIdx = rest.indexOf('--name')
+  if (nameIdx >= 0 && nameIdx + 1 < rest.length) {
+    options.name = rest[nameIdx + 1]
+  }
+
+  const hasScopeFlag = rest.some(f => agentFlags.includes(f))
+  if (hasScopeFlag) {
+    for (const [flag, agent] of Object.entries(agentMap)) {
+      if (rest.includes(flag) || rest.includes('--all')) {
+        options.agents.push(agent)
+      }
+    }
+  }
+
+  switch (subcommand) {
+    case 'install': {
+      const source = rest.find(a => !a.startsWith('--'))
+      if (!source) {
+        console.error('Usage: rolecraft mcp install <source> [--name <name>] [--cursor --claude ...]')
+        console.error('Source: npm:package, gh:owner/repo, or local path')
+        process.exit(1)
+      }
+      return mcpInstallCommand(source, options)
+    }
+    case 'list':
+      return mcpListCommand(options)
+    case 'update': {
+      const source = rest.find(a => !a.startsWith('--'))
+      if (!source) {
+        console.error('Usage: rolecraft mcp update <source> [--name <name>] [--cursor --claude ...]')
+        console.error('Source: npm:package, gh:owner/repo, or local path')
+        process.exit(1)
+      }
+      return mcpUpdateCommand(source, options)
+    }
+    case 'remove': {
+      const name = rest.find(a => !a.startsWith('--'))
+      if (!name) {
+        console.error('Usage: rolecraft mcp remove <name> [--cursor --claude ...]')
+        process.exit(1)
+      }
+      return mcpRemoveCommand(name, options)
+    }
+    default:
+      console.log(`
+rolecraft mcp — Manage MCP servers for AI agents
+
+Usage:
+  rolecraft mcp install <source>  Install an MCP server
+  rolecraft mcp list              List configured MCP servers
+  rolecraft mcp update <source>   Update an MCP server (reinstall)
+  rolecraft mcp remove <name>     Remove an MCP server
+
+Sources:
+  npm:package     Install from npm (e.g., npm:@modelcontextprotocol/github)
+  gh:owner/repo   Install from GitHub (e.g., gh:github/github-mcp-server)
+  ./path          Install from local path
+
+Options:
+  --agents, --cursor, --claude, --copilot, etc.  Target specific agents
+  --all                                           Install to all supported agents
+  --name <name>                                   Override server name
+  --dry-run                                       Preview without making changes
+
+Examples:
+  rolecraft mcp install npm:@modelcontextprotocol/github --cursor --claude
+  rolecraft mcp install npm:@anthropic/postgres-mcp --all
+  rolecraft mcp list
+  rolecraft mcp remove github-mcp-server --cursor
+`)
+  }
+}

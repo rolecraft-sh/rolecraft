@@ -19,6 +19,7 @@ import { completionsCommand } from '../src/commands/completions.js'
 import { upgradeCommand } from '../src/commands/upgrade.js'
 import { doctorCommand } from '../src/commands/doctor.js'
 import { agentsXmlCommand } from '../src/commands/agents-xml.js'
+import { mcpCommand } from '../src/commands/mcp.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'))
@@ -46,6 +47,9 @@ Usage:
   rolecraft ci                   Install all skills from lockfile
   rolecraft completions <shell>  Generate shell completions (bash|zsh|fish)
   rolecraft doctor               Run system health check
+  rolecraft mcp install <source> Install an MCP server (npm:, gh:, or local path)
+  rolecraft mcp list             List configured MCP servers
+  rolecraft mcp remove <name>    Remove an MCP server
   rolecraft agents-xml           Generate skills XML for AGENTS.md
   rolecraft agents-xml --write   Write skills XML to AGENTS.md
   rolecraft upgrade              Upgrade rolecraft to the latest version
@@ -54,6 +58,7 @@ Usage:
 Options:
   --yes, -y     Non-interactive: accept all defaults (install, setup)
   --dry-run      Preview installation without copying files (install, setup, bundle, upgrade)
+  --no-mcp       Skip MCP server installation from skills (install, bundle)
 
 Options for upgrade:
   --dry-run      Check for updates without actually upgrading
@@ -103,6 +108,7 @@ Options for install:
   --bob           Also install to ~/.bob/skills/
   --aider-desk    Also install to ~/.aider-desk/skills/
   --all          Install to all locations
+  --no-mcp       Skip MCP server installation from skill
   --frozen-lockfile  Fail if skill already installed
   --symlink      Install as symlink instead of copy
   --copy         Install as copy (default)
@@ -233,6 +239,7 @@ export async function main() {
       options.symlink = flags.includes('--symlink')
       options.dryRun = flags.includes('--dry-run')
       options.yes = flags.includes('--yes') || flags.includes('-y')
+      options.noMcp = flags.includes('--no-mcp')
 
       await installCommand(source, options)
       break
@@ -367,12 +374,18 @@ export async function main() {
       }
       const flags = args.filter(a => a.startsWith('--'))
       const sources = args.filter(a => !a.startsWith('--'))
-      const opts = { dryRun: flags.includes('--dry-run') }
+      const opts = { dryRun: flags.includes('--dry-run'), noMcp: flags.includes('--no-mcp') }
       if (sources.length === 1) {
         await bundleCommand(sources[0], opts)
       } else {
         await bundleCommand(sources, opts)
       }
+      break
+    }
+
+    case 'mcp': {
+      if (args.includes('--help') || args.includes('-h')) { usage(); return }
+      await mcpCommand(args)
       break
     }
 
