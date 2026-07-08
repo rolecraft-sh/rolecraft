@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>Install AI agent skills as roles & behaviors — from any source.</b><br>
-  Zero-dependency CLI. No marketplace. No signup.
+  Zero-dependency CLI. Skills + MCP servers. No marketplace. No signup.
 </p>
 
 <p align="center">
@@ -52,7 +52,7 @@
 ---
 
 <p align="center">
-  <b>⚡ Zero dependencies</b> · <b>📦 4 KB</b> · <b>🤖 82+ agents</b> · <b>🔒 No telemetry</b> · <b>🌐 Offline-first</b> · <b>🔧 Any source</b>
+  <b>⚡ Zero dependencies</b> · <b>📦 4 KB</b> · <b>🤖 82+ agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 No telemetry</b> · <b>🌐 Offline-first</b> · <b>🔧 Any source</b>
 </p>
 
 <p align="center">
@@ -86,6 +86,12 @@ rolecraft install npm:some-package                # npm package
 rolecraft install npm:@scope/package@1.0.0        # npm with version
 rolecraft install ./my-skill --cursor             # specific agent only
 
+# install a skill with its MCP servers (declared in SKILL.md)
+rolecraft install ./my-postgres-rules --cursor
+
+# or manage MCP servers standalone
+rolecraft mcp install npm:@modelcontextprotocol/github --cursor
+
 # or install the rolecraft skill (teaches AI agents to use rolecraft)
 npx skills add sametcelikbicak/rolecraft
 
@@ -104,6 +110,7 @@ rolecraft remove my-skill
 
 - **Zero dependencies** — ~4 KB, no bloat
 - **Any source** — local folder, GitHub/GitLab/Bitbucket repo, SSH git URL, npm package
+- **MCP + Skills in one command** — install skills and their MCP servers together. No other CLI tool combines both.
 - **82+ agents** — opencode, claude-code, cursor, copilot, aider, devin, gemini-cli, and more
 - **skills.sh compatible** — installable via `npx skills add sametcelikbicak/rolecraft`
 - **No registry required** — no signup, no marketplace, no vendor lock-in
@@ -117,33 +124,32 @@ rolecraft remove my-skill
 - **Dry-run mode** — preview before installing
 - **System health check** — `rolecraft doctor` diagnoses Node.js, agent directories, lockfiles, and skill integrity
 - **AGENTS.md XML generation** — `rolecraft agents-xml` generates Claude Code-compatible `<skills_system>` XML for agent discovery
-- **MCP server management** — `rolecraft mcp` installs, lists, and removes MCP servers alongside skills
 
 ---
 
 ## Commands overview
 
-| Command                                 | Description                                              | Details                              |
-| --------------------------------------- | -------------------------------------------------------- | ------------------------------------ |
-| `rolecraft init [<name>]`               | Scaffold a new `SKILL.md`                                | [docs](docs/commands/init.md)        |
+| Command                                 | Description                                                                 | Details                              |
+| --------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------ |
+| `rolecraft init [<name>]`               | Scaffold a new `SKILL.md`                                                   | [docs](docs/commands/init.md)        |
 | `rolecraft install <source>`            | Install a skill with security scan (local path, GitHub/GitLab/SSH URL, npm) | [docs](docs/commands/install.md)     |
-| `rolecraft bundle <sources>`            | Install multiple skills from inline sources or file      | [docs](docs/commands/bundle.md)      |
-| `rolecraft bundle create`               | Create a new bundle file                                 | [docs](docs/commands/bundle.md)      |
-| `rolecraft search <query>`              | Search for skills on GitHub (TUI with `--interactive`)   | [docs](docs/commands/search.md)      |
-| `rolecraft check`                       | Check installed skills for available updates             | [docs](docs/commands/check.md)       |
-| `rolecraft use <source>`                | Preview a skill's files without installing               | [docs](docs/commands/use.md)         |
-| `rolecraft completions bash\|zsh\|fish` | Generate shell completion scripts                        | [docs](docs/commands/completions.md) |
-| `rolecraft setup [<source>]`            | Detect agents, optionally install a skill to all         | [docs](docs/commands/setup.md)       |
-| `rolecraft list`                        | Show all installed skills                                | [docs](docs/commands/list.md)        |
-| `rolecraft doctor`                      | Run system health check                                  | [docs](docs/commands/doctor.md)      |
-| `rolecraft agents-xml [--write]`        | Generate skills XML for AGENTS.md                        | [docs](docs/commands/agents-xml.md)  |
-| `rolecraft mcp install/remove/list`     | Install, remove, and list MCP servers for AI agents      | [docs](docs/commands/mcp.md)         |
-| `rolecraft verify`                      | Check installed skill integrity via content hash         | [docs](docs/commands/verify.md)      |
-| `rolecraft ci`                          | Re-install all skills from lockfile (CI mode)            | [docs](docs/commands/ci.md)          |
-| `rolecraft upgrade`                     | Upgrade rolecraft to the latest version                  | [docs](docs/commands/upgrade.md)     |
-| `rolecraft remove <slug>`               | Uninstall a skill                                        | [docs](docs/commands/remove.md)      |
-| `rolecraft update <slug>`               | Re-install a skill to latest                             | [docs](docs/commands/update.md)      |
-| `rolecraft --version`                   | Show version                                             |                                      |
+| `rolecraft bundle <sources>`            | Install multiple skills from inline sources or file                         | [docs](docs/commands/bundle.md)      |
+| `rolecraft bundle create`               | Create a new bundle file                                                    | [docs](docs/commands/bundle.md)      |
+| `rolecraft search <query>`              | Search for skills on GitHub (TUI with `--interactive`)                      | [docs](docs/commands/search.md)      |
+| `rolecraft check`                       | Check installed skills for available updates                                | [docs](docs/commands/check.md)       |
+| `rolecraft use <source>`                | Preview a skill's files without installing                                  | [docs](docs/commands/use.md)         |
+| `rolecraft completions bash\|zsh\|fish` | Generate shell completion scripts                                           | [docs](docs/commands/completions.md) |
+| `rolecraft setup [<source>]`            | Detect agents, optionally install a skill to all                            | [docs](docs/commands/setup.md)       |
+| `rolecraft list`                        | Show all installed skills                                                   | [docs](docs/commands/list.md)        |
+| `rolecraft doctor`                      | Run system health check                                                     | [docs](docs/commands/doctor.md)      |
+| `rolecraft agents-xml [--write]`        | Generate skills XML for AGENTS.md                                           | [docs](docs/commands/agents-xml.md)  |
+| `rolecraft mcp install/remove/list`     | Install, remove, and list MCP servers for AI agents                         | [docs](docs/commands/mcp.md)         |
+| `rolecraft verify`                      | Check installed skill integrity via content hash                            | [docs](docs/commands/verify.md)      |
+| `rolecraft ci`                          | Re-install all skills from lockfile (CI mode)                               | [docs](docs/commands/ci.md)          |
+| `rolecraft upgrade`                     | Upgrade rolecraft to the latest version                                     | [docs](docs/commands/upgrade.md)     |
+| `rolecraft remove <slug>`               | Uninstall a skill                                                           | [docs](docs/commands/remove.md)      |
+| `rolecraft update <slug>`               | Re-install a skill to latest                                                | [docs](docs/commands/update.md)      |
+| `rolecraft --version`                   | Show version                                                                |                                      |
 
 ---
 
@@ -158,6 +164,7 @@ rolecraft remove my-skill
 | GitHub repo install                  | ✅               | ✅              | ❌                  |
 | GitLab / SSH git URL                 | ✅               | ✅              | ❌                  |
 | npm package source                   | ✅               | ✅              | ❌                  |
+| **MCP server management**            | ✅               | ❌              | ❌                  |
 | Agent targets                        | **82**           | 72              | 15+                 |
 | Skills.sh listed                     | ✅               | ✅              | ⚠️ (registry only)  |
 | Bundle install + create              | ✅               | ❌              | ✅ (skillset only)  |
@@ -214,10 +221,10 @@ Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
 
 Thanks to everyone who has contributed to RoleCraft:
 
-| Avatar | Name | Role |
-|--------|------|------|
-| <img src="https://github.com/sametcelikbicak.png" width="40" height="40" alt="sametcelikbicak"> | [Samet ÇELİKBIÇAK](https://github.com/sametcelikbicak) | Owner & Maintainer |
-| <img src="https://github.com/fengjikui.png" width="40" height="40" alt="fengjikui"> | [冯基魁](https://github.com/fengjikui) | [Contributor](https://github.com/sametcelikbicak/rolecraft/pull/62) |
+| Avatar                                                                                          | Name                                                   | Role                                                                |
+| ----------------------------------------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------- |
+| <img src="https://github.com/sametcelikbicak.png" width="40" height="40" alt="sametcelikbicak"> | [Samet ÇELİKBIÇAK](https://github.com/sametcelikbicak) | Owner & Maintainer                                                  |
+| <img src="https://github.com/fengjikui.png" width="40" height="40" alt="fengjikui">             | [冯基魁](https://github.com/fengjikui)                 | [Contributor](https://github.com/sametcelikbicak/rolecraft/pull/62) |
 
 ## License
 
