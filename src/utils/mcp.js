@@ -1,10 +1,9 @@
-import { readFile, writeFile, mkdir, stat } from 'node:fs/promises'
+import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { join, dirname } from 'node:path'
 import { homedir } from 'node:os'
 import { execSync as defaultExecSync, spawnSync as defaultSpawnSync } from 'node:child_process'
 import { tmpdir } from 'node:os'
-import { randomUUID } from 'node:crypto'
-import { mkdtempSync, writeFileSync, readFileSync } from 'node:fs'
+import { mkdtempSync, readFileSync } from 'node:fs'
 
 let runExec = defaultExecSync
 let runSpawnSync = defaultSpawnSync
