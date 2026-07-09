@@ -119,16 +119,4 @@ export function getAgentByFlag(flag) {
   return AGENTS_DATA.find(a => a.flag === flag)
 }
 
-export function getAgentNames() {
-  return AGENTS_DATA.map(a => a.name)
-}
-
-export function getAgentFlags() {
-  return AGENTS_DATA.map(a => `--${a.flag}`)
-}
-
-export function getAgentOptions() {
-  return AGENTS_DATA.map(a => a.flag)
-}
-
 export default AGENTS_DATA

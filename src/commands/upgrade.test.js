@@ -171,20 +171,16 @@ describe('upgrade command', () => {
     })
 
     captureLog()
-    mockExit()
-    try {
-      await upgradeModule.upgradeCommand({
+    await assert.rejects(
+      () => upgradeModule.upgradeCommand({
         execSync: () => { throw new Error('install failed') },
-      })
-    } catch (e) {
-      if (!e.message.startsWith('exit:')) throw e
-    }
+      }),
+      /Try running manually/,
+    )
     restoreLog()
-    restoreExit()
 
     globalThis.fetch = origFetch
 
-    assert.ok(logs.some(l => l.includes('Upgrade failed')))
-    assert.ok(logs.some(l => l.includes('Try running manually')))
+    assert.ok(logs.some(l => l.includes('Upgrading to')))
   })
 })

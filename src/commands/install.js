@@ -60,9 +60,7 @@ export async function installCommand(source, options) {
     const { slug } = await resolveSource(source)
     const existing = globalLock.skills[slug] || projectLock.skills[slug]
     if (existing) {
-      console.error(`Skill "${slug}" already installed. Use \`rolecraft update ${slug}\` to update or omit --frozen-lockfile to overwrite.`)
-      process.exit(1)
-      return
+      throw new Error(`Skill "${slug}" already installed. Use \`rolecraft update ${slug}\` to update or omit --frozen-lockfile to overwrite.`)
     }
   }
 
@@ -79,16 +77,13 @@ export async function installCommand(source, options) {
   const level = security.score >= 90 ? 'safe' : security.score >= 70 ? 'review' : 'danger'
 
   if (level === 'danger' && !options.yes) {
-    console.error('\n❌ Install blocked by security scan. Use --yes to force install.')
-    process.exit(1)
-    return
+    throw new Error('Install blocked by security scan. Use --yes to force install.')
   }
 
   if (level === 'review' && !options.yes) {
     const answer = await askQuestion('\n⚠️  Continue with installation? [y/N] ')
     if (answer !== 'y' && answer !== 'yes') {
       console.log('Install cancelled.')
-      process.exit(0)
       return
     }
   }

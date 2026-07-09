@@ -82,8 +82,6 @@ export async function upgradeCommand(options = {}) {
     console.log(`\n   ✅ Upgraded to v${latest}\n`)
     console.log('   Restart your terminal or re-source your shell to use the new version.\n')
   } catch {
-    console.error('\n   ❌ Upgrade failed.')
-    console.error('   Try running manually: npm install -g rolecraft\n')
-    process.exit(1)
+    throw new Error('Upgrade failed. Try running manually: npm install -g rolecraft')
   }
 }

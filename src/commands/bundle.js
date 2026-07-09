@@ -94,7 +94,7 @@ async function installSources(sources, label, options, noMcp = false) {
     console.log(`✅ All ${successCount} skill(s) installed successfully.`)
   } else {
     console.log(`⚠️  ${successCount} installed, ${failCount} failed.`)
-    if (options.frozenLockfile) process.exit(1)
+    if (options.frozenLockfile) throw new Error('Some skills failed to install.')
   }
 }
 

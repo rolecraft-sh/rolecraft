@@ -81,20 +81,10 @@ describe('remove command', () => {
   })
 
   it('exits with error when skill not found', async () => {
-    const origExit = process.exit
-    const origError = console.error
-    const errors = []
-    console.error = (msg) => errors.push(msg)
-    process.exit = (code) => { throw new Error(`exit:${code}`) }
-
     await assert.rejects(
       () => removeModule.removeCommand('nonexistent'),
-      /exit:1/,
+      /not found/,
     )
-
-    assert.ok(errors.some(e => e.includes('not found')))
-    process.exit = origExit
-    console.error = origError
   })
 
 })

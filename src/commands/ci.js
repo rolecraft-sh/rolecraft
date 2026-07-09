@@ -45,7 +45,6 @@ export async function ciCommand() {
   if (allPassed) {
     console.log(`✅ All ${entries.length} skill(s) installed from lockfile.`)
   } else {
-    console.error('❌ Some skills failed to install.')
-    process.exit(1)
+    throw new Error('Some skills failed to install.')
   }
 }

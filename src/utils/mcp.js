@@ -17,10 +17,6 @@ export function setSpawnSync(fn) {
   runSpawnSync = fn
 }
 
-function home(...parts) {
-  return join(process.env.HOME || process.env.HOMEPATH || '/tmp', ...parts)
-}
-
 const AGENT_MCP_PATHS = Object.fromEntries(
   agents
     .filter(a => a.mcp)

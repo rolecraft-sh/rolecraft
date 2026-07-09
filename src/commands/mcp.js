@@ -186,7 +186,7 @@ export async function mcpCommand(args) {
       if (!source) {
         console.error('Usage: rolecraft mcp install <source> [--name <name>] [--cursor --claude ...]')
         console.error('Source: npm:package, gh:owner/repo, or local path')
-        process.exit(1)
+        throw new Error('Missing source argument.')
       }
       return mcpInstallCommand(source, options)
     }
@@ -197,7 +197,7 @@ export async function mcpCommand(args) {
       if (!source) {
         console.error('Usage: rolecraft mcp update <source> [--name <name>] [--cursor --claude ...]')
         console.error('Source: npm:package, gh:owner/repo, or local path')
-        process.exit(1)
+        throw new Error('Missing source argument.')
       }
       return mcpUpdateCommand(source, options)
     }
@@ -205,7 +205,7 @@ export async function mcpCommand(args) {
       const name = rest.find(a => !a.startsWith('--'))
       if (!name) {
         console.error('Usage: rolecraft mcp remove <name> [--cursor --claude ...]')
-        process.exit(1)
+        throw new Error('Missing name argument.')
       }
       return mcpRemoveCommand(name, options)
     }

@@ -27,11 +27,13 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'))
 
 function usage() {
+  const agentFlags = agents.map(a => `  --${a.flag.padEnd(15)} Also install to ${a.label}`)
+
   console.log(`
 rolecraft — Install AI agent skills like roles & behaviors
 
 Zero dependencies, no marketplace required.
-Works with 82+ agents: opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody, continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot, loom, roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory, command-code, cortex, mistral-vibe, qwen-code, openclaw, codebuddy, mux, pi, autohand-code, rovo, firebender, bob, aider-desk, code-arts-doer, code-maker, code-studio, crush, eve, forge, inference-sh, jazz, iflow, kilo-code, kode, lingma, mcp-jam, moxby, ona, qoder, reasonix, terra-mind, tiny-cloud, zencoder, amp, antigravity, antigravity-cli, deepagents, dexto, loaf, replit, zed, promptscript, astrbot, qoder-cn, trae-cn, zenflow, neovate, pochi, adal, and all spec-compliant agents.
+Works with ${agents.length} agents: ${agents.map(a => a.name).join(', ')}, and all spec-compliant agents.
 
 Usage:
   rolecraft install <source>     Install a skill (local path, owner/repo, or npm:package)
@@ -69,47 +71,8 @@ Options for upgrade:
 Options for install:
   --global       Install to ~/.agents/skills/
   --project      Install to ./.agents/skills/ (default)
-  --claude       Also install to ~/.claude/skills/
-  --cursor       Also install to ~/.cursor/skills/
   --windsurf     Also install to ~/.windsurf/skills/ (deprecated: use --devin)
-  --devin        Also install to ~/.devin/skills/
-  --codex        Also install to ~/.codex/skills/
-  --copilot      Also install to ./.github/copilot/skills/
-  --aider        Also install to ~/.aider/skills/
-  --cline        Also install to ~/.cline/skills/
-  --gemini       Also install to ~/.gemini/skills/
-  --cody         Also install to ~/.cody/skills/
-  --continue     Also install to ~/.continue/skills/
-  --warp         Also install to ~/.warp/skills/
-  --codeium      Also install to ~/.codeium/skills/
-  --fabric       Also install to ~/.fabric/skills/
-  --goose        Also install to ~/.goose/skills/
-  --tabnine      Also install to ~/.tabnine/skills/
-  --supermaven   Also install to ~/.supermaven/skills/
-  --pr-pilot     Also install to ~/.pr-pilot/skills/
-  --loom         Also install to ~/.loom/skills/
-  --roo          Also install to ~/.roo/skills/
-  --trae         Also install to ~/.trae/skills/
-  --hermes       Also install to ~/.hermes/skills/
-  --kiro         Also install to ~/.kiro/skills/
-  --augment      Also install to ~/.augment/skills/
-  --kilo         Also install to ~/.kilo/skills/
-  --openhands    Also install to ~/.openhands/skills/
-  --junie        Also install to ~/.junie/skills/
-  --factory      Also install to ~/.factory/skills/
-  --command-code  Also install to ~/.commandcode/skills/
-  --cortex        Also install to ~/.snowflake/cortex/skills/
-  --mistral-vibe  Also install to ~/.vibe/skills/
-  --qwen-code     Also install to ~/.qwen/skills/
-  --openclaw      Also install to ~/.openclaw/skills/
-  --codebuddy     Also install to ~/.codebuddy/skills/
-  --mux           Also install to ~/.mux/skills/
-  --pi            Also install to ~/.pi/agent/skills/
-  --autohand-code Also install to ~/.autohand/skills/
-  --rovo          Also install to ~/.rovodev/skills/
-  --firebender    Also install to ~/.firebender/skills/
-  --bob           Also install to ~/.bob/skills/
-  --aider-desk    Also install to ~/.aider-desk/skills/
+${agentFlags.join('\n')}
   --all          Install to all locations
   --no-mcp       Skip MCP server installation from skill
   --frozen-lockfile  Fail if skill already installed
@@ -145,7 +108,7 @@ export async function main() {
       if (!source) {
         console.error('Usage: rolecraft install <source>')
         console.error('Source can be a local path (./, /, ~), GitHub ref (owner/repo), or npm package (npm:package)')
-        process.exit(1)
+        throw new Error('Missing source argument.')
       }
 
       const flags = args.slice(1)
@@ -175,7 +138,7 @@ export async function main() {
       const slug = args[0]
       if (!slug) {
         console.error('Usage: rolecraft remove <slug>')
-        process.exit(1)
+        throw new Error('Missing slug argument.')
       }
       await removeCommand(slug)
       break
@@ -186,7 +149,7 @@ export async function main() {
       const slug = args[0]
       if (!slug) {
         console.error('Usage: rolecraft update <slug>')
-        process.exit(1)
+        throw new Error('Missing slug argument.')
       }
       await updateCommand(slug)
       break
@@ -198,7 +161,7 @@ export async function main() {
       if (!source) {
         console.error('Usage: rolecraft use <source>')
         console.error('Source can be a local path (./, /, ~), GitHub ref (owner/repo), or npm package (npm:package)')
-        process.exit(1)
+        throw new Error('Missing source argument.')
       }
       await useCommand(source)
       break
@@ -217,7 +180,7 @@ export async function main() {
       const flags = args.slice(1)
       if (!query) {
         console.error('Usage: rolecraft search <query> [--interactive]')
-        process.exit(1)
+        throw new Error('Missing query argument.')
       }
       await searchCommand(query, { interactive: flags.includes('--interactive') })
       break
@@ -302,7 +265,7 @@ export async function main() {
         console.error('Usage: rolecraft bundle <source> [...]')
         console.error('       rolecraft bundle <file>')
         console.error('       rolecraft bundle create [<name>]')
-        process.exit(1)
+        throw new Error('Missing arguments.')
       }
       if (args[0] === 'create') {
         if (args.includes('--help') || args.includes('-h')) { usage(); return }

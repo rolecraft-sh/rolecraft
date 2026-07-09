@@ -1,92 +1,12 @@
-import { readLock, getProjectLockPath, computeContentHash, getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getDevinDir, getCodexDir, getCopilotProjectDir, getAiderDir, getClineDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, getCommandCodeDir, getCortexDir, getMistralVibeDir, getQwenCodeDir, getOpenClawDir, getCodeBuddyDir, getMuxDir, getPiDir, getAutohandCodeDir, getRovoDevDir, getFirebenderDir, getBobDir, getAiderDeskDir, getCodeArtsDoerDir, getCodeMakerDir, getCodeStudioDir, getCrushDir, getEveDir, getForgeDir, getInferenceShDir, getJazzDir, getIFlowDir, getKiloCodeDir, getKodeDir, getLingmaDir, getMcpJamDir, getMoxbyDir, getOnaDir, getQoderDir, getReasonixDir, getTerraMindDir, getTinyCloudDir, getZencoderDir, getZapDir, getCodeepDir, getKimiCodeDir, getZCodeDir, getAstrbotDir, getQoderCnDir, getTraeCnDir, getZenflowDir, getNeovateDir, getPochiDir, getAdalDir } from '../utils/lockfile.js'
+import { readLock, getProjectLockPath, computeContentHash, getAgentsDir } from '../utils/lockfile.js'
 import { readFile, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { createHash } from 'node:crypto'
+import agents from '../agents.js'
 
-const agentDirMap = {
-  'opencode': getAgentsDir,
-  'claude-code': getClaudeDir,
-  'cursor': getCursorDir,
-  'windsurf': getWindsurfDir,
-  'devin': getDevinDir,
-  'codex': getCodexDir,
-  'copilot': getCopilotProjectDir,
-  'aider': getAiderDir,
-  'cline': getClineDir,
-  'gemini-cli': getGeminiDir,
-  'cody': getCodyDir,
-  'continue': getContinueDir,
-  'warp': getWarpDir,
-  'codeium': getCodeiumDir,
-  'fabric': getFabricDir,
-  'goose': getGooseDir,
-  'tabnine': getTabnineDir,
-  'supermaven': getSupermavenDir,
-  'pr-pilot': getPrPilotDir,
-  'loom': getLoomDir,
-  'roo': getRooDir,
-  'trae': getTraeDir,
-  'hermes': getHermesDir,
-  'kiro': getKiroDir,
-  'augment': getAugmentDir,
-  'kilo': getKiloDir,
-  'openhands': getOpenHandsDir,
-  'junie': getJunieDir,
-  'factory': getFactoryDir,
-  'command-code': getCommandCodeDir,
-  'cortex': getCortexDir,
-  'mistral-vibe': getMistralVibeDir,
-  'qwen-code': getQwenCodeDir,
-  'openclaw': getOpenClawDir,
-  'codebuddy': getCodeBuddyDir,
-  'mux': getMuxDir,
-  'pi': getPiDir,
-  'autohand-code': getAutohandCodeDir,
-  'rovo-dev': getRovoDevDir,
-  'firebender': getFirebenderDir,
-  'ibm-bob': getBobDir,
-  'aider-desk': getAiderDeskDir,
-  'code-arts-doer': getCodeArtsDoerDir,
-  'code-maker': getCodeMakerDir,
-  'code-studio': getCodeStudioDir,
-  'crush': getCrushDir,
-  'eve': getEveDir,
-  'forge': getForgeDir,
-  'inference-sh': getInferenceShDir,
-  'jazz': getJazzDir,
-  'iflow': getIFlowDir,
-  'kilo-code': getKiloCodeDir,
-  'kode': getKodeDir,
-  'lingma': getLingmaDir,
-  'mcp-jam': getMcpJamDir,
-  'moxby': getMoxbyDir,
-  'ona': getOnaDir,
-  'qoder': getQoderDir,
-  'reasonix': getReasonixDir,
-  'terra-mind': getTerraMindDir,
-  'tiny-cloud': getTinyCloudDir,
-  'zencoder': getZencoderDir,
-  'zap': getZapDir,
-  'codeep': getCodeepDir,
-  'kimi-code': getKimiCodeDir,
-  'zcode': getZCodeDir,
-  'amp': getAgentsDir,
-  'antigravity': getAgentsDir,
-  'antigravity-cli': getAgentsDir,
-  'deep-agents': getAgentsDir,
-  'dexto': getAgentsDir,
-  'loaf': getAgentsDir,
-  'replit': getAgentsDir,
-  'zed': getAgentsDir,
-  'promptscript': getEveDir,
-  'astrbot': getAstrbotDir,
-  'qoder-cn': getQoderCnDir,
-  'trae-cn': getTraeCnDir,
-  'zenflow': getZenflowDir,
-  'neovate': getNeovateDir,
-  'pochi': getPochiDir,
-  'adal': getAdalDir,
-}
+const agentDirMap = Object.fromEntries(
+  agents.map(a => [a.name, a.getDir])
+)
 
 async function readFilesFromDir(dir) {
   try {
@@ -203,6 +123,6 @@ export async function verifyCommand(frozen) {
     console.log(`✅ All ${totalChecked} skill(s) verified successfully.`)
   } else {
     console.error(`❌ Some skills failed verification.`)
-    if (frozen) process.exit(1)
+    if (frozen) throw new Error('Some skills failed verification.')
   }
 }
