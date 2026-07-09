@@ -1,6 +1,7 @@
 import { addMcpServer, removeMcpServer, updateMcpServer, listMcpServers, getSupportedMcpAgents, resolveMcpSource, classifyMcpSource } from '../utils/mcp.js'
 import { createInterface } from 'node:readline'
 import { stdin as input, stdout as output } from 'node:process'
+import agents from '../agents.js'
 
 function askConfirmation(query) {
   const rl = createInterface({ input, output })
@@ -154,24 +155,9 @@ export async function mcpCommand(args) {
   const subcommand = args[0]
   const rest = args.slice(1)
 
-  const agentFlags = ['--agents', '--claude', '--cursor', '--windsurf', '--devin', '--codex', '--copilot', '--aider', '--cline', '--gemini', '--cody', '--continue', '--warp', '--codeium', '--fabric', '--goose', '--tabnine', '--supermaven', '--pr-pilot', '--loom', '--roo', '--trae', '--hermes', '--kiro', '--augment', '--kilo', '--openhands', '--junie', '--factory', '--command-code', '--cortex', '--mistral-vibe', '--qwen-code', '--openclaw', '--codebuddy', '--mux', '--pi', '--autohand-code', '--rovo', '--firebender', '--bob', '--aider-desk', '--all']
+  const agentFlags = ['--agents', ...agents.map(a => `--${a.flag}`), '--all']
 
-  const agentMap = {
-    '--agents': 'agents', '--claude': 'claude', '--cursor': 'cursor',
-    '--windsurf': 'windsurf', '--devin': 'devin', '--codex': 'codex',
-    '--copilot': 'copilot', '--aider': 'aider', '--cline': 'cline',
-    '--gemini': 'gemini', '--cody': 'cody', '--continue': 'continue',
-    '--warp': 'warp', '--codeium': 'codeium', '--fabric': 'fabric',
-    '--goose': 'goose', '--tabnine': 'tabnine', '--supermaven': 'supermaven',
-    '--pr-pilot': 'pr-pilot', '--loom': 'loom', '--roo': 'roo',
-    '--trae': 'trae', '--hermes': 'hermes', '--kiro': 'kiro',
-    '--augment': 'augment', '--kilo': 'kilo', '--openhands': 'openhands',
-    '--junie': 'junie', '--factory': 'factory', '--command-code': 'command-code',
-    '--cortex': 'cortex', '--mistral-vibe': 'mistral-vibe', '--qwen-code': 'qwen-code',
-    '--openclaw': 'openclaw', '--codebuddy': 'codebuddy', '--mux': 'mux',
-    '--pi': 'pi', '--autohand-code': 'autohand-code', '--rovo': 'rovo',
-    '--firebender': 'firebender', '--bob': 'bob', '--aider-desk': 'aider-desk',
-  }
+  const agentMap = Object.fromEntries(agents.map(a => [`--${a.flag}`, a.flag]))
 
   const options = {
     dryRun: rest.includes('--dry-run'),

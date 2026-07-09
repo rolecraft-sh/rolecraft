@@ -4,6 +4,7 @@ import { homedir } from 'node:os'
 import { execSync as defaultExecSync, spawnSync as defaultSpawnSync } from 'node:child_process'
 import { tmpdir } from 'node:os'
 import { mkdtempSync, readFileSync } from 'node:fs'
+import agents from '../agents.js'
 
 let runExec = defaultExecSync
 let runSpawnSync = defaultSpawnSync
@@ -20,49 +21,11 @@ function home(...parts) {
   return join(process.env.HOME || process.env.HOMEPATH || '/tmp', ...parts)
 }
 
-const AGENT_MCP_PATHS = {
-  agents:           () => home('.agents', 'mcp.json'),
-  claude:           () => home('.claude', 'claude_code.json'),
-  cursor:           () => home('.cursor', 'mcp.json'),
-  windsurf:         () => home('.windsurf', 'mcp_config.json'),
-  copilot:          () => join(process.cwd(), '.github', 'copilot', '.mcp.json'),
-  continue:         () => home('.continue', 'config.json'),
-  devin:            () => home('.devin', 'mcp.json'),
-  codex:            () => home('.codex', 'mcp.json'),
-  aider:            () => home('.aider', 'mcp.json'),
-  cline:            () => home('.cline', 'mcp.json'),
-  gemini:           () => home('.gemini', 'mcp.json'),
-  cody:             () => home('.cody', 'mcp.json'),
-  warp:             () => home('.warp', 'mcp.json'),
-  fabric:           () => home('.fabric', 'mcp.json'),
-  goose:            () => home('.goose', 'mcp.json'),
-  openhands:        () => home('.openhands', 'mcp.json'),
-  junie:            () => home('.junie', 'mcp.json'),
-  openclaw:         () => home('.openclaw', 'mcp.json'),
-  tabnine:          () => home('.tabnine', 'mcp.json'),
-  supermaven:       () => home('.supermaven', 'mcp.json'),
-  'pr-pilot':       () => home('.pr-pilot', 'mcp.json'),
-  loom:             () => home('.loom', 'mcp.json'),
-  roo:              () => home('.roo', 'mcp.json'),
-  trae:             () => home('.trae', 'mcp.json'),
-  hermes:           () => home('.hermes', 'mcp.json'),
-  kiro:             () => home('.kiro', 'mcp.json'),
-  augment:          () => home('.augment', 'mcp.json'),
-  kilo:             () => home('.kilo', 'mcp.json'),
-  factory:          () => home('.factory', 'mcp.json'),
-  'command-code':   () => home('.commandcode', 'mcp.json'),
-  cortex:           () => home('.snowflake', 'cortex', 'mcp.json'),
-  'mistral-vibe':   () => home('.vibe', 'mcp.json'),
-  'qwen-code':      () => home('.qwen', 'mcp.json'),
-  codebuddy:        () => home('.codebuddy', 'mcp.json'),
-  mux:              () => home('.mux', 'mcp.json'),
-  pi:               () => home('.pi', 'agent', 'mcp.json'),
-  'autohand-code':  () => home('.autohand', 'mcp.json'),
-  rovo:             () => home('.rovodev', 'mcp.json'),
-  firebender:       () => home('.firebender', 'mcp.json'),
-  bob:              () => home('.bob', 'mcp.json'),
-  'aider-desk':     () => home('.aider-desk', 'mcp.json'),
-}
+const AGENT_MCP_PATHS = Object.fromEntries(
+  agents
+    .filter(a => a.mcp)
+    .map(a => [a.flag, a.mcp.getPath])
+)
 
 function getMcpConfigPath(agent) {
   const fn = AGENT_MCP_PATHS[agent]

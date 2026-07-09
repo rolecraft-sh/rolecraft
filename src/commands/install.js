@@ -4,6 +4,7 @@ import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 import { scanSkill, formatSecurityReport } from '../utils/security.js'
 import { parseMcpServersFromSkill, resolveMcpSource, addMcpServer, getSupportedMcpAgents } from '../utils/mcp.js'
+import agents from '../agents.js'
 
 let createInterface = defaultCreateInterface
 let askQuestion = defaultAskQuestion
@@ -46,7 +47,7 @@ async function askScope() {
 }
 
 export async function installCommand(source, options) {
-  const hasScopeFlags = options.global || options.project || options.claude || options.cursor || options.windsurf || options.devin || options.codex || options.copilot || options.aider || options.cline || options.gemini || options.cody || options.continue || options.warp || options.codeium || options.fabric || options.goose || options.tabnine || options.supermaven || options['pr-pilot'] || options.loom || options.roo || options.trae || options.hermes || options.kiro || options.augment || options.kilo || options.openhands || options.junie || options.factory || options['command-code'] || options.cortex || options['mistral-vibe'] || options['qwen-code'] || options.openclaw || options.codebuddy || options.mux || options.pi || options['autohand-code'] || options.rovo || options.firebender || options.bob || options['aider-desk'] || options['code-arts-doer'] || options['code-maker'] || options['code-studio'] || options.crush || options.eve || options.forge || options['inference-sh'] || options.jazz || options.iflow || options['kilo-code'] || options.kode || options.lingma || options['mcp-jam'] || options.moxby || options.ona || options.qoder || options.reasonix || options['terra-mind'] || options['tiny-cloud'] || options.zencoder || options.zap || options.codeep || options['kimi-code'] || options.zcode || options.amp || options.antigravity || options['antigravity-cli'] || options.deepagents || options.dexto || options.loaf || options.replit || options.zed || options.promptscript || options.astrbot || options['qoder-cn'] || options['trae-cn'] || options.zenflow || options.neovate || options.pochi || options.adal
+  const hasScopeFlags = options.global || options.project || agents.some(a => options[a.flag])
   const scope = hasScopeFlags ? options : options.yes ? { global: false, project: true } : await askScope()
 
   if (options.frozenLockfile) {
@@ -96,88 +97,10 @@ export async function installCommand(source, options) {
 
   const targets = []
   if (scope.global) targets.push('agents')
-  if (scope.claude) targets.push('claude')
-  if (scope.cursor) targets.push('cursor')
-  if (scope.windsurf) targets.push('windsurf')
-  if (scope.devin) targets.push('devin')
-  if (scope.codex) targets.push('codex')
-  if (scope.copilot) targets.push('copilot')
-  if (scope.aider) targets.push('aider')
-  if (scope.cline) targets.push('cline')
-  if (scope.gemini) targets.push('gemini')
-  if (scope.cody) targets.push('cody')
-  if (scope.continue) targets.push('continue')
-  if (scope.warp) targets.push('warp')
-  if (scope.codeium) targets.push('codeium')
-  if (scope.fabric) targets.push('fabric')
-  if (scope.goose) targets.push('goose')
-  if (scope.tabnine) targets.push('tabnine')
-  if (scope.supermaven) targets.push('supermaven')
-  if (scope['pr-pilot']) targets.push('pr-pilot')
-  if (scope.loom) targets.push('loom')
-  if (scope.roo) targets.push('roo')
-  if (scope.trae) targets.push('trae')
-  if (scope.hermes) targets.push('hermes')
-  if (scope.kiro) targets.push('kiro')
-  if (scope.augment) targets.push('augment')
-  if (scope.kilo) targets.push('kilo')
-  if (scope.openhands) targets.push('openhands')
-  if (scope.junie) targets.push('junie')
-  if (scope.factory) targets.push('factory')
-  if (scope['command-code']) targets.push('command-code')
-  if (scope.cortex) targets.push('cortex')
-  if (scope['mistral-vibe']) targets.push('mistral-vibe')
-  if (scope['qwen-code']) targets.push('qwen-code')
-  if (scope.openclaw) targets.push('openclaw')
-  if (scope.codebuddy) targets.push('codebuddy')
-  if (scope.mux) targets.push('mux')
-  if (scope.pi) targets.push('pi')
-  if (scope['autohand-code']) targets.push('autohand-code')
-  if (scope.rovo) targets.push('rovo')
-  if (scope.firebender) targets.push('firebender')
-  if (scope.bob) targets.push('bob')
-  if (scope['aider-desk']) targets.push('aider-desk')
-  if (scope['code-arts-doer']) targets.push('code-arts-doer')
-  if (scope['code-maker']) targets.push('code-maker')
-  if (scope['code-studio']) targets.push('code-studio')
-  if (scope.crush) targets.push('crush')
-  if (scope.eve) targets.push('eve')
-  if (scope.forge) targets.push('forge')
-  if (scope['inference-sh']) targets.push('inference-sh')
-  if (scope.jazz) targets.push('jazz')
-  if (scope.iflow) targets.push('iflow')
-  if (scope['kilo-code']) targets.push('kilo-code')
-  if (scope.kode) targets.push('kode')
-  if (scope.lingma) targets.push('lingma')
-  if (scope['mcp-jam']) targets.push('mcp-jam')
-  if (scope.moxby) targets.push('moxby')
-  if (scope.ona) targets.push('ona')
-  if (scope.qoder) targets.push('qoder')
-  if (scope.reasonix) targets.push('reasonix')
-  if (scope['terra-mind']) targets.push('terra-mind')
-  if (scope['tiny-cloud']) targets.push('tiny-cloud')
-  if (scope.zencoder) targets.push('zencoder')
-  if (scope.zap) targets.push('zap')
-  if (scope.codeep) targets.push('codeep')
-  if (scope['kimi-code']) targets.push('kimi-code')
-  if (scope.zcode) targets.push('zcode')
-  if (scope.amp) targets.push('amp')
-  if (scope.antigravity) targets.push('antigravity')
-  if (scope['antigravity-cli']) targets.push('antigravity-cli')
-  if (scope.deepagents) targets.push('deepagents')
-  if (scope.dexto) targets.push('dexto')
-  if (scope.loaf) targets.push('loaf')
-  if (scope.replit) targets.push('replit')
-  if (scope.zed) targets.push('zed')
-  if (scope.promptscript) targets.push('promptscript')
-  if (scope.astrbot) targets.push('astrbot')
-  if (scope['qoder-cn']) targets.push('qoder-cn')
-  if (scope['trae-cn']) targets.push('trae-cn')
-  if (scope.zenflow) targets.push('zenflow')
-  if (scope.neovate) targets.push('neovate')
-  if (scope.pochi) targets.push('pochi')
-  if (scope.adal) targets.push('adal')
   if (scope.project) targets.push('project')
+  for (const agent of agents) {
+    if (scope[agent.flag]) targets.push(agent.flag)
+  }
 
   if (options.dryRun) {
     const mode = options.symlink ? 'symlink' : 'copy'
