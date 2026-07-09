@@ -1,9 +1,10 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join, dirname } from 'node:path'
 import { createHash } from 'node:crypto'
+import { homedir } from 'node:os'
 
 function home(...parts) {
-  return join(process.env.HOME || process.env.HOMEPATH || '/tmp', ...parts)
+  return join(homedir(), ...parts)
 }
 
 export function getGlobalLockPath() {

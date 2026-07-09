@@ -218,6 +218,18 @@ export function parseMcpServersFromSkill(content) {
   return servers
 }
 
+const MCP_SOURCE_PATTERNS = [
+  { prefix: 'npm:', label: 'npm registry', type: 'npm' },
+  { prefix: 'gh:', label: 'GitHub repository', type: 'github' },
+]
+
+export function classifyMcpSource(source) {
+  for (const p of MCP_SOURCE_PATTERNS) {
+    if (source.startsWith(p.prefix)) return p
+  }
+  return { label: 'local path', type: 'local' }
+}
+
 export function resolveMcpSource(source) {
   if (source.startsWith('npm:')) {
     const pkg = source.slice(4)

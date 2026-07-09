@@ -30,7 +30,7 @@ export function scanSkill(resolved) {
   for (const [filename, content] of fileEntries) {
     if (typeof content !== 'string') continue
     for (const check of PATTERNS) {
-      const key = `${check.severity}:${check.category}:${check.description}`
+      const key = `${check.severity}:${check.category}:${check.description}:${filename}`
       if (seen.has(key)) continue
       if (check.pattern.test(content)) {
         issues.push({ severity: check.severity, category: check.category, description: check.description, file: filename })

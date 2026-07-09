@@ -1,4 +1,5 @@
 import { watch } from 'node:fs'
+import { homedir } from 'node:os'
 import { readLock, getProjectLockPath } from '../utils/lockfile.js'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
@@ -122,7 +123,7 @@ export async function watchCommand(slug, cwd = process.cwd()) {
       continue
     }
 
-    const sourcePath = entry.source.replace(/^~/, process.env.HOME || process.env.HOMEPATH || '/tmp')
+    const sourcePath = entry.source.replace(/^~/, homedir())
 
     const handler = (eventType, filename) => {
       if (!filename || filename.startsWith('.')) return
