@@ -308,6 +308,12 @@ function downloadFile(url, dest) {
         res.resume()
         return
       }
+      const ct = (res.headers['content-type'] || '').toLowerCase()
+      if (ct && !ct.startsWith('application/') && !ct.startsWith('binary/')) {
+        reject(new Error(`Unexpected content type "${ct}" from ${url}`))
+        res.resume()
+        return
+      }
       const chunks = []
       res.on('data', (chunk) => chunks.push(chunk))
       res.on('end', () => {
