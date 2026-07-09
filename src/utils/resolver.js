@@ -1,5 +1,4 @@
-import { readFile, readdir, stat, rm } from 'node:fs/promises'
-import { createWriteStream } from 'node:fs'
+import { readFile, readdir, stat, rm, writeFile } from 'node:fs/promises'
 import { join, dirname, basename } from 'node:path'
 import { tmpdir, homedir } from 'node:os'
 import { execSync as defaultExecSync, spawnSync } from 'node:child_process'
@@ -301,42 +300,19 @@ function fetchJson(url) {
   })
 }
 
-function downloadFile(url, dest) {
-  return new Promise((resolve, reject) => {
-    try {
-      const parsed = new URL(url)
-      if (parsed.hostname !== 'registry.npmjs.org') {
-        reject(new Error(`Download not allowed from ${parsed.hostname}`))
-        return
-      }
-    } catch {
-      reject(new Error(`Invalid download URL: ${url}`))
-      return
-    }
+async function downloadFile(url, dest) {
+  const parsed = new URL(url)
+  if (parsed.hostname !== 'registry.npmjs.org') {
+    throw new Error(`Download not allowed from ${parsed.hostname}`)
+  }
 
-    const fileStream = createWriteStream(dest)
+  const response = await fetch(url)
+  if (!response.ok) {
+    throw new Error(`Failed to download: HTTP ${response.status}`)
+  }
 
-    const req = runHttpsGet(url, (res) => {
-      if (res.statusCode !== 200) {
-        reject(new Error(`Failed to download: HTTP ${res.statusCode}`))
-        res.resume()
-        return
-      }
-      res.on('data', (chunk) => fileStream.write(chunk))
-      res.on('end', () => {
-        fileStream.end()
-        resolve()
-      })
-      res.on('error', (err) => {
-        fileStream.destroy()
-        reject(err)
-      })
-    })
-    req.on('error', (err) => {
-      fileStream.destroy()
-      reject(err)
-    })
-  })
+  const buffer = Buffer.from(await response.arrayBuffer())
+  await writeFile(dest, buffer)
 }
 
 async function resolveNpm(source) {

@@ -181,7 +181,7 @@ async function pickAndInstall(items) {
     await installSkill(resolved, targets)
     console.log(`✅ Installed "${resolved.name}" to ./.agents/skills/`)
   } catch (err) {
-    console.error(`❌ Failed to install: ${err.message}`)
+    console.error('❌ Failed to install: %s', err?.message)
   }
 }
 
