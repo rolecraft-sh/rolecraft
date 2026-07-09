@@ -68,8 +68,8 @@ const agentNameToTarget = {
   zencoder: 'zencoder',
 }
 
-async function reinstallSkill(slug, lock, cwd) {
-  const entry = lock.skills[slug]
+async function reinstallSkill(slug, skills, cwd) {
+  const entry = skills[slug]
   if (!entry || entry.sourceType !== 'local') return false
 
   try {
