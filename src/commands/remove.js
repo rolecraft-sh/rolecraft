@@ -26,9 +26,7 @@ export async function removeCommand(slug) {
   const projectFound = findActualSlug(slug, projectLock)
 
   if (!globalFound && !projectFound) {
-    console.error(`Skill "${slug}" not found.`)
-    process.exit(1)
-    return
+    throw new Error(`Skill "${slug}" not found.`)
   }
 
   const actualSlug = globalFound || projectFound

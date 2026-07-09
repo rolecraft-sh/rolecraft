@@ -1,9 +1,10 @@
-import { readFile, readdir, stat } from 'node:fs/promises'
+import { readFile, readdir, stat, rm } from 'node:fs/promises'
+import { createWriteStream } from 'node:fs'
 import { join, dirname, basename } from 'node:path'
 import { tmpdir, homedir } from 'node:os'
 import { execSync as defaultExecSync, spawnSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
-import { readdirSync, readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs'
+import { mkdtempSync } from 'node:fs'
 import { get as defaultHttpsGet } from 'node:https'
 import { computeContentHash } from './lockfile.js'
 
@@ -32,14 +33,6 @@ function runGit(args, opts = {}) {
     throw new Error(msg)
   }
   return result
-}
-
-function removeDir(dir) {
-  try {
-    rmSync(dir, { recursive: true, force: true })
-  } catch {
-    // ignore cleanup errors
-  }
 }
 
 function isGitHubRef(source) {
@@ -80,14 +73,29 @@ function parseMetadata(content) {
   return { name, slug, owner, description }
 }
 
-function scanForSkill(dir, maxDepth = 3) {
+async function readFileContents(skillDir) {
+  let entries
+  try {
+    entries = await readdir(skillDir, { withFileTypes: true })
+  } catch {
+    return {}
+  }
+  const files = entries.filter(e => e.name !== '.git').map(e => e.name)
+  const fileContents = {}
+  for (const f of files) {
+    try { fileContents[f] = await readFile(join(skillDir, f), 'utf-8') } catch {}
+  }
+  return fileContents
+}
+
+async function scanForSkill(dir, maxDepth = 3) {
   const results = []
 
-  function scan(currentDir, depth = 0) {
+  async function scan(currentDir, depth = 0) {
     if (depth > maxDepth) return
     let entries
     try {
-      entries = readdirSync(currentDir, { withFileTypes: true })
+      entries = await readdir(currentDir, { withFileTypes: true })
     } catch {
       return
     }
@@ -95,10 +103,10 @@ function scanForSkill(dir, maxDepth = 3) {
       if (entry.name === '.git') continue
       const fullPath = join(currentDir, entry.name)
       if (entry.isDirectory()) {
-        scan(fullPath, depth + 1)
+        await scan(fullPath, depth + 1)
       } else if (entry.name === 'SKILL.md') {
         try {
-          const c = readFileSync(fullPath, 'utf-8')
+          const c = await readFile(fullPath, 'utf-8')
           const meta = parseMetadata(c)
           results.push({ dir: dirname(fullPath), ...meta, content: c })
         } catch {
@@ -108,7 +116,7 @@ function scanForSkill(dir, maxDepth = 3) {
     }
   }
 
-  scan(dir)
+  await scan(dir)
   return results
 }
 
@@ -134,31 +142,21 @@ async function resolveLocal(source) {
   try {
     const content = await readFile(directPath, 'utf-8')
     const meta = parseMetadata(content)
-    const dirEntries = await readdir(skillDir, { withFileTypes: true })
-    const files = dirEntries.filter(e => e.name !== '.git').map(e => e.name)
-    const fileContents = {}
-    for (const f of files) {
-      try { fileContents[f] = readFileSync(join(skillDir, f), 'utf-8') } catch {}
-    }
+    const fileContents = await readFileContents(skillDir)
+    const files = Object.keys(fileContents)
     return { ...meta, content, files, fileContents, contentSha: computeContentHash(fileContents), skillDir, sourcePath: source, sourceType: 'local' }
   } catch {
     // direct SKILL.md not found, scan recursively
   }
 
-  const found = scanForSkill(skillDir)
+  const found = await scanForSkill(skillDir)
   if (found.length === 0) {
     throw new Error(`No SKILL.md found in ${skillDir}`)
   }
 
   const skill = found[0]
-  const files = readdirSync(skill.dir, { withFileTypes: true })
-    .filter(e => e.name !== '.git')
-    .map(e => e.name)
-
-  const fileContents = {}
-  for (const f of files) {
-    try { fileContents[f] = readFileSync(join(skill.dir, f), 'utf-8') } catch {}
-  }
+  const fileContents = await readFileContents(skill.dir)
+  const files = Object.keys(fileContents)
 
   return { ...skill, files, fileContents, contentSha: computeContentHash(fileContents), skillDir: skill.dir, sourcePath: source, sourceType: 'local' }
 }
@@ -170,30 +168,20 @@ async function resolveGitHub(source) {
   try {
     runGit(['clone', '--depth', '1', url, tmpDir])
   } catch {
-    removeDir(tmpDir)
+    await rm(tmpDir, { recursive: true, force: true }).catch(() => {})
     throw new Error(`Failed to clone GitHub repo ${source}`)
   }
 
   try {
-    const found = scanForSkill(tmpDir)
+    const found = await scanForSkill(tmpDir)
 
     if (found.length === 0) {
       throw new Error(`No SKILL.md found in GitHub repo ${source}`)
     }
 
     const skill = found[0]
-    const files = readdirSync(skill.dir, { withFileTypes: true })
-      .filter(e => e.name !== '.git')
-      .map(e => e.name)
-
-    const fileContents = {}
-    for (const f of files) {
-      try {
-        fileContents[f] = readFileSync(join(skill.dir, f), 'utf-8')
-      } catch {
-        // skip unreadable files
-      }
-    }
+    const fileContents = await readFileContents(skill.dir)
+    const files = Object.keys(fileContents)
 
     const owner = source.split('/')[0]
     return {
@@ -207,7 +195,7 @@ async function resolveGitHub(source) {
       sourceType: 'github',
     }
   } finally {
-    removeDir(tmpDir)
+    await rm(tmpDir, { recursive: true, force: true }).catch(() => {})
   }
 }
 
@@ -235,24 +223,18 @@ async function resolveGitUrl(source) {
     throw new Error(`Failed to clone repository from ${source}`)
   }
 
-  const found = scanForSkill(tmpDir)
+  const found = await scanForSkill(tmpDir)
 
   if (found.length === 0) {
-    removeDir(tmpDir)
+    await rm(tmpDir, { recursive: true, force: true }).catch(() => {})
     throw new Error(`No SKILL.md found in repository ${source}`)
   }
 
   const skill = found[0]
-  const files = readdirSync(skill.dir, { withFileTypes: true })
-    .filter(e => e.name !== '.git')
-    .map(e => e.name)
+  const fileContents = await readFileContents(skill.dir)
+  const files = Object.keys(fileContents)
 
-  const fileContents = {}
-  for (const f of files) {
-    try { fileContents[f] = readFileSync(join(skill.dir, f), 'utf-8') } catch {}
-  }
-
-  removeDir(tmpDir)
+  await rm(tmpDir, { recursive: true, force: true }).catch(() => {})
 
   return {
     ...skill,
@@ -321,21 +303,39 @@ function fetchJson(url) {
 
 function downloadFile(url, dest) {
   return new Promise((resolve, reject) => {
+    try {
+      const parsed = new URL(url)
+      if (parsed.hostname !== 'registry.npmjs.org') {
+        reject(new Error(`Download not allowed from ${parsed.hostname}`))
+        return
+      }
+    } catch {
+      reject(new Error(`Invalid download URL: ${url}`))
+      return
+    }
+
+    const fileStream = createWriteStream(dest)
+
     const req = runHttpsGet(url, (res) => {
       if (res.statusCode !== 200) {
         reject(new Error(`Failed to download: HTTP ${res.statusCode}`))
         res.resume()
         return
       }
-      const chunks = []
-      res.on('data', (chunk) => chunks.push(chunk))
+      res.on('data', (chunk) => fileStream.write(chunk))
       res.on('end', () => {
-        writeFileSync(dest, Buffer.concat(chunks))
+        fileStream.end()
         resolve()
       })
-      res.on('error', reject)
+      res.on('error', (err) => {
+        fileStream.destroy()
+        reject(err)
+      })
     })
-    req.on('error', reject)
+    req.on('error', (err) => {
+      fileStream.destroy()
+      reject(err)
+    })
   })
 }
 
@@ -368,28 +368,22 @@ async function resolveNpm(source) {
     if (tarResult.error) throw tarResult.error
     if (tarResult.status !== 0) throw new Error(`tar extraction failed with code ${tarResult.status}`)
   } catch (e) {
-    removeDir(tmpDir)
+    await rm(tmpDir, { recursive: true, force: true }).catch(() => {})
     throw new Error(`Failed to download/extract npm package "${pkgName}@${ver}": ${e.message}`)
   }
 
   let packageDir
   try {
     packageDir = join(tmpDir, 'package')
-    const found = scanForSkill(packageDir)
+    const found = await scanForSkill(packageDir)
 
     if (found.length === 0) {
       throw new Error(`No SKILL.md found in npm package ${pkgName}@${ver}`)
     }
 
     const skill = found[0]
-    const files = readdirSync(skill.dir, { withFileTypes: true })
-      .filter(e => e.name !== '.git')
-      .map(e => e.name)
-
-    const fileContents = {}
-    for (const f of files) {
-      try { fileContents[f] = readFileSync(join(skill.dir, f), 'utf-8') } catch {}
-    }
+    const fileContents = await readFileContents(skill.dir)
+    const files = Object.keys(fileContents)
 
     return {
       ...skill,
@@ -402,7 +396,7 @@ async function resolveNpm(source) {
       sourceType: 'npm',
     }
   } finally {
-    removeDir(tmpDir)
+    await rm(tmpDir, { recursive: true, force: true }).catch(() => {})
   }
 }
 

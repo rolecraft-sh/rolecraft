@@ -170,17 +170,12 @@ describe('mcp command', () => {
     }))
 
     it('exits when install has no source', async () => {
-      const origExit = process.exit
-      let exitCode
-      process.exit = (c) => { exitCode = c; throw new Error('exit') }
       const { logs, restore } = capture('error')
       try {
-        await assert.rejects(() => mcpModule.mcpCommand(['install']), /exit/)
+        await assert.rejects(() => mcpModule.mcpCommand(['install']), /Missing source argument/)
       } finally {
-        process.exit = origExit
         restore()
       }
-      assert.equal(exitCode, 1)
       assert.ok(logs.some(l => l.includes('Usage')))
     })
 
@@ -203,17 +198,12 @@ describe('mcp command', () => {
     }))
 
     it('exits when update has no source', async () => {
-      const origExit = process.exit
-      let exitCode
-      process.exit = (c) => { exitCode = c; throw new Error('exit') }
       const { logs, restore } = capture('error')
       try {
-        await assert.rejects(() => mcpModule.mcpCommand(['update']), /exit/)
+        await assert.rejects(() => mcpModule.mcpCommand(['update']), /Missing source argument/)
       } finally {
-        process.exit = origExit
         restore()
       }
-      assert.equal(exitCode, 1)
       assert.ok(logs.some(l => l.includes('Usage')))
     })
 
@@ -227,17 +217,12 @@ describe('mcp command', () => {
     }))
 
     it('exits when remove has no name', async () => {
-      const origExit = process.exit
-      let exitCode
-      process.exit = (c) => { exitCode = c; throw new Error('exit') }
       const { logs, restore } = capture('error')
       try {
-        await assert.rejects(() => mcpModule.mcpCommand(['remove']), /exit/)
+        await assert.rejects(() => mcpModule.mcpCommand(['remove']), /Missing name argument/)
       } finally {
-        process.exit = origExit
         restore()
       }
-      assert.equal(exitCode, 1)
       assert.ok(logs.some(l => l.includes('Usage')))
     })
 

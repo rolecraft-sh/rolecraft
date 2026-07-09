@@ -57,20 +57,10 @@ describe('update command', () => {
   })
 
   it('exits with error when skill not found', async () => {
-    const origExit = process.exit
-    const origError = console.error
-    const errors = []
-    console.error = (msg) => errors.push(msg)
-    process.exit = (code) => { throw new Error(`exit:${code}`) }
-
     await assert.rejects(
       () => updateModule.updateCommand('nonexistent'),
-      /exit:1/,
+      /not found/,
     )
-
-    assert.ok(errors.some(e => e.includes('not found')))
-    process.exit = origExit
-    console.error = origError
   })
 
   it('updates a project-scoped skill via projectFound branch', async () => {

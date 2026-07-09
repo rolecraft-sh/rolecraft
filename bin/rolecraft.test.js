@@ -80,12 +80,11 @@ describe('rolecraft CLI', () => {
   it('errors when install has no source', async () => {
     process.argv = ['node', 'rolecraft', 'install']
     const { logs: errors, restore: restoreErr } = capture('error')
-    mockExit()
 
     try {
       await rolecraftModule.main()
     } catch (e) {
-      assert.ok(e.message.includes('exit:1'))
+      assert.ok(e.message.includes('Missing source argument.'))
     }
 
     assert.ok(errors.some(e => e.includes('Usage: rolecraft install <source>')))
@@ -109,12 +108,11 @@ describe('rolecraft CLI', () => {
   it('errors when remove has no slug', async () => {
     process.argv = ['node', 'rolecraft', 'remove']
     const { logs: errors, restore: restoreErr } = capture('error')
-    mockExit()
 
     try {
       await rolecraftModule.main()
     } catch (e) {
-      assert.ok(e.message.includes('exit:1'))
+      assert.ok(e.message.includes('Missing slug argument.'))
     }
 
     assert.ok(errors.some(e => e.includes('Usage: rolecraft remove <slug>')))
@@ -150,28 +148,22 @@ describe('rolecraft CLI', () => {
 
   it('runs remove command with nonexistent skill', async () => {
     process.argv = ['node', 'rolecraft', 'remove', 'nonexistent']
-    const { logs: errors, restore: restoreErr } = capture('error')
-    mockExit()
 
     try {
       await rolecraftModule.main()
     } catch (e) {
-      assert.ok(e.message.includes('exit:1'))
+      assert.ok(e.message.includes('not found'))
     }
-
-    assert.ok(errors.some(e => e.includes('not found')))
-    restoreErr()
   })
 
   it('errors when update has no slug', async () => {
     process.argv = ['node', 'rolecraft', 'update']
     const { logs: errors, restore: restoreErr } = capture('error')
-    mockExit()
 
     try {
       await rolecraftModule.main()
     } catch (e) {
-      assert.ok(e.message.includes('exit:1'))
+      assert.ok(e.message.includes('Missing slug argument.'))
     }
 
     assert.ok(errors.some(e => e.includes('Usage: rolecraft update <slug>')))
@@ -263,12 +255,11 @@ describe('rolecraft CLI', () => {
   it('errors when use has no source', async () => {
     process.argv = ['node', 'rolecraft', 'use']
     const { logs: errors, restore: restoreErr } = capture('error')
-    mockExit()
 
     try {
       await rolecraftModule.main()
     } catch (e) {
-      assert.ok(e.message.includes('exit:1'))
+      assert.ok(e.message.includes('Missing source argument.'))
     }
 
     assert.ok(errors.some(e => e.includes('Usage: rolecraft use <source>')))
@@ -350,12 +341,11 @@ describe('rolecraft CLI', () => {
   it('errors when search has no query', async () => {
     process.argv = ['node', 'rolecraft', 'search']
     const { logs: errors, restore: restoreErr } = capture('error')
-    mockExit()
 
     try {
       await rolecraftModule.main()
     } catch (e) {
-      assert.ok(e.message.includes('exit:1'))
+      assert.ok(e.message.includes('Missing query argument.'))
     }
 
     assert.ok(errors.some(e => e.includes('Usage: rolecraft search <query>')))
@@ -395,17 +385,12 @@ describe('rolecraft CLI', () => {
     await rolecraftModule.main()
 
     process.argv = ['node', 'rolecraft', 'install', skillDir, '--global', '--frozen-lockfile']
-    const { logs: errors, restore: restoreErr } = capture('error')
-    mockExit()
 
     try {
       await rolecraftModule.main()
     } catch (e) {
-      assert.ok(e.message.includes('exit:1'), `Expected exit:1 but got: ${e.message}`)
+      assert.ok(e.message.includes('already installed'))
     }
-
-    assert.ok(errors.some(e => e.includes('already installed')), `Expected 'already installed' in: ${errors.join(', ')}`)
-    restoreErr()
   })
 
   it('runs verify command with no skills', async () => {
@@ -510,12 +495,11 @@ describe('rolecraft CLI', () => {
   it('errors when bundle has no args', async () => {
     process.argv = ['node', 'rolecraft', 'bundle']
     const { logs: errors, restore: restoreErr } = capture('error')
-    mockExit()
 
     try {
       await rolecraftModule.main()
     } catch (e) {
-      assert.ok(e.message.includes('exit:1'))
+      assert.ok(e.message.includes('Missing arguments.'))
     }
 
     assert.ok(errors.some(e => e.includes('Usage: rolecraft bundle')))
