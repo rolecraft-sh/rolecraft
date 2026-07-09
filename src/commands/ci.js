@@ -36,7 +36,7 @@ export async function ciCommand() {
       await installSkill(resolved, targets)
       console.log(`   ✅ ${slug} installed`)
     } catch (err) {
-      console.error(`   ❌ ${slug}: ${err.message}`)
+      console.error('   ❌ %s: %s', slug, err?.message)
       allPassed = false
     }
   }

@@ -302,7 +302,7 @@ export async function run() {
   try {
     await main()
   } catch (err) {
-    console.error(err.stack || err.message)
+    console.error(err)
     process.exit(1)
   }
 }
@@ -312,7 +312,7 @@ const isEntryPoint = process.argv[1]
 
 if (isEntryPoint) {
   run().catch((err) => {
-    console.error(err.stack || err.message)
+    console.error(err)
     process.exit(1)
   })
 }

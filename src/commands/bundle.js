@@ -79,7 +79,7 @@ async function installSources(sources, label, options, noMcp = false) {
       await installCommand(source, { global: true, project: true, noMcp: noMcp, dryRun: options.dryRun })
       successCount++
     } catch (err) {
-      console.error(`   ❌ ${source}: ${err.message}`)
+      console.error('   ❌ %s: %s', source, err?.message)
       failCount++
     }
   }

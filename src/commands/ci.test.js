@@ -91,7 +91,7 @@ describe('ci command', () => {
 
     const errors = []
     const origErr = console.error
-    console.error = (...args) => { if (args.length) errors.push(String(args[0])) }
+    console.error = (...args) => { if (args.length) errors.push(args.map(a => String(a)).join(' ')) }
     const origExit = process.exit
     process.exit = () => { throw new Error('exit') }
     try {
