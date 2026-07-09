@@ -43,6 +43,7 @@ export default defineConfig({
             { text: 'upgrade', link: '/commands/upgrade' },
             { text: 'use', link: '/commands/use' },
             { text: 'verify', link: '/commands/verify' },
+            { text: 'watch', link: '/commands/watch' },
           ],
         },
         { text: 'MCP Server Management', link: '/mcp' },

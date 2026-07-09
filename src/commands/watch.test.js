@@ -147,4 +147,118 @@ describe('watch command', () => {
     assert.ok(logs.some(l => l.includes('watching')))
     console.log = origLog
   })
+
+  it('skips non-local source when specific slug is remote', async () => {
+    const logs = []
+    const origLog = console.log
+    console.log = (...args) => { if (args.length) logs.push(String(args[0])) }
+
+    const { watchers } = await watchModule.watchCommand('remote-skill', tempDir)
+    for (const w of watchers) w.close()
+
+    assert.ok(logs.some(l => l.includes('Skipping')))
+    assert.ok(logs.some(l => l.includes('remote')))
+    console.log = origLog
+  })
+
+  it('handles file system watcher error gracefully', async () => {
+    const errors = []
+    const origError = console.error
+    const origLog = console.log
+    console.error = (...args) => { if (args.length) errors.push(String(args[0])) }
+    console.log = () => {}
+
+    const badDir = mkdtempSync(join(tmpdir(), 'rolecraft-watch-bad-'))
+    await mkdir(join(badDir, '.agents'), { recursive: true })
+    await writeFile(join(badDir, '.agents', '.skill-lock.json'), JSON.stringify({
+      version: 3,
+      skills: {
+        'bad-skill': {
+          name: 'Bad Skill',
+          source: '/nonexistent',
+          sourceType: 'local',
+          installedAt: new Date().toISOString(),
+          agents: ['opencode'],
+        },
+      },
+      dismissed: {},
+      lastSelectedAgents: [],
+    }))
+
+    const { watchers } = await watchModule.watchCommand(undefined, badDir)
+    for (const w of watchers) w.close()
+
+    // fs.watch behavior on non-existent paths varies across platforms:
+    // macOS throws synchronously, Linux emits error async.
+    // Verify command completes without crashing.
+    if (errors.length > 0) {
+      assert.ok(errors.some(e => e.includes('cannot watch')))
+    }
+    console.error = origError
+    console.log = origLog
+    process.env.HOME = tempDir
+    await rm(badDir, { recursive: true, force: true })
+  })
+
+  it('reinstalls skill on file change and logs sync', async () => {
+    const logs = []
+    const origLog = console.log
+    console.log = (...args) => { if (args.length) logs.push(String(args[0])) }
+
+    const { watchers } = await watchModule.watchCommand('local-skill', tempDir)
+
+    // Trigger a file change in the watched source directory
+    await writeFile(join(tempDir, 'source-local', 'TEST.md'), 'change 1')
+    await writeFile(join(tempDir, 'source-local', 'TEST.md'), 'change 2')
+
+    // Wait for debounce (300ms) plus buffer
+    await new Promise(r => setTimeout(r, 600))
+
+    for (const w of watchers) w.close()
+
+    assert.ok(logs.some(l => l.includes('syncing')), `Expected 'syncing' in logs: ${logs.join('; ')}`)
+    assert.ok(logs.some(l => l.includes('synced')), `Expected 'synced' in logs: ${logs.join('; ')}`)
+    console.log = origLog
+  })
+
+  it('handles reinstall failure gracefully', async () => {
+    const logs = []
+    const origLog = console.log
+    console.log = (...args) => { if (args.length) logs.push(String(args[0])) }
+
+    const dir = mkdtempSync(join(tmpdir(), 'rolecraft-watch-fail-'))
+    await mkdir(join(dir, '.agents'), { recursive: true })
+    await mkdir(join(dir, 'broken-source'), { recursive: true })
+    await writeFile(join(dir, 'broken-source', 'SKILL.md'), '---\nname: FailSkill\nslug: fail-skill\n---\nContent')
+    await writeFile(join(dir, '.agents', '.skill-lock.json'), JSON.stringify({
+      version: 3,
+      skills: {
+        'fail-skill': {
+          name: 'FailSkill',
+          source: join(dir, 'broken-source'),
+          sourceType: 'local',
+          installedAt: new Date().toISOString(),
+          agents: ['opencode'],
+        },
+      },
+      dismissed: {},
+      lastSelectedAgents: [],
+    }))
+
+    const { watchers } = await watchModule.watchCommand('fail-skill', dir)
+
+    // Delete SKILL.md so reinstallSkill's resolveSource throws
+    await rm(join(dir, 'broken-source', 'SKILL.md'), { force: true })
+    await writeFile(join(dir, 'broken-source', 'OTHER.md'), 'change')
+
+    await new Promise(r => setTimeout(r, 600))
+
+    for (const w of watchers) w.close()
+
+    assert.ok(logs.some(l => l.includes('syncing')))
+    assert.ok(!logs.some(l => l.includes('synced')), 'Should NOT log synced on failure')
+    console.log = origLog
+    process.env.HOME = tempDir
+    await rm(dir, { recursive: true, force: true })
+  })
 })

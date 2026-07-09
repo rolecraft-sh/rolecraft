@@ -68,12 +68,8 @@ const agentNameToTarget = {
   zencoder: 'zencoder',
 }
 
-function normalizeSlug(slug) {
-  return slug.replace(/\//g, '-')
-}
-
-async function reinstallSkill(slug, lock, cwd) {
-  const entry = lock.skills[slug]
+async function reinstallSkill(slug, skills, cwd) {
+  const entry = skills[slug]
   if (!entry || entry.sourceType !== 'local') return false
 
   try {

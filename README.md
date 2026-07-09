@@ -38,11 +38,10 @@
 
 <p align="center">
   <a href="#quick-start">Quick Start</a> ·
-  <a href="#why-rolecraft">Why RoleCraft?</a> ·
+  <a href="#who-is-this-for">Who Is This For?</a> ·
   <a href="#features">Features</a> ·
   <a href="#commands-overview">Commands</a> ·
-   <a href="docs/install.md">Install Guide</a> ·
-   <a href="https://sametcelikbicak.github.io/rolecraft/">Docs Site</a> ·
+  <a href="#faq">FAQ</a> ·
    <a href="docs/security.md">Security</a> ·
    <a href="CONTRIBUTING.md">Contribute</a>
 </p>
@@ -64,6 +63,18 @@
     
   <a href="docs/migration-from-skills.md"><b>Migrate from Vercel skills →</b></a>
 </p>
+
+---
+
+## Who is this for?
+
+| If you... | rolecraft helps you... |
+|-----------|----------------------|
+| Use AI coding agents (Claude, Cursor, Copilot, etc.) | Install reusable skills so your agent stops re-learning your project every session |
+| Maintain team conventions | Share a single skill repo across your whole team — no copy/paste |
+| Run CI/CD pipelines | Lockfile-based `rolecraft ci` re-installs skills deterministically |
+| Build agent skills | Scaffold, test, and distribute skills to 82+ agents from one source |
+| Care about security | Built-in 0–100 security scoring blocks prompt injection, command injection, and credential harvesting on install |
 
 ---
 
@@ -106,6 +117,8 @@ rolecraft remove my-skill
 
 **Requirements:** Node.js >= 20 · No other dependencies · 82+ agents supported · [Full install guide →](docs/install.md)
 
+> **Why zero dependencies?** Every dependency is a risk — supply-chain attacks, breaking changes, bloated `node_modules`. rolecraft uses only Node.js built-in modules (`fs`, `path`, `crypto`, `https`). The entire CLI is ~4 KB. No `npm install` surprises.
+
 ---
 
 ## Features
@@ -126,6 +139,35 @@ rolecraft remove my-skill
 - **Dry-run mode** — preview before installing
 - **System health check** — `rolecraft doctor` diagnoses Node.js, agent directories, lockfiles, and skill integrity
 - **AGENTS.md XML generation** — `rolecraft agents-xml` generates Claude Code-compatible `<skills_system>` XML for agent discovery
+
+---
+
+## Skills + MCP in one command
+
+rolecraft is the **only CLI** that installs both agent skills and MCP servers together.
+
+When a SKILL.md declares MCP servers in its frontmatter:
+
+```yaml
+---
+name: postgres-rules
+mcp_servers:
+  - name: postgres
+    source: npm:@modelcontextprotocol/postgres
+---
+```
+
+`rolecraft install ./postgres-rules --cursor` installs the skill and the MCP server — one command, no separate tools.
+
+You can also manage MCP servers standalone:
+
+```bash
+rolecraft mcp install npm:@modelcontextprotocol/github --cursor
+rolecraft mcp list
+rolecraft mcp remove postgres
+```
+
+[→ Full MCP documentation](docs/mcp.md)
 
 ---
 
@@ -189,6 +231,30 @@ rolecraft remove my-skill
 
 ---
 
+## Security
+
+Every install is automatically scanned with **static analysis** that detects:
+
+| Severity | What it catches |
+|----------|----------------|
+| 🔴 Critical | Prompt injection, obfuscated code (base64 blobs, `eval()`), command injection (download-and-execute) |
+| 🟡 High | Credential harvesting patterns, sensitive file access (`~/.ssh`, `.env`) |
+| 🟢 Medium/Low | Missing metadata, unusual source patterns |
+
+Scores range **0–100**:
+- **90+** → SAFE, install proceeds
+- **70–89** → REVIEW, prompts for confirmation
+- **<70** → DANGER, blocked unless `--yes`
+
+```bash
+rolecraft install ./my-skill              # auto-scanned
+rolecraft install ./my-skill --yes        # force install even if DANGER
+```
+
+[→ Full security documentation](docs/security.md)
+
+---
+
 ## How agents discover skills
 
 rolecraft knows where each AI agent looks for skills. Use flags like `--claude`, `--cursor`, `--devin` to target specific agents, or `--all` for every supported agent.
@@ -216,6 +282,26 @@ rolecraft install ./my-skill --cursor --devin --copilot --gemini --cody
 
 ---
 
+## FAQ
+
+**Q: Do I need to sign up or log in?**
+A: No. No account, no API key, no marketplace. Point rolecraft at any folder or repo and it works.
+
+**Q: Can I use rolecraft with multiple AI agents?**
+A: Yes. 82+ agents supported. Use `--cursor`, `--claude`, `--devin` flags or `--all` for every agent.
+
+**Q: Does rolecraft send telemetry?**
+A: No. Zero data leaves your machine. The security scan runs locally. No phone home.
+
+**Q: How is this different from `npx skills` (Vercel)?**
+A: rolecraft has zero dependencies, MCP server management, 82 agents (vs 72), `doctor`, `watch`, `bundle`, `agents-xml`, and shell completions. [Full comparison →](docs/comparison.md)
+
+**Q: Can I use it in CI/CD?**
+A: Yes. `rolecraft ci --yes` re-installs all skills from lockfile, non-interactive. Perfect for pipelines.
+
+**Q: My skill is blocked as DANGER. What do I do?**
+A: Review the security report, fix the flagged patterns, or use `--yes` to force install (not recommended for untrusted skills).
+
 ## Development
 
 Clone the repo and test locally without publishing to npm:
@@ -241,9 +327,16 @@ npm unlink -g rolecraft
 
 All commands work the same as the installed version. No npm publish needed.
 
+## Support
+
+- **[Docs site](https://sametcelikbicak.github.io/rolecraft/)** — full command reference and guides
+- **[GitHub Issues](https://github.com/sametcelikbicak/rolecraft/issues)** — bug reports, feature requests
+- **[SUPPORT.md](SUPPORT.md)** — how to get help
+- **[SECURITY.md](SECURITY.md)** — responsible disclosure
+
 ## Contributing
 
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to get started.
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to get started. Before opening an issue, check our [templates](.github/ISSUE_TEMPLATE/) for bug reports and feature requests.
 
 ### Contributors
 
