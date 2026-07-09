@@ -7,6 +7,7 @@ import { rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { EventEmitter } from 'node:events'
+import { Readable } from 'node:stream'
 import { execSync, spawnSync } from 'node:child_process'
 
 let tempDir, resolverModule
@@ -400,11 +401,14 @@ Just content
 
     function mockFetch() {
       origFetch = globalThis.fetch
-      globalThis.fetch = async () => ({
-        ok: true,
-        status: 200,
-        arrayBuffer: async () => Buffer.from('fake-tarball').buffer,
-      })
+      globalThis.fetch = async () => {
+        const readable = Readable.from([Buffer.from('fake-tarball')])
+        return {
+          ok: true,
+          status: 200,
+          body: Readable.toWeb(readable),
+        }
+      }
     }
 
     function restoreFetch() {

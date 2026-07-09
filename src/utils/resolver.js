@@ -1,4 +1,6 @@
-import { readFile, readdir, stat, rm, writeFile } from 'node:fs/promises'
+import { readFile, readdir, stat, rm } from 'node:fs/promises'
+import { createWriteStream } from 'node:fs'
+import { Writable } from 'node:stream'
 import { join, dirname, basename } from 'node:path'
 import { tmpdir, homedir } from 'node:os'
 import { execSync as defaultExecSync, spawnSync } from 'node:child_process'
@@ -311,8 +313,9 @@ async function downloadFile(url, dest) {
     throw new Error(`Failed to download: HTTP ${response.status}`)
   }
 
-  const buffer = Buffer.from(await response.arrayBuffer())
-  await writeFile(dest, buffer)
+  const fileStream = createWriteStream(dest)
+  const writable = Writable.toWeb(fileStream)
+  await response.body.pipeTo(writable)
 }
 
 async function resolveNpm(source) {
