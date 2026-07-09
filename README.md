@@ -223,6 +223,7 @@ rolecraft mcp remove postgres
 | Content hash verification (`verify`) | ✅               | ✅              | ❌                  |
 | CI-mode re-install (`ci`)            | ✅               | ✅              | ❌                  |
 | System health check (`doctor`)       | ✅               | ❌              | ❌                  |
+| Watch mode (auto-sync)               | ✅               | ❌              | ❌                  |
 | AGENTS.md XML generation             | ✅               | ❌              | ❌                  |
 | Self-upgrade command                 | ✅               | ❌              | ❌                  |
 | File size                            | ~4 KB            | ~465 KB         | ~84 KB              |

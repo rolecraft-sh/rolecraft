@@ -3,7 +3,7 @@ import { join, dirname, basename } from 'node:path'
 import { tmpdir, homedir } from 'node:os'
 import { execSync as defaultExecSync, spawnSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
-import { readdirSync, readFileSync, writeFileSync, mkdtempSync } from 'node:fs'
+import { readdirSync, readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs'
 import { get as defaultHttpsGet } from 'node:https'
 import { computeContentHash } from './lockfile.js'
 
@@ -35,8 +35,11 @@ function runGit(args, opts = {}) {
 }
 
 function removeDir(dir) {
-  const result = spawnSync('rm', ['-rf', dir], { stdio: 'pipe' })
-  if (result.error) throw result.error
+  try {
+    rmSync(dir, { recursive: true, force: true })
+  } catch {
+    // ignore cleanup errors
+  }
 }
 
 function isGitHubRef(source) {

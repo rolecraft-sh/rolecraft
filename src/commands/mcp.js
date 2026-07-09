@@ -1,6 +1,34 @@
-import { addMcpServer, removeMcpServer, updateMcpServer, listMcpServers, getSupportedMcpAgents, resolveMcpSource } from '../utils/mcp.js'
+import { addMcpServer, removeMcpServer, updateMcpServer, listMcpServers, getSupportedMcpAgents, resolveMcpSource, classifyMcpSource } from '../utils/mcp.js'
+import { createInterface } from 'node:readline'
+import { stdin as input, stdout as output } from 'node:process'
+
+function askConfirmation(query) {
+  const rl = createInterface({ input, output })
+  return new Promise(resolve => {
+    rl.question(query, answer => {
+      rl.close()
+      resolve(answer.trim().toLowerCase())
+    })
+  })
+}
+
+function requiresConfirmation(source) {
+  const info = classifyMcpSource(source)
+  return info.type === 'github'
+}
 
 export async function mcpInstallCommand(source, options) {
+  if (requiresConfirmation(source) && !options.yes) {
+    console.log(`\n⚠️  Installing MCP server from GitHub repository: ${source}`)
+    console.log('   This will download and execute code from an external source.')
+    console.log('   Only proceed if you trust the repository.\n')
+    const answer = await askConfirmation('Continue with installation? [y/N] ')
+    if (answer !== 'y' && answer !== 'yes') {
+      console.log('Install cancelled.')
+      return
+    }
+  }
+
   const resolved = resolveMcpSource(source)
 
   const targets = options.agents && options.agents.length > 0
@@ -55,6 +83,17 @@ export async function mcpListCommand(options) {
 }
 
 export async function mcpUpdateCommand(source, options) {
+  if (requiresConfirmation(source) && !options.yes) {
+    console.log(`\n⚠️  Updating MCP server from GitHub repository: ${source}`)
+    console.log('   This will download and execute code from an external source.')
+    console.log('   Only proceed if you trust the repository.\n')
+    const answer = await askConfirmation('Continue with update? [y/N] ')
+    if (answer !== 'y' && answer !== 'yes') {
+      console.log('Update cancelled.')
+      return
+    }
+  }
+
   const resolved = resolveMcpSource(source)
 
   const targets = options.agents && options.agents.length > 0
@@ -136,6 +175,7 @@ export async function mcpCommand(args) {
 
   const options = {
     dryRun: rest.includes('--dry-run'),
+    yes: rest.includes('--yes') || rest.includes('-y'),
     name: null,
     agents: [],
   }
@@ -202,6 +242,7 @@ Options:
   --agents, --cursor, --claude, --copilot, etc.  Target specific agents
   --all                                           Install to all supported agents
   --name <name>                                   Override server name
+  --yes, -y                                       Skip confirmation for external sources
   --dry-run                                       Preview without making changes
 
 Examples:

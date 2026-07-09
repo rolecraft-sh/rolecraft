@@ -35,6 +35,7 @@
 | Skill rating / feedback                  | ❌               | ❌                | ✅                  |
 | Skill diff / compose                     | ❌               | ❌                | ❌                  |
 | System health check (`doctor`)           | ✅               | ❌                | ❌                  |
+| Watch mode (auto-sync)                   | ✅               | ❌                | ❌                  |
 | AGENTS.md XML generation                 | ✅               | ❌                | ❌                  |
 | **MCP server management**                | ✅               | ❌                | ❌                  |
 | Security scanning (0–100)                | ✅               | ✅ (Snyk)         | ✅                  |
