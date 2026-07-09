@@ -147,6 +147,7 @@ rolecraft remove my-skill
 | `rolecraft agents-xml [--write]`        | Generate skills XML for AGENTS.md                                           | [docs](docs/commands/agents-xml.md)  |
 | `rolecraft mcp install/remove/list`     | Install, remove, and list MCP servers for AI agents                         | [docs](docs/commands/mcp.md)         |
 | `rolecraft verify`                      | Check installed skill integrity via content hash                            | [docs](docs/commands/verify.md)      |
+| `rolecraft watch [<slug>]`              | Watch skills for changes and auto-sync                                     | [docs](docs/commands/watch.md)       |
 | `rolecraft ci`                          | Re-install all skills from lockfile (CI mode)                               | [docs](docs/commands/ci.md)          |
 | `rolecraft upgrade`                     | Upgrade rolecraft to the latest version                                     | [docs](docs/commands/upgrade.md)     |
 | `rolecraft remove <slug>`               | Uninstall a skill                                                           | [docs](docs/commands/remove.md)      |

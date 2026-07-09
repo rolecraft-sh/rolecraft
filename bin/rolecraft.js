@@ -20,6 +20,7 @@ import { upgradeCommand } from '../src/commands/upgrade.js'
 import { doctorCommand } from '../src/commands/doctor.js'
 import { agentsXmlCommand } from '../src/commands/agents-xml.js'
 import { mcpCommand } from '../src/commands/mcp.js'
+import { watchCommand } from '../src/commands/watch.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'))
@@ -47,7 +48,8 @@ Usage:
   rolecraft ci                   Install all skills from lockfile
   rolecraft completions <shell>  Generate shell completions (bash|zsh|fish)
   rolecraft doctor               Run system health check
-  rolecraft mcp install <source> Install an MCP server (npm:, gh:, or local path)
+   rolecraft watch [<slug>]       Watch skills for changes and auto-sync
+   rolecraft mcp install <source> Install an MCP server (npm:, gh:, or local path)
   rolecraft mcp list             List configured MCP servers
   rolecraft mcp remove <name>    Remove an MCP server
   rolecraft agents-xml           Generate skills XML for AGENTS.md
@@ -347,6 +349,22 @@ export async function main() {
       if (args.includes('--help') || args.includes('-h')) { usage(); return }
       await doctorCommand()
       break
+
+    case 'watch': {
+      if (args.includes('--help') || args.includes('-h')) { usage(); return }
+      const slug = args[0]
+      const { watchers } = await watchCommand(slug)
+      if (watchers.length === 0) {
+        return
+      }
+      process.on('SIGINT', () => {
+        console.log('\nStopping watch...')
+        for (const w of watchers) w.close()
+        process.exit(0)
+      })
+      await new Promise(() => {})
+      break
+    }
 
     case 'agents-xml':
       if (args.includes('--help') || args.includes('-h')) { usage(); return }
