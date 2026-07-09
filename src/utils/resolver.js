@@ -1,9 +1,9 @@
-import { readFile, readdir, stat, rm, mkdir, writeFile } from 'node:fs/promises'
+import { readFile, readdir, stat, rm, writeFile } from 'node:fs/promises'
 import { join, dirname, basename } from 'node:path'
 import { tmpdir, homedir } from 'node:os'
 import { execSync as defaultExecSync, spawnSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
-import { readFileSync, mkdtempSync } from 'node:fs'
+import { mkdtempSync } from 'node:fs'
 import { get as defaultHttpsGet } from 'node:https'
 import { computeContentHash } from './lockfile.js'
 
