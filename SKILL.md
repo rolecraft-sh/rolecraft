@@ -59,6 +59,7 @@ npx rolecraft list
 | `rolecraft bundle <sources>` | Install multiple skills from file or inline |
 | `rolecraft ci` | Re-install from lockfile (CI mode) |
 | `rolecraft verify` | Check skill integrity via content hash |
+| `rolecraft watch [<slug>]` | Watch skills for changes and auto-sync |
 | `rolecraft search <query>` | Search skills on GitHub |
 | `rolecraft doctor` | Run system health check |
 | `rolecraft agents-xml [--write]` | Generate skills XML for AGENTS.md |
