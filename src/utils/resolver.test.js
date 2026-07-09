@@ -366,13 +366,13 @@ Just content
   })
 
   describe('resolveNpm', () => {
+    let origFetch
+
     function mockHttps(resolver) {
-      let callCount = 0
       resolver.setHttpsGet((...args) => {
         const cb = args[args.length - 1]
         const req = new EventEmitter()
 
-        callCount++
         process.nextTick(() => {
           const res = new EventEmitter()
           res.statusCode = 200
@@ -381,26 +381,43 @@ Just content
 
           cb(res)
 
-          if (callCount === 1) {
-            // First call: metadata fetch
-            const data = Buffer.from(JSON.stringify({
-              'dist-tags': { latest: '1.0.0' },
-              versions: {
-                '1.0.0': {
-                  dist: { tarball: 'https://registry.npmjs.org/test-pkg/-/test-pkg-1.0.0.tgz' },
-                },
+          // Single call: metadata fetch
+          const data = Buffer.from(JSON.stringify({
+            'dist-tags': { latest: '1.0.0' },
+            versions: {
+              '1.0.0': {
+                dist: { tarball: 'https://registry.npmjs.org/test-pkg/-/test-pkg-1.0.0.tgz' },
               },
-            }))
-            res.emit('data', data)
-          } else {
-            // Second call: tarball download
-            res.emit('data', Buffer.from('fake-tarball'))
-          }
+            },
+          }))
+          res.emit('data', data)
           res.emit('end')
         })
 
         return req
       })
+    }
+
+    function mockFetch() {
+      origFetch = globalThis.fetch
+      globalThis.fetch = async () => ({
+        ok: true,
+        status: 200,
+        arrayBuffer: async () => Buffer.from('fake-tarball').buffer,
+      })
+    }
+
+    function restoreFetch() {
+      if (origFetch) globalThis.fetch = origFetch
+    }
+
+    async function withMockFetch(fn) {
+      mockFetch()
+      try {
+        await fn()
+      } finally {
+        restoreFetch()
+      }
     }
 
     it('resolves an npm package', async () => {
@@ -418,16 +435,18 @@ Just content
         return { status: 0, stdout: '', stderr: '' }
       })
 
-      const result = await resolverModule.resolveSource('npm:test-pkg')
+      await withMockFetch(async () => {
+        const result = await resolverModule.resolveSource('npm:test-pkg')
 
-      assert.equal(result.name, 'npm-skill')
-      assert.equal(result.slug, 'test/npm-skill')
-      assert.equal(result.owner, 'test-pkg')
-      assert.equal(result.sourceType, 'npm')
-      assert.equal(result.sourcePath, 'npm:test-pkg')
-      assert.ok(result.files.includes('SKILL.md'))
-      assert.ok(result.files.includes('helper.js'))
-      assert.ok(result.fileContents)
+        assert.equal(result.name, 'npm-skill')
+        assert.equal(result.slug, 'test/npm-skill')
+        assert.equal(result.owner, 'test-pkg')
+        assert.equal(result.sourceType, 'npm')
+        assert.equal(result.sourcePath, 'npm:test-pkg')
+        assert.ok(result.files.includes('SKILL.md'))
+        assert.ok(result.files.includes('helper.js'))
+        assert.ok(result.fileContents)
+      })
     })
 
     it('resolves an npm package with version', async () => {
@@ -444,11 +463,13 @@ Just content
         return { status: 0, stdout: '', stderr: '' }
       })
 
-      const result = await resolverModule.resolveSource('npm:test-pkg@1.0.0')
+      await withMockFetch(async () => {
+        const result = await resolverModule.resolveSource('npm:test-pkg@1.0.0')
 
-      assert.equal(result.name, 'my-skill')
-      assert.equal(result.slug, 'org/skill')
-      assert.equal(result.sourceType, 'npm')
+        assert.equal(result.name, 'my-skill')
+        assert.equal(result.slug, 'org/skill')
+        assert.equal(result.sourceType, 'npm')
+      })
     })
 
     it('resolves scoped npm package', async () => {
@@ -465,10 +486,12 @@ Just content
         return { status: 0, stdout: '', stderr: '' }
       })
 
-      const result = await resolverModule.resolveSource('npm:@scope/test-pkg')
+      await withMockFetch(async () => {
+        const result = await resolverModule.resolveSource('npm:@scope/test-pkg')
 
-      assert.equal(result.name, 'scoped-skill')
-      assert.equal(result.sourceType, 'npm')
+        assert.equal(result.name, 'scoped-skill')
+        assert.equal(result.sourceType, 'npm')
+      })
     })
 
     it('throws when no SKILL.md found in npm package', async () => {
@@ -484,10 +507,12 @@ Just content
         return { status: 0, stdout: '', stderr: '' }
       })
 
-      await assert.rejects(
-        () => resolverModule.resolveSource('npm:test-pkg'),
-        /No SKILL.md found/,
-      )
+      await withMockFetch(async () => {
+        await assert.rejects(
+          () => resolverModule.resolveSource('npm:test-pkg'),
+          /No SKILL.md found/,
+        )
+      })
     })
 
     it('throws for invalid npm ref', async () => {
@@ -523,38 +548,17 @@ Just content
 
     it('throws when tarball download returns non-200', async () => {
       await freshImport()
-      let callCount = 0
-      resolverModule.setHttpsGet((...args) => {
-        const cb = args[args.length - 1]
-        const req = new EventEmitter()
-        callCount++
-        process.nextTick(() => {
-          const res = new EventEmitter()
-          res.headers = {}
-          res.resume = () => {}
-          cb(res)
-          if (callCount === 1) {
-            res.statusCode = 200
-            const data = Buffer.from(JSON.stringify({
-              'dist-tags': { latest: '1.0.0' },
-              versions: {
-                '1.0.0': {
-                  dist: { tarball: 'https://registry.npmjs.org/test-pkg/-/test-pkg-1.0.0.tgz' },
-                },
-              },
-            }))
-            res.emit('data', data)
-          } else {
-            res.statusCode = 500
-          }
-          res.emit('end')
-        })
-        return req
+      mockHttps(resolverModule)
+      mockFetch()
+      globalThis.fetch = async () => ({
+        ok: false,
+        status: 500,
       })
       await assert.rejects(
         () => resolverModule.resolveSource('npm:test-pkg'),
         /Failed to download/,
       )
+      restoreFetch()
     })
 
     it('throws when dist-tags.latest is missing', async () => {
@@ -619,9 +623,11 @@ Just content
         }
         return { status: 0, stdout: '', stderr: '' }
       })
-      const result = await resolverModule.resolveSource('npm:@scope/test-pkg@1.0.0')
-      assert.equal(result.name, 'scoped-version-skill')
-      assert.equal(result.sourceType, 'npm')
+      await withMockFetch(async () => {
+        const result = await resolverModule.resolveSource('npm:@scope/test-pkg@1.0.0')
+        assert.equal(result.name, 'scoped-version-skill')
+        assert.equal(result.sourceType, 'npm')
+      })
     })
   })
 
