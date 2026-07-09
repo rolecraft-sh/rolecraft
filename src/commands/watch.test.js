@@ -215,4 +215,45 @@ describe('watch command', () => {
     assert.ok(logs.some(l => l.includes('synced')), `Expected 'synced' in logs: ${logs.join('; ')}`)
     console.log = origLog
   })
+
+  it('handles reinstall failure gracefully', async () => {
+    const logs = []
+    const origLog = console.log
+    console.log = (...args) => { if (args.length) logs.push(String(args[0])) }
+
+    const dir = mkdtempSync(join(tmpdir(), 'rolecraft-watch-fail-'))
+    await mkdir(join(dir, '.agents'), { recursive: true })
+    await mkdir(join(dir, 'broken-source'), { recursive: true })
+    await writeFile(join(dir, 'broken-source', 'SKILL.md'), '---\nname: FailSkill\nslug: fail-skill\n---\nContent')
+    await writeFile(join(dir, '.agents', '.skill-lock.json'), JSON.stringify({
+      version: 3,
+      skills: {
+        'fail-skill': {
+          name: 'FailSkill',
+          source: join(dir, 'broken-source'),
+          sourceType: 'local',
+          installedAt: new Date().toISOString(),
+          agents: ['opencode'],
+        },
+      },
+      dismissed: {},
+      lastSelectedAgents: [],
+    }))
+
+    const { watchers } = await watchModule.watchCommand('fail-skill', dir)
+
+    // Delete SKILL.md so reinstallSkill's resolveSource throws
+    await rm(join(dir, 'broken-source', 'SKILL.md'), { force: true })
+    await writeFile(join(dir, 'broken-source', 'OTHER.md'), 'change')
+
+    await new Promise(r => setTimeout(r, 600))
+
+    for (const w of watchers) w.close()
+
+    assert.ok(logs.some(l => l.includes('syncing')))
+    assert.ok(!logs.some(l => l.includes('synced')), 'Should NOT log synced on failure')
+    console.log = origLog
+    process.env.HOME = tempDir
+    await rm(dir, { recursive: true, force: true })
+  })
 })
