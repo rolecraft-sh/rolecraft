@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.4.0] - 2026-07-10
+
+### Added
+- improve README, add GitHub templates, fix CodeQL alert, resolve Dependabot CVEs, 100% watch.js coverage (#74)
+- add watch command for auto-syncing skills on file change
+- add benchmark to docs site, remove ANALYSIS from sidebar (#72)
+- add VitePress docs site with GitHub Pages deploy (#71)
+- highlight MCP + Skills as key differentiator in README
+- MCP server management for AI agents
+
+### Fixed
+- use web streams pipeTo for downloadFile to resolve CodeQL http-to-file-access (#79)
+- use web streams pipeTo for downloadFile to resolve CodeQL http-to-file-access
+- resolve CodeQL alerts — http-to-file-access and log-injection (#78)
+- close security vulnerabilities and add watch to comparison (#75)
+
+### Changed
+- async/sync cleanup, process.exit removal, magic string dedup (#77)
+- centralize agent list into src/agents.js and extend MCP to all 82 agents
+- update changelog and version for v1.3.0 [skip ci] (#68)
+
+### Documentation
+- deduplicate nav links and add benchmark reference
+
+### Other
+- Revert "fix: use web streams pipeTo for downloadFile to resolve CodeQL http-to-file-access"
 ## [v1.3.0] - 2026-07-07
 
 ### Added
