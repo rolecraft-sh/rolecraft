@@ -57,7 +57,9 @@
 </p>
 
 <p align="center">
-  <a href="benchmark/RESULTS.md"><b>Benchmark: 434x faster than Vercel →</b></a>
+  <a href="benchmark/RESULTS.md"><img src="benchmark/comparison.svg" alt="Benchmark: 434x faster than Vercel" width="600"></a>
+  <br>
+  <a href="benchmark/RESULTS.md"><b>Full benchmark results →</b></a>
     
   <a href="docs/comparison.md"><b>Full feature comparison →</b></a>
     
