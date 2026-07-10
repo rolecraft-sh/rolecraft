@@ -7,6 +7,10 @@
 > **Fixture (GitHub):** [`sametcelikbicak/task-decomposer`](https://github.com/sametcelikbicak/task-decomposer)
 > **Iterations:** 10 per tool per scenario
 
+<p align="center">
+  <img src="comparison.svg" alt="Benchmark comparison chart" width="800">
+</p>
+
 ## Local path install
 
 | Tool | avg | min | max | p50 | vs rolecraft |
