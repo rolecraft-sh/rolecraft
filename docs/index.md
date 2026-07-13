@@ -5,6 +5,9 @@ hero:
   name: "RoleCraft"
   text: "Install AI agent skills as roles & behaviors"
   tagline: Zero-dependency CLI. Skills + MCP servers. No marketplace. No signup.
+  image:
+    src: /rolecraft-demo.gif
+    alt: RoleCraft Demo
   actions:
     - theme: brand
       text: Get Started
