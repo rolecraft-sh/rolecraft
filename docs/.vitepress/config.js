@@ -1,17 +1,25 @@
 import { defineConfig } from 'vitepress'
+import { createRequire } from 'node:module'
+
+const require = createRequire(import.meta.url)
+const { version } = require('../../package.json')
 
 export default defineConfig({
-  title: 'RoleCraft',
+  title: `RoleCraft v${version}`,
   description: 'Install AI agent skills as roles & behaviors — from any source',
   base: '/rolecraft/',
   lastUpdated: true,
   head: [
     ['link', { rel: 'icon', type: 'image/png', href: '/rolecraft/favicon.png' }],
     ['style', {}, ':root { --vp-nav-logo-height: 48px; }'],
+    ['style', {}, `
+      .VPHero .image-src { max-width: 520px !important; max-height: none !important; }
+      .VPHero .image-bg { width: 520px !important; height: 520px !important; }
+    `],
   ],
   themeConfig: {
     logo: '/rolecraft_logo.png',
-    siteTitle: 'RoleCraft',
+    siteTitle: `RoleCraft v${version}`,
     nav: [
       { text: 'Guide', link: '/install' },
       { text: 'Commands', link: '/commands/install' },
