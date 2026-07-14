@@ -161,9 +161,7 @@ export async function main() {
 
     case 'use': {
       if (args.includes('--help') || args.includes('-h')) { usage(); return }
-      const useFlags = args.filter(a => a.startsWith('-'))
-      const usePos = args.filter(a => !a.startsWith('-'))
-      const source = usePos[0]
+      const source = args[0]
       if (!source) {
         console.error('Usage: rolecraft use <source>')
         console.error('Source can be a local path (./, /, ~), GitHub ref (owner/repo), or npm package (npm:package)')
