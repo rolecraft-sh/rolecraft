@@ -557,4 +557,84 @@ describe('profile link command', () => {
     const linkPath = join(process.cwd(), '.agent-profile.json')
     assert.equal(existsSync(linkPath), false)
   })
+
+  it('throws for non-existent profile when linking', async () => {
+    await assert.rejects(
+      () => profileCmd.profileLinkCommand('not-here', { unlink: false }),
+      /not found/
+    )
+  })
+
+  it('shows unlink message when no link exists', async () => {
+    const logs = captureLogs()
+    await profileCmd.profileLinkCommand(undefined, { unlink: true })
+    assert.ok(logs.some(l => l.includes('No project link')))
+  })
+})
+
+describe('profile edge cases', () => {
+  it('save with no agents shows empty message', async () => {
+    const logDir = join(tempDir, 'edge-no-agents')
+    await mkdir(join(logDir, '.agents', 'profiles'), { recursive: true })
+
+    process.env.HOME = logDir
+    process.cwd = () => logDir
+    const freshCmd = await import('./profile.js')
+
+    const logs = captureLogs()
+    await freshCmd.profileSaveCommand('empty-profile', { targets: [] })
+    assert.ok(logs.some(l => l.includes('No agent configurations')))
+
+    process.env.HOME = tempDir
+    process.cwd = () => join(tempDir, 'project')
+  })
+
+  it('diff with empty agents shows message', async () => {
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({ name: 'empty-agents', agents: {} })
+
+    const logs = captureLogs()
+    await profileCmd.profileDiffCommand('empty-agents')
+
+    assert.ok(logs.some(l => l.includes('has no agent data')))
+  })
+
+  it('export with --relative handles paths', async () => {
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({
+      name: 'rel-export',
+      description: 'relative test',
+      agents: {
+        agents: {
+          config: { global: { model: 'gpt-4' } },
+          instructions: [{ file: '/absolute/path/to/rules.md', contentSha: null, scope: 'global' }],
+        },
+      },
+    })
+
+    const exportPath = join(tempDir, 'exports', 'relative.json')
+    await mkdir(dirname(exportPath), { recursive: true })
+    await profileCmd.profileExportCommand('rel-export', { relative: true, filePath: exportPath })
+
+    const exported = JSON.parse(await readFile(exportPath, 'utf-8'))
+    const instr = exported.agents.agents.instructions[0]
+    assert.ok(instr.file.startsWith('..') || !instr.file.startsWith('/'))
+  })
+
+  it('import from non-existent file throws', async () => {
+    await assert.rejects(
+      () => profileCmd.profileImportCommand('/nonexistent/path/file.json'),
+      /ENOENT/
+    )
+  })
+
+  it('export to non-existent directory creates it', async () => {
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({ name: 'deep-export', agents: {} })
+
+    const deepPath = join(tempDir, 'deep', 'nested', 'dir', 'profile.json')
+    await profileCmd.profileExportCommand('deep-export', { relative: false, filePath: deepPath })
+
+    assert.ok(existsSync(deepPath))
+  })
 })
