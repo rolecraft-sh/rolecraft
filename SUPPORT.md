@@ -3,7 +3,8 @@
 ## Documentation
 
 - [README.md](README.md) — quick start, features, command overview
-- [CONTRIBUTING.md](CONTRIBUTING.md) — how to contribute and release process
+- [CONTRIBUTING.md](CONTRIBUTING.md) — how to contribute
+- [RELEASE.md](RELEASE.md) — release process (maintainers only)
 - [SECURITY.md](SECURITY.md) — reporting vulnerabilities
 - [docs/](docs/) — full command documentation, architecture, agent paths, comparison
 
