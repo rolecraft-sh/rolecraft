@@ -58,6 +58,7 @@ export default defineConfig({
           ],
         },
         { text: 'MCP Server Management', link: '/mcp' },
+        { text: 'Profile Management', link: '/profile' },
         { text: 'Security', link: '/security' },
         { text: 'Benchmark', link: '/benchmark/RESULTS' },
         { text: 'Architecture', link: '/architecture' },

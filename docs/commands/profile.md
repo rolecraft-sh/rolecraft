@@ -2,6 +2,8 @@
 
 Save, apply, and share multi-agent configuration profiles.
 
+> 📖 For the concept guide and team workflows, see [Profile Management](../profile.md).
+
 Profiles capture your agent settings (config files, MCP servers, skills, and instructions) as named snapshots that can be applied later or shared across projects.
 
 ## Usage
