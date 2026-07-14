@@ -1,8 +1,8 @@
 import { describe, it, before, after, mock } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, existsSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, existsSync, writeFileSync, unlinkSync } from 'node:fs'
 import { mkdir, rm, writeFile, readFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { join, dirname } from 'node:path'
 import { tmpdir } from 'node:os'
 
 let tempDir, profileCmd, origHome, origCwd, origEditor
@@ -393,5 +393,168 @@ describe('profile edit command', () => {
 
     const updated = await readProfile('edit-nochange')
     assert.equal(updated.description, 'same')
+  })
+})
+
+describe('profile export command', () => {
+  it('throws if no name given', async () => {
+    await assert.rejects(
+      () => profileCmd.profileExportCommand(null, {}),
+      /Missing profile name/
+    )
+  })
+
+  it('throws for missing profile', async () => {
+    await assert.rejects(
+      () => profileCmd.profileExportCommand('not-here', {}),
+      /not found/
+    )
+  })
+
+  it('exports profile as JSON to stdout', async () => {
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({
+      name: 'export-test',
+      description: 'to export',
+      agents: { agents: { config: { global: { model: 'gpt-4' } } } },
+    })
+
+    const logs = captureLogs()
+    await profileCmd.profileExportCommand('export-test', { relative: false, filePath: null })
+
+    assert.ok(logs.some(l => l.includes('"name": "export-test"')))
+    assert.ok(logs.some(l => l.includes('"agents"')))
+  })
+
+  it('exports to file with --file option', async () => {
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({
+      name: 'file-export',
+      agents: { agents: {} },
+    })
+
+    const exportPath = join(tempDir, 'exports', 'my-profile.json')
+    await profileCmd.profileExportCommand('file-export', { relative: false, filePath: exportPath })
+
+    const exported = JSON.parse(await readFile(exportPath, 'utf-8'))
+    assert.equal(exported.name, 'file-export')
+  })
+
+  it('strips metadata on export', async () => {
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({
+      name: 'clean-export',
+      description: 'test',
+      createdAt: '2026-01-01',
+      updatedAt: '2026-06-01',
+      version: 2,
+      agents: { agents: {} },
+    })
+
+    const exportPath = join(tempDir, 'exports', 'clean.json')
+    await profileCmd.profileExportCommand('clean-export', { relative: false, filePath: exportPath })
+
+    const exported = JSON.parse(await readFile(exportPath, 'utf-8'))
+    assert.equal(exported.name, 'clean-export')
+    assert.equal(exported.createdAt, undefined)
+    assert.equal(exported.updatedAt, undefined)
+    assert.equal(exported.version, undefined)
+  })
+})
+
+describe('profile import command', () => {
+  it('throws if no source given', async () => {
+    await assert.rejects(
+      () => profileCmd.profileImportCommand(null),
+      /Missing source path/
+    )
+  })
+
+  it('imports from a local JSON file', async () => {
+    const importFile = join(tempDir, 'imports', 'imported-profile.json')
+    await mkdir(dirname(importFile), { recursive: true })
+    await writeFile(importFile, JSON.stringify({
+      name: 'imported',
+      agents: { agents: { config: { global: { model: 'gpt-4' } } } },
+    }))
+
+    const logs = captureLogs()
+    await profileCmd.profileImportCommand(importFile)
+
+    assert.ok(logs.some(l => l.includes('imported')))
+
+    const data = await (await import('../utils/profile.js')).readProfile('imported')
+    assert.ok(data)
+    assert.equal(data.name, 'imported')
+  })
+
+  it('assigns name from filename when missing', async () => {
+    const importFile = join(tempDir, 'imports', 'nameless.json')
+    await mkdir(dirname(importFile), { recursive: true })
+    await writeFile(importFile, JSON.stringify({
+      agents: { agents: {} },
+    }))
+
+    const logs = captureLogs()
+    await profileCmd.profileImportCommand(importFile)
+
+    assert.ok(logs.some(l => l.includes('nameless')))
+  })
+
+  it('throws on invalid JSON', async () => {
+    const importFile = join(tempDir, 'imports', 'bad.json')
+    await mkdir(dirname(importFile), { recursive: true })
+    await writeFile(importFile, 'not json')
+
+    await assert.rejects(
+      () => profileCmd.profileImportCommand(importFile),
+      /Invalid JSON/
+    )
+  })
+})
+
+describe('profile link command', () => {
+  after(async () => {
+    const linkPath = join(process.cwd(), '.agent-profile.json')
+    try { unlinkSync(linkPath) } catch {}
+  })
+
+  it('shows no link message when no link exists', async () => {
+    const logs = captureLogs()
+    await profileCmd.profileLinkCommand(undefined, { unlink: false })
+    assert.ok(logs.some(l => l.includes('No profile linked')))
+  })
+
+  it('creates a link to a profile', async () => {
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({ name: 'linkable', agents: {} })
+
+    const logs = captureLogs()
+    await profileCmd.profileLinkCommand('linkable', { unlink: false })
+
+    assert.ok(logs.some(l => l.includes('linkable')))
+
+    const linkPath = join(process.cwd(), '.agent-profile.json')
+    assert.ok(existsSync(linkPath))
+
+    const link = JSON.parse(await readFile(linkPath, 'utf-8'))
+    assert.equal(link.profile, 'linkable')
+  })
+
+  it('shows linked profile info', async () => {
+    const logs = captureLogs()
+    await profileCmd.profileLinkCommand(undefined, { unlink: false })
+
+    assert.ok(logs.some(l => l.includes('linkable')))
+  })
+
+  it('unlinks a profile', async () => {
+    const logs = captureLogs()
+    await profileCmd.profileLinkCommand(undefined, { unlink: true })
+
+    assert.ok(logs.some(l => l.includes('removed')))
+
+    const linkPath = join(process.cwd(), '.agent-profile.json')
+    assert.equal(existsSync(linkPath), false)
   })
 })

@@ -1,7 +1,8 @@
 import { execSync } from 'node:child_process'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
-import { mkdtempSync, writeFileSync, readFileSync, unlinkSync, rmdirSync } from 'node:fs'
+import { tmpdir, homedir } from 'node:os'
+import { join, relative, resolve, dirname } from 'node:path'
+import { mkdtempSync, writeFileSync, readFileSync, unlinkSync, rmdirSync, existsSync } from 'node:fs'
+import { readFile, writeFile, mkdir, rm } from 'node:fs/promises'
 
 import {
   readProfile,
@@ -15,6 +16,9 @@ import {
 } from '../utils/profile.js'
 import agents from '../agents.js'
 
+const LINK_FILE = '.agent-profile.json'
+const LINK_DIRS = [process.cwd(), homedir()]
+
 const AGENT_FLAGS = ['--agents', ...agents.map(a => `--${a.flag}`), '--all']
 const AGENT_MAP = Object.fromEntries(agents.map(a => [`--${a.flag}`, a.flag]))
 
@@ -27,7 +31,27 @@ function parseOptions(args) {
     yes: flags.includes('--yes') || flags.includes('-y'),
     skipMcp: flags.includes('--skip-mcp'),
     skipSkills: flags.includes('--skip-skills'),
+    relative: flags.includes('--relative'),
+    unlink: flags.includes('--unlink'),
+    filePath: null,
     targets: [],
+  }
+
+  const fileIdx = flags.indexOf('--file')
+  if (fileIdx >= 0 && fileIdx + 1 < flags.length) {
+    const nextArg = args[args.indexOf('--file') + 1]
+    if (nextArg && !nextArg.startsWith('--')) {
+      options.filePath = nextArg
+    }
+  }
+  if (!options.filePath) {
+    const fileIdxRaw = args.indexOf('--file')
+    if (fileIdxRaw >= 0 && fileIdxRaw + 1 < args.length) {
+      const candidate = args[fileIdxRaw + 1]
+      if (candidate && !candidate.startsWith('--')) {
+        options.filePath = candidate
+      }
+    }
   }
 
   const hasScope = flags.some(f => AGENT_FLAGS.includes(f))
@@ -47,13 +71,19 @@ function profileUsage() {
 rolecraft profile — Manage agent configuration profiles
 
 Usage:
-  rolecraft profile save <name>      Save current agent configs to a profile
-  rolecraft profile apply <name>     Apply a profile's settings to agents
-  rolecraft profile diff <name>      Show differences between profile and current config
-  rolecraft profile edit <name>      Edit a profile with \$EDITOR
-  rolecraft profile list             List saved profiles
-  rolecraft profile show <name>      Display a profile's contents
-  rolecraft profile delete <name>    Delete a profile
+  rolecraft profile save <name>        Save current agent configs to a profile
+  rolecraft profile apply <name>       Apply a profile's settings to agents
+  rolecraft profile diff <name>        Show differences between profile and current config
+  rolecraft profile edit <name>        Edit a profile with \$EDITOR
+  rolecraft profile list               List saved profiles
+  rolecraft profile show <name>        Display a profile's contents
+  rolecraft profile delete <name>      Delete a profile
+  rolecraft profile export <name>      Export a profile as JSON
+  rolecraft profile export <name> --file <path>  Export to a file
+  rolecraft profile import <path>      Import a profile from file or URL
+  rolecraft profile link <name>        Link a profile to current project
+  rolecraft profile link               Show linked profile
+  rolecraft profile link --unlink      Remove project link
 
 Options:
   --agents, --cursor, --claude, etc.  Target specific agents
@@ -62,6 +92,8 @@ Options:
   --dry-run                           Preview without making changes
   --skip-mcp                          Skip MCP server configuration
   --skip-skills                       Skip skill installation
+  --file <path>                       Output to file (export only)
+  --relative                          Use relative paths (export only)
 
 Examples:
   rolecraft profile save frontend-dev --agents --cursor --claude
@@ -69,6 +101,9 @@ Examples:
   rolecraft profile apply frontend-dev --dry-run
   rolecraft profile diff frontend-dev
   rolecraft profile edit frontend-dev
+  rolecraft profile export frontend-dev --file ./frontend-profile.json --relative
+  rolecraft profile import ./frontend-profile.json
+  rolecraft profile link frontend-dev
   rolecraft profile list
   rolecraft profile show frontend-dev
   rolecraft profile delete frontend-dev
@@ -261,6 +296,172 @@ export async function profileEditCommand(name) {
   }
 }
 
+function cleanProfileForExport(data) {
+  const cleaned = { ...data }
+  delete cleaned.createdAt
+  delete cleaned.updatedAt
+  delete cleaned.version
+  return cleaned
+}
+
+function relativizePaths(data, cwd) {
+  if (!data || !data.agents) return data
+  const result = JSON.parse(JSON.stringify(data))
+  for (const entry of Object.values(result.agents)) {
+    if (entry.instructions) {
+      for (const instr of entry.instructions) {
+        if (instr.file) {
+          const abs = resolve(instr.file)
+          instr.file = relative(cwd, abs)
+        }
+      }
+    }
+    if (entry.config) {
+      for (const [scope, val] of Object.entries(entry.config)) {
+        if (val && typeof val === 'object' && !Array.isArray(val)) {
+          entry.config[scope] = val
+        }
+      }
+    }
+  }
+  return result
+}
+
+export async function profileExportCommand(name, options) {
+  if (!name) {
+    console.error('Usage: rolecraft profile export <name> [--file <path>] [--relative]')
+    throw new Error('Missing profile name.')
+  }
+
+  const data = await readProfile(name)
+  if (!data) {
+    throw new Error(`Profile "${name}" not found.`)
+  }
+
+  let output = cleanProfileForExport(data)
+  if (options.relative) {
+    output = relativizePaths(output, process.cwd())
+  }
+
+  const json = JSON.stringify(output, null, 2) + '\n'
+
+  if (options.filePath) {
+    const targetPath = resolve(options.filePath)
+    await mkdir(dirname(targetPath), { recursive: true })
+    await writeFile(targetPath, json, 'utf-8')
+    console.log(`\n✅ Profile "${name}" exported to ${targetPath}`)
+  } else {
+    console.log(json)
+  }
+}
+
+export async function profileImportCommand(path) {
+  if (!path) {
+    console.error('Usage: rolecraft profile import <file-or-url>')
+    throw new Error('Missing source path.')
+  }
+
+  let content
+  const isUrl = path.startsWith('http://') || path.startsWith('https://')
+
+  if (isUrl) {
+    const res = await fetch(path)
+    if (!res.ok) throw new Error(`Failed to fetch ${path}: ${res.status}`)
+    content = await res.text()
+  } else {
+    content = await readFile(resolve(path), 'utf-8')
+  }
+
+  let data
+  try {
+    data = JSON.parse(content)
+  } catch {
+    throw new Error('Invalid JSON in profile.')
+  }
+
+  if (!data.name) {
+    const nameFromFile = path.split('/').pop()?.replace(/\.json$/i, '') || 'imported'
+    data.name = nameFromFile
+  }
+
+  data.agents = data.agents || {}
+  await writeProfile(data)
+  console.log(`\n✅ Profile "${data.name}" imported (${Object.keys(data.agents).length} agent(s)).`)
+
+  const current = await captureAllAgents()
+  if (Object.keys(current).length > 0) {
+    console.log('\n📊 Run `rolecraft profile diff ' + data.name + '` to see differences from current config.')
+  }
+}
+
+function getLinkPath(dir) {
+  return join(dir, LINK_FILE)
+}
+
+function findLinkFile() {
+  for (const dir of [process.cwd(), ...LINK_DIRS.slice(1)]) {
+    const path = getLinkPath(dir)
+    if (existsSync(path)) return path
+  }
+  return null
+}
+
+function readLinkFile(linkPath) {
+  try {
+    return JSON.parse(readFileSync(linkPath, 'utf-8'))
+  } catch {
+    return null
+  }
+}
+
+export async function profileLinkCommand(name, options) {
+  if (options.unlink) {
+    const linkPath = findLinkFile()
+    if (!linkPath) {
+      console.log('No project link found.')
+      return
+    }
+    unlinkSync(linkPath)
+    console.log(`\n✅ Project link removed.`)
+    return
+  }
+
+  if (!name) {
+    const linkPath = findLinkFile()
+    if (!linkPath) {
+      console.log('No profile linked to this project.')
+      console.log('Use: rolecraft profile link <name>')
+      return
+    }
+    const link = readLinkFile(linkPath)
+    if (!link || !link.profile) {
+      console.log('Link file is invalid.')
+      return
+    }
+    console.log(`\n   Linked profile: ${link.profile}`)
+    if (link.projectDir) console.log(`   Project: ${link.projectDir}`)
+    if (link.createdAt) console.log(`   Created: ${new Date(link.createdAt).toLocaleDateString()}`)
+    console.log()
+    return
+  }
+
+  const data = await readProfile(name)
+  if (!data) {
+    throw new Error(`Profile "${name}" not found.`)
+  }
+
+  const link = {
+    profile: name,
+    projectDir: process.cwd(),
+    createdAt: new Date().toISOString(),
+  }
+
+  const linkPath = getLinkPath(process.cwd())
+  writeFileSync(linkPath, JSON.stringify(link, null, 2) + '\n', 'utf-8')
+  console.log(`\n✅ Profile "${name}" linked to ${process.cwd()}`)
+  console.log('   Run `rolecraft profile link` to see the linked profile.')
+}
+
 export async function profileListCommand() {
   const profiles = await listProfiles()
 
@@ -363,11 +564,20 @@ export async function profileCommand(args) {
     case 'show':
       await profileShowCommand(namedArgs[0])
       break
+    case 'export':
+      await profileExportCommand(namedArgs[0], options)
+      break
+    case 'import':
+      await profileImportCommand(namedArgs[0])
+      break
+    case 'link':
+      await profileLinkCommand(namedArgs[0], options)
+      break
     case 'delete':
       await profileDeleteCommand(namedArgs[0], options)
       break
     default:
-      console.error(`Unknown profile subcommand: "${subcommand}". Use: save, apply, diff, edit, list, show, delete`)
+      console.error(`Unknown profile subcommand: "${subcommand}". Use: save, apply, diff, edit, export, import, link, list, show, delete`)
       profileUsage()
   }
 }
