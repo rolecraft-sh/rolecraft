@@ -1,9 +1,11 @@
 import { mkdir, readFile, writeFile, readdir, rm, access } from 'node:fs/promises'
-import { join } from 'node:path'
+import { join, dirname } from 'node:path'
 import { homedir } from 'node:os'
 import agents from '../agents.js'
-import { listMcpServers } from './mcp.js'
+import { listMcpServers, addMcpServer } from './mcp.js'
 import { readLock, getGlobalLockPath, getProjectLockPath } from './lockfile.js'
+import { resolveSource } from './resolver.js'
+import { installSkill } from './installer.js'
 
 const PROFILES_DIR = '.agents/profiles'
 
@@ -12,7 +14,7 @@ const PROFILE_NAME_RE = /^[a-zA-Z0-9][a-zA-Z0-9._-]*$/
 export const PROFILE_SCHEMA_VERSION = 1
 
 const AGENT_CONFIG_PATHS = {
-  opencode: {
+  agents: {
     global: () => join(homedir(), '.opencode.json'),
     project: () => join(process.cwd(), 'opencode.json'),
   },
@@ -44,7 +46,7 @@ const AGENT_CONFIG_PATHS = {
 }
 
 const AGENT_INSTRUCTION_PATHS = {
-  opencode: {
+  agents: {
     global: () => join(homedir(), '.opencode.json'),
     project: () => join(process.cwd(), 'opencode.json'),
   },
@@ -354,4 +356,223 @@ export async function captureAllAgents() {
   }
 
   return agentsData
+}
+
+const BACKUPS_DIR = '.agents/backups'
+
+function getBackupsDir() {
+  return join(homedir(), BACKUPS_DIR)
+}
+
+export async function createBackup(agentFlag) {
+  const paths = AGENT_CONFIG_PATHS[agentFlag]
+  if (!paths) return null
+
+  const backupsDir = getBackupsDir()
+  await mkdir(backupsDir, { recursive: true })
+
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+  const results = []
+
+  for (const [scope, getPath] of Object.entries(paths)) {
+    const sourcePath = getPath()
+    const content = await readFileIfExists(sourcePath)
+    if (content !== null) {
+      const backupName = `${agentFlag}-${scope}-${timestamp}.bak`
+      const backupPath = join(backupsDir, backupName)
+      await writeFile(backupPath, content, 'utf-8')
+      results.push({ scope, path: backupPath })
+    }
+  }
+
+  return results.length > 0 ? results : null
+}
+
+export async function applyAgentConfig(agentFlag, configData) {
+  const paths = AGENT_CONFIG_PATHS[agentFlag]
+  if (!paths || !configData || typeof configData !== 'object') return []
+
+  const results = []
+  for (const [scope, getPath] of Object.entries(paths)) {
+    const scopeData = configData[scope]
+    if (scopeData === undefined || scopeData === null) continue
+
+    const targetPath = getPath()
+    await mkdir(dirname(targetPath), { recursive: true })
+    await writeFile(targetPath, JSON.stringify(scopeData, null, 2) + '\n', 'utf-8')
+    results.push({ scope, path: targetPath })
+  }
+
+  return results
+}
+
+export async function applyMcpServers(agentFlag, servers) {
+  if (!servers || typeof servers !== 'object') return []
+
+  const results = []
+  for (const [name, serverConfig] of Object.entries(servers)) {
+    try {
+      const success = await addMcpServer(agentFlag, name, serverConfig)
+      results.push({ name, success })
+    } catch {
+      results.push({ name, success: false })
+    }
+  }
+
+  return results
+}
+
+export async function ensureSkillsInstalled(skills, targetFlags) {
+  if (!skills || !Array.isArray(skills) || skills.length === 0) return []
+
+  const [globalLock, projectLock] = await Promise.all([
+    readLock(getGlobalLockPath()),
+    readLock(getProjectLockPath(process.cwd())).catch(() => ({ skills: {} })),
+  ])
+
+  const installedSlugs = new Set([
+    ...Object.keys(globalLock.skills),
+    ...Object.keys(projectLock.skills),
+  ])
+
+  const results = []
+  for (const slug of skills) {
+    if (installedSlugs.has(slug)) {
+      results.push({ slug, action: 'skipped', reason: 'already_installed' })
+      continue
+    }
+
+    try {
+      const resolved = await resolveSource(slug)
+      const installTargets = targetFlags || ['agents']
+      const installResults = await installSkill(resolved, installTargets)
+      results.push({ slug, action: 'installed', targets: installResults.map(r => r.target) })
+    } catch (err) {
+      results.push({ slug, action: 'failed', reason: err.message })
+    }
+  }
+
+  return results
+}
+
+export async function applyInstructions(agentFlag, instructions) {
+  if (!instructions || !Array.isArray(instructions) || instructions.length === 0) return []
+
+  if (agentFlag === 'agents') {
+    const paths = AGENT_CONFIG_PATHS[agentFlag]
+    if (!paths) return []
+
+    const filePaths = instructions.map(i => i.file)
+    const applied = []
+
+    for (const [scope, getPath] of Object.entries(paths)) {
+      const targetPath = getPath()
+      let config = {}
+      const existing = await readFileIfExists(targetPath)
+      if (existing) {
+        try { config = JSON.parse(existing) } catch { config = {} }
+      }
+      config.instructions = filePaths
+      await mkdir(dirname(targetPath), { recursive: true })
+      await writeFile(targetPath, JSON.stringify(config, null, 2) + '\n', 'utf-8')
+      applied.push({ scope, path: targetPath })
+    }
+
+    return applied
+  }
+
+  if (agentFlag === 'cursor') {
+    const content = instructions.map(i => i.content || i.file).join('\n')
+    const targetPath = join(process.cwd(), '.cursorrules')
+    await writeFile(targetPath, content + '\n', 'utf-8')
+    return [{ scope: 'project', path: targetPath }]
+  }
+
+  return []
+}
+
+export async function applyProfileEntry(agentFlag, entry, options = {}) {
+  const result = {
+    agent: agentFlag,
+    config: { applied: [], skipped: [] },
+    mcpServers: { applied: [], skipped: [] },
+    skills: { applied: [], skipped: [], failed: [] },
+    instructions: { applied: [], skipped: [] },
+    backup: null,
+  }
+
+  if (options.dryRun) return result
+
+  if (entry.config) {
+    result.backup = await createBackup(agentFlag)
+    const configResult = await applyAgentConfig(agentFlag, entry.config)
+    result.config.applied = configResult
+  } else {
+    result.config.skipped.push('no config data in profile')
+  }
+
+  if (!options.skipMcp && entry.mcpServers) {
+    const mcpResult = await applyMcpServers(agentFlag, entry.mcpServers)
+    for (const r of mcpResult) {
+      if (r.success) result.mcpServers.applied.push(r.name)
+      else result.mcpServers.skipped.push(r.name)
+    }
+  } else {
+    result.mcpServers.skipped.push(options.skipMcp ? 'skipped via flag' : 'no MCP data in profile')
+  }
+
+  if (!options.skipSkills && entry.skills) {
+    const targets = options.targets || [agentFlag]
+    const skillResult = await ensureSkillsInstalled(entry.skills, targets)
+    for (const r of skillResult) {
+      if (r.action === 'installed') result.skills.applied.push(r.slug)
+      else if (r.action === 'failed') result.skills.failed.push({ slug: r.slug, reason: r.reason })
+      else result.skills.skipped.push(r.slug)
+    }
+  } else {
+    result.skills.skipped.push(options.skipSkills ? 'skipped via flag' : 'no skills data in profile')
+  }
+
+  if (entry.instructions) {
+    const instrResult = await applyInstructions(agentFlag, entry.instructions)
+    result.instructions.applied = instrResult
+  } else {
+    result.instructions.skipped.push('no instructions data in profile')
+  }
+
+  return result
+}
+
+export async function applyProfileData(data, options = {}) {
+  if (!data || !data.agents || typeof data.agents !== 'object') {
+    throw new Error('Profile must contain an "agents" object')
+  }
+
+  const results = {}
+  for (const [agentFlag, entry] of Object.entries(data.agents)) {
+    results[agentFlag] = await applyProfileEntry(agentFlag, entry, options)
+  }
+
+  return results
+}
+
+export function formatApplyResults(results) {
+  const lines = []
+
+  for (const [agent, result] of Object.entries(results)) {
+    const changes = []
+
+    if (result.config.applied.length > 0) changes.push(`config (${result.config.applied.length} scope(s))`)
+    if (result.mcpServers.applied.length > 0) changes.push(`MCP (${result.mcpServers.applied.length})`)
+    if (result.skills.applied.length > 0) changes.push(`skills (${result.skills.applied.length})`)
+    if (result.instructions.applied.length > 0) changes.push(`instructions (${result.instructions.applied.length})`)
+
+    if (changes.length > 0) {
+      lines.push(`  ${agent}: ${changes.join(', ')}`)
+    } else {
+      lines.push(`  ${agent}: no changes`)
+    }
+  }
+
+  return lines.join('\n')
 }

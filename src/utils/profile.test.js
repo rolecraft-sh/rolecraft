@@ -1,7 +1,7 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert/strict'
 import { mkdtempSync, existsSync, constants } from 'node:fs'
-import { mkdir, rm, writeFile } from 'node:fs/promises'
+import { mkdir, rm, writeFile, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
@@ -283,7 +283,7 @@ describe('profile capture', () => {
     })
 
     it('returns null when config file does not exist', async () => {
-      const result = await captureModule.captureAgentConfig('opencode')
+      const result = await captureModule.captureAgentConfig('agents')
       assert.equal(result, null)
     })
 
@@ -291,7 +291,7 @@ describe('profile capture', () => {
       const configPath = join(captureDir, '.opencode.json')
       await writeFile(configPath, JSON.stringify({ model: 'gpt-4', permission: { read: 'allow' } }))
 
-      const result = await captureModule.captureAgentConfig('opencode')
+      const result = await captureModule.captureAgentConfig('agents')
       assert.ok(result)
       assert.ok(result.global)
       assert.equal(result.global.model, 'gpt-4')
@@ -305,7 +305,7 @@ describe('profile capture', () => {
       await mkdir(join(process.cwd()), { recursive: true })
       await writeFile(projectPath, JSON.stringify({ model: 'gpt-4o' }))
 
-      const result = await captureModule.captureAgentConfig('opencode')
+      const result = await captureModule.captureAgentConfig('agents')
       assert.ok(result.global)
       assert.ok(result.project)
       assert.equal(result.global.model, 'gpt-4')
@@ -317,7 +317,7 @@ describe('profile capture', () => {
 
   describe('captureMcpServers', () => {
     it('returns null when no MCP servers configured', async () => {
-      const result = await captureModule.captureMcpServers('opencode')
+      const result = await captureModule.captureMcpServers('agents')
       assert.equal(result, null)
     })
 
@@ -341,7 +341,7 @@ describe('profile capture', () => {
 
   describe('captureSkills', () => {
     it('returns null when no skills installed', async () => {
-      const result = await captureModule.captureSkills('opencode')
+      const result = await captureModule.captureSkills('agents')
       assert.equal(result, null)
     })
 
@@ -350,13 +350,13 @@ describe('profile capture', () => {
       await writeFile(lockPath, JSON.stringify({
         version: 3,
         skills: {
-          'owner/repo-a': { slug: 'owner/repo-a', agents: ['opencode'] },
+          'owner/repo-a': { slug: 'owner/repo-a', agents: ['agents'] },
           'owner/repo-b': { slug: 'owner/repo-b', agents: ['cursor'] },
-          'owner/repo-c': { slug: 'owner/repo-c', agents: ['opencode', 'cursor'] },
+          'owner/repo-c': { slug: 'owner/repo-c', agents: ['agents', 'cursor'] },
         },
       }))
 
-      const result = await captureModule.captureSkills('opencode')
+      const result = await captureModule.captureSkills('agents')
       assert.ok(result)
       assert.ok(result.includes('owner/repo-a'))
       assert.ok(result.includes('owner/repo-c'))
@@ -385,9 +385,11 @@ describe('profile capture', () => {
         instructions: ['AGENTS.md', 'CONTRIBUTING.md'],
       }))
 
-      const result = await captureModule.captureInstructions('opencode')
+      const result = await captureModule.captureInstructions('agents')
       assert.ok(result)
       assert.ok(Array.isArray(result))
+      assert.equal(result.length, 1)
+      assert.equal(result[0].scope, 'global')
     })
 
     it('returns null for agent without instruction paths', async () => {
@@ -404,7 +406,7 @@ describe('profile capture', () => {
       process.cwd = () => subDir
       const freshModule = await import('./profile.js')
 
-      const result = await freshModule.captureAgentFull('opencode')
+      const result = await freshModule.captureAgentFull('agents')
       assert.equal(result, null)
 
       process.env.HOME = captureDir
@@ -421,7 +423,7 @@ describe('profile capture', () => {
       const configPath = join(subDir, '.opencode.json')
       await writeFile(configPath, JSON.stringify({ model: 'gpt-4' }))
 
-      const result = await freshModule.captureAgentFull('opencode')
+      const result = await freshModule.captureAgentFull('agents')
       assert.ok(result)
       assert.ok(result.config)
       assert.equal(result.config.global.model, 'gpt-4')
@@ -445,6 +447,195 @@ describe('profile capture', () => {
 
       const result = await captureModule.captureAllAgents()
       assert.ok(typeof result === 'object')
+    })
+  })
+})
+
+describe('profile apply', () => {
+  let applyDir, applyModule, origHome, origCwd
+
+  before(async () => {
+    applyDir = mkdtempSync(join(tmpdir(), 'rolecraft-apply-test-'))
+    origHome = process.env.HOME
+    origCwd = process.cwd
+    process.env.HOME = applyDir
+    process.cwd = () => join(applyDir, 'project')
+    await mkdir(join(applyDir, '.agents', 'profiles'), { recursive: true })
+    await mkdir(join(applyDir, 'project'), { recursive: true })
+    applyModule = await import('./profile.js')
+  })
+
+  after(async () => {
+    process.cwd = origCwd
+    await rm(applyDir, { recursive: true, force: true })
+    process.env.HOME = origHome
+  })
+
+  describe('createBackup', () => {
+    it('returns null for agent without known config paths', async () => {
+      const result = await applyModule.createBackup('nonexistent')
+      assert.equal(result, null)
+    })
+
+    it('backs up existing config', async () => {
+      const configPath = join(applyDir, '.opencode.json')
+      await writeFile(configPath, JSON.stringify({ model: 'gpt-4' }))
+
+      const result = await applyModule.createBackup('agents')
+      assert.ok(result)
+      assert.equal(result.length, 1)
+      assert.equal(result[0].scope, 'global')
+      assert.ok(result[0].path.includes('.bak'))
+    })
+
+    it('returns null when no config exists', async () => {
+      await rm(join(applyDir, '.opencode.json'))
+      const result = await applyModule.createBackup('agents')
+      assert.equal(result, null)
+    })
+  })
+
+  describe('applyAgentConfig', () => {
+    it('writes config to the correct path', async () => {
+      const configData = {
+        global: { model: 'gpt-4o', permission: { read: 'allow' } },
+      }
+
+      const result = await applyModule.applyAgentConfig('agents', configData)
+      assert.equal(result.length, 1)
+      assert.equal(result[0].scope, 'global')
+
+      const written = JSON.parse(await readFile(result[0].path, 'utf-8'))
+      assert.equal(written.model, 'gpt-4o')
+      assert.equal(written.permission.read, 'allow')
+    })
+
+    it('writes project-scoped config', async () => {
+      const projectDir = join(applyDir, 'project')
+      const configData = {
+        project: { model: 'deepseek-v4' },
+      }
+
+      const result = await applyModule.applyAgentConfig('agents', configData)
+      assert.equal(result.length, 1)
+      assert.equal(result[0].scope, 'project')
+
+      const written = JSON.parse(await readFile(result[0].path, 'utf-8'))
+      assert.equal(written.model, 'deepseek-v4')
+    })
+
+    it('returns empty array for unknown agent', async () => {
+      const result = await applyModule.applyAgentConfig('unknown', { global: {} })
+      assert.deepEqual(result, [])
+    })
+
+    it('returns empty array for null config', async () => {
+      const result = await applyModule.applyAgentConfig('agents', null)
+      assert.deepEqual(result, [])
+    })
+  })
+
+  describe('applyMcpServers', () => {
+    it('adds MCP servers to agent config', async () => {
+      const servers = {
+        'test-server': { command: 'npx', args: ['-y', '@test/server'] },
+      }
+
+      const result = await applyModule.applyMcpServers('agents', servers)
+      assert.equal(result.length, 1)
+      assert.equal(result[0].name, 'test-server')
+      assert.ok(result[0].success)
+    })
+
+    it('returns empty array for empty servers', async () => {
+      const result = await applyModule.applyMcpServers('agents', {})
+      assert.equal(result.length, 0)
+    })
+  })
+
+  describe('applyInstructions', () => {
+    it('applies instructions to opencode config', async () => {
+      const instructions = [
+        { file: 'AGENTS.md', contentSha: 'abc' },
+        { file: 'CONTRIBUTING.md', contentSha: 'def' },
+      ]
+
+      const result = await applyModule.applyInstructions('agents', instructions)
+      assert.ok(result.length > 0)
+
+      const configPath = join(applyDir, '.opencode.json')
+      const config = JSON.parse(await readFile(configPath, 'utf-8'))
+      assert.ok(config.instructions)
+      assert.ok(config.instructions.includes('AGENTS.md'))
+    })
+
+    it('returns empty array for unknown agent', async () => {
+      const result = await applyModule.applyInstructions('unknown', [{ file: 'test.md' }])
+      assert.deepEqual(result, [])
+    })
+
+    it('returns empty array for empty instructions', async () => {
+      const result = await applyModule.applyInstructions('agents', [])
+      assert.deepEqual(result, [])
+    })
+  })
+
+  describe('applyProfileEntry', () => {
+    it('returns result object with dry-run', async () => {
+      const entry = { config: { global: { model: 'gpt-4' } } }
+      const result = await applyModule.applyProfileEntry('agents', entry, { dryRun: true })
+
+      assert.equal(result.agent, 'agents')
+      assert.equal(result.config.applied.length, 0)
+      assert.equal(result.backup, null)
+    })
+
+    it('applies a complete entry', async () => {
+      const entry = {
+        config: { global: { model: 'gpt-4', instructions: ['AGENTS.md'] } },
+        mcpServers: { 'test-mcp': { command: 'npx', args: ['-y', '@test/mcp'] } },
+        instructions: [{ file: 'AGENTS.md' }],
+      }
+
+      const result = await applyModule.applyProfileEntry('agents', entry, { skipSkills: true })
+      assert.equal(result.agent, 'agents')
+      assert.ok(result.config.applied.length > 0)
+      assert.ok(result.backup)
+      assert.ok(result.mcpServers.applied.length > 0)
+    })
+  })
+
+  describe('formatApplyResults', () => {
+    it('formats results into readable string', () => {
+      const results = {
+        opencode: {
+          config: { applied: [{ scope: 'global', path: '/tmp/test' }], skipped: [] },
+          mcpServers: { applied: ['github'], skipped: [] },
+          skills: { applied: [], skipped: ['already-installed'], failed: [] },
+          instructions: { applied: [], skipped: ['no data'] },
+          backup: null,
+        },
+      }
+
+      const formatted = applyModule.formatApplyResults(results)
+      assert.ok(formatted.includes('opencode'))
+      assert.ok(formatted.includes('config'))
+      assert.ok(formatted.includes('MCP'))
+    })
+
+    it('handles no changes', () => {
+      const results = {
+        opencode: {
+          config: { applied: [], skipped: [] },
+          mcpServers: { applied: [], skipped: [] },
+          skills: { applied: [], skipped: [] },
+          instructions: { applied: [], skipped: [] },
+          backup: null,
+        },
+      }
+
+      const formatted = applyModule.formatApplyResults(results)
+      assert.ok(formatted.includes('no changes'))
     })
   })
 })
