@@ -224,10 +224,6 @@ async function readFileIfExists(path) {
   }
 }
 
-function getAgentByFlag(flag) {
-  return agents.find(a => a.flag === flag) || null
-}
-
 export async function detectAgents() {
   const found = []
   for (const agent of agents) {

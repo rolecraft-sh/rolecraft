@@ -1,8 +1,8 @@
-import { execSync } from 'node:child_process'
+import { spawnSync } from 'node:child_process'
 import { tmpdir, homedir } from 'node:os'
 import { join, relative, resolve, dirname } from 'node:path'
 import { mkdtempSync, writeFileSync, readFileSync, unlinkSync, rmdirSync, existsSync } from 'node:fs'
-import { readFile, writeFile, mkdir, rm } from 'node:fs/promises'
+import { readFile, writeFile, mkdir } from 'node:fs/promises'
 
 import {
   readProfile,
@@ -13,6 +13,7 @@ import {
   captureAgentFull,
   applyProfileData,
   formatApplyResults,
+  validateProfile,
 } from '../utils/profile.js'
 import agents from '../agents.js'
 
@@ -278,7 +279,10 @@ export async function profileEditCommand(name) {
   writeFileSync(tmpFile, JSON.stringify(data, null, 2) + '\n', 'utf-8')
 
   try {
-    execSync(`${editor} "${tmpFile}"`, { stdio: 'inherit' })
+    const [editorCmd, ...editorArgs] = editor.split(/\s+/)
+    const result = spawnSync(editorCmd, [...editorArgs, tmpFile], { stdio: 'inherit' })
+    if (result.error) throw result.error
+    if (result.status !== 0) throw new Error(`Command failed: ${editorCmd} exited with code ${result.status}`)
     const edited = JSON.parse(readFileSync(tmpFile, 'utf-8'))
     edited.name = name
     await writeProfile(edited)
@@ -305,7 +309,6 @@ function cleanProfileForExport(data) {
 }
 
 function relativizePaths(data, cwd) {
-  if (!data || !data.agents) return data
   const result = JSON.parse(JSON.stringify(data))
   for (const entry of Object.values(result.agents)) {
     if (entry.instructions) {
@@ -385,6 +388,12 @@ export async function profileImportCommand(path) {
   }
 
   data.agents = data.agents || {}
+
+  const validation = validateProfile(data)
+  if (!validation.valid) {
+    throw new Error(`Invalid profile data:\n  ${validation.errors.join('\n  ')}`)
+  }
+
   await writeProfile(data)
   console.log(`\n✅ Profile "${data.name}" imported (${Object.keys(data.agents).length} agent(s)).`)
 
