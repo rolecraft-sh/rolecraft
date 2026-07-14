@@ -52,6 +52,7 @@ export default defineConfig({
             { text: 'use', link: '/commands/use' },
             { text: 'verify', link: '/commands/verify' },
             { text: 'watch', link: '/commands/watch' },
+            { text: 'profile', link: '/commands/profile' },
           ],
         },
         { text: 'MCP Server Management', link: '/mcp' },
