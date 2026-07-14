@@ -1,18 +1,30 @@
 import { describe, it, before, after, mock } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, existsSync } from 'node:fs'
+import { mkdtempSync, existsSync, writeFileSync } from 'node:fs'
 import { mkdir, rm, writeFile, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
-let tempDir, profileCmd, origHome, origCwd
+let tempDir, profileCmd, origHome, origCwd, origEditor
+let editHelperPath
 
 before(async () => {
   tempDir = mkdtempSync(join(tmpdir(), 'rolecraft-profile-cmd-test-'))
   origHome = process.env.HOME
   origCwd = process.cwd
+  origEditor = process.env.EDITOR
   process.env.HOME = tempDir
   process.cwd = () => join(tempDir, 'project')
+
+  editHelperPath = join(tempDir, 'edit-helper.cjs')
+  writeFileSync(editHelperPath, `
+const fs = require('fs')
+const p = process.argv[2]
+const d = JSON.parse(fs.readFileSync(p, 'utf8'))
+d.description = 'edited via editor'
+fs.writeFileSync(p, JSON.stringify(d, null, 2) + '\\n', 'utf8')
+`)
+
   await mkdir(join(tempDir, '.agents', 'profiles'), { recursive: true })
   await mkdir(join(tempDir, 'project'), { recursive: true })
   profileCmd = await import('./profile.js')
@@ -20,6 +32,7 @@ before(async () => {
 
 after(async () => {
   process.cwd = origCwd
+  process.env.EDITOR = origEditor
   await rm(tempDir, { recursive: true, force: true })
   process.env.HOME = origHome
 })
@@ -210,5 +223,175 @@ describe('profile delete command', () => {
       () => profileCmd.profileDeleteCommand('not-here', {}),
       /not found/
     )
+  })
+})
+
+describe('profile apply command', () => {
+  it('throws if no name given', async () => {
+    await assert.rejects(
+      () => profileCmd.profileApplyCommand(null, {}),
+      /Missing profile name/
+    )
+  })
+
+  it('throws for missing profile', async () => {
+    await assert.rejects(
+      () => profileCmd.profileApplyCommand('not-here', {}),
+      /not found/
+    )
+  })
+
+  it('shows dry-run plan', async () => {
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({
+      name: 'apply-dry',
+      agents: { agents: { config: { global: { model: 'gpt-4' } } } },
+    })
+
+    const logs = captureLogs()
+    await profileCmd.profileApplyCommand('apply-dry', { dryRun: true, targets: [], skipMcp: false, skipSkills: false })
+    assert.ok(logs.some(l => l.includes('Would apply profile')))
+  })
+
+  it('applies a profile and shows results', async () => {
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({
+      name: 'apply-full',
+      agents: {
+        agents: {
+          config: { global: { model: 'gpt-4' } },
+        },
+      },
+    })
+
+    const opencodeConfig = join(tempDir, '.opencode.json')
+    await writeFile(opencodeConfig, JSON.stringify({ model: 'gpt-3.5' }))
+
+    const logs = captureLogs()
+    await profileCmd.profileApplyCommand('apply-full', { dryRun: false, targets: [], skipMcp: true, skipSkills: true })
+
+    assert.ok(logs.some(l => l.includes('Applied profile')))
+    assert.ok(logs.some(l => l.includes('agents')))
+  })
+
+})
+
+describe('profile diff command', () => {
+  it('throws if no name given', async () => {
+    await assert.rejects(
+      () => profileCmd.profileDiffCommand(null),
+      /Missing profile name/
+    )
+  })
+
+  it('throws for missing profile', async () => {
+    await assert.rejects(
+      () => profileCmd.profileDiffCommand('not-here'),
+      /not found/
+    )
+  })
+
+  it('shows differences between profile and current config', async () => {
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({
+      name: 'diff-test',
+      agents: {
+        agents: {
+          config: { global: { model: 'gpt-4' } },
+          skills: ['owner/skill-a'],
+        },
+      },
+    })
+
+    const logs = captureLogs()
+    await profileCmd.profileDiffCommand('diff-test')
+
+    assert.ok(logs.some(l => l.includes('diff-test')))
+    assert.ok(logs.some(l => l.includes('skills differ')))
+  })
+
+  it('shows no differences when profile matches current', async () => {
+    const appDir = join(tempDir, 'diff-match')
+    await mkdir(join(appDir, '.agents', 'profiles'), { recursive: true })
+
+    const opencodeConfig = join(appDir, '.opencode.json')
+    await writeFile(opencodeConfig, JSON.stringify({ model: 'gpt-4' }))
+
+    process.env.HOME = appDir
+    process.cwd = () => appDir
+
+    const freshCmd = await import('./profile.js')
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({
+      name: 'diff-match-prof',
+      agents: {
+        agents: {
+          config: { global: { model: 'gpt-4' } },
+          instructions: [{ file: opencodeConfig, contentSha: null, scope: 'global' }],
+        },
+      },
+    })
+
+    const logs = captureLogs()
+    await freshCmd.profileDiffCommand('diff-match-prof')
+
+    assert.ok(logs.some(l => l.includes('no differences')))
+
+    process.env.HOME = tempDir
+    process.cwd = () => join(tempDir, 'project')
+  })
+})
+
+describe('profile edit command', () => {
+  it('throws if no name given', async () => {
+    await assert.rejects(
+      () => profileCmd.profileEditCommand(null),
+      /Missing profile name/
+    )
+  })
+
+  it('throws for missing profile', async () => {
+    await assert.rejects(
+      () => profileCmd.profileEditCommand('not-here'),
+      /not found/
+    )
+  })
+
+  it('opens editor and saves changes', async () => {
+    const { writeProfile, readProfile } = await import('../utils/profile.js')
+    await writeProfile({
+      name: 'edit-test',
+      description: 'original',
+      agents: { agents: { config: { global: { model: 'gpt-4' } } } },
+    })
+
+    process.env.EDITOR = `node ${editHelperPath}`
+
+    const logs = captureLogs()
+    await profileCmd.profileEditCommand('edit-test')
+
+    assert.ok(logs.some(l => l.includes('updated')))
+
+    const updated = await readProfile('edit-test')
+    assert.equal(updated.description, 'edited via editor')
+  })
+
+  it('saves unchanged file when editor does not modify', async () => {
+    const { writeProfile, readProfile } = await import('../utils/profile.js')
+    await writeProfile({
+      name: 'edit-nochange',
+      description: 'same',
+      agents: { agents: {} },
+    })
+
+    process.env.EDITOR = 'true'
+
+    const logs = captureLogs()
+    await profileCmd.profileEditCommand('edit-nochange')
+
+    assert.ok(logs.some(l => l.includes('updated')))
+
+    const updated = await readProfile('edit-nochange')
+    assert.equal(updated.description, 'same')
   })
 })
