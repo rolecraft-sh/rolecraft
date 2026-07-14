@@ -201,4 +201,92 @@ describe('doctor command', () => {
     }
     assert.ok(logs.some(l => l.includes('Project lockfile')))
   })
+
+  it('warns when .agents directory is missing', async () => {
+    const altDir = mkdtempSync(join(tmpdir(), 'rolecraft-doctor-alt-'))
+    const origHome = process.env.HOME
+    const origCwd = process.cwd()
+    process.env.HOME = altDir
+    process.chdir(altDir)
+
+    await writeFile(join(altDir, '.agents', '.skill-lock.json'), JSON.stringify({
+      version: 3, skills: {}, dismissed: {}, lastSelectedAgents: [],
+    })).catch(() => {})
+    await rm(join(altDir, '.agents'), { recursive: true, force: true }).catch(() => {})
+
+    const { logs, restore } = capture()
+    try {
+      await doctorModule.doctorCommand()
+    } finally {
+      restore()
+      process.env.HOME = origHome
+      process.chdir(origCwd)
+      await rm(altDir, { recursive: true, force: true }).catch(() => {})
+    }
+    assert.ok(logs.some(l => l.includes('not yet created')))
+  })
+
+  it('reports missing skill directory in integrity check', async () => {
+    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
+      version: 3, skills: {
+        'test/hash-check': { slug: 'test/hash-check', contentSha: 'abc' },
+      }, dismissed: {}, lastSelectedAgents: [],
+    }))
+
+    const { logs, restore } = capture()
+    try {
+      await doctorModule.doctorCommand()
+    } finally {
+      restore()
+    }
+
+    assert.ok(logs.some(l => l.includes('hash mismatch') || l.includes('missing')))
+  })
+
+  it('verifies skill integrity when directory exists with matching hash', async () => {
+    await mkdir(join(tempDir, '.agents', 'skills', 'test-hash-ok'), { recursive: true })
+    const { writeFileSync } = await import('node:fs')
+    writeFileSync(join(tempDir, '.agents', 'skills', 'test-hash-ok', 'SKILL.md'), '# Test skill\n\nContent')
+    const { computeContentHash } = await import('../utils/lockfile.js')
+    const hash = computeContentHash({ 'SKILL.md': '# Test skill\n\nContent' })
+
+    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
+      version: 3, skills: {
+        'test/hash-ok': { slug: 'test/hash-ok', contentSha: hash },
+      }, dismissed: {}, lastSelectedAgents: [],
+    }))
+
+    const { logs, restore } = capture()
+    try {
+      await doctorModule.doctorCommand()
+    } finally {
+      restore()
+    }
+
+    assert.ok(logs.some(l => l.includes('checked')))
+  })
+
+  it('reports hash mismatch when content differs', async () => {
+    await mkdir(join(tempDir, '.agents', 'skills', 'test-hash-bad'), { recursive: true })
+    const { writeFileSync } = await import('node:fs')
+    writeFileSync(join(tempDir, '.agents', 'skills', 'test-hash-bad', 'SKILL.md'), '# Original content')
+    const { computeContentHash } = await import('../utils/lockfile.js')
+    const origContent = { 'SKILL.md': '# Different content' }
+    const badHash = computeContentHash(origContent)
+
+    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
+      version: 3, skills: {
+        'test/hash-bad': { slug: 'test/hash-bad', contentSha: badHash },
+      }, dismissed: {}, lastSelectedAgents: [],
+    }))
+
+    const { logs, restore } = capture()
+    try {
+      await doctorModule.doctorCommand()
+    } finally {
+      restore()
+    }
+
+    assert.ok(logs.some(l => l.includes('hash mismatch') || l.includes('checked')))
+  })
 })

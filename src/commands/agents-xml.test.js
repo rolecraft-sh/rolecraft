@@ -229,4 +229,47 @@ More content.
     assert.ok(content.includes('Some content.'))
     assert.ok(content.includes('More content.'))
   })
+
+  it('handles parseNameAndDescription when SKILL.md is missing', async () => {
+    await mkdir(join(tempDir, '.agents', 'skills', 'test-no-file'), { recursive: true })
+
+    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
+      version: 3, skills: {
+        'test/no-file': { slug: 'test/no-file', source: tempDir, sourceType: 'local', contentSha: 'abc',
+          agents: ['opencode'],
+        },
+      }, dismissed: {}, lastSelectedAgents: [],
+    }))
+
+    const { logs, restore } = capture()
+    try {
+      await xmlModule.agentsXmlCommand()
+    } finally {
+      restore()
+    }
+    const output = logs.join(' ')
+    assert.ok(output.includes('test/no-file'))
+  })
+
+  it('handles parseNameAndDescription with invalid SKILL.md', async () => {
+    await mkdir(join(tempDir, '.agents', 'skills', 'test-bad-md'), { recursive: true })
+    writeFileSync(join(tempDir, '.agents', 'skills', 'test-bad-md', 'SKILL.md'), 'No frontmatter here')
+
+    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
+      version: 3, skills: {
+        'test/bad-md': { slug: 'test/bad-md', source: tempDir, sourceType: 'local', contentSha: 'abc',
+          agents: ['opencode'],
+        },
+      }, dismissed: {}, lastSelectedAgents: [],
+    }))
+
+    const { logs, restore } = capture()
+    try {
+      await xmlModule.agentsXmlCommand()
+    } finally {
+      restore()
+    }
+    const output = logs.join(' ')
+    assert.ok(output.includes('test/bad-md'))
+  })
 })

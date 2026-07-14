@@ -76,6 +76,145 @@ describe('profile command dispatcher', () => {
     await profileCmd.profileCommand(['unknown'])
     assert.ok(logs.some(l => l.includes('Unknown profile subcommand')))
   })
+
+  it('dispatches export with --file through parseArgs', async () => {
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({ name: 'dispatch-export', agents: { agents: {} } })
+
+    const exportPath = join(tempDir, 'dispatch-export.json')
+    const logs = captureLogs()
+    await profileCmd.profileCommand(['export', 'dispatch-export', '--file', exportPath])
+    assert.ok(existsSync(exportPath))
+  })
+
+  it('parses --file when followed by another flag', async () => {
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({ name: 'dispatch-file-flag', agents: { agents: {} } })
+
+    const exportPath = join(tempDir, 'dispatch-file-flag.json')
+    const logs = captureLogs()
+    await profileCmd.profileCommand(['export', 'dispatch-file-flag', '--file', exportPath, '--dry-run'])
+    assert.ok(existsSync(exportPath))
+  })
+
+  it('parses --agents flag to add targets', async () => {
+    const { writeProfile, readProfile } = await import('../utils/profile.js')
+    const saveDir = join(tempDir, 'agents-flag-' + Date.now())
+    await mkdir(join(saveDir, '.agents', 'profiles'), { recursive: true })
+    await mkdir(join(saveDir, '.agents', 'skills', 'test-skill'), { recursive: true })
+    const opencodeConfig = join(saveDir, '.opencode.json')
+    await writeFile(opencodeConfig, JSON.stringify({ model: 'gpt-4' }))
+
+    process.env.HOME = saveDir
+    process.cwd = () => saveDir
+    const freshCmd = await import('./profile.js')
+
+    const logs = captureLogs()
+    await freshCmd.profileCommand(['save', 'agents-flag-prof', '--agents'])
+
+    assert.ok(logs.some(l => l.includes('agents-flag-prof')))
+
+    process.env.HOME = tempDir
+    process.cwd = () => join(tempDir, 'project')
+  })
+
+  it('dispatches import with --file through parseArgs', async () => {
+    const importPath = join(tempDir, 'dispatch-import.json')
+    await writeFile(importPath, JSON.stringify({ name: 'dispatch-import', agents: { agents: {} } }))
+
+    const logs = captureLogs()
+    await profileCmd.profileCommand(['import', importPath])
+    assert.ok(logs.some(l => l.includes('dispatch-import')))
+  })
+
+  it('dispatches save subcommand', async () => {
+    const saveDir = join(tempDir, 'dispatch-save-' + Date.now())
+    await mkdir(join(saveDir, '.agents', 'profiles'), { recursive: true })
+    await mkdir(join(saveDir, '.agents', 'skills', 'test-skill'), { recursive: true })
+    await writeFile(join(saveDir, '.opencode.json'), JSON.stringify({ model: 'gpt-4' }))
+
+    process.env.HOME = saveDir
+    process.cwd = () => saveDir
+    const freshCmd = await import('./profile.js')
+    const logs = []
+    mock.method(console, 'log', (...args) => { if (args.length) logs.push(String(args[0])) })
+    await freshCmd.profileCommand(['save', 'saved-via-dispatch'])
+    assert.ok(logs.some(l => l.includes('saved-via-dispatch')))
+
+    process.env.HOME = tempDir
+    process.cwd = () => join(tempDir, 'project')
+  })
+
+  it('dispatches apply subcommand', async () => {
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({ name: 'apply-via-dispatch', agents: { agents: { config: { global: { model: 'gpt-4' } } } } })
+    const logs = captureLogs()
+    await profileCmd.profileCommand(['apply', 'apply-via-dispatch', '--dry-run'])
+    assert.ok(logs.some(l => l.includes('Would apply')))
+  })
+
+  it('dispatches diff subcommand', async () => {
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({ name: 'diff-via-dispatch', agents: { agents: { config: { global: { model: 'gpt-4' } } } } })
+    const logs = captureLogs()
+    await profileCmd.profileCommand(['diff', 'diff-via-dispatch'])
+    assert.ok(logs.some(l => l.includes('diff-via-dispatch')))
+  })
+
+  it('dispatches list subcommand', async () => {
+    const logs = captureLogs()
+    await profileCmd.profileCommand(['list'])
+    assert.ok(logs.some(l => l.includes('profile') || l.includes('No profiles')))
+  })
+
+  it('dispatches show subcommand', async () => {
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({ name: 'show-via-dispatch', agents: { agents: {} } })
+    const logs = captureLogs()
+    await profileCmd.profileCommand(['show', 'show-via-dispatch'])
+    assert.ok(logs.some(l => l.includes('show-via-dispatch')))
+  })
+
+  it('dispatches link subcommand', async () => {
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({ name: 'link-via-dispatch', agents: {} })
+    const linkPath = join(process.cwd(), '.agent-profile.json')
+    try { const { unlinkSync } = await import('node:fs'); unlinkSync(linkPath) } catch {}
+    const logs = captureLogs()
+    await profileCmd.profileCommand(['link', 'link-via-dispatch'])
+    assert.ok(logs.some(l => l.includes('link-via-dispatch')))
+    try { const { unlinkSync } = await import('node:fs'); unlinkSync(linkPath) } catch {}
+  })
+
+  it('dispatches delete subcommand', async () => {
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({ name: 'del-via-dispatch', agents: {} })
+    const logs = captureLogs()
+    await profileCmd.profileCommand(['delete', 'del-via-dispatch'])
+    assert.ok(logs.some(l => l.includes('del-via-dispatch')))
+  })
+
+  it('dispatches edit subcommand', async () => {
+    const { writeProfile, readProfile } = await import('../utils/profile.js')
+    const editName = 'edit-via-dispatch'
+    await writeProfile({ name: editName, description: 'original', agents: { agents: {} } })
+    const editScriptPath = join(tempDir, 'edit-dispatch-helper.cjs')
+    const { writeFileSync } = await import('node:fs')
+    writeFileSync(editScriptPath, `
+const fs = require('fs')
+const p = process.argv[2]
+const d = JSON.parse(fs.readFileSync(p, 'utf8'))
+d.description = 'edited via dispatch'
+fs.writeFileSync(p, JSON.stringify(d, null, 2) + '\\n', 'utf8')
+`)
+    process.env.EDITOR = `node ${editScriptPath}`
+    const logs = captureLogs()
+    await profileCmd.profileCommand(['edit', editName])
+    assert.ok(logs.some(l => l.includes('updated')))
+    const updated = await readProfile(editName)
+    assert.equal(updated.description, 'edited via dispatch')
+    process.env.EDITOR = origEditor
+  })
 })
 
 describe('profile save command', () => {
@@ -147,22 +286,40 @@ describe('profile save command', () => {
 
 describe('profile list command', () => {
   it('shows no profiles message', async () => {
+    const listDir = join(tempDir, 'list-empty-' + Date.now())
+    await mkdir(join(listDir, '.agents', 'profiles'), { recursive: true })
+    process.env.HOME = listDir
+    process.cwd = () => listDir
+
+    const freshCmd = await import('./profile.js')
     const logs = captureLogs()
-    await profileCmd.profileListCommand()
+    await freshCmd.profileListCommand()
     assert.ok(logs.some(l => l.includes('No profiles saved')))
+
+    process.env.HOME = tempDir
+    process.cwd = () => join(tempDir, 'project')
   })
 
   it('lists saved profiles', async () => {
+    const listDir = join(tempDir, 'list-with-' + Date.now())
+    await mkdir(join(listDir, '.agents', 'profiles'), { recursive: true })
+    process.env.HOME = listDir
+    process.cwd = () => listDir
+
+    const freshCmd = await import('./profile.js')
     const { writeProfile } = await import('../utils/profile.js')
     await writeProfile({ name: 'list-test-a', agents: { agents: {} } })
     await writeProfile({ name: 'list-test-b', agents: { agents: {}, cursor: {} } })
 
     const logs = captureLogs()
-    await profileCmd.profileListCommand()
+    await freshCmd.profileListCommand()
 
     assert.ok(logs.some(l => l.includes('list-test-a')))
     assert.ok(logs.some(l => l.includes('list-test-b')))
     assert.ok(logs.some(l => l.includes('2 profile(s)')))
+
+    process.env.HOME = tempDir
+    process.cwd = () => join(tempDir, 'project')
   })
 })
 
@@ -196,6 +353,29 @@ describe('profile show command', () => {
       /not found/
     )
   })
+
+  it('shows (not set) for missing description and version', async () => {
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({
+      name: 'no-meta',
+      agents: { agents: {} },
+    })
+
+    const data = await (await import('../utils/profile.js')).readProfile('no-meta')
+    data.description = undefined
+    data.version = undefined
+    delete data.description
+    delete data.version
+
+    const { writeFile } = await import('node:fs/promises')
+    const { profilePath } = await import('../utils/profile.js')
+    await writeFile(profilePath('no-meta'), JSON.stringify(data, null, 2))
+
+    const logs = captureLogs()
+    await profileCmd.profileShowCommand('no-meta')
+
+    assert.ok(logs.some(l => l.includes('(not set)')))
+  })
 })
 
 describe('profile delete command', () => {
@@ -210,6 +390,15 @@ describe('profile delete command', () => {
     const logs = captureLogs()
     await profileCmd.profileDeleteCommand('non-existent', { dryRun: true })
     assert.ok(logs.some(l => l.includes('does not exist')))
+  })
+
+  it('dry-run on existing profile shows would-delete', async () => {
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({ name: 'dry-del', agents: {} })
+
+    const logs = captureLogs()
+    await profileCmd.profileDeleteCommand('dry-del', { dryRun: true })
+    assert.ok(logs.some(l => l.includes('Would delete')))
   })
 
   it('deletes a profile', async () => {
@@ -284,6 +473,40 @@ describe('profile apply command', () => {
     assert.ok(logs.some(l => l.includes('agents')))
   })
 
+  it('applies with specific agent targets in dry-run', async () => {
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({
+      name: 'apply-targeted',
+      agents: {
+        agents: { config: { global: { model: 'gpt-4' } } },
+        cursor: { instructions: [{ file: '.cursorrules' }] },
+      },
+    })
+
+    const logs = captureLogs()
+    await profileCmd.profileApplyCommand('apply-targeted', { dryRun: true, targets: ['agents'], skipMcp: false, skipSkills: false })
+
+    assert.ok(logs.some(l => l.includes('Would apply profile')))
+    assert.ok(logs.some(l => l.includes('agents')))
+    assert.equal(logs.some(l => l.includes('cursor')), false)
+  })
+
+  it('applies with specific agent targets', async () => {
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({
+      name: 'apply-targeted-real',
+      agents: {
+        agents: { config: { global: { model: 'gpt-4' } } },
+      },
+    })
+
+    const logs = captureLogs()
+    await profileCmd.profileApplyCommand('apply-targeted-real', { dryRun: false, targets: ['agents'], skipMcp: true, skipSkills: true })
+
+    assert.ok(logs.some(l => l.includes('Applied profile')))
+    assert.ok(logs.some(l => l.includes('agents')))
+  })
+
 })
 
 describe('profile diff command', () => {
@@ -350,6 +573,41 @@ describe('profile diff command', () => {
     process.env.HOME = tempDir
     process.cwd = () => join(tempDir, 'project')
   })
+
+  it('detects config and MCP differences', async () => {
+    const diffDir = join(tempDir, 'diff-config-mcp')
+    await mkdir(join(diffDir, '.agents', 'profiles'), { recursive: true })
+
+    process.env.HOME = diffDir
+    process.cwd = () => diffDir
+
+    const freshCmd = await import('./profile.js')
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({
+      name: 'diff-config-mcp-prof',
+      agents: {
+        agents: {
+          config: { global: { model: 'gpt-5' } },
+          mcpServers: { 'test-mcp': { command: 'npx', args: ['-y', '@test/one'] } },
+        },
+      },
+    })
+
+    const opencodeConfig = join(diffDir, '.opencode.json')
+    await writeFile(opencodeConfig, JSON.stringify({ model: 'gpt-4' }))
+
+    const { addMcpServer } = await import('../utils/mcp.js')
+    await addMcpServer('agents', 'test-mcp', { command: 'npx', args: ['-y', '@test/two'] })
+
+    const logs = captureLogs()
+    await freshCmd.profileDiffCommand('diff-config-mcp-prof')
+
+    assert.ok(logs.some(l => l.includes('config differs')))
+    assert.ok(logs.some(l => l.includes('MCP servers differ')))
+
+    process.env.HOME = tempDir
+    process.cwd = () => join(tempDir, 'project')
+  })
 })
 
 describe('profile edit command', () => {
@@ -403,6 +661,43 @@ describe('profile edit command', () => {
 
     const updated = await readProfile('edit-nochange')
     assert.equal(updated.description, 'same')
+  })
+
+  it('throws on editor error (non-zero exit)', async () => {
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({
+      name: 'edit-error',
+      description: 'will fail',
+      agents: { agents: {} },
+    })
+
+    process.env.EDITOR = 'false'
+
+    await assert.rejects(
+      () => profileCmd.profileEditCommand('edit-error'),
+      /Command failed/
+    )
+  })
+
+  it('throws on invalid JSON after editing', async () => {
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({
+      name: 'edit-bad-json',
+      description: 'will become invalid',
+      agents: { agents: {} },
+    })
+
+    const scriptPath = join(tempDir, 'write-invalid-json.sh')
+    await writeFile(scriptPath, '#!/bin/sh\nprintf "not valid json" > "$1"\n')
+    const { chmodSync } = await import('node:fs')
+    chmodSync(scriptPath, 0o755)
+
+    process.env.EDITOR = `/bin/sh ${scriptPath}`
+
+    await assert.rejects(
+      () => profileCmd.profileEditCommand('edit-bad-json'),
+      /Invalid JSON/
+    )
   })
 })
 
@@ -521,6 +816,76 @@ describe('profile import command', () => {
       /Invalid JSON/
     )
   })
+
+  it('imports from a URL', async () => {
+    const urlDir = join(tempDir, 'url-import-' + Date.now())
+    await mkdir(join(urlDir, '.agents', 'profiles'), { recursive: true })
+
+    process.env.HOME = urlDir
+    process.cwd = () => urlDir
+    const freshCmd = await import('./profile.js')
+
+    const fetchMock = mock.method(global, 'fetch', async () => ({
+      ok: true,
+      text: async () => JSON.stringify({ name: 'url-profile', agents: { agents: {} } }),
+    }))
+
+    const logs = captureLogs()
+    await freshCmd.profileImportCommand('https://example.com/test-profile.json')
+
+    assert.ok(logs.some(l => l.includes('url-profile')))
+    fetchMock.mock.restore()
+
+    process.env.HOME = tempDir
+    process.cwd = () => join(tempDir, 'project')
+  })
+
+  it('does not show diff hint when no agents detected', async () => {
+    const logDir = join(tempDir, 'import-noagents')
+    await mkdir(join(logDir, '.agents', 'profiles'), { recursive: true })
+
+    process.env.HOME = logDir
+    process.cwd = () => logDir
+    const freshCmd = await import('./profile.js')
+
+    const importFile = join(logDir, 'noagent-import.json')
+    await writeFile(importFile, JSON.stringify({ name: 'noagent', agents: { agents: {} } }))
+
+    const logs = captureLogs()
+    await freshCmd.profileImportCommand(importFile)
+
+    assert.ok(logs.some(l => l.includes('noagent')))
+    assert.equal(logs.some(l => l.includes('diff')), false)
+
+    process.env.HOME = tempDir
+    process.cwd = () => join(tempDir, 'project')
+  })
+
+  it('shows diff hint when current agents have config', async () => {
+    const hintDir = join(tempDir, 'import-hint')
+    await mkdir(join(hintDir, '.agents', 'profiles'), { recursive: true })
+    await mkdir(join(hintDir, '.agents', 'skills'), { recursive: true })
+    await writeFile(join(hintDir, '.opencode.json'), JSON.stringify({ model: 'gpt-4' }))
+
+    process.env.HOME = hintDir
+    process.cwd = () => hintDir
+    const freshCmd = await import('./profile.js')
+
+    const importFile = join(hintDir, 'hint-import.json')
+    await writeFile(importFile, JSON.stringify({
+      name: 'hint-profile',
+      agents: { agents: { config: { global: { model: 'gpt-4' } } } },
+    }))
+
+    const logs = captureLogs()
+    await freshCmd.profileImportCommand(importFile)
+
+    assert.ok(logs.some(l => l.includes('hint-profile')))
+    assert.ok(logs.some(l => l.includes('diff')))
+
+    process.env.HOME = tempDir
+    process.cwd = () => join(tempDir, 'project')
+  })
 })
 
 describe('profile link command', () => {
@@ -579,6 +944,28 @@ describe('profile link command', () => {
     const logs = captureLogs()
     await profileCmd.profileLinkCommand(undefined, { unlink: true })
     assert.ok(logs.some(l => l.includes('No project link')))
+  })
+
+  it('shows invalid message for corrupted link file', async () => {
+    const linkPath = join(process.cwd(), '.agent-profile.json')
+    writeFileSync(linkPath, 'not valid json', 'utf-8')
+
+    const logs = captureLogs()
+    await profileCmd.profileLinkCommand(undefined, { unlink: false })
+    assert.ok(logs.some(l => l.includes('Link file is invalid')))
+
+    unlinkSync(linkPath)
+  })
+
+  it('shows invalid message for link file without profile field', async () => {
+    const linkPath = join(process.cwd(), '.agent-profile.json')
+    writeFileSync(linkPath, JSON.stringify({ projectDir: '/tmp' }), 'utf-8')
+
+    const logs = captureLogs()
+    await profileCmd.profileLinkCommand(undefined, { unlink: false })
+    assert.ok(logs.some(l => l.includes('Link file is invalid')))
+
+    unlinkSync(linkPath)
   })
 })
 

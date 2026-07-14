@@ -37,33 +37,33 @@ Zero dependencies, no marketplace required.
 Works with ${agents.length} agents: ${agents.map(a => a.name).join(', ')}, and all spec-compliant agents.
 
 Usage:
-  rolecraft install <source>     Install a skill (local path, owner/repo, or npm:package)
-  rolecraft bundle <source> [...] Install skills from a file or inline sources
+  rolecraft install <source>        Install a skill (local path, owner/repo, or npm:package)
+  rolecraft bundle <source> [...]   Install skills from a file or inline sources
   rolecraft bundle create [<name>]  Create a new bundle file
-  rolecraft use <source>         Preview a skill without installing
-  rolecraft list                 List installed skills
-  rolecraft remove <slug>        Remove a skill
-  rolecraft update <slug>        Re-install a skill (update to latest)
-  rolecraft setup [<source>]     Detect agents and optionally install a skill
-  rolecraft init [<name>]        Scaffold a new SKILL.md
-  rolecraft search <query>       Search for skills on GitHub
-  rolecraft check                Check for available skill updates
-  rolecraft verify               Verify installed skill integrity
-  rolecraft ci                   Install all skills from lockfile
-  rolecraft completions <shell>  Generate shell completions (bash|zsh|fish)
-  rolecraft doctor               Run system health check
-   rolecraft watch [<slug>]       Watch skills for changes and auto-sync
-  rolecraft profile                Manage agent configuration profiles
-  rolecraft mcp install <source> Install an MCP server (npm:, gh:, or local path)
-  rolecraft mcp list             List configured MCP servers
-  rolecraft mcp remove <name>    Remove an MCP server
-  rolecraft agents-xml           Generate skills XML for AGENTS.md
-  rolecraft agents-xml --write   Write skills XML to AGENTS.md
-  rolecraft upgrade              Upgrade rolecraft to the latest version
-  rolecraft help                 Show this help
+  rolecraft use <source>            Preview a skill without installing
+  rolecraft list                    List installed skills
+  rolecraft remove <slug>           Remove a skill
+  rolecraft update <slug>           Re-install a skill (update to latest)
+  rolecraft setup [<source>]        Detect agents and optionally install a skill
+  rolecraft init [<name>]           Scaffold a new SKILL.md
+  rolecraft search <query>          Search for skills on GitHub
+  rolecraft check                   Check for available skill updates
+  rolecraft verify                  Verify installed skill integrity
+  rolecraft ci                      Install all skills from lockfile
+  rolecraft completions <shell>     Generate shell completions (bash|zsh|fish)
+  rolecraft doctor                  Run system health check
+  rolecraft watch [<slug>]          Watch skills for changes and auto-sync
+  rolecraft profile                 Manage agent configuration profiles
+  rolecraft mcp install <source>    Install an MCP server (npm:, gh:, or local path)
+  rolecraft mcp list                List configured MCP servers
+  rolecraft mcp remove <name>       Remove an MCP server
+  rolecraft agents-xml              Generate skills XML for AGENTS.md
+  rolecraft agents-xml --write      Write skills XML to AGENTS.md
+  rolecraft upgrade                 Upgrade rolecraft to the latest version
+  rolecraft help                    Show this help
 
 Options:
-  --yes, -y     Non-interactive: accept all defaults (install, setup)
+  --yes, -y      Non-interactive: accept all defaults (install, setup)
   --dry-run      Preview installation without copying files (install, setup, bundle, upgrade)
   --no-mcp       Skip MCP server installation from skills (install, bundle)
 
@@ -75,13 +75,13 @@ Options for install:
   --project      Install to ./.agents/skills/ (default)
   --windsurf     Also install to ~/.windsurf/skills/ (deprecated: use --devin)
 ${agentFlags.join('\n')}
-  --all          Install to all locations
-  --no-mcp       Skip MCP server installation from skill
+  --all              Install to all locations
+  --no-mcp           Skip MCP server installation from skill
   --frozen-lockfile  Fail if skill already installed
-  --symlink      Install as symlink instead of copy
-  --copy         Install as copy (default)
-  --dry-run      Preview installation without copying files
-  --interactive  Choose and install a skill from search results
+  --symlink          Install as symlink instead of copy
+  --copy             Install as copy (default)
+  --dry-run          Preview installation without copying files
+  --interactive      Choose and install a skill from search results
 
 Examples:
   rolecraft install ./my-skill
