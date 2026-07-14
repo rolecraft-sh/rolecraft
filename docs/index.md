@@ -4,19 +4,24 @@ layout: home
 hero:
   name: "RoleCraft"
   text: "Install AI agent skills as roles & behaviors"
-  tagline: Zero-dependency CLI. Skills + MCP servers. No marketplace. No signup.
+  tagline: One command. All agents. Skills + MCP servers. Zero configuration.
   image:
     src: /rolecraft-demo.gif
     alt: RoleCraft Demo
   actions:
     - theme: brand
-      text: Get Started
+      text: Onboarding Guide
+      link: /guides/onboarding
+    - theme: alt
+      text: Install Guide
       link: /install
     - theme: alt
       text: View on GitHub
       link: https://github.com/sametcelikbicak/rolecraft
 
 features:
+  - title: One-Command Onboarding
+    details: "rolecraft setup <source> detects all AI agents and installs skills + MCP servers to every one of them."
   - title: Zero Dependencies
     details: ~4 KB, no bloat. Only Node.js built-ins.
   - title: MCP + Skills in One Command
@@ -29,4 +34,3 @@ features:
     details: Lockfile-based re-install, --yes flag, dry-run mode for pipelines.
   - title: Any Source
     details: Local folder, GitHub, GitLab, SSH git URL, npm package.
----

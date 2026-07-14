@@ -21,7 +21,8 @@ export default defineConfig({
     logo: '/rolecraft_logo.png',
     siteTitle: `RoleCraft v${version}`,
     nav: [
-      { text: 'Guide', link: '/install' },
+      { text: 'Onboarding', link: '/guides/onboarding' },
+      { text: 'Install', link: '/install' },
       { text: 'Commands', link: '/commands/install' },
       { text: 'MCP', link: '/mcp' },
       { text: 'Benchmark', link: '/benchmark/RESULTS' },
@@ -31,6 +32,7 @@ export default defineConfig({
       '/': [
         { text: 'Introduction', link: '/' },
         { text: 'Install Guide', link: '/install' },
+        { text: 'Onboarding Guide', link: '/guides/onboarding' },
         {
           text: 'Commands',
           items: [
