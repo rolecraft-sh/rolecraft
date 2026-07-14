@@ -10,7 +10,11 @@
 6. `rolecraft verify` checks installed files against the stored hash
 7. `rolecraft ci` re-installs all skills from the lockfile (e.g. in CI pipelines)
 8. `rolecraft doctor` runs a system health check across Node.js, agent directories, and lockfiles
-9. Compatible with skills installed by `@agentskill.sh/cli`, `add-skill`, or manual installs
+9. `rolecraft profile` saves, applies, diffs, edits, exports, imports, and links multi-agent configuration profiles
+10. `rolecraft mcp` manages MCP server configurations (install, list, remove)
+11. `rolecraft agents-xml` generates a skills XML block for `AGENTS.md`
+12. `rolecraft watch` watches installed skills for changes and auto-syncs
+13. Compatible with skills installed by `@agentskill.sh/cli`, `add-skill`, or manual installs
 
 ## Project structure
 
@@ -19,25 +23,31 @@ rolecraft/
 ├── bin/rolecraft.js          # CLI entry point
 ├── src/
 │   ├── commands/
-│   │   ├── bundle.js          # multi-skill install from bundle file
-│   │   ├── check.js           # skill update checking
-│   │   ├── ci.js              # frozen lockfile install
-│   │   ├── completions.js     # shell completion generation
-│   │   ├── doctor.js          # system health check
-│   │   ├── init.js            # SKILL.md scaffolding
-│   │   ├── install.js         # install logic + interactive scope
-│   │   ├── list.js            # list installed skills
-│   │   ├── remove.js          # remove skill + lockfile cleanup
-│   │   ├── search.js          # GitHub skill discovery
-│   │   ├── setup.js           # detect agents + install to all
-│   │   ├── update.js          # re-install skill to latest
-│   │   ├── upgrade.js         # self-upgrade
-│   │   ├── use.js             # preview skill without installing
-│   │   └── verify.js          # integrity verification
+│   │   ├── agents-xml.js     # generate skills XML for AGENTS.md
+│   │   ├── bundle.js         # multi-skill install from bundle file
+│   │   ├── check.js          # skill update checking
+│   │   ├── ci.js             # frozen lockfile install
+│   │   ├── completions.js    # shell completion generation
+│   │   ├── doctor.js         # system health check
+│   │   ├── init.js           # SKILL.md scaffolding
+│   │   ├── install.js        # install logic + interactive scope
+│   │   ├── list.js           # list installed skills
+│   │   ├── mcp.js            # MCP server management (install/list/remove)
+│   │   ├── profile.js        # agent config profile management
+│   │   ├── remove.js         # remove skill + lockfile cleanup
+│   │   ├── search.js         # GitHub skill discovery
+│   │   ├── setup.js          # detect agents + install to all
+│   │   ├── update.js         # re-install skill to latest
+│   │   ├── upgrade.js        # self-upgrade
+│   │   ├── use.js            # preview skill without installing
+│   │   ├── verify.js         # integrity verification
+│   │   └── watch.js          # watch skills for changes and auto-sync
 │   └── utils/
-│       ├── resolver.js       # source resolver (local / GitHub / GitLab / npm)
 │       ├── installer.js      # copy/symlink files to target dirs
 │       ├── lockfile.js       # read/write .skill-lock.json + content hash
+│       ├── mcp.js            # MCP server config read/write
+│       ├── profile.js        # profile CRUD, capture, apply utilities
+│       ├── resolver.js       # source resolver (local / GitHub / GitLab / npm)
 │       └── security.js       # static analysis scoring (0–100)
 ├── package.json
 ├── CHANGELOG.md              # Release history
