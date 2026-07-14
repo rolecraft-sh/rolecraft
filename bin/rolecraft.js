@@ -21,6 +21,7 @@ import { doctorCommand } from '../src/commands/doctor.js'
 import { agentsXmlCommand } from '../src/commands/agents-xml.js'
 import { mcpCommand } from '../src/commands/mcp.js'
 import { watchCommand } from '../src/commands/watch.js'
+import { profileCommand } from '../src/commands/profile.js'
 import agents from '../src/agents.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -52,7 +53,8 @@ Usage:
   rolecraft completions <shell>  Generate shell completions (bash|zsh|fish)
   rolecraft doctor               Run system health check
    rolecraft watch [<slug>]       Watch skills for changes and auto-sync
-   rolecraft mcp install <source> Install an MCP server (npm:, gh:, or local path)
+  rolecraft profile                Manage agent configuration profiles
+  rolecraft mcp install <source> Install an MCP server (npm:, gh:, or local path)
   rolecraft mcp list             List configured MCP servers
   rolecraft mcp remove <name>    Remove an MCP server
   rolecraft agents-xml           Generate skills XML for AGENTS.md
@@ -280,6 +282,12 @@ export async function main() {
       } else {
         await bundleCommand(sources, opts)
       }
+      break
+    }
+
+    case 'profile': {
+      if (args.includes('--help') || args.includes('-h')) { usage(); return }
+      await profileCommand(args)
       break
     }
 
