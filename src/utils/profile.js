@@ -1,12 +1,60 @@
-import { mkdir, readFile, writeFile, readdir, rm } from 'node:fs/promises'
+import { mkdir, readFile, writeFile, readdir, rm, access } from 'node:fs/promises'
 import { join } from 'node:path'
 import { homedir } from 'node:os'
+import agents from '../agents.js'
+import { listMcpServers } from './mcp.js'
+import { readLock, getGlobalLockPath, getProjectLockPath } from './lockfile.js'
 
 const PROFILES_DIR = '.agents/profiles'
 
 const PROFILE_NAME_RE = /^[a-zA-Z0-9][a-zA-Z0-9._-]*$/
 
 export const PROFILE_SCHEMA_VERSION = 1
+
+const AGENT_CONFIG_PATHS = {
+  opencode: {
+    global: () => join(homedir(), '.opencode.json'),
+    project: () => join(process.cwd(), 'opencode.json'),
+  },
+  claude: {
+    global: () => join(homedir(), '.claude', 'claude_code.json'),
+  },
+  cursor: {
+    project: () => join(process.cwd(), '.cursorrules'),
+  },
+  windsurf: {
+    global: () => join(homedir(), '.windsurf', 'mcp_config.json'),
+  },
+  devin: {
+    global: () => join(homedir(), '.devin', 'mcp_config.json'),
+  },
+  copilot: {
+    project: () => join(process.cwd(), '.github', 'copilot', 'instructions.md'),
+  },
+  continue: {
+    global: () => join(homedir(), '.continue', 'config.json'),
+  },
+  aider: {
+    global: () => join(homedir(), '.aider.conf.yml'),
+    project: () => join(process.cwd(), '.aider.conf.yml'),
+  },
+  gemini: {
+    global: () => join(homedir(), '.gemini', 'config', 'config.json'),
+  },
+}
+
+const AGENT_INSTRUCTION_PATHS = {
+  opencode: {
+    global: () => join(homedir(), '.opencode.json'),
+    project: () => join(process.cwd(), 'opencode.json'),
+  },
+  cursor: {
+    project: () => join(process.cwd(), '.cursorrules'),
+  },
+  copilot: {
+    project: () => join(process.cwd(), '.github', 'copilot', 'instructions.md'),
+  },
+}
 
 export function getProfilesDir() {
   return join(homedir(), PROFILES_DIR)
@@ -164,4 +212,146 @@ export async function listProfiles() {
   })
 
   return results
+}
+
+async function readFileIfExists(path) {
+  try {
+    return await readFile(path, 'utf-8')
+  } catch {
+    return null
+  }
+}
+
+function getAgentByFlag(flag) {
+  return agents.find(a => a.flag === flag) || null
+}
+
+export async function detectAgents() {
+  const found = []
+  for (const agent of agents) {
+    try {
+      await access(agent.getDir())
+      found.push(agent.flag)
+    } catch {
+      // agent not installed
+    }
+  }
+  return found
+}
+
+export async function captureAgentConfig(agentFlag) {
+  const paths = AGENT_CONFIG_PATHS[agentFlag]
+  if (!paths) return null
+
+  const result = {}
+  for (const [scope, getPath] of Object.entries(paths)) {
+    const content = await readFileIfExists(getPath())
+    if (content !== null) {
+      try {
+        result[scope] = JSON.parse(content)
+      } catch {
+        result[scope] = content
+      }
+    }
+  }
+
+  return Object.keys(result).length > 0 ? result : null
+}
+
+export async function captureAgentConfigRaw(agentFlag) {
+  const paths = AGENT_CONFIG_PATHS[agentFlag]
+  if (!paths) return null
+
+  const result = {}
+  for (const [scope, getPath] of Object.entries(paths)) {
+    const content = await readFileIfExists(getPath())
+    if (content !== null) {
+      result[scope] = content
+    }
+  }
+
+  return Object.keys(result).length > 0 ? result : null
+}
+
+export async function captureMcpServers(agentFlag) {
+  try {
+    const servers = await listMcpServers(agentFlag)
+    if (!servers || servers.length === 0) return null
+
+    const result = {}
+    for (const s of servers) {
+      result[s.name] = { command: s.command, args: s.args }
+    }
+    return result
+  } catch {
+    return null
+  }
+}
+
+export async function captureSkills(agentFlag) {
+  const [globalLock, projectLock] = await Promise.all([
+    readLock(getGlobalLockPath()),
+    readLock(getProjectLockPath(process.cwd())).catch(() => ({ skills: {} })),
+  ])
+
+  const allSkills = { ...globalLock.skills, ...projectLock.skills }
+  const slugs = []
+
+  for (const [slug, entry] of Object.entries(allSkills)) {
+    const targetAgents = entry.agents || []
+    if (targetAgents.includes(agentFlag) || targetAgents.includes('all') || targetAgents.includes('agents')) {
+      slugs.push(slug)
+    }
+  }
+
+  return slugs.length > 0 ? slugs : null
+}
+
+export async function captureInstructions(agentFlag) {
+  const paths = AGENT_INSTRUCTION_PATHS[agentFlag]
+  if (!paths) return null
+
+  const result = []
+  for (const [scope, getPath] of Object.entries(paths)) {
+    const content = await readFileIfExists(getPath())
+    if (content !== null) {
+      const filePath = getPath()
+      result.push({ file: filePath, contentSha: null, scope })
+    }
+  }
+
+  return result.length > 0 ? result : null
+}
+
+export async function captureAgentFull(agentFlag) {
+  const [config, mcpServers, skills, instructions] = await Promise.all([
+    captureAgentConfig(agentFlag),
+    captureMcpServers(agentFlag),
+    captureSkills(agentFlag),
+    captureInstructions(agentFlag),
+  ])
+
+  if (!config && !mcpServers && !skills && !instructions) return null
+
+  const entry = {}
+  if (config) entry.config = config
+  if (mcpServers) entry.mcpServers = mcpServers
+  if (skills) entry.skills = skills
+  if (instructions) entry.instructions = instructions
+
+  return entry
+}
+
+export async function captureAllAgents() {
+  const detected = await detectAgents()
+  const agentsData = {}
+
+  for (const flag of detected) {
+    const entry = await captureAgentFull(flag)
+    if (entry) {
+      agentsData[flag] = entry
+    }
+  }
+
+  return agentsData
 }

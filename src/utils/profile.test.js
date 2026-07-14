@@ -1,6 +1,6 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, existsSync } from 'node:fs'
+import { mkdtempSync, existsSync, constants } from 'node:fs'
 import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
@@ -240,12 +240,211 @@ describe('profile utils', () => {
   describe('ensureProfileDir', () => {
     it('creates the profiles directory', async () => {
       const dir = profileModule.getProfilesDir()
-      // delete it first
       await rm(dir, { recursive: true, force: true })
       assert.equal(existsSync(dir), false)
 
       await profileModule.ensureProfileDir()
       assert.equal(existsSync(dir), true)
+    })
+  })
+})
+
+describe('profile capture', () => {
+  let captureDir, captureModule, origHome, origCwd
+
+  before(async () => {
+    captureDir = mkdtempSync(join(tmpdir(), 'rolecraft-capture-test-'))
+    origHome = process.env.HOME
+    origCwd = process.cwd
+    process.env.HOME = captureDir
+    process.cwd = () => captureDir
+    await mkdir(join(captureDir, '.agents', 'profiles'), { recursive: true })
+    captureModule = await import('./profile.js')
+  })
+
+  after(async () => {
+    process.cwd = origCwd
+    await rm(captureDir, { recursive: true, force: true })
+    process.env.HOME = origHome
+  })
+
+  describe('detectAgents', () => {
+    it('returns empty when no agents installed', async () => {
+      const agents = await captureModule.detectAgents()
+      assert.ok(Array.isArray(agents))
+      assert.equal(agents.length, 0)
+    })
+  })
+
+  describe('captureAgentConfig', () => {
+    it('returns null when agent has no known config paths', async () => {
+      const result = await captureModule.captureAgentConfig('nonexistent-agent')
+      assert.equal(result, null)
+    })
+
+    it('returns null when config file does not exist', async () => {
+      const result = await captureModule.captureAgentConfig('opencode')
+      assert.equal(result, null)
+    })
+
+    it('captures config when file exists', async () => {
+      const configPath = join(captureDir, '.opencode.json')
+      await writeFile(configPath, JSON.stringify({ model: 'gpt-4', permission: { read: 'allow' } }))
+
+      const result = await captureModule.captureAgentConfig('opencode')
+      assert.ok(result)
+      assert.ok(result.global)
+      assert.equal(result.global.model, 'gpt-4')
+      assert.equal(result.global.permission.read, 'allow')
+    })
+
+    it('captures both global and project configs', async () => {
+      const globalPath = join(captureDir, '.opencode.json')
+      const projectPath = join(process.cwd(), 'opencode.json')
+      await writeFile(globalPath, JSON.stringify({ model: 'gpt-4' }))
+      await mkdir(join(process.cwd()), { recursive: true })
+      await writeFile(projectPath, JSON.stringify({ model: 'gpt-4o' }))
+
+      const result = await captureModule.captureAgentConfig('opencode')
+      assert.ok(result.global)
+      assert.ok(result.project)
+      assert.equal(result.global.model, 'gpt-4')
+      assert.equal(result.project.model, 'gpt-4o')
+
+      await rm(projectPath)
+    })
+  })
+
+  describe('captureMcpServers', () => {
+    it('returns null when no MCP servers configured', async () => {
+      const result = await captureModule.captureMcpServers('opencode')
+      assert.equal(result, null)
+    })
+
+    it('captures MCP servers when configured', async () => {
+      const mcpPath = join(captureDir, '.agents', 'mcp.json')
+      await writeFile(mcpPath, JSON.stringify({
+        mcpServers: {
+          github: { command: 'npx', args: ['-y', '@test/github'] },
+          db: { command: 'node', args: ['/path/to/db.js'] },
+        },
+      }))
+
+      const result = await captureModule.captureMcpServers('agents')
+      assert.ok(result)
+      assert.ok(result.github)
+      assert.equal(result.github.command, 'npx')
+      assert.ok(result.db)
+      assert.equal(result.db.command, 'node')
+    })
+  })
+
+  describe('captureSkills', () => {
+    it('returns null when no skills installed', async () => {
+      const result = await captureModule.captureSkills('opencode')
+      assert.equal(result, null)
+    })
+
+    it('captures skills from lockfile for the agent', async () => {
+      const lockPath = join(captureDir, '.agents', '.skill-lock.json')
+      await writeFile(lockPath, JSON.stringify({
+        version: 3,
+        skills: {
+          'owner/repo-a': { slug: 'owner/repo-a', agents: ['opencode'] },
+          'owner/repo-b': { slug: 'owner/repo-b', agents: ['cursor'] },
+          'owner/repo-c': { slug: 'owner/repo-c', agents: ['opencode', 'cursor'] },
+        },
+      }))
+
+      const result = await captureModule.captureSkills('opencode')
+      assert.ok(result)
+      assert.ok(result.includes('owner/repo-a'))
+      assert.ok(result.includes('owner/repo-c'))
+      assert.equal(result.includes('owner/repo-b'), false)
+    })
+
+    it('captures skills with "all" agent flag', async () => {
+      const lockPath = join(captureDir, '.agents', '.skill-lock.json')
+      await writeFile(lockPath, JSON.stringify({
+        version: 3,
+        skills: {
+          'owner/global-skill': { slug: 'owner/global-skill', agents: ['agents'] },
+        },
+      }))
+
+      const result = await captureModule.captureSkills('opencode')
+      assert.ok(result)
+      assert.ok(result.includes('owner/global-skill'))
+    })
+  })
+
+  describe('captureInstructions', () => {
+    it('captures opencode instructions from config', async () => {
+      const configPath = join(captureDir, '.opencode.json')
+      await writeFile(configPath, JSON.stringify({
+        instructions: ['AGENTS.md', 'CONTRIBUTING.md'],
+      }))
+
+      const result = await captureModule.captureInstructions('opencode')
+      assert.ok(result)
+      assert.ok(Array.isArray(result))
+    })
+
+    it('returns null for agent without instruction paths', async () => {
+      const result = await captureModule.captureInstructions('devin')
+      assert.equal(result, null)
+    })
+  })
+
+  describe('captureAgentFull', () => {
+    it('returns null when nothing is configured', async () => {
+      const subDir = join(captureDir, 'full-empty-' + Date.now())
+      await mkdir(subDir, { recursive: true })
+      process.env.HOME = subDir
+      process.cwd = () => subDir
+      const freshModule = await import('./profile.js')
+
+      const result = await freshModule.captureAgentFull('opencode')
+      assert.equal(result, null)
+
+      process.env.HOME = captureDir
+      process.cwd = () => captureDir
+    })
+
+    it('combines all captures for an agent', async () => {
+      const subDir = join(captureDir, 'full-with-' + Date.now())
+      await mkdir(subDir, { recursive: true })
+      process.env.HOME = subDir
+      process.cwd = () => subDir
+      const freshModule = await import('./profile.js')
+
+      const configPath = join(subDir, '.opencode.json')
+      await writeFile(configPath, JSON.stringify({ model: 'gpt-4' }))
+
+      const result = await freshModule.captureAgentFull('opencode')
+      assert.ok(result)
+      assert.ok(result.config)
+      assert.equal(result.config.global.model, 'gpt-4')
+
+      process.env.HOME = captureDir
+      process.cwd = () => captureDir
+    })
+  })
+
+  describe('captureAllAgents', () => {
+    it('returns empty object when no agents', async () => {
+      const result = await captureModule.captureAllAgents()
+      assert.ok(typeof result === 'object')
+      assert.equal(Object.keys(result).length, 0)
+    })
+
+    it('captures configured agents', async () => {
+      await mkdir(join(captureDir, '.agents', 'skills', 'test-skill'), { recursive: true })
+      const configPath = join(captureDir, '.opencode.json')
+      await writeFile(configPath, JSON.stringify({ model: 'gpt-4' }))
+
+      const result = await captureModule.captureAllAgents()
+      assert.ok(typeof result === 'object')
     })
   })
 })
