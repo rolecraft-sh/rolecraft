@@ -14,6 +14,9 @@ import {
   applyProfileData,
   formatApplyResults,
   validateProfile,
+  ensureProfileDir,
+  profilePath,
+  PROFILE_SCHEMA_VERSION,
 } from '../utils/profile.js'
 import agents from '../agents.js'
 
@@ -394,7 +397,16 @@ export async function profileImportCommand(path) {
     throw new Error(`Invalid profile data:\n  ${validation.errors.join('\n  ')}`)
   }
 
-  await writeProfile(data)
+  const enriched = {
+    ...data,
+    name: data.name,
+    version: data.version ?? PROFILE_SCHEMA_VERSION,
+    updatedAt: new Date().toISOString(),
+    createdAt: data.createdAt ?? new Date().toISOString(),
+  }
+
+  await ensureProfileDir()
+  await writeFile(profilePath(data.name), JSON.stringify(enriched, null, 2) + '\n', 'utf-8')
   console.log(`\n✅ Profile "${data.name}" imported (${Object.keys(data.agents).length} agent(s)).`)
 
   const current = await captureAllAgents()
