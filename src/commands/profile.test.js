@@ -50,12 +50,22 @@ describe('profile command dispatcher', () => {
     const logs = captureLogs()
     await profileCmd.profileCommand(['--help'])
     assert.ok(logs.some(l => l.includes('rolecraft profile')))
+    assert.ok(logs.some(l => l.includes('save')))
+    assert.ok(logs.some(l => l.includes('apply')))
+  })
+
+  it('shows usage for -h', async () => {
+    const logs = captureLogs()
+    await profileCmd.profileCommand(['-h'])
+    assert.ok(logs.some(l => l.includes('rolecraft profile')))
+    assert.ok(logs.some(l => l.includes('save')))
   })
 
   it('shows usage for no args', async () => {
     const logs = captureLogs()
     await profileCmd.profileCommand([])
     assert.ok(logs.some(l => l.includes('rolecraft profile')))
+    assert.ok(logs.some(l => l.includes('save')))
   })
 
   it('shows error for unknown subcommand', async () => {

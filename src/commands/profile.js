@@ -390,7 +390,7 @@ export async function profileImportCommand(path) {
 
   const current = await captureAllAgents()
   if (Object.keys(current).length > 0) {
-    console.log('\n📊 Run `rolecraft profile diff ' + data.name + '` to see differences from current config.')
+    console.log(`\n📊 Run \`rolecraft profile diff ${data.name}\` to see differences from current config.`)
   }
 }
 
@@ -497,8 +497,8 @@ export async function profileShowCommand(name) {
 
   const agentCount = data.agents ? Object.keys(data.agents).length : 0
   console.log(`\nProfile: ${data.name}`)
-  if (data.description) console.log(`Description: ${data.description}`)
-  console.log(`Version: ${data.version}`)
+  console.log(`Description: ${data.description || '(not set)'}`)
+  console.log(`Version: ${data.version ?? '(not set)'}`)
   console.log(`Created: ${data.createdAt ? new Date(data.createdAt).toLocaleDateString() : 'unknown'}`)
   console.log(`Updated: ${data.updatedAt ? new Date(data.updatedAt).toLocaleDateString() : 'unknown'}`)
   console.log(`Agents: ${agentCount}\n`)

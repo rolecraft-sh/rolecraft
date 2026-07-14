@@ -286,7 +286,6 @@ export async function main() {
     }
 
     case 'profile': {
-      if (args.includes('--help') || args.includes('-h')) { usage(); return }
       await profileCommand(args)
       break
     }
