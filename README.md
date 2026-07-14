@@ -80,6 +80,20 @@
 
 ---
 
+## Onboarding: zero to productive in one command
+
+New project? New team member? One command installs your skills + MCP servers + conventions to **every AI agent** on the machine:
+
+```bash
+# install globally
+npm install -g rolecraft
+
+# one command: detect all agents + install skill + MCP servers
+rolecraft setup sametcelikbicak/task-decomposer
+```
+
+That's it. The skill is now active in every agent you use — opencode, cursor, claude-code, copilot, aider, all of them. [→ Full onboarding guide](docs/guides/onboarding.md)
+
 ## Quick start
 
 ```bash

@@ -1,5 +1,16 @@
 # Install
 
+## One-command onboarding
+
+The fastest way to go from zero to productive:
+
+```bash
+npm install -g rolecraft
+rolecraft setup ./team-skill
+```
+
+This detects every AI agent on your machine and installs the skill + MCP servers to all of them. [→ Full onboarding guide](guides/onboarding.md)
+
 ## Quick install
 
 ```bash
