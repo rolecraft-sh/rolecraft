@@ -151,9 +151,7 @@ export async function setupCommand(source, options = {}) {
     const targets = agents.map(a => a.flag)
     targets.push('project')
 
-    if (options.yes) {
-      // skip confirmation, proceed with install
-    } else if (options.dryRun) {
+    if (options.dryRun) {
       console.log('📋 Dry-run — no files will be copied:\n')
       console.log(`   Skill:     ${resolved.name} (${resolved.slug})`)
       console.log(`   Source:    ${source}`)
@@ -163,11 +161,22 @@ export async function setupCommand(source, options = {}) {
       return
     }
 
+    if (options.yes) {
+      // skip confirmation, proceed with install
+    }
+
     const results = await installSkill(resolved, targets)
 
-    console.log('✅ Installed to all detected agents:\n')
+    const pathCounts = new Map()
     for (const r of results) {
-      console.log(`   ${r.label} → ${r.path}`)
+      const count = pathCounts.get(r.path) || 0
+      pathCounts.set(r.path, count + 1)
+    }
+
+    console.log(`✅ Installed to ${results.length} agent(s):\n`)
+    for (const [path, count] of pathCounts) {
+      const detail = count > 1 ? ` (×${count} agents)` : ''
+      console.log(`   ${path}${detail}`)
     }
 
     if (resolved.content) {

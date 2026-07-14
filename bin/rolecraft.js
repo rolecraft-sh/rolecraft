@@ -106,14 +106,16 @@ export async function main() {
         usage()
         return
       }
-      const source = args[0]
+      const installFlags = args.filter(a => a.startsWith('-'))
+      const installPos = args.filter(a => !a.startsWith('-'))
+      const source = installPos[0]
       if (!source) {
         console.error('Usage: rolecraft install <source>')
         console.error('Source can be a local path (./, /, ~), GitHub ref (owner/repo), or npm package (npm:package)')
         throw new Error('Missing source argument.')
       }
 
-      const flags = args.slice(1)
+      const flags = installFlags
       const scopeFlags = ['--global', '--project', '--all', ...agents.map(a => `--${a.flag}`)]
       const hasScopeFlag = flags.some(f => scopeFlags.includes(f))
       const options = hasScopeFlag ? {
@@ -159,7 +161,9 @@ export async function main() {
 
     case 'use': {
       if (args.includes('--help') || args.includes('-h')) { usage(); return }
-      const source = args[0]
+      const useFlags = args.filter(a => a.startsWith('-'))
+      const usePos = args.filter(a => !a.startsWith('-'))
+      const source = usePos[0]
       if (!source) {
         console.error('Usage: rolecraft use <source>')
         console.error('Source can be a local path (./, /, ~), GitHub ref (owner/repo), or npm package (npm:package)')
@@ -216,9 +220,10 @@ export async function main() {
 
     case 'setup': {
       if (args.includes('--help') || args.includes('-h')) { usage(); return }
-      const source = args[0]
-      const flags = args.slice(1)
-      await setupCommand(source, { dryRun: flags.includes('--dry-run'), yes: flags.includes('--yes') || flags.includes('-y') })
+      const setupFlags = args.filter(a => a.startsWith('-'))
+      const setupPos = args.filter(a => !a.startsWith('-'))
+      const source = setupPos[0]
+      await setupCommand(source, { dryRun: setupFlags.includes('--dry-run'), yes: setupFlags.includes('--yes') || setupFlags.includes('-y') })
       break
     }
 
