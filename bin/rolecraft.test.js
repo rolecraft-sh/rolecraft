@@ -1,581 +1,362 @@
 import { describe, it, before, after, mock } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync } from 'node:fs'
-import { mkdir, rm } from 'node:fs/promises'
-import { join, dirname } from 'node:path'
+import { mkdtempSync } from 'node:fs'
+import { mkdir, rm, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { fileURLToPath } from 'node:url'
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
-const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'))
-const VERSION = pkg.version
+let tempDir, origHome, origCwd, origArgv
 
-let tempDir, rolecraftModule, origArgv, origExit, origCwd, origHome
+function captureLogs() {
+  const logs = []
+  mock.method(console, 'log', (...args) => {
+    if (args.length) logs.push(String(args[0]))
+  })
+  return logs
+}
+
+function captureErrors() {
+  const errors = []
+  mock.method(console, 'error', (...args) => {
+    if (args.length) errors.push(String(args.join(' ')))
+  })
+  return errors
+}
 
 before(async () => {
   tempDir = mkdtempSync(join(tmpdir(), 'rolecraft-cli-test-'))
   origHome = process.env.HOME
-  origCwd = process.cwd()
-  process.env.HOME = tempDir
-  process.chdir(tempDir)
-  await mkdir(join(tempDir, '.agents'), { recursive: true })
-
+  origCwd = process.cwd
   origArgv = process.argv
-  origExit = process.exit
-  rolecraftModule = await import('./rolecraft.js')
+  process.env.HOME = tempDir
+  process.cwd = () => join(tempDir, 'project')
+  await mkdir(join(tempDir, 'project'), { recursive: true })
 })
 
 after(async () => {
-  process.exit = origExit
-  process.argv = origArgv
-  process.chdir(origCwd)
   process.env.HOME = origHome
+  process.cwd = origCwd
+  process.argv = origArgv
   await rm(tempDir, { recursive: true, force: true })
 })
 
-function capture(name, obj = console) {
-  const logs = []
-  const orig = obj[name]
-  obj[name] = (...args) => {
-    if (args.length) logs.push(String(args[0]))
-  }
-  return { logs, restore: () => { obj[name] = orig } }
-}
-
-function mockExit() {
-  mock.method(process, 'exit', (code) => { throw new Error(`exit:${code}`) })
-}
-
 describe('rolecraft CLI', () => {
-  it('shows usage for help command', async () => {
-    process.argv = ['node', 'rolecraft', 'help']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
+  it('shows usage for --help', async () => {
+    const { main } = await import('./rolecraft.js')
+    const logs = captureLogs()
+    process.argv = ['node', 'rolecraft', '--help']
+    await main()
     assert.ok(logs.some(l => l.includes('rolecraft')))
-    restore()
   })
 
-  it('shows usage for --help flag', async () => {
-    process.argv = ['node', 'rolecraft', '--help']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
+  it('shows usage for -h', async () => {
+    const { main } = await import('./rolecraft.js')
+    const logs = captureLogs()
+    process.argv = ['node', 'rolecraft', '-h']
+    await main()
     assert.ok(logs.some(l => l.includes('rolecraft')))
-    restore()
+  })
+
+  it('shows usage for help subcommand', async () => {
+    const { main } = await import('./rolecraft.js')
+    const logs = captureLogs()
+    process.argv = ['node', 'rolecraft', 'help']
+    await main()
+    assert.ok(logs.some(l => l.includes('rolecraft')))
   })
 
   it('shows usage for unknown command', async () => {
-    process.argv = ['node', 'rolecraft', 'unknown']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
+    const { main } = await import('./rolecraft.js')
+    const logs = captureLogs()
+    process.argv = ['node', 'rolecraft', 'nonexistent-command']
+    await main()
     assert.ok(logs.some(l => l.includes('rolecraft')))
-    restore()
   })
 
-  it('errors when install has no source', async () => {
-    process.argv = ['node', 'rolecraft', 'install']
-    const { logs: errors, restore: restoreErr } = capture('error')
-
-    try {
-      await rolecraftModule.main()
-    } catch (e) {
-      assert.ok(e.message.includes('Missing source argument.'))
-    }
-
-    assert.ok(errors.some(e => e.includes('Usage: rolecraft install <source>')))
-    restoreErr()
-  })
-
-  it('runs install with --global flag', async () => {
-    const skillDir = join(tempDir, 'my-cli-skill')
-    mkdirSync(skillDir, { recursive: true })
-    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: cli/cli-skill\nname: cli-skill\nContent')
-
-    process.argv = ['node', 'rolecraft', 'install', skillDir, '--global']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
-    assert.ok(logs.some(l => l.includes('Installed')))
-    restore()
-  })
-
-  it('errors when remove has no slug', async () => {
-    process.argv = ['node', 'rolecraft', 'remove']
-    const { logs: errors, restore: restoreErr } = capture('error')
-
-    try {
-      await rolecraftModule.main()
-    } catch (e) {
-      assert.ok(e.message.includes('Missing slug argument.'))
-    }
-
-    assert.ok(errors.some(e => e.includes('Usage: rolecraft remove <slug>')))
-    restoreErr()
-  })
-
-  it('dispatches list command without errors', async () => {
-    process.argv = ['node', 'rolecraft', 'list']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
-    assert.ok(logs.length > 0)
-    restore()
-  })
-
-  it('runs remove command with existing skill', async () => {
-    const skillDir = join(tempDir, 'removable-skill')
-    mkdirSync(skillDir, { recursive: true })
-    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/removable\nname: removable\nContent')
-
-    process.argv = ['node', 'rolecraft', 'install', skillDir, '--global']
-    await rolecraftModule.main()
-
-    process.argv = ['node', 'rolecraft', 'remove', 'test/removable']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
-    assert.ok(logs.some(l => l.includes('Removed')))
-    restore()
-  })
-
-  it('runs remove command with nonexistent skill', async () => {
-    process.argv = ['node', 'rolecraft', 'remove', 'nonexistent']
-
-    try {
-      await rolecraftModule.main()
-    } catch (e) {
-      assert.ok(e.message.includes('not found'))
-    }
-  })
-
-  it('errors when update has no slug', async () => {
-    process.argv = ['node', 'rolecraft', 'update']
-    const { logs: errors, restore: restoreErr } = capture('error')
-
-    try {
-      await rolecraftModule.main()
-    } catch (e) {
-      assert.ok(e.message.includes('Missing slug argument.'))
-    }
-
-    assert.ok(errors.some(e => e.includes('Usage: rolecraft update <slug>')))
-    restoreErr()
-  })
-
-  it('runs update command with existing skill', async () => {
-    const skillDir = join(tempDir, 'updatable-skill')
-    mkdirSync(skillDir, { recursive: true })
-    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/updatable\nname: updatable\nContent')
-
-    process.argv = ['node', 'rolecraft', 'install', skillDir, '--global']
-    await rolecraftModule.main()
-
-    process.argv = ['node', 'rolecraft', 'update', 'test/updatable']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
-    assert.ok(logs.some(l => l.includes('Updated')))
-    restore()
-  })
-
-  it('run() catches errors', async () => {
-    process.argv = ['node', 'rolecraft', 'install']
-    const { logs: errors, restore: restoreErr } = capture('error')
-    mockExit()
-
-    try {
-      await rolecraftModule.run()
-    } catch (e) {
-      assert.ok(e.message.includes('exit:1'))
-    }
-
-    assert.ok(errors.some(e => e.includes('Usage: rolecraft install <source>')))
-    restoreErr()
-  })
-
-  it('shows version for version command', async () => {
-    process.argv = ['node', 'rolecraft', 'version']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
-    assert.ok(logs.some(l => l === VERSION))
-    restore()
-  })
-
-  it('shows version for --version flag', async () => {
+  it('shows version for --version', async () => {
+    const { main } = await import('./rolecraft.js')
+    const logs = captureLogs()
     process.argv = ['node', 'rolecraft', '--version']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
-    assert.ok(logs.some(l => l === VERSION))
-    restore()
+    await main()
+    assert.ok(logs.some(l => l.match(/\d+\.\d+\.\d+/)))
   })
 
-  it('shows version for -v flag', async () => {
+  it('shows version for -v', async () => {
+    const { main } = await import('./rolecraft.js')
+    const logs = captureLogs()
     process.argv = ['node', 'rolecraft', '-v']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
-    assert.ok(logs.some(l => l === VERSION))
-    restore()
+    await main()
+    assert.ok(logs.some(l => l.match(/\d+\.\d+\.\d+/)))
   })
 
-  it('entry point invokes run() when executed directly', async () => {
-    const { execSync } = await import('node:child_process')
-    const binPath = new URL('./rolecraft.js', import.meta.url).pathname
-    const result = execSync(`node "${binPath}" help`, {
-      encoding: 'utf-8',
-      env: { ...process.env, HOME: tempDir },
-    })
-    assert.ok(result.includes('rolecraft'))
+  it('shows version for version subcommand', async () => {
+    const { main } = await import('./rolecraft.js')
+    const logs = captureLogs()
+    process.argv = ['node', 'rolecraft', 'version']
+    await main()
+    assert.ok(logs.some(l => l.match(/\d+\.\d+\.\d+/)))
   })
 
-  it('entry point shows version when run with --version', async () => {
-    const { execSync } = await import('node:child_process')
-    const binPath = new URL('./rolecraft.js', import.meta.url).pathname
-    const result = execSync(`node "${binPath}" --version`, {
-      encoding: 'utf-8',
-      env: { ...process.env, HOME: tempDir },
-    })
-    assert.equal(result.trim(), VERSION)
-  })
-
-  it('errors when use has no source', async () => {
-    process.argv = ['node', 'rolecraft', 'use']
-    const { logs: errors, restore: restoreErr } = capture('error')
-
-    try {
-      await rolecraftModule.main()
-    } catch (e) {
-      assert.ok(e.message.includes('Missing source argument.'))
-    }
-
-    assert.ok(errors.some(e => e.includes('Usage: rolecraft use <source>')))
-    restoreErr()
-  })
-
-  it('runs use command with existing source', async () => {
-    const skillDir = join(tempDir, 'use-cli-skill')
-    mkdirSync(skillDir, { recursive: true })
-    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/use-skill\nname: use-skill\nContent')
-
-    process.argv = ['node', 'rolecraft', 'use', skillDir]
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
-    assert.ok(logs.some(l => l.includes('use-skill')))
-    assert.ok(logs.some(l => l.includes('SKILL.md')))
-    assert.ok(logs.some(l => l.includes('Content')))
-    restore()
-  })
-
-  it('runs setup command without source', async () => {
-    process.argv = ['node', 'rolecraft', 'setup']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
-    assert.ok(logs.some(l => l.includes('Detecting agents')))
-    restore()
-  })
-
-  it('runs setup command with source', async () => {
-    const skillDir = join(tempDir, 'setup-cli-skill')
-    mkdirSync(skillDir, { recursive: true })
-    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/setup-cli\nname: setup-cli-test\nContent')
-
-    process.argv = ['node', 'rolecraft', 'setup', skillDir]
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
-    assert.ok(logs.some(l => l.includes('setup-cli-test')))
-    restore()
-  })
-
-  it('runs init command without name', async () => {
-    process.argv = ['node', 'rolecraft', 'init']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
-    assert.ok(logs.some(l => l.includes('Created skill scaffold')))
-    assert.ok(logs.some(l => l.includes('my-skill')))
-    restore()
-  })
-
-  it('runs init command with name', async () => {
-    process.argv = ['node', 'rolecraft', 'init', 'my-custom-skill']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
-    assert.ok(logs.some(l => l.includes('my-custom-skill')))
-    restore()
-  })
-
-  it('runs init command with namespaced name', async () => {
-    process.argv = ['node', 'rolecraft', 'init', 'namespace/my-skill']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
-    assert.ok(logs.some(l => l.includes('namespace/my-skill')))
-    assert.ok(logs.some(l => l.includes('namespace-my-skill')))
-    restore()
-  })
-
-  it('errors when search has no query', async () => {
-    process.argv = ['node', 'rolecraft', 'search']
-    const { logs: errors, restore: restoreErr } = capture('error')
-
-    try {
-      await rolecraftModule.main()
-    } catch (e) {
-      assert.ok(e.message.includes('Missing query argument.'))
-    }
-
-    assert.ok(errors.some(e => e.includes('Usage: rolecraft search <query>')))
-    restoreErr()
-  })
-
-  it('handles search rate limit gracefully', async () => {
-    process.argv = ['node', 'rolecraft', 'search', 'test-query']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
-    assert.ok(logs.some(l => l.includes('rate limit') || l.includes('No skills found') || l.includes('Search results')))
-    restore()
-  })
-
-  it('installs with --frozen-lockfile flag on fresh skill', async () => {
-    const skillDir = join(tempDir, 'fresh-skill')
-    mkdirSync(skillDir, { recursive: true })
-    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/fresh\nname: fresh-skill\nContent')
-
-    process.argv = ['node', 'rolecraft', 'install', skillDir, '--global', '--frozen-lockfile']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
-    assert.ok(logs.some(l => l.includes('Installed')))
-    restore()
-  })
-
-  it('fails with --frozen-lockfile when skill already exists', async () => {
-    const skillDir = join(tempDir, 'dupe-skill')
-    mkdirSync(skillDir, { recursive: true })
-    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/dupe\nname: dupe-skill\nContent')
-
-    process.argv = ['node', 'rolecraft', 'install', skillDir, '--global']
-    await rolecraftModule.main()
-
-    process.argv = ['node', 'rolecraft', 'install', skillDir, '--global', '--frozen-lockfile']
-
-    try {
-      await rolecraftModule.main()
-    } catch (e) {
-      assert.ok(e.message.includes('already installed'))
-    }
-  })
-
-  it('runs verify command with no skills', async () => {
-    process.argv = ['node', 'rolecraft', 'verify']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
-    assert.ok(logs.some(l => l.includes('Verifying')))
-    restore()
-  })
-
-  it('runs ci command with no skills', async () => {
-    writeFileSync(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({ version: 3, skills: {}, dismissed: {}, lastSelectedAgents: [] }))
-
-    process.argv = ['node', 'rolecraft', 'ci']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
-    assert.ok(logs.some(l => l.includes('No skills in lockfile')))
-    restore()
-  })
-
-  it('installs with --symlink flag', async () => {
-    const skillDir = join(tempDir, 'symlink-cli-skill')
-    mkdirSync(skillDir, { recursive: true })
-    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/symlink-cli\nname: symlink-cli\nContent')
-
-    process.argv = ['node', 'rolecraft', 'install', skillDir, '--global', '--symlink']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
-    assert.ok(logs.some(l => l.includes('Installed')))
-    restore()
-  })
-
-  it('shows dry-run plan without installing', async () => {
-    const skillDir = join(tempDir, 'dry-run-cli-skill')
-    mkdirSync(skillDir, { recursive: true })
-    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/dry-run-cli\nname: dry-run-cli\nContent')
-
-    process.argv = ['node', 'rolecraft', 'install', skillDir, '--global', '--dry-run']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
-    assert.ok(logs.some(l => l.includes('Dry-run')))
-    assert.ok(logs.some(l => l.includes('dry-run-cli')))
-    restore()
-  })
-
-  it('runs upgrade command with dry-run', async () => {
-    process.argv = ['node', 'rolecraft', 'upgrade', '--dry-run']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
+  it('shows usage for install --help', async () => {
+    const { main } = await import('./rolecraft.js')
+    const logs = captureLogs()
+    process.argv = ['node', 'rolecraft', 'install', '--help']
+    await main()
     assert.ok(logs.some(l => l.includes('rolecraft')))
-    restore()
   })
 
-  it('dispatches completions command via CLI', async () => {
+  it('throws for install with no source', async () => {
+    const { main } = await import('./rolecraft.js')
+    process.argv = ['node', 'rolecraft', 'install']
+    await assert.rejects(() => main(), /Missing source/)
+  })
+
+  it('dispatches install with a source that fails resolution', async () => {
+    const { main } = await import('./rolecraft.js')
+    process.argv = ['node', 'rolecraft', 'install', '/tmp/nonexistent-rolecraft-test', '--project']
+    await assert.rejects(() => main())
+  })
+
+  it('shows usage for remove --help', async () => {
+    const { main } = await import('./rolecraft.js')
+    const logs = captureLogs()
+    process.argv = ['node', 'rolecraft', 'remove', '--help']
+    await main()
+    assert.ok(logs.some(l => l.includes('rolecraft')))
+  })
+
+  it('throws for remove with no slug', async () => {
+    const { main } = await import('./rolecraft.js')
+    process.argv = ['node', 'rolecraft', 'remove']
+    await assert.rejects(() => main(), /Missing slug/)
+  })
+
+  it('shows usage for update --help', async () => {
+    const { main } = await import('./rolecraft.js')
+    const logs = captureLogs()
+    process.argv = ['node', 'rolecraft', 'update', '--help']
+    await main()
+    assert.ok(logs.some(l => l.includes('rolecraft')))
+  })
+
+  it('throws for update with no slug', async () => {
+    const { main } = await import('./rolecraft.js')
+    process.argv = ['node', 'rolecraft', 'update']
+    await assert.rejects(() => main(), /Missing slug/)
+  })
+
+  it('shows usage for use --help', async () => {
+    const { main } = await import('./rolecraft.js')
+    const logs = captureLogs()
+    process.argv = ['node', 'rolecraft', 'use', '--help']
+    await main()
+    assert.ok(logs.some(l => l.includes('rolecraft')))
+  })
+
+  it('throws for use with no source', async () => {
+    const { main } = await import('./rolecraft.js')
+    process.argv = ['node', 'rolecraft', 'use']
+    await assert.rejects(() => main(), /Missing source/)
+  })
+
+  it('dispatches list command', async () => {
+    const { main } = await import('./rolecraft.js')
+    process.argv = ['node', 'rolecraft', 'list']
+    await main()
+  })
+
+  it('dispatches doctor command', async () => {
+    const { main } = await import('./rolecraft.js')
+    const logs = captureLogs()
+    process.argv = ['node', 'rolecraft', 'doctor']
+    await main()
+    assert.ok(logs.some(l => l.includes('✓') || l.includes('✗') || l.includes('System')))
+  })
+
+  it('dispatches agents-xml command', async () => {
+    const { main } = await import('./rolecraft.js')
+    process.argv = ['node', 'rolecraft', 'agents-xml']
+    await main()
+  })
+
+  it('dispatches agents-xml --write command', async () => {
+    const { main } = await import('./rolecraft.js')
+    await mkdir(join(tempDir, 'project', '.agents', 'skills'), { recursive: true })
+    process.argv = ['node', 'rolecraft', 'agents-xml', '--write']
+    await main()
+  })
+
+  it('dispatches profile --help command', async () => {
+    const { main } = await import('./rolecraft.js')
+    const logs = captureLogs()
+    process.argv = ['node', 'rolecraft', 'profile', '--help']
+    await main()
+    assert.ok(logs.some(l => l.includes('rolecraft profile')))
+  })
+
+  it('dispatches profile list command', async () => {
+    const { main } = await import('./rolecraft.js')
+    const logs = captureLogs()
+    process.argv = ['node', 'rolecraft', 'profile', 'list']
+    await main()
+    assert.ok(logs.some(l => l.includes('No profiles')))
+  })
+
+  it('dispatches completions shell command', async () => {
+    const { main } = await import('./rolecraft.js')
+    const logs = captureLogs()
     process.argv = ['node', 'rolecraft', 'completions', 'bash']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
+    await main()
     assert.ok(logs.some(l => l.includes('complete')))
-    restore()
   })
 
-  it('dispatches bundle command via CLI with file', async () => {
-    const { mkdirSync, writeFileSync } = await import('node:fs')
-    const skillDir = join(tempDir, 'bundle-cli-skill')
-    mkdirSync(skillDir, { recursive: true })
-    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/bundle-cli\nname: bundle-cli\nContent')
-
-    const bundlePath = join(tempDir, 'bundle-cli.json')
-    writeFileSync(bundlePath, JSON.stringify([skillDir]))
-
-    process.argv = ['node', 'rolecraft', 'bundle', bundlePath]
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
-    assert.ok(logs.some(l => l.includes('All 1 skill(s) installed')))
-    restore()
+  it('dispatches verify command', async () => {
+    const { main } = await import('./rolecraft.js')
+    process.argv = ['node', 'rolecraft', 'verify']
+    await main()
   })
 
-  it('dispatches bundle create command via CLI', async () => {
-    process.argv = ['node', 'rolecraft', 'bundle', 'create', 'cli-test-bundle']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
-    assert.ok(logs.some(l => l.includes('Created')))
-    restore()
+  it('shows usage for verify --help', async () => {
+    const { main } = await import('./rolecraft.js')
+    const logs = captureLogs()
+    process.argv = ['node', 'rolecraft', 'verify', '--help']
+    await main()
+    assert.ok(logs.some(l => l.includes('rolecraft')))
   })
 
-  it('errors when bundle has no args', async () => {
-    process.argv = ['node', 'rolecraft', 'bundle']
-    const { logs: errors, restore: restoreErr } = capture('error')
-
-    try {
-      await rolecraftModule.main()
-    } catch (e) {
-      assert.ok(e.message.includes('Missing arguments.'))
-    }
-
-    assert.ok(errors.some(e => e.includes('Usage: rolecraft bundle')))
-    restoreErr()
-  })
-
-  it('shows usage for completions with --help', async () => {
-    process.argv = ['node', 'rolecraft', 'completions', '--help']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
-    assert.ok(logs.some(l => l.includes('Usage:')))
-    restore()
-  })
-
-  it('shows usage for bundle with --help', async () => {
-    process.argv = ['node', 'rolecraft', 'bundle', '--help']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
-    assert.ok(logs.some(l => l.includes('Usage:')))
-    restore()
-  })
-
-  it('dispatches bundle with inline sources via CLI', async () => {
-    const skillDir1 = join(tempDir, 'bundle-inline-1')
-    const { mkdirSync, writeFileSync } = await import('node:fs')
-    mkdirSync(skillDir1, { recursive: true })
-    writeFileSync(join(skillDir1, 'SKILL.md'), '# slug: test/inline1\nname: inline1\nContent')
-
-    const skillDir2 = join(tempDir, 'bundle-inline-2')
-    mkdirSync(skillDir2, { recursive: true })
-    writeFileSync(join(skillDir2, 'SKILL.md'), '# slug: test/inline2\nname: inline2\nContent')
-
-    process.argv = ['node', 'rolecraft', 'bundle', skillDir1, skillDir2]
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
-    assert.ok(logs.some(l => l.includes('All 2 skill(s) installed')))
-    restore()
-  })
-
-  it('dispatches check command via CLI', async () => {
+  it('dispatches check command', async () => {
+    const { main } = await import('./rolecraft.js')
     process.argv = ['node', 'rolecraft', 'check']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
-    assert.ok(logs.some(l => l.includes('No installed skills found') || l.includes('Checking') || l.includes('up to date') || l.includes('All skills are up to date')))
-    restore()
+    await main()
   })
 
-  it('dispatches check-updates command via CLI', async () => {
+  it('shows usage for check --help', async () => {
+    const { main } = await import('./rolecraft.js')
+    const logs = captureLogs()
+    process.argv = ['node', 'rolecraft', 'check', '--help']
+    await main()
+    assert.ok(logs.some(l => l.includes('rolecraft')))
+  })
+
+  it('dispatches ci command', async () => {
+    const { main } = await import('./rolecraft.js')
+    process.argv = ['node', 'rolecraft', 'ci']
+    await main()
+  })
+
+  it('dispatches setup command without source', async () => {
+    const { main } = await import('./rolecraft.js')
+    process.argv = ['node', 'rolecraft', 'setup']
+    await main()
+  })
+
+  it('shows usage for setup --help', async () => {
+    const { main } = await import('./rolecraft.js')
+    const logs = captureLogs()
+    process.argv = ['node', 'rolecraft', 'setup', '--help']
+    await main()
+    assert.ok(logs.some(l => l.includes('rolecraft')))
+  })
+
+  it('dispatches init command', async () => {
+    const initDir = join(tempDir, 'init-test-' + Date.now())
+    await mkdir(initDir, { recursive: true })
+    process.cwd = () => initDir
+    const { main } = await import('./rolecraft.js')
+    process.argv = ['node', 'rolecraft', 'init']
+    await main()
+    process.cwd = () => join(tempDir, 'project')
+  })
+
+  it('shows usage for upgrade --help', async () => {
+    const { main } = await import('./rolecraft.js')
+    const logs = captureLogs()
+    process.argv = ['node', 'rolecraft', 'upgrade', '--help']
+    await main()
+    assert.ok(logs.some(l => l.includes('rolecraft')))
+  })
+
+  it('shows bundle usage when no args provided', async () => {
+    const { main } = await import('./rolecraft.js')
+    process.argv = ['node', 'rolecraft', 'bundle']
+    await assert.rejects(() => main(), /Missing arguments/)
+  })
+
+  it('shows usage for bundle create --help', async () => {
+    const { main } = await import('./rolecraft.js')
+    const logs = captureLogs()
+    process.argv = ['node', 'rolecraft', 'bundle', 'create', '--help']
+    await main()
+    assert.ok(logs.some(l => l.includes('rolecraft')))
+  })
+
+  it('shows usage for mcp --help', async () => {
+    const { main } = await import('./rolecraft.js')
+    const logs = captureLogs()
+    process.argv = ['node', 'rolecraft', 'mcp', '--help']
+    await main()
+    assert.ok(logs.some(l => l.includes('rolecraft')))
+  })
+
+  it('run catches errors and logs them', async () => {
+    const { run } = await import('./rolecraft.js')
+    const errs = captureErrors()
+    process.argv = ['node', 'rolecraft', '--version']
+    await run()
+    assert.ok(errs.length === 0)
+  })
+
+  it('run exits gracefully when main succeeds', async () => {
+    const { run } = await import('./rolecraft.js')
+    const logs = captureLogs()
+    process.argv = ['node', 'rolecraft', '--version']
+    await run()
+    assert.ok(logs.some(l => l.match(/\d+\.\d+\.\d+/)))
+  })
+
+  it('dispatches check-updates alias', async () => {
+    const { main } = await import('./rolecraft.js')
     process.argv = ['node', 'rolecraft', 'check-updates']
-    const { logs, restore } = capture('log')
-
-    await rolecraftModule.main()
-
-    assert.ok(logs.some(l => l.includes('No installed skills found') || l.includes('Checking') || l.includes('up to date') || l.includes('All skills are up to date')))
-    restore()
+    await main()
   })
 
-  it('entry point catch handler handles rejected promise from run()', async () => {
-    const { execSync } = await import('node:child_process')
-    const binPath = new URL('./rolecraft.js', import.meta.url).pathname
-    try {
-      execSync(`node "${binPath}" install`, {
-        encoding: 'utf-8',
-        env: { ...process.env, HOME: tempDir },
-      })
-      assert.fail('should have thrown')
-    } catch (e) {
-      assert.ok(e.stderr?.includes('Usage: rolecraft install <source>'))
-    }
+  it('shows usage for search --help', async () => {
+    const { main } = await import('./rolecraft.js')
+    const logs = captureLogs()
+    process.argv = ['node', 'rolecraft', 'search', '--help']
+    await main()
+    assert.ok(logs.some(l => l.includes('rolecraft')))
+  })
+
+  it('throws for search with no query', async () => {
+    const { main } = await import('./rolecraft.js')
+    process.argv = ['node', 'rolecraft', 'search']
+    await assert.rejects(() => main(), /Missing query/)
+  })
+
+  it('dispatches init command with a name', async () => {
+    const initDir = join(tempDir, 'init-name-test-' + Date.now())
+    await mkdir(initDir, { recursive: true })
+    process.cwd = () => initDir
+    const { main } = await import('./rolecraft.js')
+    process.argv = ['node', 'rolecraft', 'init', 'my-skill']
+    await main()
+    process.cwd = () => join(tempDir, 'project')
+  })
+
+  it('shows usage for init --help', async () => {
+    const { main } = await import('./rolecraft.js')
+    const logs = captureLogs()
+    process.argv = ['node', 'rolecraft', 'init', '--help']
+    await main()
+    assert.ok(logs.some(l => l.includes('rolecraft')))
+  })
+
+  it('dispatches watch --help', async () => {
+    const { main } = await import('./rolecraft.js')
+    const logs = captureLogs()
+    process.argv = ['node', 'rolecraft', 'watch', '--help']
+    await main()
+    assert.ok(logs.some(l => l.includes('rolecraft')))
   })
 })

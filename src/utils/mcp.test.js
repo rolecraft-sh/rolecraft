@@ -338,6 +338,28 @@ Just content
     })
   })
 
+  describe('classifyMcpSource', () => {
+    it('classifies npm: source', () => {
+      const info = mcpModule.classifyMcpSource('npm:@test/pkg')
+      assert.equal(info.type, 'npm')
+    })
+
+    it('classifies gh: source', () => {
+      const info = mcpModule.classifyMcpSource('gh:test/repo')
+      assert.equal(info.type, 'github')
+    })
+
+    it('classifies local path as local', () => {
+      const info = mcpModule.classifyMcpSource('./local/server.js')
+      assert.equal(info.type, 'local')
+    })
+
+    it('classifies absolute path as local', () => {
+      const info = mcpModule.classifyMcpSource('/home/user/server.js')
+      assert.equal(info.type, 'local')
+    })
+  })
+
   describe('resolveMcpSource', () => {
     it('resolves npm: source', () => {
       const resolved = mcpModule.resolveMcpSource('npm:@modelcontextprotocol/github')
