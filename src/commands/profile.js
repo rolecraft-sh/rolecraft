@@ -151,7 +151,7 @@ export async function profileSaveCommand(name, options) {
   }
 
   if (dryRun) {
-    console.log(`\n📋 Would save profile "${name}" with:\n`)
+    console.log(`\n📋 [dry-run] Would save profile "${name}" with:\n`)
     for (const [flag, entry] of Object.entries(agentsData)) {
       console.log(`   ${flag}: ${formatAgentSummary(entry)}`)
     }
@@ -183,7 +183,7 @@ export async function profileApplyCommand(name, options) {
   const { dryRun, targets, skipMcp, skipSkills } = options
 
   if (dryRun) {
-    console.log(`\n📋 Would apply profile "${name}":\n`)
+    console.log(`\n📋 [dry-run] Would apply profile "${name}":\n`)
     const agentsToApply = targets.length > 0
       ? Object.fromEntries(Object.entries(data.agents).filter(([flag]) => targets.includes(flag)))
       : data.agents
@@ -544,7 +544,7 @@ export async function profileDeleteCommand(name, options) {
       console.log(`Profile "${name}" does not exist.`)
       return
     }
-    console.log(`Would delete profile "${name}".`)
+    console.log(`📋 [dry-run] Would delete profile "${name}".`)
     return
   }
 

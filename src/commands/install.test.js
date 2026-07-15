@@ -170,7 +170,7 @@ describe('askScope', () => {
     const { logs, restore } = capture('log')
     await installModule.installCommand(checkDir, { global: true, dryRun: true })
 
-    assert.ok(logs.some(l => l.includes('Dry-run')))
+    assert.ok(logs.some(l => l.includes('[dry-run]')))
     assert.ok(logs.some(l => l.includes('dry-run-skill')))
     assert.ok(logs.some(l => l.includes('Targets')))
     assert.ok(!logs.some(l => l.includes('Installed')))

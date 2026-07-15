@@ -5,6 +5,7 @@ import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, 
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 import { parseMcpServersFromSkill, resolveMcpSource, addMcpServer, getSupportedMcpAgents } from '../utils/mcp.js'
+import { createSpinner } from '../utils/spinner.js'
 
 const KNOWN_AGENTS = [
   { flag: 'agents', label: 'opencode', dir: getAgentsDir },
@@ -143,16 +144,16 @@ export async function setupCommand(source, options = {}) {
   console.log()
 
   if (source) {
-    console.log(`📦 Installing skill from: ${source}`)
+    const spinner = createSpinner(`📦 Installing ${source}...`)
+    spinner.start()
     const resolved = await resolveSource(source)
-
-    console.log(`   Found: ${resolved.name} (${resolved.slug})\n`)
+    spinner.succeed(`📦 Found: ${resolved.name} (${resolved.slug})`)
 
     const targets = agents.map(a => a.flag)
     targets.push('project')
 
     if (options.dryRun) {
-      console.log('📋 Dry-run — no files will be copied:\n')
+      console.log(`\n📋 [dry-run] Would install skill:\n`)
       console.log(`   Skill:     ${resolved.name} (${resolved.slug})`)
       console.log(`   Source:    ${source}`)
       console.log(`   Mode:      copy`)

@@ -5,6 +5,7 @@ import { installSkill } from '../utils/installer.js'
 import { scanSkill, formatSecurityReport } from '../utils/security.js'
 import { parseMcpServersFromSkill, resolveMcpSource, addMcpServer, getSupportedMcpAgents } from '../utils/mcp.js'
 import agents from '../agents.js'
+import { createSpinner } from '../utils/spinner.js'
 
 let createInterface = defaultCreateInterface
 let askQuestion = defaultAskQuestion
@@ -64,10 +65,10 @@ export async function installCommand(source, options) {
     }
   }
 
-  console.log(`\n🔍 Resolving skill from: ${source}`)
+  const spinner = createSpinner(`🔍 Resolving ${source}...`)
+  spinner.start()
   const resolved = await resolveSource(source)
-
-  console.log(`\n📦 Found skill: ${resolved.name}`)
+  spinner.succeed(`📦 Found: ${resolved.name}`)
   console.log(`   Slug:     ${resolved.slug}`)
   console.log(`   Owner:    ${resolved.owner}`)
   console.log(`   Files:    ${resolved.files.join(', ')}`)
@@ -99,7 +100,7 @@ export async function installCommand(source, options) {
 
   if (options.dryRun) {
     const mode = options.symlink ? 'symlink' : 'copy'
-    console.log('📋 Dry-run — no files will be copied:\n')
+    console.log(`\n📋 [dry-run] Would install skill:\n`)
     console.log(`   Skill:     ${resolved.name} (${resolved.slug})`)
     console.log(`   Source:    ${source}`)
     console.log(`   Mode:      ${mode}`)

@@ -71,9 +71,13 @@ async function installSources(sources, label, options, noMcp = false) {
 
   for (let i = 0; i < sources.length; i++) {
     const source = sources[i]
-    console.log(`   [${i + 1}/${sources.length}] ${source}`)
 
-    if (options.dryRun) continue
+    if (options.dryRun) {
+      console.log(`   • ${source}`)
+      continue
+    }
+
+    console.log(`   [${i + 1}/${sources.length}] ${source}`)
 
     try {
       await installCommand(source, { global: true, project: true, noMcp: noMcp, dryRun: options.dryRun })
@@ -84,11 +88,12 @@ async function installSources(sources, label, options, noMcp = false) {
     }
   }
 
-  console.log()
   if (options.dryRun) {
-    console.log(`📋 Would install ${sources.length} skill(s). Use without --dry-run to install.`)
+    console.log(`\n📋 [dry-run] Would install ${sources.length} skill(s).\n`)
     return
   }
+
+  console.log()
 
   if (failCount === 0) {
     console.log(`✅ All ${successCount} skill(s) installed successfully.`)

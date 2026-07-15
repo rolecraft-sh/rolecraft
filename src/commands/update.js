@@ -35,7 +35,7 @@ function detectTargets(slug, cwd) {
   return targets
 }
 
-export async function updateCommand(slug) {
+export async function updateCommand(slug, options = {}) {
   const globalLock = await readLock()
   const projectLock = await readLock(getProjectLockPath(process.cwd()))
 
@@ -61,6 +61,14 @@ export async function updateCommand(slug) {
   const targets = detectTargets(actualSlug, process.cwd())
   if (targets.length === 0) {
     targets.push('agents')
+  }
+
+  if (options.dryRun) {
+    console.log(`\n📋 [dry-run] Would update skill:\n`)
+    console.log(`   Skill:   ${actualSlug}`)
+    console.log(`   Source:  ${source} (${sourceType})`)
+    console.log(`   Targets: ${targets.join(', ')}\n`)
+    return
   }
 
   console.log(`\n🔄 Updating skill: ${actualSlug}`)
