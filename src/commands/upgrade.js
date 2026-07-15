@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { execSync } from 'node:child_process'
+import { createSpinner } from '../utils/spinner.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const pkg = JSON.parse(readFileSync(join(__dirname, '..', '..', 'package.json'), 'utf-8'))
@@ -31,13 +32,13 @@ async function fetchLatestVersion() {
 export async function upgradeCommand(options = {}) {
   const current = pkg.version
 
-  console.log(`\n📦 rolecraft v${current}`)
-  console.log('   Checking for updates...\n')
-
+  const spinner = createSpinner(`📦 Checking for updates (v${current})...`)
+  spinner.start()
   const latest = await fetchLatestVersion()
+  spinner.succeed()
 
   if (options.dryRun) {
-    console.log('📋 Dry-run — upgrade check:\n')
+    console.log(`\n📋 [dry-run] Would upgrade:\n`)
     console.log(`   Current: v${current}`)
     if (latest) {
       console.log(`   Latest:  v${latest}`)

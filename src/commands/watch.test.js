@@ -54,6 +54,19 @@ after(async () => {
 })
 
 describe('watch command', () => {
+  it('dry-run shows plan without watching', async () => {
+    const logs = []
+    const origLog = console.log
+    console.log = (...args) => { if (args.length) logs.push(String(args[0])) }
+
+    const { watchers } = await watchModule.watchCommand(undefined, tempDir, { dryRun: true })
+
+    assert.ok(logs.some(l => l.includes('[dry-run]')))
+    assert.ok(logs.some(l => l.includes('local-skill')))
+    assert.equal(watchers.length, 0)
+    console.log = origLog
+  })
+
   it('shows message when no skills installed', async () => {
     const emptyDir = mkdtempSync(join(tmpdir(), 'rolecraft-watch-empty-'))
     const origHome2 = process.env.HOME

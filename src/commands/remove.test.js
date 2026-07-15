@@ -35,6 +35,18 @@ after(async () => {
 })
 
 describe('remove command', () => {
+  it('dry-run shows plan without removing', async () => {
+    const logs = []
+    mock.method(console, 'log', (...args) => {
+      if (args.length) logs.push(String(args[0]))
+    })
+
+    await removeModule.removeCommand('test/skill', { dryRun: true })
+
+    assert.ok(logs.some(l => l.includes('[dry-run]')))
+    assert.ok(logs.some(l => l.includes('test/skill')))
+  })
+
   it('removes an installed skill by exact slug from global', async () => {
     const logs = []
     mock.method(console, 'log', (...args) => {

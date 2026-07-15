@@ -37,7 +37,7 @@ export async function mcpInstallCommand(source, options) {
     : getSupportedMcpAgents()
 
   if (options.dryRun) {
-    console.log(`📋 Would install MCP server from: ${source}`)
+    console.log(`\n📋 [dry-run] Would install MCP server from: ${source}`)
     console.log(`   Command: ${resolved.command} ${resolved.args.join(' ')}`)
     console.log(`   Targets: ${targets.join(', ')}`)
     return
@@ -102,7 +102,7 @@ export async function mcpUpdateCommand(source, options) {
     : getSupportedMcpAgents()
 
   if (options.dryRun) {
-    console.log(`📋 Would update MCP server from: ${source}`)
+    console.log(`\n📋 [dry-run] Would update MCP server from: ${source}`)
     console.log(`   Command: ${resolved.command} ${resolved.args.join(' ')}`)
     console.log(`   Targets: ${targets.join(', ')}`)
     return

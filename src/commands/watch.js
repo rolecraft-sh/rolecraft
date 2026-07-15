@@ -23,7 +23,7 @@ async function reinstallSkill(slug, skills, cwd) {
   }
 }
 
-export async function watchCommand(slug, cwd = process.cwd()) {
+export async function watchCommand(slug, cwd = process.cwd(), options = {}) {
   const globalLock = await readLock()
   const projectLock = await readLock(getProjectLockPath(cwd))
 
@@ -46,6 +46,17 @@ export async function watchCommand(slug, cwd = process.cwd()) {
 
   if (watchSlugs.length === 0) {
     if (!slug) console.log('No local skills to watch.')
+    return { watchers: [], skills: watchSlugs }
+  }
+
+  if (options.dryRun) {
+    console.log(`\n📋 [dry-run] Would watch ${watchSlugs.length} skill(s):\n`)
+    for (const s of watchSlugs) {
+      const entry = mergedSkills[s]
+      const sourcePath = entry.source.replace(/^~/, homedir())
+      console.log(`   • ${s} → ${sourcePath}`)
+    }
+    console.log()
     return { watchers: [], skills: watchSlugs }
   }
 

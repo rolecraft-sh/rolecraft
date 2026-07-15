@@ -50,7 +50,7 @@ after(async () => {
 })
 
 describe('upgrade command', () => {
-  it('shows current version', async () => {
+  it('shows current version and check message', async () => {
     captureLog()
     mockExit()
     try {
@@ -61,20 +61,7 @@ describe('upgrade command', () => {
     restoreLog()
     restoreExit()
 
-    assert.ok(logs.some(l => l.includes(`rolecraft v${VERSION}`)))
-  })
-
-  it('shows check message', async () => {
-    captureLog()
-    mockExit()
-    try {
-      await upgradeModule.upgradeCommand()
-    } catch (e) {
-      if (!e.message.startsWith('exit:')) throw e
-    }
-    restoreLog()
-    restoreExit()
-
+    assert.ok(logs.some(l => l.includes(`v${VERSION}`)))
     assert.ok(logs.some(l => l.includes('Checking for updates')))
   })
 
@@ -83,8 +70,8 @@ describe('upgrade command', () => {
     await upgradeModule.upgradeCommand({ dryRun: true })
     restoreLog()
 
-    assert.ok(logs.some(l => l.includes('Dry-run')))
-    assert.ok(logs.some(l => l.includes('rolecraft')))
+    assert.ok(logs.some(l => l.includes('[dry-run]')))
+    assert.ok(logs.some(l => l.includes('Current:')))
   })
 
   it('dry-run shows current version', async () => {

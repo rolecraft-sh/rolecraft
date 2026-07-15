@@ -5,8 +5,14 @@ Watch installed skills for file changes and auto-sync to agent directories.
 ## Usage
 
 ```bash
-rolecraft watch [<slug>]
+rolecraft watch [<slug>] [--dry-run]
 ```
+
+## Options
+
+| Flag          | Description                            |
+|---------------|----------------------------------------|
+| `--dry-run`   | Preview which skills would be watched without starting file watchers |
 
 ## Description
 
@@ -22,6 +28,9 @@ rolecraft watch
 
 # Watch a specific skill
 rolecraft watch my-skill
+
+# Preview without starting watchers
+rolecraft watch --dry-run
 ```
 
 ## Output

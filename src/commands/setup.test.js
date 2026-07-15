@@ -104,7 +104,7 @@ describe('setup command', () => {
     await setupModule.setupCommand(skillDir, { dryRun: true })
     restoreLog()
 
-    assert.ok(logs.some(l => l.includes('Dry-run')))
+    assert.ok(logs.some(l => l.includes('[dry-run]')))
     assert.ok(logs.some(l => l.includes('setup-dry-test')))
     assert.ok(!logs.some(l => l.includes('Installed')))
   }))

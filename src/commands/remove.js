@@ -17,7 +17,7 @@ function findActualSlug(slug, lock) {
   })
 }
 
-export async function removeCommand(slug) {
+export async function removeCommand(slug, options = {}) {
   const globalLock = await readLock()
   const projectLockPath = getProjectLockPath(process.cwd())
   const projectLock = await readLock(projectLockPath)
@@ -31,6 +31,15 @@ export async function removeCommand(slug) {
 
   const actualSlug = globalFound || projectFound
 
+  if (options.dryRun) {
+    console.log(`\n📋 [dry-run] Would remove skill:\n`)
+    console.log(`   Skill:  ${actualSlug}`)
+    if (globalFound) console.log(`   Global: ${join(getAgentsDir(), normalizeSlug(actualSlug))}`)
+    if (projectFound) console.log(`   Project: ${join(process.cwd(), '.agents', 'skills', normalizeSlug(actualSlug))}`)
+    console.log()
+    return
+  }
+
   if (globalFound) {
     const dir = join(getAgentsDir(), normalizeSlug(actualSlug))
     await rm(dir, { recursive: true, force: true })
@@ -43,5 +52,5 @@ export async function removeCommand(slug) {
     await removeSkillFromLock(actualSlug, projectLockPath)
   }
 
-  console.log(`Removed ${actualSlug}.`)
+  console.log(`✅ Removed ${actualSlug}.`)
 }

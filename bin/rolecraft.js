@@ -63,24 +63,21 @@ Usage:
   rolecraft help                    Show this help
 
 Options:
-  --yes, -y      Non-interactive: accept all defaults (install, setup)
-  --dry-run      Preview installation without copying files (install, setup, bundle, upgrade)
+  --yes, -y      Non-interactive: accept all defaults (install, setup, mcp, profile)
+  --dry-run      Preview without making changes (install, setup, bundle, upgrade, profile, mcp, update, remove, watch)
   --no-mcp       Skip MCP server installation from skills (install, bundle)
-
-Options for upgrade:
-  --dry-run      Check for updates without actually upgrading
 
 Options for install:
   --global       Install to ~/.agents/skills/
   --project      Install to ./.agents/skills/ (default)
-  --windsurf     Also install to ~/.windsurf/skills/ (deprecated: use --devin)
+  --windsurf     Also install to ~/.windsurf/skills/
+  --devin        Also install to ~/.devin/skills/
 ${agentFlags.join('\n')}
   --all              Install to all locations
   --no-mcp           Skip MCP server installation from skill
   --frozen-lockfile  Fail if skill already installed
   --symlink          Install as symlink instead of copy
   --copy             Install as copy (default)
-  --dry-run          Preview installation without copying files
   --interactive      Choose and install a skill from search results
 
 Examples:
@@ -144,7 +141,8 @@ export async function main() {
         console.error('Usage: rolecraft remove <slug>')
         throw new Error('Missing slug argument.')
       }
-      await removeCommand(slug)
+      const removeFlags = args.filter(a => a.startsWith('-'))
+      await removeCommand(slug, { dryRun: removeFlags.includes('--dry-run') })
       break
     }
 
@@ -155,7 +153,8 @@ export async function main() {
         console.error('Usage: rolecraft update <slug>')
         throw new Error('Missing slug argument.')
       }
-      await updateCommand(slug)
+      const updateFlags = args.filter(a => a.startsWith('-'))
+      await updateCommand(slug, { dryRun: updateFlags.includes('--dry-run') })
       break
     }
 
@@ -240,7 +239,8 @@ export async function main() {
     case 'watch': {
       if (args.includes('--help') || args.includes('-h')) { usage(); return }
       const slug = args[0]
-      const { watchers } = await watchCommand(slug)
+      const watchFlags = args.filter(a => a.startsWith('-'))
+      const { watchers } = await watchCommand(slug, process.cwd(), { dryRun: watchFlags.includes('--dry-run') })
       if (watchers.length === 0) {
         return
       }
@@ -312,7 +312,7 @@ export async function run() {
   try {
     await main()
   } catch (err) {
-    console.error(err)
+    console.error('\n❌ %s', err?.message || err)
     process.exit(1)
   }
 }
@@ -321,8 +321,5 @@ const isEntryPoint = process.argv[1]
   && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))
 
 if (isEntryPoint) {
-  run().catch((err) => {
-    console.error(err)
-    process.exit(1)
-  })
+  run()
 }

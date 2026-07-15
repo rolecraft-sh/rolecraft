@@ -43,6 +43,20 @@ after(async () => {
 })
 
 describe('update command', () => {
+  it('dry-run shows plan without updating', async () => {
+    const logs = []
+    const origLog = console.log
+    console.log = (...args) => {
+      if (args.length) logs.push(String(args[0]))
+    }
+
+    await updateModule.updateCommand('test/skill', { dryRun: true })
+
+    assert.ok(logs.some(l => l.includes('[dry-run]')))
+    assert.ok(logs.some(l => l.includes('test/skill')))
+    console.log = origLog
+  })
+
   it('updates an installed skill', async () => {
     const logs = []
     const origLog = console.log
