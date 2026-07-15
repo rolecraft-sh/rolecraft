@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.5.0] - 2026-07-15
+
+### Added
+- improve UX with dry-run consistency, spinner, and error formatting (#96)
+- agent profile system (save, apply, diff, edit, export, import, link) (#89)
+- add demo GIF to hero section and show version in site title (#88)
+- add benchmark comparison SVG visual with color contrast fixes (#87)
+
+### Fixed
+- use full URL for benchmark SVG to prevent VitePress build failure
+
+### Changed
+- bump actions/upload-pages-artifact from 3.0.1 to 5.0.0 (#86)
+- bump actions/configure-pages from 5.0.0 to 6.0.0 (#85)
+- bump actions/deploy-pages from 4.0.5 to 5.0.0 (#84)
+- bump github/codeql-action/init from 4.36.3 to 4.37.0 (#83)
+- bump github/codeql-action/analyze from 4.36.3 to 4.37.0 (#82)
+- update changelog and version for v1.4.0 [skip ci] (#81)
+
+### Documentation
+- simplify CONTRIBUTING, move release process to RELEASE.md, add good first issues
+- onboarding guide + profile guide + fix dry-run priority and flag ordering (#90)
+- update architecture.md with missing commands and utils
+- add profile command to sidebar and fix formatting
 ## [v1.4.0] - 2026-07-10
 
 ### Added
