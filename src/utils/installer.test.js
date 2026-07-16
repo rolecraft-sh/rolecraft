@@ -756,6 +756,38 @@ describe('installer', () => {
     assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 
+  it('installs skill to droid directory (~/.factory/skills/)', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['droid'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'droid')
+    const skillDir = join(process.env.HOME, '.factory', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to chatgpt directory (~/.chatgpt/skills/)', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['chatgpt'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'chatgpt')
+    const skillDir = join(process.env.HOME, '.chatgpt', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to codearts-agent directory (~/.codeartsdoer/skills/)', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['codearts-agent'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'codearts-agent')
+    const skillDir = join(process.env.HOME, '.codeartsdoer', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to universal directory (~/.config/agents/skills/)', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['universal'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'universal')
+    const skillDir = join(process.env.HOME, '.config', 'agents', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
   it('installs skill to amp directory (~/.agents/skills/)', async () => {
     const results = await installerModule.installSkill(resolvedSkill, ['amp'])
     assert.equal(results.length, 1)

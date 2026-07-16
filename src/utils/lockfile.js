@@ -307,6 +307,22 @@ export function getAdalDir() {
   return home('.adal', 'skills')
 }
 
+export function getDroidDir() {
+  return home('.factory', 'skills')
+}
+
+export function getChatgptDir() {
+  return home('.chatgpt', 'skills')
+}
+
+export function getCodeartsAgentDir() {
+  return home('.codeartsdoer', 'skills')
+}
+
+export function getUniversalDir() {
+  return home('.config', 'agents', 'skills')
+}
+
 export function getProjectLockPath(cwd) {
   return join(cwd, '.agents', '.skill-lock.json')
 }

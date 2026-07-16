@@ -2,12 +2,12 @@
 name: rolecraft
 description: >-
   Install AI agent skills as roles & behaviors from any source — local folder,
-  GitHub, GitLab, SSH git URL. Zero-dependency CLI with 82+ agent targets.
+  GitHub, GitLab, SSH git URL. Zero-dependency CLI with 86+ agent targets.
 ---
 
 # rolecraft
 
-Install and manage AI agent skills across 82+ agents with a single command. Zero dependencies. No registry required.
+Install and manage AI agent skills across 86+ agents with a single command. Zero dependencies. No registry required.
 
 ## When to use
 
