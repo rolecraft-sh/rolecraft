@@ -52,7 +52,7 @@ rm ~/.skills-lock.json
 ## What rolecraft does differently
 
 ### More agent targets
-rolecraft supports **82+ agents** vs Vercel's 72. This includes newer agents like `augment`, `kilo`, `openhands`, `junie`, `factory`, `command-code`, and more.
+rolecraft supports **86+ agents** vs Vercel's 72. This includes newer agents like `augment`, `kilo`, `openhands`, `junie`, `factory`, `command-code`, and more.
 
 ### Any source, not just GitHub
 Install from local folders, GitLab, Bitbucket, SSH URLs, or even npm packages — not just GitHub repos.

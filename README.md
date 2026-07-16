@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>Install AI agent skills as roles & behaviors — from any source.</b><br>
-  Zero-dependency CLI · <b>MCP + Skills in one command</b> · 82+ agents · No signup
+  Zero-dependency CLI · <b>MCP + Skills in one command</b> · 86+ agents · No signup
 </p>
 
 <p align="center">
@@ -49,7 +49,7 @@
 ---
 
 <p align="center">
-  <b>⚡ Zero dependencies</b> · <b>📦 4 KB</b> · <b>🤖 82+ agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 No telemetry</b> · <b>🌐 Offline-first</b> · <b>🔧 Any source</b>
+  <b>⚡ Zero dependencies</b> · <b>📦 4 KB</b> · <b>🤖 86+ agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 No telemetry</b> · <b>🌐 Offline-first</b> · <b>🔧 Any source</b>
 </p>
 
 <p align="center">
@@ -92,7 +92,7 @@ rolecraft check
 rolecraft remove my-skill
 ```
 
-**Requirements:** Node.js >= 20 · 4 KB · zero dependencies · 82+ agents · [Full install guide →](docs/install.md)
+**Requirements:** Node.js >= 20 · 4 KB · zero dependencies · 86+ agents · [Full install guide →](docs/install.md)
 
 > **Why zero dependencies?** Every dependency is a supply-chain risk. rolecraft uses only Node.js built-ins (`fs`, `path`, `crypto`, `https`) — no `node_modules` surprises.
 
@@ -127,7 +127,7 @@ No other CLI combines both. npx skills has no MCP support. ags has a separate MC
 - **Zero dependencies** — ~4 KB, only Node.js built-ins
 - **MCP + Skills in one command** — install skills and their MCP servers together. Unique.
 - **Any source** — local folder, GitHub/GitLab/SSH URL, npm package
-- **82+ agents** — opencode, claude-code, cursor, copilot, aider, devin, gemini-cli, and more
+- **86+ agents** — opencode, claude-code, cursor, copilot, aider, devin, gemini-cli, and more
 - **No registry required** — no signup, no marketplace, no vendor lock-in
 - **Security scoring** — static analysis: detects prompt injection, command injection, obfuscated code, credential harvesting. Scores 0–100. Blocks dangerous skills
 - **CI-ready** — lockfile-based re-install (`rolecraft ci`), `--yes` flag, `--dry-run`
@@ -254,13 +254,13 @@ rolecraft install ./my-skill --cursor --devin --copilot --gemini --cody
 A: No. No account, no API key, no marketplace. Point rolecraft at any folder or repo and it works.
 
 **Q: Can I use rolecraft with multiple AI agents?**
-A: Yes. 82+ agents supported. Use `--cursor`, `--claude`, `--devin` flags or `--all` for every agent.
+A: Yes. 86+ agents supported. Use `--cursor`, `--claude`, `--devin` flags or `--all` for every agent.
 
 **Q: Does rolecraft send telemetry?**
 A: No. Zero data leaves your machine. The security scan runs locally. No phone home.
 
 **Q: How is this different from `npx skills` (Vercel)?**
-A: rolecraft has zero dependencies, MCP server management, 82 agents (vs 72), `doctor`, `watch`, `bundle`, `agents-xml`, and shell completions. [Full comparison →](docs/comparison.md)
+A: rolecraft has zero dependencies, MCP server management, 86 agents (vs 72), `doctor`, `watch`, `bundle`, `agents-xml`, and shell completions. [Full comparison →](docs/comparison.md)
 
 **Q: Can I use it in CI/CD?**
 A: Yes. `rolecraft ci --yes` re-installs all skills from lockfile, non-interactive. Perfect for pipelines.

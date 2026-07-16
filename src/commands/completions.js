@@ -18,6 +18,7 @@ const SCOPE_FLAGS = [
   '--amp', '--antigravity', '--antigravity-cli', '--deepagents', '--dexto',
   '--loaf', '--replit', '--zed', '--promptscript',
   '--astrbot', '--qoder-cn', '--trae-cn', '--zenflow', '--neovate', '--pochi', '--adal',
+  '--droid', '--chatgpt', '--codearts-agent', '--universal',
   '--all',
 ]
 
@@ -149,8 +150,12 @@ _rolecraft() {
             '--zap[Also install to ~/.zap/skills/]' \\
             '--codeep[Also install to ~/.codeep/skills/]' \\
             '--kimi-code[Also install to ~/.kimi-code/skills/]' \\
-            '--zcode[Also install to ~/.zcode/skills/]' \\
-            '--all[Install to all locations]' \\
+             '--zcode[Also install to ~/.zcode/skills/]' \\
+             '--droid[Also install to ~/.factory/skills/]' \\
+             '--chatgpt[Also install to ~/.chatgpt/skills/]' \\
+             '--codearts-agent[Also install to ~/.codeartsdoer/skills/]' \\
+             '--universal[Also install to ~/.config/agents/skills/]' \\
+             '--all[Install to all locations]' \\
             '--dry-run[Preview without copying]' \\
             '--frozen-lockfile[Fail if already installed]' \\
             '--symlink[Install as symlink]' \\
@@ -270,6 +275,10 @@ for cmd in install bundle use setup upgrade
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l codeep          -d 'Install to ~/.codeep/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l kimi-code       -d 'Install to ~/.kimi-code/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l zcode           -d 'Install to ~/.zcode/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l droid           -d 'Install to ~/.factory/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l chatgpt         -d 'Install to ~/.chatgpt/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l codearts-agent  -d 'Install to ~/.codeartsdoer/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l universal       -d 'Install to ~/.config/agents/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l all            -d 'Install to all locations'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l dry-run        -d 'Preview without copying'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l frozen-lockfile -d 'Fail if already installed'

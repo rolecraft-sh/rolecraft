@@ -86,6 +86,10 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | neovate         | `~/.neovate/skills/`                              |
 | pochi           | `~/.pochi/skills/`                                |
 | adal            | `~/.adal/skills/`                                 |
+| droid           | `~/.factory/skills/`                              |
+| chatgpt         | `~/.chatgpt/skills/`                              |
+| codearts-agent  | `~/.codeartsdoer/skills/`                         |
+| universal       | `~/.config/agents/skills/`                        |
 
 > ⚠️ Windsurf has been rebranded to **Devin Desktop**. The `--windsurf` flag and `~/.windsurf/skills/` path still work for backward compatibility, but new deployments should use `--devin` / `~/.devin/skills/`.
 

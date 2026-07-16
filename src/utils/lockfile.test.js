@@ -117,6 +117,22 @@ describe('lockfile', () => {
     assert.equal(lockModule.getAdalDir(), join(tempDir, '.adal', 'skills'))
   })
 
+  it('getDroidDir returns path inside homedir', () => {
+    assert.equal(lockModule.getDroidDir(), join(tempDir, '.factory', 'skills'))
+  })
+
+  it('getChatgptDir returns path inside homedir', () => {
+    assert.equal(lockModule.getChatgptDir(), join(tempDir, '.chatgpt', 'skills'))
+  })
+
+  it('getCodeartsAgentDir returns path inside homedir', () => {
+    assert.equal(lockModule.getCodeartsAgentDir(), join(tempDir, '.codeartsdoer', 'skills'))
+  })
+
+  it('getUniversalDir returns path inside homedir', () => {
+    assert.equal(lockModule.getUniversalDir(), join(tempDir, '.config', 'agents', 'skills'))
+  })
+
   it('getCursorDir returns path inside homedir', () => {
     assert.equal(lockModule.getCursorDir(), join(tempDir, '.cursor', 'skills'))
   })
