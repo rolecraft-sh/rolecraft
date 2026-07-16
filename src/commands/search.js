@@ -34,6 +34,12 @@ export function formatRepo(r) {
   return `${bold(r.full_name)}\n  ${dim(desc)}  ${yellow(`⭐ ${stars}`)}  ${cyan(lang)}`
 }
 
+export function formatSkillsShItem(skill) {
+  const desc = skill.name || 'No description'
+  const installs = skill.installs || 0
+  return `${bold(skill.source + '/' + skill.skillId)}\n  ${dim(desc)}  ${yellow(`📦 ${installs}`)}  ${cyan('skills.sh')}`
+}
+
 const ITEM_LINES = 4
 
 function tuiFormat(item, selected) {
@@ -211,6 +217,18 @@ async function searchGitHub(query, filenameFilter = true) {
   return await response.json()
 }
 
+async function searchSkillsSh(query) {
+  const url = `https://skills.sh/api/search?q=${encodeURIComponent(query)}`
+  const response = await runFetch(url, {
+    signal: AbortSignal.timeout(10000),
+  })
+  if (!response.ok) {
+    return { error: `skills.sh API error: ${response.status}` }
+  }
+  const data = await response.json()
+  return { items: data.skills || [] }
+}
+
 async function lookupGithubRepo(ref) {
   const url = `https://api.github.com/repos/${ref}`
   try {
@@ -266,6 +284,35 @@ function displayResults(data, query) {
 
 export async function searchCommand(query, options = {}) {
   let data
+
+  if (options.skillsSh) {
+    try {
+      data = await searchSkillsSh(query)
+    } catch {
+      throw new Error('Failed to search skills.sh. Check your internet connection.')
+    }
+
+    if (data.error) {
+      throw new Error(data.error)
+    }
+
+    if (data.items.length === 0) {
+      console.log(`\nNo skills found on skills.sh for "${query}".`)
+      return
+    }
+
+    console.log(`\n🔍 [Experimental] skills.sh results for "${query}":\n`)
+    for (const skill of data.items) {
+      const line = formatSkillsShItem(skill).split('\n')
+      console.log(`   ${line[0]}`)
+      console.log(`   ├─ ${line[1]}`)
+      console.log(`   └─ rolecraft install ${skill.source}/${skill.skillId}`)
+      console.log()
+    }
+    console.log(`${data.items.length} result(s) found.`)
+    console.log('\n⚠️  skills.sh integration is experimental. The API may change or become unavailable.')
+    return
+  }
 
   try {
     data = await searchOrLookup(query)
