@@ -96,7 +96,7 @@ rolecraft convert ./my-skill
 rolecraft convert --help
 ```
 
-**Requirements:** Node.js >= 20 · 4 KB · zero dependencies · 86+ agents · [Full install guide →](docs/install.md)
+**Requirements:** Node.js >= 20 · 4 KB · zero dependencies · 86+ agents · [Getting Started →](docs/guides/getting-started.md) · [Full install guide →](docs/install.md)
 
 > **Why zero dependencies?** Every dependency is a supply-chain risk. rolecraft uses only Node.js built-ins (`fs`, `path`, `crypto`, `https`) — no `node_modules` surprises.
 
@@ -169,6 +169,7 @@ No other CLI combines both. npx skills has no MCP support. ags has a separate MC
 | `rolecraft remove <slug>`               | Uninstall a skill                                                           | [docs](docs/commands/remove.md)      |
 | `rolecraft update <slug>`               | Re-install a skill to latest                                                | [docs](docs/commands/update.md)      |
 | `rolecraft --version`                   | Show version                                                                |                                      |
+| `rolecraft --help`                      | Show full command reference                                                 | [CLI Reference](docs/reference.md)   |
 
 ---
 
