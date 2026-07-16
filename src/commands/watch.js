@@ -84,9 +84,7 @@ export async function watchCommand(slug, cwd = process.cwd(), options = {}) {
         const timestamp = new Date().toLocaleTimeString()
         console.log(`  [${timestamp}] ${s}: ${filename} changed, syncing...`)
         const ok = await reinstallSkill(s, mergedSkills, cwd)
-        if (ok) {
-          console.log(`  [${timestamp}] ${s}: synced successfully`)
-        }
+        console.log(`  [${timestamp}] ${s}: ${ok ? 'synced successfully' : 'sync failed'}`)
       }, 300)
     }
 

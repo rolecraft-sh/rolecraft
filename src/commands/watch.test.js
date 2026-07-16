@@ -303,6 +303,7 @@ describe('watch command', () => {
 
       assert.ok(logs.some(l => l.includes('syncing')))
       assert.ok(!logs.some(l => l.includes('synced')), 'Should NOT log synced on failure')
+      assert.ok(logs.some(l => l.includes('sync failed')), `Expected 'sync failed' in logs: ${logs.join('; ')}`)
     } finally {
       console.log = origLog
       process.env.HOME = tempDir
