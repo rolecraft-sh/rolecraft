@@ -307,6 +307,8 @@ Thanks to everyone who has contributed to RoleCraft:
 | <img src="https://github.com/sametcelikbicak.png" width="40" height="40" alt="sametcelikbicak"> | [Samet ÇELİKBIÇAK](https://github.com/sametcelikbicak) | Owner & Maintainer                                                  |
 | <img src="https://github.com/fengjikui.png" width="40" height="40" alt="fengjikui">             | [冯基魁](https://github.com/fengjikui)                 | [Contributor](https://github.com/sametcelikbicak/rolecraft/pull/62) |
 | <img src="https://github.com/Yurii201811.png" width="40" height="40" alt="Yurii201811">         | [Yurii201811](https://github.com/Yurii201811)         | [Contributor](https://github.com/sametcelikbicak/rolecraft/pull/104) |
+| <img src="https://github.com/gaoharimran29-glitch.png" width="40" height="40" alt="gaoharimran29-glitch"> | [Gaohar Imran](https://github.com/gaoharimran29-glitch) | [Contributor](https://github.com/sametcelikbicak/rolecraft/pull/113) |
+| <img src="https://github.com/ajaynomics.png" width="40" height="40" alt="ajaynomics">               | [Ajay Krishnan](https://github.com/ajaynomics)         | [Contributor](https://github.com/sametcelikbicak/rolecraft/pull/114) |
 
 ---
 
