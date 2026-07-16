@@ -1,4 +1,5 @@
 import { accessSync, constants, readFileSync, readdirSync } from 'node:fs'
+import { execSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { readLock, getProjectLockPath, getAgentsDir } from '../utils/lockfile.js'
@@ -29,6 +30,20 @@ export async function doctorCommand() {
   const [major] = process.versions.node.split('.').map(Number)
   if (major < 20) {
     report('Node.js compatibility', 'error', '>= 20 required, please upgrade')
+  }
+
+  try {
+    execSync('git --version', { stdio: 'ignore' })
+    report('Git availability', 'pass', 'detected')
+  } catch {
+    report('Git availability', 'warn', 'not found (needed for GitHub sources)')
+  }
+
+  try {
+    execSync('npm --version', { stdio: 'ignore' })
+    report('npm availability', 'pass', 'detected')
+  } catch {
+    report('npm availability', 'warn', 'not found (needed for npm sources)')
   }
 
   report('rolecraft version', 'pass', `v${pkg.version}`)
