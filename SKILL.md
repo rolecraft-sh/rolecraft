@@ -44,6 +44,9 @@ npx rolecraft doctor
 
 # List installed skills
 npx rolecraft list
+
+# Convert between SKILL.md and .mdc
+npx rolecraft convert ./my-skill
 ```
 
 ## Install commands
@@ -65,6 +68,7 @@ npx rolecraft list
 | `rolecraft agents-xml [--write]` | Generate skills XML for AGENTS.md |
 | `rolecraft use <source>` | Preview without installing |
 | `rolecraft completions bash\|zsh\|fish` | Generate shell completions |
+| `rolecraft convert <source>` | Convert between SKILL.md and .mdc formats |
 
 ## Common flags
 
@@ -77,7 +81,7 @@ npx rolecraft list
 | `--symlink` | Symlink instead of copy |
 | `--global` / `--project` | Scope selection |
 
-## Supported agents (82+)
+## Supported agents (86+)
 
 `opencode`, `claude-code`, `cursor`, `windsurf`, `devin`, `codex`, `copilot`, `aider`, `cline`, `gemini-cli`, `cody`, `continue`, `warp`, `codeium`, `fabric`, `goose`, `tabnine`, `supermaven`, `pr-pilot`, `loom`, `roo`, `trae`, `hermes`, `kiro`, `augment`, `kilo`, `openhands`, `junie`, `factory`, `command-code`, `cortex`, `mistral-vibe`, `qwen-code`, `openclaw`, `codebuddy`, `mux`, `pi`, `autohand-code`, `rovo`, `firebender`, `bob`, `aider-desk`, and 25+ more.
 

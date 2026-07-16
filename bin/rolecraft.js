@@ -21,6 +21,7 @@ import { doctorCommand } from '../src/commands/doctor.js'
 import { agentsXmlCommand } from '../src/commands/agents-xml.js'
 import { mcpCommand } from '../src/commands/mcp.js'
 import { watchCommand } from '../src/commands/watch.js'
+import { convertCommand } from '../src/commands/convert.js'
 import { profileCommand } from '../src/commands/profile.js'
 import agents from '../src/agents.js'
 
@@ -60,6 +61,7 @@ Usage:
   rolecraft agents-xml              Generate skills XML for AGENTS.md
   rolecraft agents-xml --write      Write skills XML to AGENTS.md
   rolecraft upgrade                 Upgrade rolecraft to the latest version
+  rolecraft convert <source>        Convert a skill between SKILL.md and .mdc formats
   rolecraft help                    Show this help
 
 Options:
@@ -263,6 +265,18 @@ export async function main() {
     case '-v':
       console.log(pkg.version)
       break
+
+    case 'convert': {
+      if (args.includes('--help') || args.includes('-h')) { usage(); return }
+      const source = args[0]
+      if (!source) {
+        console.error('Usage: rolecraft convert <source>')
+        throw new Error('Missing source argument.')
+      }
+      const convertFlags = args.filter(a => a.startsWith('-'))
+      await convertCommand(source, { dryRun: convertFlags.includes('--dry-run') })
+      break
+    }
 
     case 'bundle': {
       if (args.includes('--help') || args.includes('-h')) { usage(); return }

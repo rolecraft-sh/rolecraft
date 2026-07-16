@@ -14,7 +14,8 @@
 10. `rolecraft mcp` manages MCP server configurations (install, list, remove)
 11. `rolecraft agents-xml` generates a skills XML block for `AGENTS.md`
 12. `rolecraft watch` watches installed skills for changes and auto-syncs
-13. Compatible with skills installed by `@agentskill.sh/cli`, `add-skill`, or manual installs
+13. `rolecraft convert` converts between SKILL.md and .mdc formats
+14. Compatible with skills installed by `@agentskill.sh/cli`, `add-skill`, or manual installs
 
 ## Project structure
 

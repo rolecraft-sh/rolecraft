@@ -38,6 +38,7 @@ export default defineConfig({
           items: [
             { text: 'agents-xml', link: '/commands/agents-xml' },
             { text: 'bundle', link: '/commands/bundle' },
+            { text: 'convert', link: '/commands/convert' },
             { text: 'check', link: '/commands/check' },
             { text: 'ci', link: '/commands/ci' },
             { text: 'completions', link: '/commands/completions' },
