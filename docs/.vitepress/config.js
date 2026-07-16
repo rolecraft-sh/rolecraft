@@ -21,9 +21,11 @@ export default defineConfig({
     logo: '/rolecraft_logo.png',
     siteTitle: `RoleCraft v${version}`,
     nav: [
+      { text: 'Getting Started', link: '/guides/getting-started' },
       { text: 'Onboarding', link: '/guides/onboarding' },
       { text: 'Install', link: '/install' },
       { text: 'Commands', link: '/commands/install' },
+      { text: 'Reference', link: '/reference' },
       { text: 'MCP', link: '/mcp' },
       { text: 'Benchmark', link: '/benchmark/RESULTS' },
       { text: 'Security', link: '/security' },
@@ -32,7 +34,15 @@ export default defineConfig({
       '/': [
         { text: 'Introduction', link: '/' },
         { text: 'Install Guide', link: '/install' },
-        { text: 'Onboarding Guide', link: '/guides/onboarding' },
+        {
+          text: 'Guides',
+          items: [
+            { text: 'Getting Started', link: '/guides/getting-started' },
+            { text: 'Onboarding Guide', link: '/guides/onboarding' },
+            { text: 'Use Cases', link: '/guides/use-cases' },
+          ],
+        },
+        { text: 'CLI Reference', link: '/reference' },
         {
           text: 'Commands',
           items: [
