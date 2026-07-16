@@ -373,4 +373,78 @@ describe('search command', () => {
       }
     })
   })
+
+  describe('skills.sh integration (experimental)', () => {
+    afterEach(() => {
+      searchModule.setFetch(globalThis.fetch)
+    })
+
+    it('formats a skills.sh item', () => {
+      const result = searchModule.formatSkillsShItem({
+        skillId: 'my-skill',
+        name: 'My Skill',
+        installs: 12345,
+        source: 'user/repo',
+      })
+      assert.ok(result.includes('user/repo/my-skill'))
+      assert.ok(result.includes('My Skill'))
+      assert.ok(result.includes('12345'))
+      assert.ok(result.includes('skills.sh'))
+    })
+
+    it('handles missing fields in skills.sh item', () => {
+      const result = searchModule.formatSkillsShItem({
+        skillId: 'test-skill',
+      })
+      assert.ok(result.includes('No description'))
+      assert.ok(result.includes('0'))
+    })
+
+    it('shows results from skills.sh', async () => {
+      mockFetch(200, {
+        skills: [
+          { skillId: 'skill-one', name: 'Skill One', installs: 100, source: 'user1/repo' },
+          { skillId: 'skill-two', name: 'Skill Two', installs: 50, source: 'user2/repo' },
+        ],
+      })
+
+      const { logs, restore } = capture('log')
+      await searchModule.searchCommand('test', { skillsSh: true })
+      restore()
+
+      assert.ok(logs.some(l => l.includes('Experimental')))
+      assert.ok(logs.some(l => l.includes('skill-one')))
+      assert.ok(logs.some(l => l.includes('skill-two')))
+      assert.ok(logs.some(l => l.includes('100')))
+      assert.ok(logs.some(l => l.includes('2 result(s) found')))
+    })
+
+    it('shows no results message when skills.sh returns empty', async () => {
+      mockFetch(200, { skills: [] })
+
+      const { logs, restore } = capture('log')
+      await searchModule.searchCommand('nonexistent', { skillsSh: true })
+      restore()
+
+      assert.ok(logs.some(l => l.includes('No skills found')))
+    })
+
+    it('throws on skills.sh network error', async () => {
+      searchModule.setFetch(() => Promise.reject(new Error('network error')))
+
+      await assert.rejects(
+        () => searchModule.searchCommand('test', { skillsSh: true }),
+        /Failed to search skills/,
+      )
+    })
+
+    it('throws on skills.sh non-ok response', async () => {
+      mockFetch(500, {})
+
+      await assert.rejects(
+        () => searchModule.searchCommand('test', { skillsSh: true }),
+        /skills.sh API error: 500/,
+      )
+    })
+  })
 })

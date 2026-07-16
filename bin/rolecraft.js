@@ -47,7 +47,7 @@ Usage:
   rolecraft update <slug>           Re-install a skill (update to latest)
   rolecraft setup [<source>]        Detect agents and optionally install a skill
   rolecraft init [<name>]           Scaffold a new SKILL.md
-  rolecraft search <query>          Search for skills on GitHub
+  rolecraft search <query>          Search for skills on GitHub --skills-sh  Search skills.sh (experimental)
   rolecraft check                   Check for available skill updates
   rolecraft verify                  Verify installed skill integrity
   rolecraft ci                      Install all skills from lockfile
@@ -187,7 +187,7 @@ export async function main() {
         console.error('Usage: rolecraft search <query> [--interactive]')
         throw new Error('Missing query argument.')
       }
-      await searchCommand(query, { interactive: flags.includes('--interactive') })
+      await searchCommand(query, { interactive: flags.includes('--interactive'), skillsSh: flags.includes('--skills-sh') })
       break
     }
 
