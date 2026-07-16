@@ -306,6 +306,13 @@ Thanks to everyone who has contributed to RoleCraft:
 | <img src="https://github.com/sametcelikbicak.png" width="40" height="40" alt="sametcelikbicak"> | [Samet ÇELİKBIÇAK](https://github.com/sametcelikbicak) | Owner & Maintainer                                                  |
 | <img src="https://github.com/fengjikui.png" width="40" height="40" alt="fengjikui">             | [冯基魁](https://github.com/fengjikui)                 | [Contributor](https://github.com/sametcelikbicak/rolecraft/pull/62) |
 
+---
+
+⭐ **If rolecraft makes your AI agent workflow easier, consider [starring the repo](https://github.com/sametcelikbicak/rolecraft).**  
+It helps others discover the project and shows that the community finds it useful.
+
+---
+
 ## License
 
 MIT
