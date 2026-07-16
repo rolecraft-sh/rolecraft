@@ -90,6 +90,10 @@ rolecraft list
 rolecraft search code-review
 rolecraft check
 rolecraft remove my-skill
+
+# convert between SKILL.md and .mdc formats
+rolecraft convert ./my-skill
+rolecraft convert --help
 ```
 
 **Requirements:** Node.js >= 20 · 4 KB · zero dependencies · 86+ agents · [Full install guide →](docs/install.md)
@@ -160,6 +164,7 @@ No other CLI combines both. npx skills has no MCP support. ags has a separate MC
 | `rolecraft verify`                      | Check installed skill integrity via content hash                            | [docs](docs/commands/verify.md)      |
 | `rolecraft watch [<slug>]`              | Watch skills for changes and auto-sync                                     | [docs](docs/commands/watch.md)       |
 | `rolecraft ci`                          | Re-install all skills from lockfile (CI mode)                               | [docs](docs/commands/ci.md)          |
+| `rolecraft convert <source>`            | Convert between SKILL.md and .mdc formats                                   | [docs](docs/commands/convert.md)     |
 | `rolecraft upgrade`                     | Upgrade rolecraft to the latest version                                     | [docs](docs/commands/upgrade.md)     |
 | `rolecraft remove <slug>`               | Uninstall a skill                                                           | [docs](docs/commands/remove.md)      |
 | `rolecraft update <slug>`               | Re-install a skill to latest                                                | [docs](docs/commands/update.md)      |
