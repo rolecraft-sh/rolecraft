@@ -4,7 +4,6 @@ import { Writable } from 'node:stream'
 import { join, dirname, basename } from 'node:path'
 import { tmpdir, homedir } from 'node:os'
 import { execSync as defaultExecSync, spawnSync } from 'node:child_process'
-import { randomUUID } from 'node:crypto'
 import { mkdtempSync } from 'node:fs'
 import { get as defaultHttpsGet } from 'node:https'
 import { computeContentHash } from './lockfile.js'
@@ -163,7 +162,7 @@ async function resolveLocal(source) {
 }
 
 async function resolveGitHub(source) {
-  const tmpDir = join(tmpdir(), `rolecraft-${randomUUID().slice(0, 8)}`)
+  const tmpDir = mkdtempSync(join(tmpdir(), 'rolecraft-gh-'))
   const url = `https://github.com/${source}.git`
 
   try {
@@ -215,7 +214,7 @@ function normalizeGitUrl(source) {
 }
 
 async function resolveGitUrl(source) {
-  const tmpDir = join(tmpdir(), `rolecraft-${randomUUID().slice(0, 8)}`)
+  const tmpDir = mkdtempSync(join(tmpdir(), 'rolecraft-git-'))
   const url = normalizeGitUrl(source)
 
   try {
@@ -285,6 +284,10 @@ function parseNpmRef(source) {
 }
 
 function fetchJson(url) {
+  const parsed = new URL(url)
+  if (!parsed.hostname.endsWith('.npmjs.org') && parsed.hostname !== 'npmjs.org') {
+    throw new Error(`Fetch not allowed from ${parsed.hostname}`)
+  }
   return new Promise((resolve, reject) => {
     const req = runHttpsGet(url, { headers: { Accept: 'application/json' } }, (res) => {
       let data = ''

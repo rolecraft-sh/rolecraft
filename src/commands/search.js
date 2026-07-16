@@ -180,7 +180,7 @@ async function pickAndInstall(items) {
 
   const repo = items[selectedIndex]
   const source = repo.full_name
-  console.log(`\n📦 Installing "${source}"...`)
+  console.log('\n📦 Installing "%s"...', source)
   try {
     const resolved = await resolveSource(source)
     const targets = ['project']

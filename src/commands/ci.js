@@ -19,22 +19,22 @@ export async function ciCommand() {
     return
   }
 
-  console.log(`\n🔒 Installing ${entries.length} skill(s) from lockfile...\n`)
+    console.log('\n🔒 Installing %s skill(s) from lockfile...\n', entries.length)
 
   let allPassed = true
   for (const [slug, entry] of entries) {
     if (!entry.source) {
-      console.error(`   ❌ ${slug}: missing source in lockfile`)
+      console.error('   ❌ %s: missing source in lockfile', slug)
       allPassed = false
       continue
     }
 
-    console.log(`   📦 ${slug} → ${entry.source}`)
+    console.log('   📦 %s → %s', slug, entry.source)
     try {
       const resolved = await resolveSource(entry.source)
       const targets = entry.sourceType === 'local' ? ['project'] : ['agents']
       await installSkill(resolved, targets)
-      console.log(`   ✅ ${slug} installed`)
+      console.log('   ✅ %s installed', slug)
     } catch (err) {
       console.error('   ❌ %s: %s', slug, err?.message)
       allPassed = false
@@ -43,7 +43,7 @@ export async function ciCommand() {
 
   console.log()
   if (allPassed) {
-    console.log(`✅ All ${entries.length} skill(s) installed from lockfile.`)
+    console.log('✅ All %s skill(s) installed from lockfile.', entries.length)
   } else {
     throw new Error('Some skills failed to install.')
   }

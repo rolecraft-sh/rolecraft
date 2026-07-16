@@ -406,7 +406,12 @@ export async function profileImportCommand(path) {
   }
 
   await ensureProfileDir()
-  await writeFile(profilePath(data.name), JSON.stringify(enriched, null, 2) + '\n', 'utf-8')
+  const profilePath_ = resolve(profilePath(data.name))
+  const profilesDir_ = resolve(join(homedir(), '.agents', 'profiles'))
+  if (!profilePath_.startsWith(profilesDir_)) {
+    throw new Error('Invalid profile path')
+  }
+  await writeFile(profilePath_, JSON.stringify(enriched, null, 2) + '\n', 'utf-8')
   console.log(`\n✅ Profile "${data.name}" imported (${Object.keys(data.agents).length} agent(s)).`)
 
   const current = await captureAllAgents()
