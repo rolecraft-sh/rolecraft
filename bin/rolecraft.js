@@ -70,6 +70,7 @@ Options:
   --no-mcp       Skip MCP server installation from skills (install, bundle)
 
 Options for install:
+  --yes, -y      Non-interactive: accept all defaults and skip prompts
   --global       Install to ~/.agents/skills/
   --project      Install to ./.agents/skills/ (default)
   --windsurf     Also install to ~/.windsurf/skills/
