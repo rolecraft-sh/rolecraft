@@ -67,6 +67,26 @@ describe('doctor command', () => {
     assert.ok(logs.some(l => l.includes('rolecraft version')))
   })
 
+  it('reports git availability', async () => {
+    const { logs, restore } = capture()
+    try {
+      await doctorModule.doctorCommand()
+    } finally {
+      restore()
+    }
+    assert.ok(logs.some(l => l.includes('Git availability')))
+  })
+
+  it('reports npm availability', async () => {
+    const { logs, restore } = capture()
+    try {
+      await doctorModule.doctorCommand()
+    } finally {
+      restore()
+    }
+    assert.ok(logs.some(l => l.includes('npm availability')))
+  })
+
   it('reports home directory', async () => {
     const { logs, restore } = capture()
     try {
