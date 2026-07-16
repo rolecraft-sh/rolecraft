@@ -102,7 +102,8 @@ describe('rolecraft CLI', () => {
     const logs = captureLogs()
     process.argv = ['node', 'rolecraft', 'install', '--help']
     await main()
-    assert.ok(logs.some(l => l.includes('rolecraft')))
+    const help = logs.join('\n')
+    assert.match(help, /Options for install:[\s\S]*--yes, -y/)
   })
 
   it('throws for install with no source', async () => {
