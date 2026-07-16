@@ -326,7 +326,7 @@ export async function run() {
   try {
     await main()
   } catch (err) {
-    console.error('\n❌ %s', err?.message || err)
+    console.error('\n❌ %s', String(err?.message || err).replace(/\n/g, '\\n').replace(/\r/g, '\\r'))
     process.exit(1)
   }
 }

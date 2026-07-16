@@ -37,8 +37,21 @@ before(async () => {
   updateModule = await import('./update.js')
 })
 
+async function rmRetry(path, opts, maxRetries = 5) {
+  for (let i = 0; i < maxRetries; i++) {
+    try { await rm(path, opts); return } catch (e) {
+      if (e.code === 'ENOTEMPTY' || e.code === 'EBUSY') {
+        await new Promise(r => setTimeout(r, 200 * (i + 1)))
+        continue
+      }
+      throw e
+    }
+  }
+  await rm(path, opts)
+}
+
 after(async () => {
-  await rm(tempDir, { recursive: true, force: true })
+  await rmRetry(tempDir, { recursive: true, force: true })
   process.env.HOME = origHome
 })
 

@@ -4,6 +4,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, readFileSync } from 'node:fs'
 import { rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
+import { format } from 'node:util'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
@@ -14,7 +15,7 @@ function capture() {
   logs = []
   origLog = console.log
   console.log = (...args) => {
-    if (args.length) logs.push(String(args[0]))
+    if (args.length) logs.push(format(...args))
   }
 }
 

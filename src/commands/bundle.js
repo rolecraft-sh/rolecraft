@@ -77,7 +77,7 @@ async function installSources(sources, label, options, noMcp = false) {
       continue
     }
 
-    console.log(`   [${i + 1}/${sources.length}] ${source}`)
+    console.log('   [%s/%s] %s', i + 1, sources.length, source)
 
     try {
       await installCommand(source, { global: true, project: true, noMcp: noMcp, dryRun: options.dryRun })
