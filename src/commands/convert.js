@@ -1,4 +1,4 @@
-import { readFile, writeFile, readdir, stat, mkdir } from 'node:fs/promises'
+import { readFile, writeFile, readdir, mkdir } from 'node:fs/promises'
 import { join, basename } from 'node:path'
 import { homedir } from 'node:os'
 import { detectFormat, skillToMdc, mdcToSkill, parseFrontmatter } from '../utils/converter.js'
