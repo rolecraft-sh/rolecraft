@@ -53,3 +53,7 @@ chore: bump dependencies
 ## Code of Conduct
 
 Be respectful and constructive. Keep discussions focused on the code.
+
+## Show Your Support
+
+If rolecraft makes your workflow easier, consider [starring the repo](https://github.com/sametcelikbicak/rolecraft). It helps others discover the project.
