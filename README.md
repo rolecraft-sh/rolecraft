@@ -162,7 +162,7 @@ No other CLI combines both. npx skills has no MCP support. ags has a separate MC
 | `rolecraft mcp install/remove/list`     | Install, remove, and list MCP servers for AI agents                         | [docs](docs/commands/mcp.md)         |
 | `rolecraft profile save/apply/list`     | Save, apply, and share multi-agent configuration profiles                   | [docs](docs/commands/profile.md)     |
 | `rolecraft verify`                      | Check installed skill integrity via content hash                            | [docs](docs/commands/verify.md)      |
-| `rolecraft watch [<slug>]`              | Watch skills for changes and auto-sync                                     | [docs](docs/commands/watch.md)       |
+| `rolecraft watch [<slug>]`              | Watch skills for changes and auto-sync                                      | [docs](docs/commands/watch.md)       |
 | `rolecraft ci`                          | Re-install all skills from lockfile (CI mode)                               | [docs](docs/commands/ci.md)          |
 | `rolecraft convert <source>`            | Convert between SKILL.md and .mdc formats                                   | [docs](docs/commands/convert.md)     |
 | `rolecraft upgrade`                     | Upgrade rolecraft to the latest version                                     | [docs](docs/commands/upgrade.md)     |
@@ -209,13 +209,14 @@ No other CLI combines both. npx skills has no MCP support. ags has a separate MC
 
 Every install is automatically scanned with **static analysis** that detects:
 
-| Severity | What it catches |
-|----------|----------------|
-| 🔴 Critical | Prompt injection, obfuscated code (base64 blobs, `eval()`), command injection (download-and-execute) |
-| 🟡 High | Credential harvesting patterns, sensitive file access (`~/.ssh`, `.env`) |
-| 🟢 Medium/Low | Missing metadata, unusual source patterns |
+| Severity      | What it catches                                                                                      |
+| ------------- | ---------------------------------------------------------------------------------------------------- |
+| 🔴 Critical   | Prompt injection, obfuscated code (base64 blobs, `eval()`), command injection (download-and-execute) |
+| 🟡 High       | Credential harvesting patterns, sensitive file access (`~/.ssh`, `.env`)                             |
+| 🟢 Medium/Low | Missing metadata, unusual source patterns                                                            |
 
 Scores range **0–100**:
+
 - **90+** → SAFE, install proceeds
 - **70–89** → REVIEW, prompts for confirmation
 - **<70** → DANGER, blocked unless `--yes`
@@ -302,13 +303,16 @@ Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
 
 Thanks to everyone who has contributed to RoleCraft:
 
-| Avatar                                                                                          | Name                                                   | Role                                                                |
-| ----------------------------------------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------- |
-| <img src="https://github.com/sametcelikbicak.png" width="40" height="40" alt="sametcelikbicak"> | [Samet ÇELİKBIÇAK](https://github.com/sametcelikbicak) | Owner & Maintainer                                                  |
-| <img src="https://github.com/fengjikui.png" width="40" height="40" alt="fengjikui">             | [冯基魁](https://github.com/fengjikui)                 | [Contributor](https://github.com/sametcelikbicak/rolecraft/pull/62) |
-| <img src="https://github.com/Yurii201811.png" width="40" height="40" alt="Yurii201811">         | [Yurii201811](https://github.com/Yurii201811)         | [Contributor](https://github.com/sametcelikbicak/rolecraft/pull/104) |
-| <img src="https://github.com/gaoharimran29-glitch.png" width="40" height="40" alt="gaoharimran29-glitch"> | [Gaohar Imran](https://github.com/gaoharimran29-glitch) | [Contributor](https://github.com/sametcelikbicak/rolecraft/pull/113) |
-| <img src="https://github.com/ajaynomics.png" width="40" height="40" alt="ajaynomics">               | [Ajay Krishnan](https://github.com/ajaynomics)         | [Contributor](https://github.com/sametcelikbicak/rolecraft/pull/114) |
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/sametcelikbicak"><img src="https://github.com/sametcelikbicak.png" width="60" height="60" alt="sametcelikbicak"><br><b>Samet ÇELİKBIÇAK</b></a><br><sub>Owner & Maintainer</sub></td>
+    <td align="center"><a href="https://github.com/fengjikui"><img src="https://github.com/fengjikui.png" width="60" height="60" alt="fengjikui"><br><b>冯基魁</b></a><br><sub><a href="https://github.com/sametcelikbicak/rolecraft/pull/62">Contributor</a></sub></td>
+    <td align="center"><a href="https://github.com/Yurii201811"><img src="https://github.com/Yurii201811.png" width="60" height="60" alt="Yurii201811"><br><b>Yurii201811</b></a><br><sub><a href="https://github.com/sametcelikbicak/rolecraft/pull/104">Contributor</a></sub></td>
+    <td align="center"><a href="https://github.com/gaoharimran29-glitch"><img src="https://github.com/gaoharimran29-glitch.png" width="60" height="60" alt="gaoharimran29-glitch"><br><b>Gaohar Imran</b></a><br><sub><a href="https://github.com/sametcelikbicak/rolecraft/pull/113">Contributor</a></sub></td>
+    <td align="center"><a href="https://github.com/ajaynomics"><img src="https://github.com/ajaynomics.png" width="60" height="60" alt="ajaynomics"><br><b>Ajay Krishnan</b></a><br><sub><a href="https://github.com/sametcelikbicak/rolecraft/pull/114">Contributor</a></sub></td>
+    <td align="center"><a href="https://github.com/BenjaminAyivoh1"><img src="https://github.com/BenjaminAyivoh1.png" width="60" height="60" alt="BenjaminAyivoh1"><br><b>Benjamin Ayivoh</b></a><br><sub><a href="https://github.com/sametcelikbicak/rolecraft/pull/120">Contributor</a></sub></td>
+  </tr>
+</table>
 
 ---
 
