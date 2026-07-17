@@ -1,6 +1,6 @@
 import { readLock, getProjectLockPath } from '../utils/lockfile.js'
 
-export async function listCommand(cwd) {
+export async function listCommand(cwd, options = {}) {
   const [globalLock, projectLock] = await Promise.all([
     readLock(),
     cwd ? readLock(getProjectLockPath(cwd)) : Promise.resolve(null),
@@ -14,6 +14,32 @@ export async function listCommand(cwd) {
   }
 
   const skills = Object.entries(mergedSkills)
+  if (options.json) {
+  const jsonSkills = {}
+
+  for (const [slug, entry] of skills) {
+    const inProject = projectSkills.has(slug)
+    const inGlobal = slug in globalLock.skills
+
+    const scope = inProject && inGlobal
+      ? 'global, project'
+      : inProject
+        ? 'project'
+        : 'global'
+
+    jsonSkills[slug] = {
+      ...entry,
+      scope,
+    }
+  }
+
+  console.log(JSON.stringify({
+    skills: jsonSkills,
+    total: skills.length,
+  }, null, 2))
+
+  return
+}
 
   if (skills.length === 0) {
     console.log('No skills installed.')

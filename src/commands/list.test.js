@@ -39,19 +39,54 @@ describe('list command', () => {
     assert.ok(logs.some(l => l.includes('No skills installed')))
   })
 
-  it('lists installed skills with details', async () => {
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3,
-      skills: {
-        'test/skill': {
-          installedAt: '2025-01-15T10:00:00.000Z',
-          source: 'owner/repo',
-          sourceType: 'github',
+  it('outputs JSON when json option is enabled', async () => {
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'test/skill': {
+            installedAt: '2025-01-15T10:00:00.000Z',
+            source: 'owner/repo',
+            sourceType: 'github',
+            agents: ['cursor', 'claude'],
+          },
         },
-      },
-      dismissed: {},
-      lastSelectedAgents: [],
-    }))
+        dismissed: {},
+        lastSelectedAgents: [],
+      })
+    )
+
+    const logs = captureLogs()
+
+    await listModule.listCommand(undefined, { json: true })
+
+    const output = JSON.parse(logs.join('\n'))
+
+    assert.equal(output.total, 1)
+    assert.ok(output.skills['test/skill'])
+    assert.equal(output.skills['test/skill'].scope, 'global')
+    assert.equal(output.skills['test/skill'].source, 'owner/repo')
+    assert.equal(output.skills['test/skill'].sourceType, 'github')
+    assert.deepEqual(output.skills['test/skill'].agents, ['cursor', 'claude'])
+  })
+
+  it('lists installed skills with details', async () => {
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'test/skill': {
+            installedAt: '2025-01-15T10:00:00.000Z',
+            source: 'owner/repo',
+            sourceType: 'github',
+          },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      })
+    )
 
     const logs = captureLogs()
 
@@ -64,12 +99,19 @@ describe('list command', () => {
   })
 
   it('handles skill without optional fields', async () => {
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3,
-      skills: { 'minimal/skill': { installedAt: '2025-01-01T00:00:00.000Z' } },
-      dismissed: {},
-      lastSelectedAgents: [],
-    }))
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'minimal/skill': {
+            installedAt: '2025-01-01T00:00:00.000Z',
+          },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      })
+    )
 
     const logs = captureLogs()
 
@@ -80,12 +122,17 @@ describe('list command', () => {
   })
 
   it('handles skill with unknown installedAt', async () => {
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3,
-      skills: { 'nodate/skill': {} },
-      dismissed: {},
-      lastSelectedAgents: [],
-    }))
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'nodate/skill': {},
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      })
+    )
 
     const logs = captureLogs()
 
@@ -95,40 +142,67 @@ describe('list command', () => {
   })
 
   it('merges project-scoped skills when cwd is given', async () => {
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3,
-      skills: { 'global/only': { installedAt: '2025-01-01T00:00:00.000Z' } },
-      dismissed: {},
-      lastSelectedAgents: [],
-    }))
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'global/only': {
+            installedAt: '2025-01-01T00:00:00.000Z',
+          },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      })
+    )
 
-    await writeFile(join(projectDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3,
-      skills: { 'project/only': { installedAt: '2025-06-01T00:00:00.000Z' } },
-      dismissed: {},
-      lastSelectedAgents: [],
-    }))
+    await writeFile(
+      join(projectDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'project/only': {
+            installedAt: '2025-06-01T00:00:00.000Z',
+          },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      })
+    )
 
     const logs = captureLogs()
 
     await listModule.listCommand(projectDir)
 
-    assert.ok(logs.some(l => l.includes('global/only')), 'should show global skill')
-    assert.ok(logs.some(l => l.includes('project/only')), 'should show project skill')
+    assert.ok(logs.some(l => l.includes('global/only')))
+    assert.ok(logs.some(l => l.includes('project/only')))
     assert.ok(logs.some(l => l.includes('2 skill(s)')))
   })
 
   it('shows scope as project for skills only in project lock', async () => {
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3, skills: {}, dismissed: {}, lastSelectedAgents: [],
-    }))
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {},
+        dismissed: {},
+        lastSelectedAgents: [],
+      })
+    )
 
-    await writeFile(join(projectDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3,
-      skills: { 'proj/skill': { installedAt: '2025-06-01T00:00:00.000Z' } },
-      dismissed: {},
-      lastSelectedAgents: [],
-    }))
+    await writeFile(
+      join(projectDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'proj/skill': {
+            installedAt: '2025-06-01T00:00:00.000Z',
+          },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      })
+    )
 
     const logs = captureLogs()
 
@@ -138,19 +212,33 @@ describe('list command', () => {
   })
 
   it('shows scope as global, project when skill exists in both', async () => {
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3,
-      skills: { 'shared/skill': { installedAt: '2025-01-01T00:00:00.000Z' } },
-      dismissed: {},
-      lastSelectedAgents: [],
-    }))
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'shared/skill': {
+            installedAt: '2025-01-01T00:00:00.000Z',
+          },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      })
+    )
 
-    await writeFile(join(projectDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3,
-      skills: { 'shared/skill': { installedAt: '2025-06-01T00:00:00.000Z' } },
-      dismissed: {},
-      lastSelectedAgents: [],
-    }))
+    await writeFile(
+      join(projectDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'shared/skill': {
+            installedAt: '2025-06-01T00:00:00.000Z',
+          },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      })
+    )
 
     const logs = captureLogs()
 
