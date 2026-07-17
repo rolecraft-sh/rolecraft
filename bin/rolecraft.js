@@ -133,9 +133,14 @@ export async function main() {
       break
     }
 
-    case 'list':
-      await listCommand(process.cwd())
+    case 'list': {
+      const options = {
+        json: args.includes('--json'),
+      }
+
+      await listCommand(process.cwd(), options)
       break
+    }
 
     case 'remove': {
       if (args.includes('--help') || args.includes('-h')) { usage(); return }
