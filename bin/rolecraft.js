@@ -135,12 +135,12 @@ export async function main() {
 
     case 'list': {
       const options = {
-      json: args.includes('--json'),
-    }
+        json: args.includes('--json'),
+      }
 
-    await listCommand(process.cwd(), options)
-    break
-  }
+      await listCommand(process.cwd(), options)
+      break
+    }
 
     case 'remove': {
       if (args.includes('--help') || args.includes('-h')) { usage(); return }

@@ -15,31 +15,31 @@ export async function listCommand(cwd, options = {}) {
 
   const skills = Object.entries(mergedSkills)
   if (options.json) {
-  const jsonSkills = {}
+    const jsonSkills = {}
 
-  for (const [slug, entry] of skills) {
-    const inProject = projectSkills.has(slug)
-    const inGlobal = slug in globalLock.skills
+    for (const [slug, entry] of skills) {
+      const inProject = projectSkills.has(slug)
+      const inGlobal = slug in globalLock.skills
 
-    const scope = inProject && inGlobal
-      ? 'global, project'
-      : inProject
-        ? 'project'
-        : 'global'
+      const scope = inProject && inGlobal
+        ? 'global, project'
+        : inProject
+          ? 'project'
+          : 'global'
 
-    jsonSkills[slug] = {
-      ...entry,
-      scope,
+      jsonSkills[slug] = {
+        ...entry,
+        scope,
+      }
     }
+
+    console.log(JSON.stringify({
+      skills: jsonSkills,
+      total: skills.length,
+    }, null, 2))
+
+    return
   }
-
-  console.log(JSON.stringify({
-    skills: jsonSkills,
-    total: skills.length,
-  }, null, 2))
-
-  return
-}
 
   if (skills.length === 0) {
     console.log('No skills installed.')
