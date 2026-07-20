@@ -299,7 +299,7 @@ cd rolecraft
 npm link                   # rolecraft CLI runs from local checkout
 npm install                # for docs site (VitePress)
 npm run docs:dev           # local docs preview
-npm test                   # 678 tests, 0 fails expected
+npm test                   # 721+ tests, 0 fails expected
 ```
 
 [→ Contributing guide](CONTRIBUTING.md)

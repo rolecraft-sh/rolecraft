@@ -8,7 +8,7 @@ Thanks for your interest in contributing! Here's how you can help.
 git clone https://github.com/sametcelikbicak/rolecraft.git
 cd rolecraft
 npm link                  # now `rolecraft` runs from your local checkout
-npm test                  # 676+ tests should pass
+npm test                  # 721+ tests should pass
 ```
 
 **Requirements:** Node.js >= 20, no other dependencies.
