@@ -78,17 +78,6 @@ jobs:
           git commit -m "chore: update changelog and version for ${{ github.ref_name }}"
           git push origin "$BRANCH_NAME"
 
-      - name: Update tag to release commit (re-signed)
-        run: |
-          TAG_NAME="${{ github.ref_name }}"
-          TAG_MESSAGE="chore: release $TAG_NAME"
-          if git config tag.gpgsign | grep -q true; then
-            git tag -f -s "$TAG_NAME" -m "$TAG_MESSAGE"
-          else
-            git tag -f "$TAG_NAME"
-          fi
-          git push origin "$TAG_NAME" --force
-
       - name: Create Pull Request
         run: |
           cat > /tmp/pr-body.md << BODYEOF
