@@ -1,7 +1,7 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert/strict'
 import { mkdtempSync } from 'node:fs'
-import { mkdir, rm, writeFile } from 'node:fs/promises'
+import { mkdir, rm, writeFile, symlink } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
@@ -308,5 +308,73 @@ describe('doctor command', () => {
     }
 
     assert.ok(logs.some(l => l.includes('hash mismatch') || l.includes('checked')))
+  })
+
+  it('shows platform info', async () => {
+    const { logs, restore } = capture()
+    try {
+      await doctorModule.doctorCommand()
+    } finally {
+      restore()
+    }
+    assert.ok(logs.some(l => l.includes('Platform')))
+  })
+
+  it('shows node.js location', async () => {
+    const { logs, restore } = capture()
+    try {
+      await doctorModule.doctorCommand()
+    } finally {
+      restore()
+    }
+    assert.ok(logs.some(l => l.includes('Node.js location')))
+    assert.ok(logs.some(l => l.includes(process.execPath)))
+  })
+
+  it('validates lockfile schema as valid', async () => {
+    const { logs, restore } = capture()
+    try {
+      await doctorModule.doctorCommand()
+    } finally {
+      restore()
+    }
+    assert.ok(logs.some(l => l.includes('lockfile schema')))
+    assert.ok(logs.some(l => l.includes('valid')))
+  })
+
+  it('reports no orphaned skill dirs when clean', async () => {
+    const { logs, restore } = capture()
+    try {
+      await doctorModule.doctorCommand()
+    } finally {
+      restore()
+    }
+    assert.ok(logs.some(l => l.includes('Orphaned skill dirs')))
+    assert.ok(logs.some(l => l.includes('none')))
+  })
+
+  it('reports mcp servers check', async () => {
+    const { logs, restore } = capture()
+    try {
+      await doctorModule.doctorCommand()
+    } finally {
+      restore()
+    }
+    assert.ok(logs.some(l => l.includes('MCP servers')))
+  })
+
+  it('outputs json with --json flag', async () => {
+    const { logs, restore } = capture()
+    try {
+      await doctorModule.doctorCommand({ json: true })
+    } finally {
+      restore()
+    }
+    assert.ok(logs.length > 0)
+    const parsed = JSON.parse(logs.join(''))
+    assert.ok(typeof parsed.status === 'string')
+    assert.ok(typeof parsed.checks === 'object')
+    assert.ok(typeof parsed.summary === 'object')
+    assert.ok(typeof parsed.summary.passed === 'number')
   })
 })
