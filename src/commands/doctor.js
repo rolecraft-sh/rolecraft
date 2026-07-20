@@ -120,14 +120,6 @@ export async function doctorCommand(options = {}) {
   let warnings = 0
   let errors = 0
 
-  function report(label, status, detail = '') {
-    if (jsonMode) return { label, status, detail }
-    console.log(`   ${icon(status)} ${label.padEnd(38)} ${detail}`)
-    if (status === 'pass') passed++
-    else if (status === 'warn') warnings++
-    else errors++
-  }
-
   const jsonChecks = []
 
   function checked(label, status, detail = '') {
