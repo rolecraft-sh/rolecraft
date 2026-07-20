@@ -52,7 +52,7 @@ Usage:
   rolecraft verify                  Verify installed skill integrity
   rolecraft ci                      Install all skills from lockfile
   rolecraft completions <shell>     Generate shell completions (bash|zsh|fish)
-  rolecraft doctor                  Run system health check
+  rolecraft doctor                  Run system health check (--json, --network)
   rolecraft watch [<slug>]          Watch skills for changes and auto-sync
   rolecraft profile                 Manage agent configuration profiles
   rolecraft mcp install <source>    Install an MCP server (npm:, gh:, or local path)
@@ -271,10 +271,12 @@ export async function main() {
       break
     }
 
-    case 'doctor':
+    case 'doctor': {
       if (args.includes('--help') || args.includes('-h')) { usage(); return }
-      await doctorCommand()
+      const doctorFlags = args.filter(a => a.startsWith('-'))
+      await doctorCommand({ json: doctorFlags.includes('--json'), network: doctorFlags.includes('--network') })
       break
+    }
 
     case 'watch': {
       if (args.includes('--help') || args.includes('-h')) { usage(); return }

@@ -6,20 +6,33 @@ Run a system health check to diagnose common issues.
 
 ```bash
 rolecraft doctor
+rolecraft doctor --json          # JSON output
+rolecraft doctor --network       # include network connectivity check
 ```
 
 ## Description
 
 Scans your system and reports on:
 
-- **Node.js version** — verifies >= 20
-- **rolecraft version** — shows current installed version
-- **Home directory** — confirms HOME is set
-- **~/.agents directory** — checks if the global agents directory exists
-- **Global lockfile** — reads the lockfile and counts tracked skills
-- **Project lockfile** — reads the project-scoped lockfile (if any)
-- **Agent detection** — finds all installed AI agents by scanning known skill directories
-- **Skill integrity** — for each skill in the lockfile, verifies the skill directory exists and content hashes match
+- **Node.js version** — verifies >= 20, shows runtime path
+- **Platform** — OS and kernel release
+- **Git / npm availability** — needed for GitHub and npm sources
+- **~/.agents directory** — existence and permissions
+- **Lockfile schema** — validates global lockfile format
+- **Global & project lockfiles** — skill count per scope
+- **Disk usage** — total size of installed skills
+- **Agent detection** — finds installed agents among 86+ supported, per-agent skill count and directory permissions
+- **Orphaned skill dirs** — directories not tracked in any lockfile
+- **Skill integrity** — verifies skill directories exist, content hashes match, and checks for broken symlinks
+- **MCP servers** — counts configured MCP servers across detected agents
+- **Network** (with `--network`) — tests connectivity to GitHub
+
+## Flags
+
+| Flag | Description |
+|------|-------------|
+| `--json` | Output results as structured JSON |
+| `--network` | Include a network connectivity check (GitHub) |
 
 ## Example output
 
@@ -29,32 +42,50 @@ $ rolecraft doctor
 🔬 rolecraft doctor — System Health Check
 
    ✅ Node.js version                        v22.0.0
-   ✅ rolecraft version                      v1.2.0
+   ✅ Git availability                       detected
+   ✅ npm availability                       detected
+   ✅ rolecraft version                      v1.6.0
+   ✅ Node.js location                       /usr/local/bin/node
+   ✅ Platform                               darwin 24.0.0
    ✅ Home directory                         /home/user
    ✅ ~/.agents directory                    /home/user/.agents
+   ✅ ~/.agents permissions                  rwx
+   ✅ Global lockfile schema                 v3, valid
    ✅ Global lockfile                        3 skill(s) tracked
    ⚠️  Project lockfile                       no project skills
-   ✅ Agent detection                        2 agent(s) found
-     ✅  └ opencode                          2 skill(s)
-     ✅  └ claude-code                       1 skill(s)
-   ✅ Skill integrity                        3 checked, 0 hash mismatch(es), 0 missing director(ies)
+   ✅ Disk usage                             3 skill(s), 12.5 KB total
+   ✅ Agent detection                        14/86 supported agents detected
+     ✅  └ opencode                          2 skill(s) [rwx]
+     ✅  └ claude-code                       1 skill(s) [rwx]
+   ✅ Orphaned skill dirs                    none
+   ✅ Skill integrity                        3 checked, 0 hash mismatch(es)
+   ✅ MCP servers                            6 configured across 3 agent(s)
 
-📋 Summary: 9 passed, 1 warnings, 0 errors
+📋 Summary: 14/15 passed, 1 warnings, 0 errors
 ```
 
 ```bash
-$ rolecraft doctor
+$ rolecraft doctor --json
+
+{
+  "status": "degraded",
+  "checks": {
+    "Node.js version": { "status": "pass", "detail": "v22.0.0" },
+    "Agent detection": { "status": "pass", "detail": "14/86 supported agents detected" },
+    "Skill integrity": { "status": "warn", "detail": "3 checked, 1 missing director(ies)" },
+    "MCP servers": { "status": "warn", "detail": "none configured" }
+  },
+  "summary": { "passed": 12, "warnings": 3, "errors": 0 }
+}
+```
+
+```bash
+$ rolecraft doctor --network
 
 🔬 rolecraft doctor — System Health Check
 
-   ✅ Node.js version                        v20.11.0
-   ✅ rolecraft version                      v1.2.0
-   ✅ Home directory                         /home/user
-   ⚠️  ~/.agents directory                   not yet created
-   ⚠️  Global lockfile                       no global skills
-   ⚠️  Project lockfile                      no project skills
-   ⚠️  Agent detection                       no supported agents detected
-   ⚠️  Skill integrity                       no skills to verify
+   ...
+   ✅ Network (GitHub)                       reachable
 
-📋 Summary: 3 passed, 5 warnings, 0 errors
+📋 Summary: 15/15 passed, 0 warnings, 0 errors
 ```

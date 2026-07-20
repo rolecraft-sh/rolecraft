@@ -209,7 +209,13 @@ Verifies SHA256 content hashes of all installed skills.
 
 ### `rolecraft doctor`
 
-Runs system health checks: Node.js version, agent directories, lockfile integrity, skill file existence.
+```bash
+rolecraft doctor                # standard health check
+rolecraft doctor --json         # JSON output for scripting
+rolecraft doctor --network      # include GitHub connectivity test
+```
+
+Runs comprehensive system health checks: Node.js version, platform info, Git/npm availability, agent directories, lockfile schema validation, disk usage, orphaned directory detection, skill integrity (hash + symlink), MCP server configuration, and optional network connectivity (`--network`).
 
 ### `rolecraft watch [<slug>]`
 
