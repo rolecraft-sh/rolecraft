@@ -69,6 +69,14 @@ Options:
   --dry-run      Preview without making changes (install, setup, bundle, upgrade, profile, mcp, update, remove, watch)
   --no-mcp       Skip MCP server installation from skills (install, bundle)
 
+Options for use:
+  --list         List available skills from a source without previewing
+  --skill <names> Preview specific skills by name (comma-separated)
+
+Options for setup:
+  --list         List available skills from a source without installing
+  --skill <names> Install specific skills by name (comma-separated)
+
 Options for install:
   --yes, -y      Non-interactive: accept all defaults and skip prompts
   --global       Install to ~/.agents/skills/
@@ -181,7 +189,15 @@ export async function main() {
         console.error('Source can be a local path (./, /, ~), GitHub ref (owner/repo), or npm package (npm:package)')
         throw new Error('Missing source argument.')
       }
-      await useCommand(source)
+      const useFlags = args.filter(a => a.startsWith('-'))
+      const useOptions = {
+        list: useFlags.includes('--list'),
+      }
+      const skillIndex = useFlags.indexOf('--skill')
+      if (skillIndex !== -1 && useFlags[skillIndex + 1] && !useFlags[skillIndex + 1].startsWith('-')) {
+        useOptions.skill = useFlags[skillIndex + 1].split(',').map(s => s.trim())
+      }
+      await useCommand(source, useOptions)
       break
     }
 
@@ -235,7 +251,16 @@ export async function main() {
       const setupFlags = args.filter(a => a.startsWith('-'))
       const setupPos = args.filter(a => !a.startsWith('-'))
       const source = setupPos[0]
-      await setupCommand(source, { dryRun: setupFlags.includes('--dry-run'), yes: setupFlags.includes('--yes') || setupFlags.includes('-y') })
+      const setupOptions = {
+        dryRun: setupFlags.includes('--dry-run'),
+        yes: setupFlags.includes('--yes') || setupFlags.includes('-y'),
+        list: setupFlags.includes('--list'),
+      }
+      const skillIndex = setupFlags.indexOf('--skill')
+      if (skillIndex !== -1 && setupFlags[skillIndex + 1] && !setupFlags[skillIndex + 1].startsWith('-')) {
+        setupOptions.skill = setupFlags[skillIndex + 1].split(',').map(s => s.trim())
+      }
+      await setupCommand(source, setupOptions)
       break
     }
 

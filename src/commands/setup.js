@@ -1,11 +1,19 @@
 import { accessSync, readdirSync, constants } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
+import { createInterface as defaultCreateInterface } from 'node:readline'
+import { stdin as input, stdout as output } from 'node:process'
 import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotProjectDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, getCommandCodeDir, getCortexDir, getMistralVibeDir, getQwenCodeDir, getOpenClawDir, getCodeBuddyDir, getMuxDir, getPiDir, getAutohandCodeDir, getRovoDevDir, getFirebenderDir, getBobDir, getAiderDeskDir, getCodeArtsDoerDir, getCodeMakerDir, getCodeStudioDir, getCrushDir, getEveDir, getForgeDir, getInferenceShDir, getJazzDir, getIFlowDir, getKiloCodeDir, getKodeDir, getLingmaDir, getMcpJamDir, getMoxbyDir, getOnaDir, getQoderDir, getReasonixDir, getTerraMindDir, getTinyCloudDir, getZencoderDir, getZapDir, getCodeepDir, getKimiCodeDir, getZCodeDir, getAstrbotDir, getQoderCnDir, getTraeCnDir, getZenflowDir, getNeovateDir, getPochiDir, getAdalDir, getDroidDir, getChatgptDir, getCodeartsAgentDir, getUniversalDir } from '../utils/lockfile.js'
-import { resolveSource } from '../utils/resolver.js'
+import { resolveSkills } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 import { parseMcpServersFromSkill, resolveMcpSource, addMcpServer, getSupportedMcpAgents } from '../utils/mcp.js'
 import { createSpinner } from '../utils/spinner.js'
+
+let createInterface = defaultCreateInterface
+
+export function setCreateInterface(fn) {
+  createInterface = fn
+}
 
 const KNOWN_AGENTS = [
   { flag: 'agents', label: 'opencode', dir: getAgentsDir },
@@ -114,6 +122,56 @@ function globalAgentsDir() {
   return join(homedir(), '.agents', 'skills')
 }
 
+function askQuestion(query) {
+  const rl = createInterface({ input, output })
+  return new Promise(resolve => {
+    rl.question(query, answer => {
+      rl.close()
+      resolve(answer.trim().toLowerCase())
+    })
+  })
+}
+
+function selectSkillsInteractive(skills) {
+  console.log()
+  for (let i = 0; i < skills.length; i++) {
+    console.log(`  ${i + 1}. ${skills[i].name}`)
+    if (skills[i].description) {
+      console.log(`      ${skills[i].description}`)
+    }
+  }
+
+  return (async () => {
+    while (true) {
+      console.log()
+      const answer = await askQuestion('Enter numbers (space-separated) to select, "all" for all, or press Enter to confirm selection: ')
+
+      if (answer === '' || answer === null || answer === undefined) {
+        console.log('  No skills selected. Nothing to install.')
+        return null
+      }
+
+      if (answer === 'all') {
+        console.log(`  Selected all ${skills.length} skills.`)
+        return skills
+      }
+
+      const parts = answer.split(/\s+/).map(p => parseInt(p, 10))
+      const selected = []
+      for (const p of parts) {
+        if (!isNaN(p) && p >= 1 && p <= skills.length) {
+          selected.push(skills[p - 1])
+          console.log(`  ${skills[p - 1].name} selected`)
+        }
+      }
+
+      if (selected.length > 0) {
+        return selected
+      }
+    }
+  })()
+}
+
 export async function setupCommand(source, options = {}) {
   const agents = detectAgents()
   const projectDir = join(process.cwd(), '.agents', 'skills')
@@ -148,56 +206,108 @@ export async function setupCommand(source, options = {}) {
   console.log()
 
   if (source) {
-    const spinner = createSpinner(`📦 Installing ${source}...`)
+    if (options.list) {
+      const spinner = createSpinner('Resolving skills...')
+      spinner.start()
+      const skills = await resolveSkills(source)
+      spinner.succeed(`Found ${skills.length} skill(s)`)
+      console.log()
+      for (const s of skills) {
+        console.log(`  ${s.name}`)
+        console.log(`    Slug:       ${s.slug}`)
+        console.log(`    Owner:      ${s.owner}`)
+        if (s.description) console.log(`    Description: ${s.description}`)
+        console.log(`    Files:      ${s.files.join(', ')}`)
+        console.log()
+      }
+      return
+    }
+
+    const spinner = createSpinner(`📦 Resolving ${source}...`)
     spinner.start()
-    const resolved = await resolveSource(source)
-    spinner.succeed(`📦 Found: ${resolved.name} (${resolved.slug})`)
+    const allSkills = await resolveSkills(source)
+    spinner.succeed(`Found ${allSkills.length} skill(s)`)
+
+    let selectedSkills
+    if (options.skill && options.skill.length > 0) {
+      const skillNames = options.skill.map(n => n.toLowerCase())
+      selectedSkills = allSkills.filter(s =>
+        skillNames.includes(s.name.toLowerCase()) || skillNames.includes(s.slug.toLowerCase())
+      )
+      if (selectedSkills.length === 0) {
+        throw new Error(`No matching skills found for: ${options.skill.join(', ')}. Available: ${allSkills.map(s => s.name).join(', ')}`)
+      }
+    } else if (allSkills.length === 1) {
+      selectedSkills = allSkills
+    } else if (options.yes) {
+      selectedSkills = allSkills
+      console.log(`   Installing all ${allSkills.length} skills`)
+    } else {
+      const result = await selectSkillsInteractive(allSkills)
+      if (!result) {
+        console.log('Setup cancelled.')
+        return
+      }
+      selectedSkills = result
+    }
 
     const targets = agents.map(a => a.flag)
     targets.push('project')
 
     if (options.dryRun) {
-      console.log(`\n📋 [dry-run] Would install skill:\n`)
-      console.log(`   Skill:     ${resolved.name} (${resolved.slug})`)
-      console.log(`   Source:    ${source}`)
-      console.log(`   Mode:      copy`)
-      console.log(`   Files:     ${resolved.files.join(', ')}`)
-      console.log(`   Targets:   ${targets.join(', ')}\n`)
+      console.log(`\n📋 [dry-run] Would install ${selectedSkills.length} skill(s):\n`)
+      for (const skill of selectedSkills) {
+        console.log(`   Skill:     ${skill.name} (${skill.slug})`)
+        console.log(`   Source:    ${source}`)
+        console.log(`   Mode:      copy`)
+        console.log(`   Files:     ${skill.files.join(', ')}`)
+        console.log(`   Targets:   ${targets.join(', ')}\n`)
+      }
       return
     }
 
-    if (options.yes) {
-      // skip confirmation, proceed with install
-    }
+    for (const skill of selectedSkills) {
+      const resolved = {
+        ...skill,
+        sourcePath: skill.sourcePath || source,
+        sourceType: skill.sourceType || 'local',
+      }
 
-    const results = await installSkill(resolved, targets)
+      console.log()
+      console.log(`   Skill:    ${resolved.name}`)
+      console.log(`   Slug:     ${resolved.slug}`)
+      console.log(`   Owner:    ${resolved.owner}`)
+      console.log(`   Files:    ${resolved.files.join(', ')}`)
 
-    const pathCounts = new Map()
-    for (const r of results) {
-      const count = pathCounts.get(r.path) || 0
-      pathCounts.set(r.path, count + 1)
-    }
+      const results = await installSkill(resolved, targets)
 
-    console.log(`✅ Installed to ${results.length} agent(s):\n`)
-    for (const [path, count] of pathCounts) {
-      const detail = count > 1 ? ` (×${count} agents)` : ''
-      console.log(`   ${path}${detail}`)
-    }
+      const pathCounts = new Map()
+      for (const r of results) {
+        const count = pathCounts.get(r.path) || 0
+        pathCounts.set(r.path, count + 1)
+      }
 
-    if (resolved.content) {
-      const mcpServers = parseMcpServersFromSkill(resolved.content)
-      if (mcpServers.length > 0) {
-        console.log(`\n🔧 Skill includes ${mcpServers.length} MCP server(s). Installing...`)
-        const supported = getSupportedMcpAgents()
-        const mcpTargets = agents.filter(a => supported.includes(a.flag)).map(a => a.flag)
-        for (const server of mcpServers) {
-          const resolvedMcp = resolveMcpSource(server.source)
-          let installedCount = 0
-          for (const agent of mcpTargets) {
-            const ok = await addMcpServer(agent, server.name, resolvedMcp)
-            if (ok) installedCount++
+      console.log(`   Installed to ${results.length} agent(s):`)
+      for (const [path, count] of pathCounts) {
+        const detail = count > 1 ? ` (×${count} agents)` : ''
+        console.log(`     ${path}${detail}`)
+      }
+
+      if (resolved.content) {
+        const mcpServers = parseMcpServersFromSkill(resolved.content)
+        if (mcpServers.length > 0) {
+          console.log(`\n   Skill includes ${mcpServers.length} MCP server(s). Installing...`)
+          const supported = getSupportedMcpAgents()
+          const mcpTargets = agents.filter(a => supported.includes(a.flag)).map(a => a.flag)
+          for (const server of mcpServers) {
+            const resolvedMcp = resolveMcpSource(server.source)
+            let installedCount = 0
+            for (const agent of mcpTargets) {
+              const ok = await addMcpServer(agent, server.name, resolvedMcp)
+              if (ok) installedCount++
+            }
+            console.log(`     ${installedCount}/${mcpTargets.length} agents: MCP server "${server.name}" installed`)
           }
-          console.log(`   ${installedCount}/${mcpTargets.length} agents: MCP server "${server.name}" installed`)
         }
       }
     }
@@ -207,6 +317,11 @@ export async function setupCommand(source, options = {}) {
     console.log('Examples:')
     console.log('  rolecraft setup ./my-skill')
     console.log('  rolecraft setup sametcelikbicak/task-decomposer')
+    console.log('\nOptions:')
+    console.log('  --list        List available skills from a source without installing')
+    console.log('  --skill <n>   Install specific skills by name (comma-separated)')
+    console.log('  --yes, -y     Install all skills without prompt')
+    console.log('  --dry-run     Preview without installing')
   }
 }
 

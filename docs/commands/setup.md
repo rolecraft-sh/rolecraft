@@ -9,6 +9,8 @@ Detect every AI agent on your machine and install a skill — plus its MCP serve
 ```bash
 rolecraft setup                    # detect agents only
 rolecraft setup <source>           # detect + install skill + MCP to all agents
+rolecraft setup <source> --list    # list skills without installing
+rolecraft setup <source> --skill <names>  # install specific skills
 ```
 
 ## Description
@@ -16,9 +18,20 @@ rolecraft setup <source>           # detect + install skill + MCP to all agents
 `rolecraft setup` is the **onboarding command**. It:
 
 1. Scans your system for all installed AI agent directories (opencode, cursor, claude-code, copilot, aider, etc.)
-2. When a source is provided: resolves the skill, runs a security scan, installs to every detected agent, and sets up any MCP servers declared in `SKILL.md`
+2. When a source is provided: resolves the skill(s), installs to every detected agent, and sets up any MCP servers declared in `SKILL.md`
+
+For sources with multiple skills (e.g. `mattpocock/skills`), you'll be prompted to select which skills to install. Use `--yes` to install all, or `--skill` to pick specific ones.
 
 This is the fastest way to go from zero to productive — one command configures every AI agent you use.
+
+## Options
+
+| Flag | Description |
+|------|-------------|
+| `--yes`, `-y` | Install all skills without prompt |
+| `--dry-run` | Preview without installing |
+| `--list` | List available skills without installing |
+| `--skill <names>` | Install specific skills by name (comma-separated) |
 
 ## Examples
 
@@ -39,6 +52,19 @@ rolecraft setup npm:@org/agent-rules
 ```
 
 Installs the skill to every detected agent automatically. No need to specify `--cursor`, `--claude`, etc.
+
+### Multi-skill source
+
+```bash
+# Show skills in a multi-skill source without installing
+rolecraft setup mattpocock/skills --list
+
+# Install specific skills
+rolecraft setup mattpocock/skills --skill "typescript-rules,react-rules"
+
+# Install all with --yes
+rolecraft setup mattpocock/skills -y
+```
 
 ### With MCP servers
 

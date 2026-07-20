@@ -102,4 +102,61 @@ Content here
     assert.ok(logs.some(l => l.includes('A skill with description')))
     assert.ok(logs.some(l => l.includes('desc/skill')))
   })
+
+  it('shows all skills from multi-skill source', async () => {
+    const multiDir = join(tempDir, 'multi-use')
+    mkdirSync(join(multiDir, 'skills', 'alpha'), { recursive: true })
+    mkdirSync(join(multiDir, 'skills', 'beta'), { recursive: true })
+    writeFileSync(join(multiDir, 'skills', 'alpha', 'SKILL.md'), '---\nname: alpha\nslug: multi/alpha\ndescription: First\n---\nContent A')
+    writeFileSync(join(multiDir, 'skills', 'beta', 'SKILL.md'), '---\nname: beta\nslug: multi/beta\ndescription: Second\n---\nContent B')
+
+    capture()
+    await useModule.useCommand(multiDir)
+    restoreLog()
+
+    assert.ok(logs.some(l => l.includes('alpha')))
+    assert.ok(logs.some(l => l.includes('beta')))
+    assert.ok(logs.some(l => l.includes('Content A')))
+    assert.ok(logs.some(l => l.includes('Content B')))
+  })
+
+  it('--list flag shows all skills without content', async () => {
+    const multiDir = join(tempDir, 'multi-use-list')
+    mkdirSync(join(multiDir, 'skills', 'skill-x'), { recursive: true })
+    writeFileSync(join(multiDir, 'skills', 'skill-x', 'SKILL.md'), '---\nname: skill-x\ndescription: Extra\n---\nSecret')
+
+    capture()
+    await useModule.useCommand(multiDir, { list: true })
+    restoreLog()
+
+    assert.ok(logs.some(l => l.includes('skill-x')))
+    assert.ok(logs.some(l => l.includes('Extra')))
+    assert.ok(!logs.some(l => l.includes('Secret')))
+  })
+
+  it('--skill flag filters to specific skill', async () => {
+    const multiDir = join(tempDir, 'multi-use-skill')
+    mkdirSync(join(multiDir, 'skills', 'filter-a'), { recursive: true })
+    mkdirSync(join(multiDir, 'skills', 'filter-b'), { recursive: true })
+    writeFileSync(join(multiDir, 'skills', 'filter-a', 'SKILL.md'), '---\nname: filter-a\nslug: f/a\n---\nAAA')
+    writeFileSync(join(multiDir, 'skills', 'filter-b', 'SKILL.md'), '---\nname: filter-b\nslug: f/b\n---\nBBB')
+
+    capture()
+    await useModule.useCommand(multiDir, { skill: ['filter-a'] })
+    restoreLog()
+
+    assert.ok(logs.some(l => l.includes('AAA')))
+    assert.ok(!logs.some(l => l.includes('BBB')))
+  })
+
+  it('--skill flag throws for non-matching names', async () => {
+    const multiDir = join(tempDir, 'multi-use-nomatch')
+    mkdirSync(join(multiDir, 'skills', 'exists'), { recursive: true })
+    writeFileSync(join(multiDir, 'skills', 'exists', 'SKILL.md'), '---\nname: exists\n---\nX')
+
+    await assert.rejects(
+      () => useModule.useCommand(multiDir, { skill: ['nope'] }),
+      /No matching skills found/,
+    )
+  })
 })
