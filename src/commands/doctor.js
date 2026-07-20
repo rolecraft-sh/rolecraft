@@ -1,4 +1,4 @@
-import { accessSync, constants, readFileSync, readdirSync, statSync, lstatSync } from 'node:fs'
+import { accessSync, constants, readFileSync, readdirSync, statSync } from 'node:fs'
 import { execSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
