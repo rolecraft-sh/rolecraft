@@ -23,6 +23,7 @@ export default defineConfig({
     nav: [
       { text: 'Getting Started', link: '/guides/getting-started' },
       { text: 'Onboarding', link: '/guides/onboarding' },
+      { text: 'CI/CD', link: '/guides/ci' },
       { text: 'Install', link: '/install' },
       { text: 'Commands', link: '/commands/install' },
       { text: 'Reference', link: '/reference' },
@@ -40,6 +41,7 @@ export default defineConfig({
             { text: 'Getting Started', link: '/guides/getting-started' },
             { text: 'Onboarding Guide', link: '/guides/onboarding' },
             { text: 'Use Cases', link: '/guides/use-cases' },
+            { text: 'CI/CD Integration', link: '/guides/ci' },
           ],
         },
         { text: 'CLI Reference', link: '/reference' },

@@ -17,6 +17,7 @@
   <a href="https://github.com/sametcelikbicak/rolecraft/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/sametcelikbicak/rolecraft/test.yml?label=tests" alt="Tests"></a>
   <a href="https://github.com/sametcelikbicak/rolecraft/actions/workflows/codeql.yml"><img src="https://img.shields.io/github/actions/workflow/status/sametcelikbicak/rolecraft/codeql.yml?label=CodeQL" alt="CodeQL"></a>
   <a href="https://github.com/sametcelikbicak/rolecraft/blob/main/.github/dependabot.yml"><img src="https://img.shields.io/badge/dependabot-enabled-025e8c?logo=Dependabot" alt="Dependabot"></a>
+  <a href="https://github.com/marketplace/actions/rolecraft-action"><img src="https://img.shields.io/badge/GitHub%20Action-rolecraft--action-blue?logo=github" alt="GitHub Action"></a>
   <a href="https://github.com/sametcelikbicak/rolecraft"><img src="https://img.shields.io/github/stars/sametcelikbicak/rolecraft?style=social" alt="Stars"></a>
   <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/📜-Changelog-blue" alt="Changelog"></a>
   <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/🤝-Contributing-green" alt="Contributing"></a>
@@ -140,6 +141,21 @@ No other CLI combines both. npx skills has no MCP support. ags has a separate MC
 - **System health check** — `rolecraft doctor` diagnoses agent directories, lockfiles, and skill integrity
 - **AGENTS.md XML generation** — `rolecraft agents-xml` generates Claude Code-compatible XML
 - **Profile system** — save, apply, and share multi-agent configurations
+
+---
+
+## CI/CD Integration
+
+Use the [rolecraft GitHub Action](https://github.com/marketplace/actions/rolecraft-action) to verify and install skills in your CI pipeline:
+
+```yaml
+# .github/workflows/skills.yml
+- uses: sametcelikbicak/rolecraft-action@v1
+  with:
+    command: ci --yes
+```
+
+See the [CI guide](docs/guides/ci.md) for more examples.
 
 ---
 
