@@ -186,13 +186,13 @@ describe('askScope', () => {
     try {
       await assert.rejects(
         () => installModule.installCommand(dangerDir, { global: true }),
-        /Install blocked by security scan/,
+        /blocked by security scan/,
       )
     } finally {
       restore()
     }
 
-    assert.ok(!logs.some(l => l.includes('Installed successfully')))
+    assert.ok(!logs.some(l => l.includes('Installed')))
     assert.equal(existsSync(join(tempDir, '.agents', 'skills', 'test-danger')), false)
   })
 
@@ -235,8 +235,8 @@ describe('askScope', () => {
       installModule.resetAskQuestion()
     }
 
-    assert.ok(logs.some(l => l.includes('Install cancelled')))
-    assert.ok(!logs.some(l => l.includes('Installed successfully')))
+    assert.ok(logs.some(l => l.includes('Skipping')))
+    assert.ok(!logs.some(l => l.includes('Installed')))
     assert.equal(existsSync(join(tempDir, '.agents', 'skills', 'test-review-cancel')), false)
   })
 
@@ -270,6 +270,63 @@ describe('askScope', () => {
 
     assert.ok(logs.some(l => l.includes('Installed')))
     assert.ok(logs.some(l => l.includes('my-test-mcp')))
+  })
+
+  it('installs with --list flag shows skills without installing', async () => {
+    const listDir = join(tempDir, 'list-skill')
+    mkdirSync(listDir, { recursive: true })
+    writeFileSync(join(listDir, 'SKILL.md'), '---\nname: list-me\ndescription: For listing\n---\nContent')
+
+    const { logs, restore } = capture('log')
+    await installModule.installCommand(listDir, { list: true, global: true })
+    restore()
+
+    assert.ok(logs.some(l => l.includes('list-me')))
+    assert.ok(logs.some(l => l.includes('Found')))
+    assert.ok(!logs.some(l => l.includes('Installed')))
+  })
+
+  it('--skill flag selects specific skill from multi-skill source', async () => {
+    const multiDir = join(tempDir, 'multi-select-skill')
+    mkdirSync(join(multiDir, 'skills', 'alpha'), { recursive: true })
+    mkdirSync(join(multiDir, 'skills', 'beta'), { recursive: true })
+    writeFileSync(join(multiDir, 'skills', 'alpha', 'SKILL.md'), '---\nname: alpha\nslug: multi/alpha\ndescription: A\n---\nContent')
+    writeFileSync(join(multiDir, 'skills', 'beta', 'SKILL.md'), '---\nname: beta\nslug: multi/beta\ndescription: B\n---\nContent')
+
+    const { logs, restore } = capture('log')
+    await installModule.installCommand(multiDir, { skill: ['alpha'], global: true })
+    restore()
+
+    assert.ok(logs.some(l => l.includes('Installed')))
+    assert.ok(logs.some(l => l.includes('alpha')))
+    assert.ok(!logs.some(l => l.includes('beta')))
+  })
+
+  it('--skill flag throws for non-matching names', async () => {
+    const multiDir = join(tempDir, 'multi-no-match')
+    mkdirSync(join(multiDir, 'skills', 'only-one'), { recursive: true })
+    writeFileSync(join(multiDir, 'skills', 'only-one', 'SKILL.md'), '---\nname: only-one\ndescription: Lonely\n---\nC')
+
+    await assert.rejects(
+      () => installModule.installCommand(multiDir, { skill: ['nonexistent'], global: true }),
+      /No matching skills found/,
+    )
+  })
+
+  it('installs all skills with --yes from multi-skill source', async () => {
+    const multiDir = join(tempDir, 'multi-yes-skill')
+    mkdirSync(join(multiDir, 'skills', 's1'), { recursive: true })
+    mkdirSync(join(multiDir, 'skills', 's2'), { recursive: true })
+    writeFileSync(join(multiDir, 'skills', 's1', 'SKILL.md'), '---\nname: s1\ndescription: First\n---\nA')
+    writeFileSync(join(multiDir, 'skills', 's2', 'SKILL.md'), '---\nname: s2\ndescription: Second\n---\nB')
+
+    const { logs, restore } = capture('log')
+    await installModule.installCommand(multiDir, { global: true, yes: true })
+    restore()
+
+    assert.ok(logs.some(l => l.includes('s1')))
+    assert.ok(logs.some(l => l.includes('s2')))
+    assert.ok(logs.some(l => l.includes('Installed')))
   })
 
   it('--no-mcp skips MCP server installation', async () => {

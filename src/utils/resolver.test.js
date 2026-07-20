@@ -303,6 +303,66 @@ Just content
     })
   })
 
+  describe('resolveSkills', () => {
+    it('returns all skills from a multi-skill local source', async () => {
+      const multiDir = join(tempDir, 'multi-skill')
+      const engDir = join(multiDir, 'skills', 'engineering', 'skill-a')
+      const prodDir = join(multiDir, 'skills', 'productivity', 'skill-b')
+      mkdirSync(engDir, { recursive: true })
+      mkdirSync(prodDir, { recursive: true })
+      writeFileSync(join(engDir, 'SKILL.md'), '---\nname: skill-a\nslug: eng/skill-a\nowner: tester\ndescription: First skill\n---\nContent A')
+      writeFileSync(join(prodDir, 'SKILL.md'), '---\nname: skill-b\nslug: prod/skill-b\nowner: tester\ndescription: Second skill\n---\nContent B')
+      writeFileSync(join(engDir, 'helper.js'), 'x')
+
+      const result = await resolverModule.resolveSkills(multiDir)
+
+      assert.equal(result.length, 2)
+      assert.ok(result.some(s => s.name === 'skill-a'))
+      assert.ok(result.some(s => s.name === 'skill-b'))
+      const skillA = result.find(s => s.name === 'skill-a')
+      assert.ok(skillA.files.includes('SKILL.md'))
+      assert.ok(skillA.files.includes('helper.js'))
+      assert.equal(skillA.owner, 'tester')
+      assert.equal(skillA.sourceType, 'local')
+    })
+
+    it('resolveSkills from single-skill source returns array of 1', async () => {
+      const singleDir = join(tempDir, 'single-resolve-skills')
+      mkdirSync(singleDir, { recursive: true })
+      writeFileSync(join(singleDir, 'SKILL.md'), '---\nname: solo\ndescription: A lone skill\n---\nContent')
+
+      const result = await resolverModule.resolveSkills(singleDir)
+
+      assert.equal(result.length, 1)
+      assert.equal(result[0].name, 'solo')
+      assert.equal(result[0].sourceType, 'local')
+    })
+
+    it('resolveSkills from GitHub returns all skills', async () => {
+      await freshImport()
+      resolverModule.setSpawnSync((cmd, args) => {
+        if (cmd === 'git' && args[0] === 'clone') {
+          const d = args[4]
+          mkdirSync(join(d, 'skills', 'alpha'), { recursive: true })
+          mkdirSync(join(d, 'skills', 'beta'), { recursive: true })
+          writeFileSync(join(d, 'skills', 'alpha', 'SKILL.md'), '---\nname: alpha\nslug: gh/alpha\ndescription: Alpha\n---\nA')
+          writeFileSync(join(d, 'skills', 'beta', 'SKILL.md'), '---\nname: beta\nslug: gh/beta\ndescription: Beta\n---\nB')
+        }
+        return { status: 0, stdout: '', stderr: '' }
+      })
+
+      const result = await resolverModule.resolveSkills('user/multi-repo')
+
+      assert.equal(result.length, 2)
+      assert.ok(result.some(s => s.name === 'alpha'))
+      assert.ok(result.some(s => s.name === 'beta'))
+      for (const s of result) {
+        assert.equal(s.owner, 'user')
+        assert.equal(s.sourceType, 'github')
+      }
+    })
+  })
+
   describe('resolveGitHub', () => {
 
     it('throws for invalid GitHub ref', async () => {

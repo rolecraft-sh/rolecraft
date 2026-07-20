@@ -81,7 +81,8 @@ ${agentFlags.join('\n')}
   --frozen-lockfile  Fail if skill already installed
   --symlink          Install as symlink instead of copy
   --copy             Install as copy (default)
-  --interactive      Choose and install a skill from search results
+  --list             List available skills from a source without installing
+  --skill <names>    Install specific skills by name (comma-separated, e.g. "skill1,skill2")
 
 Examples:
   rolecraft install ./my-skill
@@ -128,6 +129,12 @@ export async function main() {
       options.dryRun = flags.includes('--dry-run')
       options.yes = flags.includes('--yes') || flags.includes('-y')
       options.noMcp = flags.includes('--no-mcp')
+      options.list = flags.includes('--list')
+
+      const skillIndex = flags.indexOf('--skill')
+      if (skillIndex !== -1 && flags[skillIndex + 1] && !flags[skillIndex + 1].startsWith('-')) {
+        options.skill = flags[skillIndex + 1].split(',').map(s => s.trim())
+      }
 
       await installCommand(source, options)
       break
