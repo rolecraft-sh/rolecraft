@@ -25,6 +25,43 @@ All notable changes to this project will be documented in this file.
 - update changelog and version for v1.6.0
 - update changelog and version for v1.6.0
 - update changelog and version for v1.6.0
+- update changelog and version for v1.6.0
+- bump github/codeql-action/analyze from 4.37.0 to 4.37.1 (#115)
+- bump github/codeql-action/init from 4.37.0 to 4.37.1
+- bump actions/setup-node from 6.4.0 to 7.0.0
+- add star CTA to README (#102)
+- update changelog and version for v1.5.0 [skip ci] (#97)
+
+### Documentation
+- add Benjamin Ayivoh to contributors, convert to grid layout
+- add star request to CONTRIBUTING.md
+- add Gaohar Imran and Ajay Krishnan to contributors table
+- add Yurii201811 to contributors table
+- add getting-started, use-cases, and CLI reference pages (#103)
+- streamline README for Show HN launch
+## [v1.6.0] - 2026-07-20
+
+### Added
+- add --json flag to list command (#120)
+- add git and npm availability checks
+- add skills.sh search with --skills-sh flag (experimental) (#101)
+- add convert command for SKILL.md <-> .mdc format conversion (#100)
+- add droid, chatgpt, codearts-agent, universal agents (86 total)
+
+### Fixed
+- log reinstall failure in watch command
+- document install yes flag in help
+- resolve CodeQL alerts and flaky ENOTEMPTY tests
+- enable docs deployment after release
+
+### Changed
+- update changelog and version for v1.6.0
+- update changelog and version for v1.6.0
+- update changelog and version for v1.6.0
+- update changelog and version for v1.6.0
+- update changelog and version for v1.6.0
+- update changelog and version for v1.6.0
+- update changelog and version for v1.6.0
 - bump github/codeql-action/analyze from 4.37.0 to 4.37.1 (#115)
 - bump github/codeql-action/init from 4.37.0 to 4.37.1
 - bump actions/setup-node from 6.4.0 to 7.0.0
