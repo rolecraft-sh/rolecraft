@@ -8,7 +8,7 @@
 4. Computes a SHA256 content hash and stores it in the lockfile
 5. Updates `~/.agents/.skill-lock.json` so agents can discover the skill
 6. `rolecraft verify` checks installed files against the stored hash
-7. `rolecraft ci` re-installs all skills from the lockfile (e.g. in CI pipelines)
+7. `rolecraft ci` re-installs all skills and MCP servers from lockfiles (e.g. in CI pipelines)
 8. `rolecraft doctor` runs a system health check across Node.js, agent directories, and lockfiles
 9. `rolecraft profile` saves, applies, diffs, edits, exports, imports, and links multi-agent configuration profiles
 10. `rolecraft mcp` manages MCP server configurations (install, list, remove)
@@ -46,6 +46,7 @@ rolecraft/
 │   └── utils/
 │       ├── installer.js      # copy/symlink files to target dirs
 │       ├── lockfile.js       # read/write .skill-lock.json + content hash
+│       ├── mcp-lock.js       # read/write .mcp-lock.json for MCP restore
 │       ├── mcp.js            # MCP server config read/write
 │       ├── profile.js        # profile CRUD, capture, apply utilities
 │       ├── resolver.js       # source resolver (local / GitHub / GitLab / npm)

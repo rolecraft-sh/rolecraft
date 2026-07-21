@@ -5,6 +5,7 @@ import { execSync as defaultExecSync, spawnSync as defaultSpawnSync } from 'node
 import { tmpdir } from 'node:os'
 import { mkdtempSync, readFileSync } from 'node:fs'
 import agents from '../agents.js'
+import { addServerToMcpLock, removeServerFromMcpLock } from './mcp-lock.js'
 
 let runExec = defaultExecSync
 let runSpawnSync = defaultSpawnSync
@@ -111,13 +112,20 @@ function listMcpServerEntries(data, agent) {
   }))
 }
 
-export async function addMcpServer(agent, name, serverConfig) {
+export async function addMcpServer(agent, name, serverConfig, source = null) {
   const result = await readMcpConfig(agent)
   if (!result) return false
   const { configPath, data } = result
   setMcpServerEntry(data, agent, name, serverConfig)
   await mkdir(dirname(configPath), { recursive: true })
   await writeFile(configPath, JSON.stringify(data, null, 2) + '\n', 'utf-8')
+
+  await addServerToMcpLock(name, {
+    source: source || reconstructMcpSource(serverConfig, name),
+    sourceType: serverConfig.sourceType,
+    agents: [agent],
+  })
+
   return true
 }
 
@@ -131,12 +139,15 @@ export async function removeMcpServer(agent, name) {
   if (before === after) return false
   await mkdir(dirname(configPath), { recursive: true })
   await writeFile(configPath, JSON.stringify(data, null, 2) + '\n', 'utf-8')
+
+  await removeServerFromMcpLock(name, agent)
+
   return true
 }
 
-export async function updateMcpServer(agent, name, serverConfig) {
+export async function updateMcpServer(agent, name, serverConfig, source = null) {
   await removeMcpServer(agent, name)
-  return addMcpServer(agent, name, serverConfig)
+  return addMcpServer(agent, name, serverConfig, source)
 }
 
 export async function listMcpServers(agent) {
@@ -285,6 +296,19 @@ export function resolveMcpSource(source) {
   throw new Error(`Unknown MCP source format: ${source}. Use npm:package, gh:owner/repo, uvx:package, pipx:package, go:package, deno:module, cargo:crate, or a local path.`)
 }
 
+function reconstructMcpSource(serverConfig, name) {
+  const { sourceType, packageName, repo, path: mcpPath } = serverConfig
+  if (sourceType === 'npm') return `npm:${packageName}`
+  if (sourceType === 'github') return `gh:${repo}`
+  if (sourceType === 'uvx') return `uvx:${packageName}`
+  if (sourceType === 'pipx') return `pipx:${packageName}`
+  if (sourceType === 'go') return `go:${packageName}`
+  if (sourceType === 'deno') return `deno:${packageName}`
+  if (sourceType === 'cargo') return `cargo:${packageName}`
+  if (sourceType === 'local') return mcpPath || name
+  return name
+}
+
 export async function installMcpServersFromSkill(skillContent, targets) {
   const servers = parseMcpServersFromSkill(skillContent)
   if (servers.length === 0) return []
@@ -292,7 +316,7 @@ export async function installMcpServersFromSkill(skillContent, targets) {
   for (const server of servers) {
     const resolved = resolveMcpSource(server.source)
     for (const agent of targets) {
-      const success = await addMcpServer(agent, server.name, resolved)
+      const success = await addMcpServer(agent, server.name, resolved, server.source)
       results.push({ agent, name: server.name, success })
     }
   }

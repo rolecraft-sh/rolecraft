@@ -526,4 +526,121 @@ mcp_servers:
       assert.ok(config.mcpServers['test-mcp'])
     }))
   })
+
+  describe('mcp-lock', () => {
+    let lockModule
+
+    before(async () => {
+      lockModule = await import('./mcp-lock.js')
+    })
+
+    describe('getMcpLockPath', () => {
+      it('returns path under .agents', () => {
+        const p = lockModule.getMcpLockPath()
+        assert.ok(p.endsWith('.agents/.mcp-lock.json'))
+      })
+    })
+
+    describe('readMcpLock and writeMcpLock', () => {
+      it('returns default for missing lockfile', withTempDir(async () => {
+        const lock = await lockModule.readMcpLock()
+        assert.deepEqual(lock, { version: 1, servers: {} })
+      }))
+
+      it('writes and reads lockfile', withTempDir(async () => {
+        const data = { version: 1, servers: { test: { source: 'npm:@test/pkg', agents: ['cursor'] } } }
+        await lockModule.writeMcpLock(data)
+        const read = await lockModule.readMcpLock()
+        assert.deepEqual(read, data)
+      }))
+    })
+
+    describe('addServerToMcpLock', () => {
+      it('adds a new server entry', withTempDir(async () => {
+        await lockModule.addServerToMcpLock('my-server', { source: 'npm:@test/pkg', agents: ['cursor'] })
+        const lock = await lockModule.readMcpLock()
+        assert.ok(lock.servers['my-server'])
+        assert.equal(lock.servers['my-server'].source, 'npm:@test/pkg')
+        assert.deepEqual(lock.servers['my-server'].agents, ['cursor'])
+      }))
+
+      it('merges agents when adding same server again', withTempDir(async () => {
+        await lockModule.addServerToMcpLock('my-server', { source: 'npm:@test/pkg', agents: ['cursor'] })
+        await lockModule.addServerToMcpLock('my-server', { source: 'npm:@test/pkg', agents: ['claude'] })
+        const lock = await lockModule.readMcpLock()
+        assert.deepEqual(lock.servers['my-server'].agents.sort(), ['claude', 'cursor'])
+      }))
+
+      it('deduplicates agents', withTempDir(async () => {
+        await lockModule.addServerToMcpLock('my-server', { source: 'npm:@test/pkg', agents: ['cursor'] })
+        await lockModule.addServerToMcpLock('my-server', { source: 'npm:@test/pkg', agents: ['cursor'] })
+        const lock = await lockModule.readMcpLock()
+        assert.deepEqual(lock.servers['my-server'].agents, ['cursor'])
+      }))
+    })
+
+    describe('removeServerFromMcpLock', () => {
+      it('removes agent from entry', withTempDir(async () => {
+        await lockModule.addServerToMcpLock('my-server', { source: 'npm:@test/pkg', agents: ['cursor', 'claude'] })
+        await lockModule.removeServerFromMcpLock('my-server', 'cursor')
+        const lock = await lockModule.readMcpLock()
+        assert.deepEqual(lock.servers['my-server'].agents, ['claude'])
+      }))
+
+      it('deletes entry when last agent removed', withTempDir(async () => {
+        await lockModule.addServerToMcpLock('my-server', { source: 'npm:@test/pkg', agents: ['cursor'] })
+        await lockModule.removeServerFromMcpLock('my-server', 'cursor')
+        const lock = await lockModule.readMcpLock()
+        assert.equal(lock.servers['my-server'], undefined)
+      }))
+
+      it('no-op for non-existent server', withTempDir(async () => {
+        const lock = await lockModule.removeServerFromMcpLock('nonexistent', 'cursor')
+        assert.deepEqual(lock.servers, {})
+      }))
+    })
+  })
+
+  describe('lockfile integration', () => {
+    let lockModule
+
+    before(async () => {
+      lockModule = await import('./mcp-lock.js')
+    })
+
+    it('addMcpServer creates lockfile entry', withTempDir(async () => {
+      mcpModule.addMcpServer('agents', 'locked-server', { command: 'npx', args: ['-y', '@test/locked'] })
+      await new Promise(r => setTimeout(r, 50))
+      const lock = await lockModule.readMcpLock()
+      assert.ok(lock.servers['locked-server'])
+      assert.ok(lock.servers['locked-server'].agents.includes('agents'))
+    }))
+
+    it('removeMcpServer removes agent from lockfile', withTempDir(async () => {
+      await mcpModule.addMcpServer('agents', 'to-remove-lock', { command: 'npx', args: ['-y', '@test/rm'] })
+      await new Promise(r => setTimeout(r, 50))
+      let lock = await lockModule.readMcpLock()
+      assert.ok(lock.servers['to-remove-lock'])
+
+      await mcpModule.removeMcpServer('agents', 'to-remove-lock')
+      await new Promise(r => setTimeout(r, 50))
+      lock = await lockModule.readMcpLock()
+      assert.equal(lock.servers['to-remove-lock'], undefined)
+    }))
+
+    it('installMcpServersFromSkill records source in lockfile', withTempDir(async () => {
+      const content = `---
+name: test
+mcp_servers:
+  - name: lock-skill-mcp
+    source: npm:@test/lock-skill
+---
+`
+      await mcpModule.installMcpServersFromSkill(content, ['agents'])
+      await new Promise(r => setTimeout(r, 50))
+      const lock = await lockModule.readMcpLock()
+      assert.ok(lock.servers['lock-skill-mcp'])
+      assert.equal(lock.servers['lock-skill-mcp'].source, 'npm:@test/lock-skill')
+    }))
+  })
 })
