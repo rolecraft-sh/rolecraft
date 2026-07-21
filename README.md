@@ -174,7 +174,7 @@ See the [CI guide](docs/guides/ci.md) for more examples.
 | `rolecraft list`                        | Show all installed skills                                                   | [docs](docs/commands/list.md)        |
 | `rolecraft doctor`                      | Run system health check                                                     | [docs](docs/commands/doctor.md)      |
 | `rolecraft agents-xml [--write]`        | Generate skills XML for AGENTS.md                                           | [docs](docs/commands/agents-xml.md)  |
-| `rolecraft mcp install/remove/list`     | Install, remove, and list MCP servers for AI agents                         | [docs](docs/commands/mcp.md)         |
+| `rolecraft mcp install/remove/list/search` | Install, remove, list, or search MCP servers for AI agents              | [docs](docs/commands/mcp.md)         |
 | `rolecraft profile save/apply/list`     | Save, apply, and share multi-agent configuration profiles                   | [docs](docs/commands/profile.md)     |
 | `rolecraft verify`                      | Check installed skill integrity via content hash                            | [docs](docs/commands/verify.md)      |
 | `rolecraft watch [<slug>]`              | Watch skills for changes and auto-sync                                      | [docs](docs/commands/watch.md)       |

@@ -242,6 +242,125 @@ describe('mcp command', () => {
   })
 })
 
+describe('mcpSearchCommand', () => {
+  it('searches GitHub for MCP servers', async () => {
+    mcpModule.setFetch(() => Promise.resolve({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({
+        items: [
+          { full_name: 'owner/mcp-server', description: 'Test MCP', stargazers_count: 10, language: 'Go', topics: ['mcp-server'] },
+        ],
+      }),
+    }))
+
+    const { logs, restore } = capture('log')
+    await mcpModule.mcpSearchCommand('test')
+    restore()
+    assert.ok(logs.some(l => l.includes('MCP server search results')))
+    assert.ok(logs.some(l => l.includes('owner/mcp-server')))
+  })
+
+  it('searches npm for MCP packages', async () => {
+    mcpModule.setFetch(() => Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({
+        objects: [
+          { package: { name: '@scope/mcp-pkg', description: 'MCP pkg', keywords: ['mcp'] } },
+        ],
+        total: 1,
+      }),
+    }))
+
+    const { logs, restore } = capture('log')
+    await mcpModule.mcpSearchCommand('test', { npm: true })
+    restore()
+    assert.ok(logs.some(l => l.includes('npm MCP packages')))
+    assert.ok(logs.some(l => l.includes('@scope/mcp-pkg')))
+  })
+
+  it('handles GitHub rate limit', async () => {
+    mcpModule.setFetch(() => Promise.resolve({
+      ok: false,
+      status: 403,
+      json: () => Promise.resolve({}),
+    }))
+
+    const { logs, restore } = capture('log')
+    await mcpModule.mcpSearchCommand('test')
+    restore()
+    assert.ok(logs.some(l => l.includes('rate limit')))
+  })
+
+  it('handles GitHub API error', async () => {
+    mcpModule.setFetch(() => Promise.resolve({
+      ok: false,
+      status: 500,
+      json: () => Promise.resolve({}),
+    }))
+
+    await assert.rejects(
+      () => mcpModule.mcpSearchCommand('test'),
+      /GitHub API error/,
+    )
+  })
+
+  it('handles npm API error', async () => {
+    mcpModule.setFetch(() => Promise.resolve({
+      ok: false,
+      status: 500,
+    }))
+
+    await assert.rejects(
+      () => mcpModule.mcpSearchCommand('test', { npm: true }),
+      /npm API error/,
+    )
+  })
+
+  it('handles network error on GitHub search', async () => {
+    mcpModule.setFetch(() => Promise.reject(new Error('network error')))
+
+    await assert.rejects(
+      () => mcpModule.mcpSearchCommand('test'),
+      /Failed to search GitHub/,
+    )
+  })
+
+  it('handles network error on npm search', async () => {
+    mcpModule.setFetch(() => Promise.reject(new Error('network error')))
+
+    await assert.rejects(
+      () => mcpModule.mcpSearchCommand('test', { npm: true }),
+      /Failed to search npm/,
+    )
+  })
+
+  it('shows no results for empty GitHub search', async () => {
+    mcpModule.setFetch(() => Promise.resolve({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ items: [] }),
+    }))
+
+    const { logs, restore } = capture('log')
+    await mcpModule.mcpSearchCommand('nonexistent-mcp')
+    restore()
+    assert.ok(logs.some(l => l.includes('No MCP servers found')))
+  })
+
+  it('shows no results for empty npm search', async () => {
+    mcpModule.setFetch(() => Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({ objects: [], total: 0 }),
+    }))
+
+    const { logs, restore } = capture('log')
+    await mcpModule.mcpSearchCommand('nonexistent-mcp', { npm: true })
+    restore()
+    assert.ok(logs.some(l => l.includes('No MCP packages found')))
+  })
+})
+
 function withTempDir(fn) {
   return async () => {
     const td = mkdtempSync(join(tmpdir(), 'rolecraft-mcp-cmd-test-'))

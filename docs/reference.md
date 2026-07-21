@@ -256,6 +256,7 @@ profile link [name]           # link to project
 ```bash
 mcp install <source> [flags]    # install MCP server
 mcp list                        # list all MCP servers
+mcp search <query> [flags]      # search MCP servers (--npm, --interactive)
 mcp remove <name> [flags]       # remove MCP server
 ```
 

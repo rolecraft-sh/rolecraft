@@ -39,6 +39,15 @@ rolecraft mcp install ./my-mcp-server --cursor
 # List configured MCP servers
 rolecraft mcp list
 
+# Search for MCP servers (GitHub)
+rolecraft mcp search github
+
+# Search npm registry for MCP packages
+rolecraft mcp search postgres --npm
+
+# Interactive search + install
+rolecraft mcp search filesystem --interactive
+
 # Remove an MCP server
 rolecraft mcp remove github-mcp-server --cursor
 ```
