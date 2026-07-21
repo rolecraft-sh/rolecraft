@@ -1,6 +1,6 @@
 # `rolecraft mcp` — MCP Server Management
 
-Install, list, search, and remove MCP servers for AI agents.
+Install, list, search, check, update, and remove MCP servers for AI agents.
 
 ## Usage
 
@@ -8,6 +8,8 @@ Install, list, search, and remove MCP servers for AI agents.
 rolecraft mcp install <source> [options]
 rolecraft mcp list [options]
 rolecraft mcp search <query> [options]
+rolecraft mcp check
+rolecraft mcp update <source> [options]
 rolecraft mcp remove <name> [options]
 ```
 
@@ -62,6 +64,53 @@ rolecraft mcp install npm:@test/mcp --name my-server --cursor
 - `--yes`, `-y` — Skip confirmation and security blocks
 - `--agents`, `--cursor`, `--claude`, `--copilot`, `--continue`, etc. — Target specific agents
 - `--all` — Install to all supported MCP agents
+
+### `update`
+
+Reinstall an MCP server, refreshing to the latest version (or a specified version).
+
+```bash
+# Update to latest
+rolecraft mcp update npm:@modelcontextprotocol/github --cursor
+
+# Update to a specific version
+rolecraft mcp update npm:@modelcontextprotocol/github@1.2.3 --cursor
+
+# Update and change target agents
+rolecraft mcp update npm:@modelcontextprotocol/github --cursor --claude
+
+# Dry-run
+rolecraft mcp update npm:@modelcontextprotocol/github --dry-run
+```
+
+**Options:**
+- `--name <name>` — Override the server name (default: auto-detected from source)
+- `--dry-run` — Preview without making changes
+- `--yes`, `-y` — Skip confirmation
+- `--agents`, `--cursor`, `--claude`, etc. — Target specific agents
+- `--all` — Update on all agents
+
+### `check`
+
+Check installed MCP servers for available updates.
+
+```bash
+rolecraft mcp check
+```
+
+Queries the npm registry for the latest version of each npm-sourced MCP server and reports which ones are outdated. Non-npm sources (local paths, GitHub repos) are skipped with a notice.
+
+**Example output:**
+
+```
+Checking 3 MCP server(s) for updates...
+
+   🔄 @modelcontextprotocol/github    1.0.0 → 2.0.0 (cursor, claude)
+   ✅ @anthropic/postgres-mcp         0.5.0 is latest (cursor)
+   ⏭️ ./local-server.js                non-npm source, skipping
+
+⚠️  1 MCP server(s) have updates available.
+```
 
 ### `list`
 

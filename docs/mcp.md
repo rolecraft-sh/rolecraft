@@ -55,8 +55,17 @@ rolecraft mcp search postgres --npm
 # Interactive search + install
 rolecraft mcp search filesystem --interactive
 
+# Check for MCP server updates
+rolecraft mcp check
+
+# Update a MCP server to latest version
+rolecraft mcp update npm:@modelcontextprotocol/github --cursor
+
 # Remove an MCP server
 rolecraft mcp remove github-mcp-server --cursor
+
+# Validate MCP configurations
+rolecraft doctor
 ```
 
 ## Onboarding Example
