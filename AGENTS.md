@@ -11,11 +11,11 @@
 5. `npm test` — run tests
 6. Never leave changes that break tests
 7. Write tests for new features
-8. Update docs (README, CONTRIBUTING, docs/) when needed
+8. Update docs (README, docs/) when needed
 9. Test `--dry-run` flag if the feature supports it
-10. `git add ... && git commit -m "type: message"` — commit
+10. `git add ... && git commit -m "type: short description"` — title only, no body
 11. `git push -u origin <branch>` — push
-12. `gh pr create` — open PR
+12. `gh pr create` — open PR with short one-sentence body
 13. Before merging, wait for all GitHub Actions checks to pass (`gh run watch` or check PR status). Never merge while checks are running.
 
 ## Workflow
@@ -24,10 +24,16 @@
 - After completing the work, run `npm run lint` and the tests: `node --test --test-concurrency=1`
 - Never leave changes that break tests
 - Write tests for new features
-- Update documentation (README, CONTRIBUTING, docs/) when needed
+- Update documentation (README, docs/) when needed
 - Test the `--dry-run` flag if the feature supports it
-- After tests pass, commit the changes, push the branch, and open a PR
+- After tests pass, commit the changes (title only, no body), push the branch, and open a PR (one-sentence body)
 - Before merging, wait for all GitHub Actions checks to pass (`gh run watch` or check PR status). Never merge while checks are running.
+
+## Interaction rules
+- **Chat vs dev mode:** Before writing any code, confirm whether the user wants development or just information. Ask: "Are you asking me to develop something or just asking for information?"
+- **Commit messages:** Title only, no body. Example: `feat: add rolecraft mcp check command`
+- **PR body:** One-sentence summary. Example: "Adds rolecraft mcp check command for npm update checks."
+- **Branch strategy:** Always branch from latest main for any work that requires a commit, unless the user explicitly says otherwise.
 
 ## Code style
 - Keep the zero-dependency principle (don't add new dependencies to package.json)
