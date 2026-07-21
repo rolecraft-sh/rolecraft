@@ -3,7 +3,7 @@ import { join, dirname } from 'node:path'
 import { homedir } from 'node:os'
 import { execSync as defaultExecSync, spawnSync as defaultSpawnSync } from 'node:child_process'
 import { tmpdir } from 'node:os'
-import { mkdtempSync, readFileSync, readdirSync, statSync } from 'node:fs'
+import { mkdtempSync, readFileSync, readdirSync } from 'node:fs'
 import agents from '../agents.js'
 import { addServerToMcpLock, removeServerFromMcpLock } from './mcp-lock.js'
 
