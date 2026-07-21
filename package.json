@@ -74,12 +74,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sametcelikbicak/rolecraft.git"
+    "url": "git+https://github.com/rolecraft-sh/rolecraft.git"
   },
   "bugs": {
-    "url": "https://github.com/sametcelikbicak/rolecraft/issues"
+    "url": "https://github.com/rolecraft-sh/rolecraft/issues"
   },
-  "homepage": "https://sametcelikbicak.github.io/rolecraft/",
+  "homepage": "https://rolecraft-sh.github.io/rolecraft/",
   "scripts": {
     "lint": "node --check bin/rolecraft.js src/**/*.js",
     "test": "node --test --test-concurrency=1",
