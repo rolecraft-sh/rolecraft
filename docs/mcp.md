@@ -12,11 +12,26 @@ When a `SKILL.md` declares `mcp_servers:` in its frontmatter, `rolecraft install
 ## Quick Start
 
 ```bash
-# Install an MCP server from npm to specific agents
+# Install from npm (Node.js)
 rolecraft mcp install npm:@modelcontextprotocol/github --cursor --claude
 
-# Install an MCP server from GitHub
+# Install from GitHub (Node.js)
 rolecraft mcp install gh:github/github-mcp-server --all
+
+# Install from Python (uvx)
+rolecraft mcp install uvx:@anthropic/postgres-mcp --cursor
+
+# Install from Python (pipx)
+rolecraft mcp install pipx:postgres-mcp --cursor
+
+# Install from Go
+rolecraft mcp install go:github.com/org/mcp-server --all
+
+# Install from Deno
+rolecraft mcp install deno:jsr:@org/mcp-server --all
+
+# Install from Rust (cargo)
+rolecraft mcp install cargo:my-mcp-server --cursor
 
 # Install from a local path
 rolecraft mcp install ./my-mcp-server --cursor
@@ -104,6 +119,11 @@ More agents will be added as their MCP standards solidify.
 |--------|---------|-------------|
 | `npm:` | `npm:@modelcontextprotocol/github` | Install from npm, runs via `npx -y` |
 | `gh:` | `gh:github/github-mcp-server` | Clone from GitHub, runs via `node` |
+| `uvx:` | `uvx:@anthropic/postgres-mcp` | Python package via `uvx` |
+| `pipx:` | `pipx:postgres-mcp` | Python package via `pipx run` |
+| `go:` | `go:github.com/org/mcp-server` | Go package via `go run` |
+| `deno:` | `deno:jsr:@org/mcp-server` | Deno module via `deno run` |
+| `cargo:` | `cargo:my-mcp-server` | Rust crate via `cargo run` |
 | Local path | `./my-mcp-server/index.js` | Run directly with `node` |
 
 ## Commands
