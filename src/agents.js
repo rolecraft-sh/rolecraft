@@ -105,19 +105,34 @@ const AGENTS_DATA = [
   { flag: 'promptscript', name: 'promptscript', getDir: () => proj('agent', 'skills'), label: './agent/skills/' },
 ]
 
+const MCP_SUPPORTED = [
+  'agents',
+  'claude',
+  'cursor',
+  'windsurf',
+  'devin',
+  'copilot',
+  'continue',
+]
+
+const MCP_PATHS = {
+  claude: () => home('.claude.json'),
+  windsurf: () => home('.windsurf', 'mcp_config.json'),
+  copilot: () => proj('.github', 'copilot', '.mcp.json'),
+  continue: () => home('.continue', 'config.json'),
+}
+
 for (const a of AGENTS_DATA) {
-  a.mcp = { getPath: mcpFromSkillDir(a.getDir) }
+  if (!MCP_SUPPORTED.includes(a.flag)) {
+    a.mcp = null
+    continue
+  }
+  if (MCP_PATHS[a.flag]) {
+    a.mcp = { getPath: MCP_PATHS[a.flag] }
+  } else {
+    a.mcp = { getPath: mcpFromSkillDir(a.getDir) }
+  }
 }
-
-function find(flag) {
-  return AGENTS_DATA.findIndex(a => a.flag === flag)
-}
-
-// Override non-standard MCP paths
-AGENTS_DATA[find('claude')].mcp = { getPath: () => home('.claude', 'claude_code.json') }
-AGENTS_DATA[find('windsurf')].mcp = { getPath: () => home('.windsurf', 'mcp_config.json') }
-AGENTS_DATA[find('copilot')].mcp = { getPath: () => proj('.github', 'copilot', '.mcp.json') }
-AGENTS_DATA[find('continue')].mcp = { getPath: () => home('.continue', 'config.json') }
 
 export function getAgentByFlag(flag) {
   return AGENTS_DATA.find(a => a.flag === flag)

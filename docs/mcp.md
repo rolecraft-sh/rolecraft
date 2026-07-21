@@ -76,7 +76,7 @@ This does **three things** automatically:
 2. **MCP installation** → reads `mcp_servers` from SKILL.md, resolves the sources
 3. **Config wiring** → writes MCP config in each agent's native format:
    - Cursor: `~/.cursor/mcp.json`
-   - Claude Code: `~/.claude/claude_code.json`
+   - Claude Code: `~/.claude.json`
    - Windsurf: `~/.windsurf/mcp_config.json`
 
 ### 3. Each agent can now
@@ -103,11 +103,10 @@ rolecraft bundle install team-onboarding.json
 | Agent | Config File | Format |
 |-------|------------|--------|
 | opencode | `~/.agents/mcp.json` | Standard `mcpServers` object |
-| claude-code | `~/.claude/claude_code.json` | Standard `mcpServers` object |
+| claude-code | `~/.claude.json` | Standard `mcpServers` object |
 | cursor | `~/.cursor/mcp.json` | Standard `mcpServers` object |
 | windsurf | `~/.windsurf/mcp_config.json` | Standard `mcpServers` object |
 | devin | `~/.devin/mcp.json` | Standard `mcpServers` object |
-| codex | `~/.codex/mcp.json` | Standard `mcpServers` object |
 | copilot | `./.github/copilot/.mcp.json` | `{ inputs: [], servers: {} }` |
 | continue | `~/.continue/config.json` | `{ experimental: { mcpServers: [] } }` |
 

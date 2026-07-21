@@ -88,7 +88,7 @@ rolecraft list --global
 
 ## 4. MCP server fleet management
 
-**Problem:** Installing MCP servers requires editing JSON configs for each agent. The format differs between cursor (`mcp_config.json`), claude-code (`claude_code.json`), and copilot (`.mcp.json`). Multiply by N agents and it's unmanageable.
+**Problem:** Installing MCP servers requires editing JSON configs for each agent. The format differs between cursor (`mcp_config.json`), claude-code (`~/.claude.json`), and copilot (`.mcp.json`). Multiply by N agents and it's unmanageable.
 
 **Solution:** Declare MCP servers in `SKILL.md` frontmatter. rolecraft handles the per-agent config format automatically.
 
