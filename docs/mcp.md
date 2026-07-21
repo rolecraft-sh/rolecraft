@@ -33,6 +33,13 @@ rolecraft mcp install deno:jsr:@org/mcp-server --all
 # Install from Rust (cargo)
 rolecraft mcp install cargo:my-mcp-server --cursor
 
+# Pin to a specific version
+rolecraft mcp install npm:@modelcontextprotocol/github@1.2.3 --cursor
+
+# Pin to a branch or tag (GitHub source)
+rolecraft mcp install gh:github/github-mcp-server@main --all
+rolecraft mcp install gh:github/github-mcp-server@v1.0.0 --cursor
+
 # Install from a local path
 rolecraft mcp install ./my-mcp-server --cursor
 

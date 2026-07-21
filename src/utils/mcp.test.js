@@ -392,6 +392,32 @@ Just content
       assert.equal(resolved.command, 'npx')
       assert.deepEqual(resolved.args, ['-y', '@modelcontextprotocol/github'])
       assert.equal(resolved.sourceType, 'npm')
+      assert.equal(resolved.packageVersion, null)
+    })
+
+    it('resolves npm: source with @version (scoped)', () => {
+      const resolved = mcpModule.resolveMcpSource('npm:@modelcontextprotocol/github@1.2.3')
+      assert.equal(resolved.command, 'npx')
+      assert.deepEqual(resolved.args, ['-y', '@modelcontextprotocol/github@1.2.3'])
+      assert.equal(resolved.sourceType, 'npm')
+      assert.equal(resolved.packageName, '@modelcontextprotocol/github')
+      assert.equal(resolved.packageVersion, '1.2.3')
+    })
+
+    it('resolves npm: source with @version (unscoped)', () => {
+      const resolved = mcpModule.resolveMcpSource('npm:lodash@4.17.21')
+      assert.equal(resolved.command, 'npx')
+      assert.deepEqual(resolved.args, ['-y', 'lodash@4.17.21'])
+      assert.equal(resolved.packageName, 'lodash')
+      assert.equal(resolved.packageVersion, '4.17.21')
+    })
+
+    it('resolves npm: source with tag as version', () => {
+      const resolved = mcpModule.resolveMcpSource('npm:@scope/pkg@latest')
+      assert.equal(resolved.command, 'npx')
+      assert.deepEqual(resolved.args, ['-y', '@scope/pkg@latest'])
+      assert.equal(resolved.packageName, '@scope/pkg')
+      assert.equal(resolved.packageVersion, 'latest')
     })
 
     it('resolves uvx: source', () => {
@@ -466,17 +492,58 @@ Just content
           writeFileSync(join(cloneDir, 'package.json'), JSON.stringify({ main: 'index.js' }))
           return { status: 0 }
         }
+        if (cmd === 'rm') return { status: 0 }
         return { status: 0 }
       })
-      try {
-        const resolved = mcpModule.resolveMcpSource('gh:test/mcp-server')
-        assert.equal(resolved.command, 'node')
-        assert.equal(resolved.sourceType, 'github')
-        assert.equal(resolved.repo, 'test/mcp-server')
-      } finally {
-        mcpModule.setSpawnSync(undefined)
-      }
+      const resolved = mcpModule.resolveMcpSource('gh:test/mcp-server')
+      assert.equal(resolved.command, 'node')
+      assert.equal(resolved.sourceType, 'github')
+      assert.equal(resolved.repo, 'test/mcp-server')
+      assert.equal(resolved.ref, null)
+      mcpModule.setSpawnSync(undefined)
     }))
+
+    it('gh: source with @branch ref uses --branch flag', () => {
+      const capturedArgs = []
+      mcpModule.setSpawnSync((cmd, args) => {
+        if (cmd === 'git') {
+          capturedArgs.push(...args)
+          const cloneDir = args[args.length - 1]
+          mkdirSync(cloneDir, { recursive: true })
+          writeFileSync(join(cloneDir, 'package.json'), JSON.stringify({ main: 'index.js' }))
+          return { status: 0 }
+        }
+        if (cmd === 'rm') return { status: 0 }
+        return { status: 0 }
+      })
+      const resolved = mcpModule.resolveMcpSource('gh:test/mcp-server@main')
+      assert.equal(resolved.repo, 'test/mcp-server')
+      assert.equal(resolved.ref, 'main')
+      assert.ok(capturedArgs.includes('--branch'))
+      assert.ok(capturedArgs.includes('main'))
+      mcpModule.setSpawnSync(undefined)
+    })
+
+    it('gh: source with @tag ref', () => {
+      const capturedArgs = []
+      mcpModule.setSpawnSync((cmd, args) => {
+        if (cmd === 'git') {
+          capturedArgs.push(...args)
+          const cloneDir = args[args.length - 1]
+          mkdirSync(cloneDir, { recursive: true })
+          writeFileSync(join(cloneDir, 'package.json'), JSON.stringify({ main: 'index.js' }))
+          return { status: 0 }
+        }
+        if (cmd === 'rm') return { status: 0 }
+        return { status: 0 }
+      })
+      const resolved = mcpModule.resolveMcpSource('gh:owner/repo@v1.0.0')
+      assert.equal(resolved.repo, 'owner/repo')
+      assert.equal(resolved.ref, 'v1.0.0')
+      assert.ok(capturedArgs.includes('--branch'))
+      assert.ok(capturedArgs.includes('v1.0.0'))
+      mcpModule.setSpawnSync(undefined)
+    })
   })
 
   describe('readMcpConfig', () => {

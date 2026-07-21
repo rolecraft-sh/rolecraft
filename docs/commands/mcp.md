@@ -21,8 +21,15 @@ Install an MCP server from a source.
 # npm / npx
 rolecraft mcp install npm:@modelcontextprotocol/github --cursor --claude
 
+# npm with version pinning
+rolecraft mcp install npm:@modelcontextprotocol/github@1.2.3 --cursor
+
 # GitHub
 rolecraft mcp install gh:github/github-mcp-server --all
+
+# GitHub with branch/tag pinning
+rolecraft mcp install gh:github/github-mcp-server@main --all
+rolecraft mcp install gh:github/github-mcp-server@v1.0.0 --cursor
 
 # Python (uvx)
 rolecraft mcp install uvx:@anthropic/postgres-mcp --cursor
