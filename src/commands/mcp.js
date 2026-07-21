@@ -47,7 +47,7 @@ export async function mcpInstallCommand(source, options) {
 
   const results = []
   for (const agent of targets) {
-    const success = await addMcpServer(agent, name, resolved)
+    const success = await addMcpServer(agent, name, resolved, source)
     results.push({ agent, name, success })
     if (success) {
       console.log(`   ✅ ${agent}: MCP server "${name}" installed`)
@@ -112,7 +112,7 @@ export async function mcpUpdateCommand(source, options) {
 
   const results = []
   for (const agent of targets) {
-    const success = await updateMcpServer(agent, name, resolved)
+    const success = await updateMcpServer(agent, name, resolved, source)
     results.push({ agent, name, success })
     if (success) {
       console.log(`   ✅ ${agent}: MCP server "${name}" updated`)

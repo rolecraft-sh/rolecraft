@@ -201,7 +201,7 @@ No arguments. Checks all installed skills for newer versions.
 
 ### `rolecraft ci`
 
-Re-install all skills from lockfile. Use `--yes` in CI.
+Re-install all skills and MCP servers from lockfiles. Use `--yes` in CI.
 
 ### `rolecraft verify`
 

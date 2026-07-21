@@ -125,6 +125,24 @@ More agents will be added as their MCP standards solidify.
 | `cargo:` | `cargo:my-mcp-server` | Rust crate via `cargo run` |
 | Local path | `./my-mcp-server/index.js` | Run directly with `node` |
 
+## Lockfile & CI Restore
+
+Every MCP server you install is tracked in `~/.agents/.mcp-lock.json`. This lockfile records:
+- The original source string (e.g. `npm:@modelcontextprotocol/github`)
+- Which agents the server is installed to
+
+When you run `rolecraft ci`, MCP servers from the lockfile are automatically re-installed to their configured agents — just like skills.
+
+```bash
+# After git clone — restores skills + MCP servers
+rolecraft ci
+```
+
+The lockfile updates automatically:
+- **Install** → server is added to the lockfile
+- **Remove** → server is removed from the lockfile (or agents are unlinked if installed elsewhere)
+- **Update** → lockfile is refreshed with the new source
+
 ## Commands
 
 See [`docs/commands/mcp.md`](./commands/mcp.md) for the full command reference.
