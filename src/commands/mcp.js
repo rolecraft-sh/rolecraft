@@ -184,6 +184,67 @@ export async function mcpRemoveCommand(name, options) {
   return results
 }
 
+async function fetchNpmLatestVersion(packageName) {
+  const encodedName = encodeURIComponent(packageName).replace(/^%40/, '@')
+  const url = `https://registry.npmjs.org/${encodedName}/latest`
+  const response = await runFetch(url, {
+    signal: AbortSignal.timeout(8000),
+  })
+  if (!response.ok) return null
+  const data = await response.json()
+  return data.version || null
+}
+
+export async function mcpCheckCommand() {
+  const { readMcpLock } = await import('../utils/mcp-lock.js')
+  const lock = await readMcpLock()
+  const servers = Object.entries(lock.servers || {})
+
+  if (servers.length === 0) {
+    console.log('\nNo MCP servers in lockfile.')
+    return
+  }
+
+  console.log(`\nChecking ${servers.length} MCP server(s) for updates...\n`)
+
+  let updatesAvailable = 0
+  for (const [name, entry] of servers) {
+    const source = entry.source || ''
+    const agents = (entry.agents || []).join(', ')
+
+    if (!source.startsWith('npm:')) {
+      console.log(`   ⏭️  ${name.padEnd(30)} non-npm source (${source.slice(0, 3)}...), skipping`)
+      continue
+    }
+
+    const pkg = source.slice(4)
+    const atIdx = pkg.lastIndexOf('@')
+    const packageName = atIdx > 0 ? pkg.slice(0, atIdx) : pkg
+    const installedVersion = atIdx > 0 ? pkg.slice(atIdx + 1) : null
+
+    try {
+      const latestVersion = await fetchNpmLatestVersion(packageName)
+      if (!latestVersion) {
+        console.log(`   ❌ ${name.padEnd(30)} could not check (registry unreachable)`)
+        continue
+      }
+
+      if (installedVersion && installedVersion !== latestVersion) {
+        console.log(`   🔄 ${name.padEnd(30)} ${installedVersion} → ${latestVersion} (${agents})`)
+        updatesAvailable++
+      } else if (installedVersion) {
+        console.log(`   ✅ ${name.padEnd(30)} ${installedVersion} is latest (${agents})`)
+      } else {
+        console.log(`   ✅ ${name.padEnd(30)} latest: ${latestVersion} (no version pinned) (${agents})`)
+      }
+    } catch {
+      console.log(`   ❌ ${name.padEnd(30)} check failed (${source})`)
+    }
+  }
+
+  console.log(`\n${updatesAvailable > 0 ? `⚠️  ${updatesAvailable} MCP server(s) have updates available.` : '✅ All MCP servers are up to date.'}\n`)
+}
+
 function formatMcpRepo(r) {
   const desc = r.description || 'No description'
   const stars = r.stargazers_count || 0
@@ -531,6 +592,8 @@ export async function mcpCommand(args) {
       }
       return mcpRemoveCommand(name, options)
     }
+    case 'check':
+      return mcpCheckCommand()
     case 'search': {
       const query = rest.find(a => !a.startsWith('--'))
       if (!query) {
@@ -551,6 +614,7 @@ Usage:
   rolecraft mcp install <source>  Install an MCP server
   rolecraft mcp list              List configured MCP servers
   rolecraft mcp search <query>    Search for MCP servers on GitHub
+  rolecraft mcp check             Check for MCP server updates
   rolecraft mcp update <source>   Update an MCP server (reinstall)
   rolecraft mcp remove <name>     Remove an MCP server
 

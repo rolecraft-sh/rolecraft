@@ -58,6 +58,7 @@ Usage:
    rolecraft mcp install <source>    Install an MCP server (npm:, gh:, or local path, e.g. npm:pkg@1.0.0 or gh:owner/repo@branch)
    rolecraft mcp list                List configured MCP servers
    rolecraft mcp search <query>      Search for MCP servers (--npm for npm search)
+   rolecraft mcp check               Check for MCP server updates
    rolecraft mcp remove <name>       Remove an MCP server
   rolecraft agents-xml              Generate skills XML for AGENTS.md
   rolecraft agents-xml --write      Write skills XML to AGENTS.md
