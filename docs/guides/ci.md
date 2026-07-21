@@ -17,7 +17,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - uses: sametcelikbicak/rolecraft-action@v1
+      - uses: rolecraft-sh/rolecraft-action@v1
         with:
           command: ci --yes
 ```
@@ -27,7 +27,7 @@ jobs:
 ### Re-install from lockfile
 
 ```yaml
-- uses: sametcelikbicak/rolecraft-action@v1
+- uses: rolecraft-sh/rolecraft-action@v1
   with:
     command: ci --yes
 ```
@@ -35,7 +35,7 @@ jobs:
 ### Verify skill integrity
 
 ```yaml
-- uses: sametcelikbicak/rolecraft-action@v1
+- uses: rolecraft-sh/rolecraft-action@v1
   with:
     command: verify
 ```
@@ -43,7 +43,7 @@ jobs:
 ### Run system health check
 
 ```yaml
-- uses: sametcelikbicak/rolecraft-action@v1
+- uses: rolecraft-sh/rolecraft-action@v1
   with:
     command: doctor
 ```
@@ -51,7 +51,7 @@ jobs:
 ### Dry-run install
 
 ```yaml
-- uses: sametcelikbicak/rolecraft-action@v1
+- uses: rolecraft-sh/rolecraft-action@v1
   with:
     command: install user/repo --dry-run
 ```
@@ -65,4 +65,4 @@ jobs:
 
 ## Action repository
 
-https://github.com/sametcelikbicak/rolecraft-action
+https://github.com/rolecraft-sh/rolecraft-action

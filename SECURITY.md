@@ -8,7 +8,7 @@ If you discover a security vulnerability in rolecraft, please report it privatel
 
 To report a vulnerability, open a GitHub Security Advisory at:
 
-https://github.com/sametcelikbicak/rolecraft/security/advisories/new
+https://github.com/rolecraft-sh/rolecraft/security/advisories/new
 
 Or email the maintainer directly (see the committer history for contact).
 

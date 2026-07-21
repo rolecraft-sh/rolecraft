@@ -23,7 +23,7 @@ cat ~/.ssh/id_ed25519 | pbcopy
 # or on Linux: cat ~/.ssh/id_ed25519 | xclip -sel clip
 ```
 
-Add these secrets to the repository at `https://github.com/sametcelikbicak/rolecraft/settings/secrets/actions`:
+Add these secrets to the repository at `https://github.com/rolecraft-sh/rolecraft/settings/secrets/actions`:
 
 | Secret | Value |
 |--------|-------|

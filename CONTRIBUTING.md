@@ -5,7 +5,7 @@ Thanks for your interest in contributing! Here's how you can help.
 ## Quick Start
 
 ```bash
-git clone https://github.com/sametcelikbicak/rolecraft.git
+git clone https://github.com/rolecraft-sh/rolecraft.git
 cd rolecraft
 npm link                  # now `rolecraft` runs from your local checkout
 npm test                  # 730+ tests should pass
@@ -15,9 +15,9 @@ npm test                  # 730+ tests should pass
 
 ## Find Something to Work On
 
-Start with issues labeled [`good first issue`](https://github.com/sametcelikbicak/rolecraft/labels/good%20first%20issue) — they are small, self-contained, and perfect for new contributors.
+Start with issues labeled [`good first issue`](https://github.com/rolecraft-sh/rolecraft/labels/good%20first%20issue) — they are small, self-contained, and perfect for new contributors.
 
-Don't see anything you like? Open a [feature request](https://github.com/sametcelikbicak/rolecraft/issues/new?template=feature_request.md) or ask in [Discussions](https://github.com/sametcelikbicak/rolecraft/discussions).
+Don't see anything you like? Open a [feature request](https://github.com/rolecraft-sh/rolecraft/issues/new?template=feature_request.md) or ask in [Discussions](https://github.com/rolecraft-sh/rolecraft/discussions).
 
 ## Make Changes
 
@@ -47,8 +47,8 @@ chore: bump dependencies
 
 ## Need Help?
 
-- Open a [Discussion](https://github.com/sametcelikbicak/rolecraft/discussions)
-- Check the [docs site](https://sametcelikbicak.github.io/rolecraft/)
+- Open a [Discussion](https://github.com/rolecraft-sh/rolecraft/discussions)
+- Check the [docs site](https://rolecraft-sh.github.io/rolecraft/)
 
 ## Code of Conduct
 
@@ -56,4 +56,4 @@ Be respectful and constructive. Keep discussions focused on the code.
 
 ## Show Your Support
 
-If rolecraft makes your workflow easier, consider [starring the repo](https://github.com/sametcelikbicak/rolecraft). It helps others discover the project.
+If rolecraft makes your workflow easier, consider [starring the repo](https://github.com/rolecraft-sh/rolecraft). It helps others discover the project.

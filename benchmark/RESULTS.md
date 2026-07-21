@@ -8,7 +8,7 @@
 > **Iterations:** 10 per tool per scenario
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/sametcelikbicak/rolecraft/main/benchmark/comparison.svg" alt="Benchmark comparison chart" width="800">
+  <img src="https://raw.githubusercontent.com/rolecraft-sh/rolecraft/main/benchmark/comparison.svg" alt="Benchmark comparison chart" width="800">
 </p>
 
 ## Local path install

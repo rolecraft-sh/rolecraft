@@ -17,7 +17,7 @@ hero:
       link: /install
     - theme: alt
       text: View on GitHub
-      link: https://github.com/sametcelikbicak/rolecraft
+      link: https://github.com/rolecraft-sh/rolecraft
 
 features:
   - title: One-Command Onboarding

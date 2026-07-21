@@ -110,6 +110,6 @@ rolecraft install ./my-skill --all
 
 ## Links
 
-- GitHub: https://github.com/sametcelikbicak/rolecraft
+- GitHub: https://github.com/rolecraft-sh/rolecraft
 - npm: https://www.npmjs.com/package/rolecraft
-- Docs: https://github.com/sametcelikbicak/rolecraft#readme
+- Docs: https://github.com/rolecraft-sh/rolecraft#readme

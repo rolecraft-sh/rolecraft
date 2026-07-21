@@ -82,11 +82,11 @@ export default defineConfig({
     },
     search: { provider: 'local' },
     editLink: {
-      pattern: 'https://github.com/sametcelikbicak/rolecraft/edit/main/docs/:path',
+      pattern: 'https://github.com/rolecraft-sh/rolecraft/edit/main/docs/:path',
       text: 'Edit this page on GitHub',
     },
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/sametcelikbicak/rolecraft' },
+      { icon: 'github', link: 'https://github.com/rolecraft-sh/rolecraft' },
       { icon: 'npm', link: 'https://www.npmjs.com/package/rolecraft' },
     ],
   },

@@ -11,18 +11,17 @@
 
 <p align="center">
   <a href="https://awesome.re"><img src="https://awesome.re/badge.svg" alt="Awesome"></a>
-  <a href="https://skills.sh/sametcelikbicak/rolecraft"><img src="https://skills.sh/b/sametcelikbicak/rolecraft" alt="skills.sh"></a>
   <a href="https://www.npmjs.com/package/rolecraft"><img src="https://img.shields.io/npm/v/rolecraft" alt="npm"></a>
   <a href="https://www.npmjs.com/package/rolecraft"><img src="https://img.shields.io/npm/dm/rolecraft" alt="npm downloads"></a>
-  <a href="https://github.com/sametcelikbicak/rolecraft/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/sametcelikbicak/rolecraft/test.yml?label=tests" alt="Tests"></a>
-  <a href="https://github.com/sametcelikbicak/rolecraft/actions/workflows/codeql.yml"><img src="https://img.shields.io/github/actions/workflow/status/sametcelikbicak/rolecraft/codeql.yml?label=CodeQL" alt="CodeQL"></a>
-  <a href="https://github.com/sametcelikbicak/rolecraft/blob/main/.github/dependabot.yml"><img src="https://img.shields.io/badge/dependabot-enabled-025e8c?logo=Dependabot" alt="Dependabot"></a>
-  <a href="https://github.com/marketplace/actions/rolecraft-action"><img src="https://img.shields.io/badge/GitHub%20Action-rolecraft--action-blue?logo=github" alt="GitHub Action"></a>
-  <a href="https://github.com/sametcelikbicak/rolecraft"><img src="https://img.shields.io/github/stars/sametcelikbicak/rolecraft?style=social" alt="Stars"></a>
+   <a href="https://github.com/rolecraft-sh/rolecraft/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/rolecraft-sh/rolecraft/test.yml?label=tests" alt="Tests"></a>
+   <a href="https://github.com/rolecraft-sh/rolecraft/actions/workflows/codeql.yml"><img src="https://img.shields.io/github/actions/workflow/status/rolecraft-sh/rolecraft/codeql.yml?label=CodeQL" alt="CodeQL"></a>
+   <a href="https://github.com/rolecraft-sh/rolecraft/blob/main/.github/dependabot.yml"><img src="https://img.shields.io/badge/dependabot-enabled-025e8c?logo=Dependabot" alt="Dependabot"></a>
+   <a href="https://github.com/marketplace/actions/rolecraft-action"><img src="https://img.shields.io/badge/GitHub%20Action-rolecraft--action-blue?logo=github" alt="GitHub Action"></a>
+   <a href="https://github.com/rolecraft-sh/rolecraft"><img src="https://img.shields.io/github/stars/rolecraft-sh/rolecraft?style=social" alt="Stars"></a>
   <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/📜-Changelog-blue" alt="Changelog"></a>
   <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/🤝-Contributing-green" alt="Contributing"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT"></a>
-   <a href="https://sametcelikbicak.github.io/rolecraft/"><img src="https://img.shields.io/badge/📖-Docs%20site-blue" alt="Docs"></a>
+   <a href="https://rolecraft-sh.github.io/rolecraft/"><img src="https://img.shields.io/badge/📖-Docs%20site-blue" alt="Docs"></a>
    <a href="package.json"><img src="https://img.shields.io/node/v/rolecraft" alt="Node"></a>
   <a href="docs/security.md"><img src="https://img.shields.io/badge/🔒-security%20scoring-brightgreen" alt="Security scoring"></a>
   <a href="CODE_OF_CONDUCT.md"><img src="https://img.shields.io/badge/📖-Code%20of%20Conduct-orange" alt="Code of Conduct"></a>
@@ -150,7 +149,7 @@ Use the [rolecraft GitHub Action](https://github.com/marketplace/actions/rolecra
 
 ```yaml
 # .github/workflows/skills.yml
-- uses: sametcelikbicak/rolecraft-action@v1
+- uses: rolecraft-sh/rolecraft-action@v1
   with:
     command: ci --yes
 ```
@@ -294,7 +293,7 @@ A: Review the security report, fix the flagged patterns, or use `--yes` to force
 ## Development
 
 ```bash
-git clone https://github.com/sametcelikbicak/rolecraft.git
+git clone https://github.com/rolecraft-sh/rolecraft.git
 cd rolecraft
 npm link                   # rolecraft CLI runs from local checkout
 npm install                # for docs site (VitePress)
@@ -306,8 +305,8 @@ npm test                   # 730+ tests, 0 fails expected
 
 ## Support
 
-- **[Docs site](https://sametcelikbicak.github.io/rolecraft/)** — full command reference and guides
-- **[GitHub Issues](https://github.com/sametcelikbicak/rolecraft/issues)** — bug reports, feature requests
+- **[Docs site](https://rolecraft-sh.github.io/rolecraft/)** — full command reference and guides
+- **[GitHub Issues](https://github.com/rolecraft-sh/rolecraft/issues)** — bug reports, feature requests
 - **[SUPPORT.md](SUPPORT.md)** — how to get help
 - **[SECURITY.md](SECURITY.md)** — responsible disclosure
 
@@ -332,7 +331,7 @@ Thanks to everyone who has contributed to RoleCraft:
 
 ---
 
-⭐ **If rolecraft makes your AI agent workflow easier, consider [starring the repo](https://github.com/sametcelikbicak/rolecraft).**  
+⭐ **If rolecraft makes your AI agent workflow easier, consider [starring the repo](https://github.com/rolecraft-sh/rolecraft).**  
 It helps others discover the project and shows that the community finds it useful.
 
 ---
