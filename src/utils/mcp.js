@@ -207,20 +207,38 @@ export function classifyMcpSource(source) {
 
 export function resolveMcpSource(source) {
   if (source.startsWith('npm:')) {
-    const pkg = source.slice(4)
+    let pkg = source.slice(4)
+    let version = null
+    const atIdx = pkg.lastIndexOf('@')
+    if (atIdx > 0) {
+      version = pkg.slice(atIdx + 1)
+      pkg = pkg.slice(0, atIdx)
+    }
+    const args = version ? ['-y', `${pkg}@${version}`] : ['-y', pkg]
     return {
       command: 'npx',
-      args: ['-y', pkg],
+      args,
       sourceType: 'npm',
       packageName: pkg,
+      packageVersion: version,
     }
   }
   if (source.startsWith('gh:')) {
-    const repo = source.slice(3)
+    let repo = source.slice(3)
+    let ref = null
+    const atIdx = repo.lastIndexOf('@')
+    if (atIdx > 0) {
+      ref = repo.slice(atIdx + 1)
+      repo = repo.slice(0, atIdx)
+    }
     const tmpDir = mkdtempSync(join(tmpdir(), 'rolecraft-mcp-'))
     const cloneDir = join(tmpDir, 'repo')
     try {
-      const result = runSpawnSync('git', ['clone', '--depth', '1', `https://github.com/${repo}.git`, cloneDir], { stdio: 'pipe', timeout: 30000 })
+      const cloneArgs = ['clone', '--depth', '1', `https://github.com/${repo}.git`, cloneDir]
+      if (ref) {
+        cloneArgs.splice(2, 0, '--branch', ref)
+      }
+      const result = runSpawnSync('git', cloneArgs, { stdio: 'pipe', timeout: 30000 })
       if (result.status !== 0) throw new Error(`Failed to clone ${repo}: ${result.stderr?.toString() || result.status}`)
       const pkgJson = JSON.parse(readFileSync(join(cloneDir, 'package.json'), 'utf-8'))
       const main = pkgJson.main || 'index.js'
@@ -233,6 +251,7 @@ export function resolveMcpSource(source) {
         args: [command, ...args],
         sourceType: 'github',
         repo,
+        ref,
       }
     } catch (err) {
       try { runSpawnSync('rm', ['-rf', tmpDir], { stdio: 'pipe' }) } catch {}
@@ -297,9 +316,9 @@ export function resolveMcpSource(source) {
 }
 
 function reconstructMcpSource(serverConfig, name) {
-  const { sourceType, packageName, repo, path: mcpPath } = serverConfig
-  if (sourceType === 'npm') return `npm:${packageName}`
-  if (sourceType === 'github') return `gh:${repo}`
+  const { sourceType, packageName, packageVersion, repo, ref, path: mcpPath } = serverConfig
+  if (sourceType === 'npm') return `npm:${packageName}${packageVersion ? `@${packageVersion}` : ''}`
+  if (sourceType === 'github') return `gh:${repo}${ref ? `@${ref}` : ''}`
   if (sourceType === 'uvx') return `uvx:${packageName}`
   if (sourceType === 'pipx') return `pipx:${packageName}`
   if (sourceType === 'go') return `go:${packageName}`

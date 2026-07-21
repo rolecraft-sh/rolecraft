@@ -55,7 +55,7 @@ Usage:
   rolecraft doctor                  Run system health check (--json, --network)
   rolecraft watch [<slug>]          Watch skills for changes and auto-sync
   rolecraft profile                 Manage agent configuration profiles
-   rolecraft mcp install <source>    Install an MCP server (npm:, gh:, or local path)
+   rolecraft mcp install <source>    Install an MCP server (npm:, gh:, or local path, e.g. npm:pkg@1.0.0 or gh:owner/repo@branch)
    rolecraft mcp list                List configured MCP servers
    rolecraft mcp search <query>      Search for MCP servers (--npm for npm search)
    rolecraft mcp remove <name>       Remove an MCP server
