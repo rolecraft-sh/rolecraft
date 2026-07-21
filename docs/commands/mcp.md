@@ -17,10 +17,34 @@ rolecraft mcp remove <name> [options]
 Install an MCP server from a source.
 
 ```bash
+# npm / npx
 rolecraft mcp install npm:@modelcontextprotocol/github --cursor --claude
+
+# GitHub
 rolecraft mcp install gh:github/github-mcp-server --all
+
+# Python (uvx)
+rolecraft mcp install uvx:@anthropic/postgres-mcp --cursor
+
+# Python (pipx)
+rolecraft mcp install pipx:postgres-mcp --cursor
+
+# Go
+rolecraft mcp install go:github.com/org/mcp-server --all
+
+# Deno
+rolecraft mcp install deno:jsr:@org/mcp-server --all
+
+# Rust
+rolecraft mcp install cargo:my-mcp-server --cursor
+
+# Local path
 rolecraft mcp install ./local-server.js --cursor
+
+# Dry-run
 rolecraft mcp install npm:@anthropic/postgres-mcp --all --dry-run
+
+# Custom name
 rolecraft mcp install npm:@test/mcp --name my-server --cursor
 ```
 

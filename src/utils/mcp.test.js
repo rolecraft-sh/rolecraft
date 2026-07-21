@@ -349,6 +349,31 @@ Just content
       assert.equal(info.type, 'github')
     })
 
+    it('classifies uvx: source', () => {
+      const info = mcpModule.classifyMcpSource('uvx:@anthropic/postgres-mcp')
+      assert.equal(info.type, 'uvx')
+    })
+
+    it('classifies pipx: source', () => {
+      const info = mcpModule.classifyMcpSource('pipx:postgres-mcp')
+      assert.equal(info.type, 'pipx')
+    })
+
+    it('classifies go: source', () => {
+      const info = mcpModule.classifyMcpSource('go:github.com/org/mcp-server')
+      assert.equal(info.type, 'go')
+    })
+
+    it('classifies deno: source', () => {
+      const info = mcpModule.classifyMcpSource('deno:jsr:@org/mcp-server')
+      assert.equal(info.type, 'deno')
+    })
+
+    it('classifies cargo: source', () => {
+      const info = mcpModule.classifyMcpSource('cargo:my-mcp-server')
+      assert.equal(info.type, 'cargo')
+    })
+
     it('classifies local path as local', () => {
       const info = mcpModule.classifyMcpSource('./local/server.js')
       assert.equal(info.type, 'local')
@@ -366,6 +391,41 @@ Just content
       assert.equal(resolved.command, 'npx')
       assert.deepEqual(resolved.args, ['-y', '@modelcontextprotocol/github'])
       assert.equal(resolved.sourceType, 'npm')
+    })
+
+    it('resolves uvx: source', () => {
+      const resolved = mcpModule.resolveMcpSource('uvx:@anthropic/postgres-mcp')
+      assert.equal(resolved.command, 'uvx')
+      assert.deepEqual(resolved.args, ['@anthropic/postgres-mcp'])
+      assert.equal(resolved.sourceType, 'uvx')
+    })
+
+    it('resolves pipx: source', () => {
+      const resolved = mcpModule.resolveMcpSource('pipx:postgres-mcp')
+      assert.equal(resolved.command, 'pipx')
+      assert.deepEqual(resolved.args, ['run', 'postgres-mcp'])
+      assert.equal(resolved.sourceType, 'pipx')
+    })
+
+    it('resolves go: source', () => {
+      const resolved = mcpModule.resolveMcpSource('go:github.com/org/mcp-server')
+      assert.equal(resolved.command, 'go')
+      assert.deepEqual(resolved.args, ['run', 'github.com/org/mcp-server'])
+      assert.equal(resolved.sourceType, 'go')
+    })
+
+    it('resolves deno: source', () => {
+      const resolved = mcpModule.resolveMcpSource('deno:jsr:@org/mcp-server')
+      assert.equal(resolved.command, 'deno')
+      assert.deepEqual(resolved.args, ['run', 'jsr:@org/mcp-server'])
+      assert.equal(resolved.sourceType, 'deno')
+    })
+
+    it('resolves cargo: source', () => {
+      const resolved = mcpModule.resolveMcpSource('cargo:my-mcp-server')
+      assert.equal(resolved.command, 'cargo')
+      assert.deepEqual(resolved.args, ['run', 'my-mcp-server'])
+      assert.equal(resolved.sourceType, 'cargo')
     })
 
     it('resolves local path source', () => {

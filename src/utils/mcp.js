@@ -180,6 +180,11 @@ export function parseMcpServersFromSkill(content) {
 const MCP_SOURCE_PATTERNS = [
   { prefix: 'npm:', label: 'npm registry', type: 'npm' },
   { prefix: 'gh:', label: 'GitHub repository', type: 'github' },
+  { prefix: 'uvx:', label: 'Python package (uvx)', type: 'uvx' },
+  { prefix: 'pipx:', label: 'Python package (pipx)', type: 'pipx' },
+  { prefix: 'go:', label: 'Go package', type: 'go' },
+  { prefix: 'deno:', label: 'Deno module (JSR)', type: 'deno' },
+  { prefix: 'cargo:', label: 'Rust crate', type: 'cargo' },
 ]
 
 export function classifyMcpSource(source) {
@@ -223,6 +228,51 @@ export function resolveMcpSource(source) {
       throw err
     }
   }
+  if (source.startsWith('uvx:')) {
+    const pkg = source.slice(4)
+    return {
+      command: 'uvx',
+      args: [pkg],
+      sourceType: 'uvx',
+      packageName: pkg,
+    }
+  }
+  if (source.startsWith('pipx:')) {
+    const pkg = source.slice(5)
+    return {
+      command: 'pipx',
+      args: ['run', pkg],
+      sourceType: 'pipx',
+      packageName: pkg,
+    }
+  }
+  if (source.startsWith('go:')) {
+    const pkg = source.slice(3)
+    return {
+      command: 'go',
+      args: ['run', pkg],
+      sourceType: 'go',
+      packageName: pkg,
+    }
+  }
+  if (source.startsWith('deno:')) {
+    const pkg = source.slice(5)
+    return {
+      command: 'deno',
+      args: ['run', pkg],
+      sourceType: 'deno',
+      packageName: pkg,
+    }
+  }
+  if (source.startsWith('cargo:')) {
+    const pkg = source.slice(6)
+    return {
+      command: 'cargo',
+      args: ['run', pkg],
+      sourceType: 'cargo',
+      packageName: pkg,
+    }
+  }
   if (source.startsWith('/') || source.startsWith('.') || source.startsWith('~')) {
     const resolvedPath = source.startsWith('~') ? join(homedir(), source.slice(1)) : source
     return {
@@ -232,7 +282,7 @@ export function resolveMcpSource(source) {
       path: resolvedPath,
     }
   }
-  throw new Error(`Unknown MCP source format: ${source}. Use npm:package, gh:owner/repo, or a local path.`)
+  throw new Error(`Unknown MCP source format: ${source}. Use npm:package, gh:owner/repo, uvx:package, pipx:package, go:package, deno:module, cargo:crate, or a local path.`)
 }
 
 export async function installMcpServersFromSkill(skillContent, targets) {
