@@ -5,13 +5,15 @@ import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
-let tempDir, listModule, projectDir, origHome
+let tempDir, listModule, projectDir, origHome, origUserProfile
 
 before(async () => {
   tempDir = mkdtempSync(join(tmpdir(), 'rolecraft-list-test-'))
   projectDir = join(tempDir, 'some-project')
   origHome = process.env.HOME
+  origUserProfile = process.env.USERPROFILE
   process.env.HOME = tempDir
+  process.env.USERPROFILE = tempDir
   await mkdir(join(tempDir, '.agents'), { recursive: true })
   await mkdir(join(projectDir, '.agents'), { recursive: true })
   listModule = await import('./list.js')
@@ -20,6 +22,7 @@ before(async () => {
 after(async () => {
   await rm(tempDir, { recursive: true, force: true })
   process.env.HOME = origHome
+  process.env.USERPROFILE = origUserProfile
 })
 
 function captureLogs() {
@@ -69,6 +72,52 @@ describe('list command', () => {
     assert.equal(output.skills['test/skill'].source, 'owner/repo')
     assert.equal(output.skills['test/skill'].sourceType, 'github')
     assert.deepEqual(output.skills['test/skill'].agents, ['cursor', 'claude'])
+  })
+
+  it('filters installed skills by agent case-insensitively', async () => {
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'cursor/skill': { agents: ['cursor'] },
+          'shared/skill': { agents: ['Cursor', 'claude-code'] },
+          'claude/skill': { agents: ['claude-code'] },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      })
+    )
+
+    const logs = captureLogs()
+
+    await listModule.listCommand(undefined, { agent: 'CURSOR' })
+
+    assert.ok(logs.some(l => l.includes('Installed skills for cursor')))
+    assert.ok(logs.some(l => l.includes('cursor/skill')))
+    assert.ok(logs.some(l => l.includes('shared/skill')))
+    assert.ok(logs.every(l => !l.includes('claude/skill')))
+    assert.ok(logs.some(l => l.includes('2 skill(s) total for cursor')))
+  })
+
+  it('shows an agent-specific message when no skills match', async () => {
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'cursor/skill': { agents: ['cursor'] },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      })
+    )
+
+    const logs = captureLogs()
+
+    await listModule.listCommand(undefined, { agent: 'nonexistent' })
+
+    assert.deepEqual(logs, ['No skills installed for nonexistent.'])
   })
 
   it('lists installed skills with details', async () => {

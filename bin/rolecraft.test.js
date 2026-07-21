@@ -5,7 +5,7 @@ import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
-let tempDir, origHome, origCwd, origArgv
+let tempDir, origHome, origUserProfile, origCwd, origArgv
 
 function captureLogs() {
   const logs = []
@@ -26,15 +26,18 @@ function captureErrors() {
 before(async () => {
   tempDir = mkdtempSync(join(tmpdir(), 'rolecraft-cli-test-'))
   origHome = process.env.HOME
+  origUserProfile = process.env.USERPROFILE
   origCwd = process.cwd
   origArgv = process.argv
   process.env.HOME = tempDir
+  process.env.USERPROFILE = tempDir
   process.cwd = () => join(tempDir, 'project')
   await mkdir(join(tempDir, 'project'), { recursive: true })
 })
 
 after(async () => {
   process.env.HOME = origHome
+  process.env.USERPROFILE = origUserProfile
   process.cwd = origCwd
   process.argv = origArgv
   await rm(tempDir, { recursive: true, force: true })
@@ -164,6 +167,34 @@ describe('rolecraft CLI', () => {
     const { main } = await import('./rolecraft.js')
     process.argv = ['node', 'rolecraft', 'list']
     await main()
+  })
+
+  it('passes the short agent filter to the list command', async () => {
+    const { main } = await import('./rolecraft.js')
+    await mkdir(join(tempDir, '.agents'), { recursive: true })
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'cursor/skill': { agents: ['cursor'] },
+          'claude/skill': { agents: ['claude-code'] },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      })
+    )
+    const logs = captureLogs()
+    process.argv = ['node', 'rolecraft', 'list', '-a', 'CURSOR']
+
+    await main()
+
+    assert.ok(logs.some(l => l.includes('cursor/skill')))
+    assert.ok(logs.every(l => !l.includes('claude/skill')))
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({ version: 3, skills: {}, dismissed: {}, lastSelectedAgents: [] })
+    )
   })
 
   it('dispatches doctor command', async () => {
