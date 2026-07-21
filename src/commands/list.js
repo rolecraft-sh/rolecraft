@@ -13,7 +13,10 @@ export async function listCommand(cwd, options = {}) {
     Object.assign(mergedSkills, projectLock.skills)
   }
 
-  const skills = Object.entries(mergedSkills)
+  const agent = options.agent?.toLowerCase()
+  const skills = Object.entries(mergedSkills).filter(([, entry]) =>
+    !agent || (Array.isArray(entry.agents) && entry.agents.some(name => name.toLowerCase() === agent))
+  )
   if (options.json) {
     const jsonSkills = {}
 
@@ -42,11 +45,11 @@ export async function listCommand(cwd, options = {}) {
   }
 
   if (skills.length === 0) {
-    console.log('No skills installed.')
+    console.log(agent ? `No skills installed for ${agent}.` : 'No skills installed.')
     return
   }
 
-  console.log('Installed skills:\n')
+  console.log(agent ? `Installed skills for ${agent}:\n` : 'Installed skills:\n')
   for (const [slug, entry] of skills) {
     const inProject = projectSkills.has(slug)
     const inGlobal = slug in globalLock.skills
@@ -65,5 +68,5 @@ export async function listCommand(cwd, options = {}) {
   }
 
   const count = skills.length
-  console.log(`${count} skill(s) total.`)
+  console.log(agent ? `${count} skill(s) total for ${agent}.` : `${count} skill(s) total.`)
 }

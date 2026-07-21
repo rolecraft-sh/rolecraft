@@ -42,7 +42,7 @@ Usage:
   rolecraft bundle <source> [...]   Install skills from a file or inline sources
   rolecraft bundle create [<name>]  Create a new bundle file
   rolecraft use <source>            Preview a skill without installing
-  rolecraft list                    List installed skills
+  rolecraft list [--agent <name>]   List installed skills, optionally filtered by agent
   rolecraft remove <slug>           Remove a skill
   rolecraft update <slug>           Re-install a skill (update to latest)
   rolecraft setup [<source>]        Detect agents and optionally install a skill
@@ -74,6 +74,9 @@ Options:
 Options for use:
   --list         List available skills from a source without previewing
   --skill <names> Preview specific skills by name (comma-separated)
+
+Options for list:
+  --agent, -a <name> Filter skills by installed agent
 
 Options for setup:
   --list         List available skills from a source without installing
@@ -151,8 +154,15 @@ export async function main() {
     }
 
     case 'list': {
+      const agentIndex = args.findIndex(arg => arg === '--agent' || arg === '-a')
+      const agent = agentIndex === -1 ? undefined : args[agentIndex + 1]
+      if (agentIndex !== -1 && (!agent || agent.startsWith('-'))) {
+        throw new Error('Missing agent name for --agent.')
+      }
+
       const options = {
         json: args.includes('--json'),
+        agent,
       }
 
       await listCommand(process.cwd(), options)
