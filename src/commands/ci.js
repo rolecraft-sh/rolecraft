@@ -1,7 +1,7 @@
 import { readLock, getProjectLockPath } from '../utils/lockfile.js'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
-import { readMcpLock, getMcpLockPath } from '../utils/mcp-lock.js'
+import { readMcpLock } from '../utils/mcp-lock.js'
 import { resolveMcpSource, addMcpServer } from '../utils/mcp.js'
 
 export async function ciCommand() {
