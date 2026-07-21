@@ -11,7 +11,7 @@
 7. `rolecraft ci` re-installs all skills and MCP servers from lockfiles (e.g. in CI pipelines)
 8. `rolecraft doctor` runs a system health check across Node.js, agent directories, and lockfiles
 9. `rolecraft profile` saves, applies, diffs, edits, exports, imports, and links multi-agent configuration profiles
-10. `rolecraft mcp` manages MCP server configurations (install, list, remove)
+10. `rolecraft mcp` manages MCP server configurations (install, list, search, remove)
 11. `rolecraft agents-xml` generates a skills XML block for `AGENTS.md`
 12. `rolecraft watch` watches installed skills for changes and auto-syncs
 13. `rolecraft convert` converts between SKILL.md and .mdc formats

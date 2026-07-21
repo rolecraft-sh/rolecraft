@@ -1,12 +1,13 @@
 # `rolecraft mcp` — MCP Server Management
 
-Install, list, and remove MCP servers for AI agents.
+Install, list, search, and remove MCP servers for AI agents.
 
 ## Usage
 
 ```bash
 rolecraft mcp install <source> [options]
 rolecraft mcp list [options]
+rolecraft mcp search <query> [options]
 rolecraft mcp remove <name> [options]
 ```
 
@@ -70,6 +71,42 @@ Remove an MCP server.
 ```bash
 rolecraft mcp remove github-mcp-server --cursor
 rolecraft mcp remove postgres --all
+```
+
+### `search`
+
+Search for MCP servers on GitHub or npm.
+
+```bash
+# Search GitHub for repos with topic:mcp-server
+rolecraft mcp search github
+
+# Search npm registry for MCP packages
+rolecraft mcp search postgres --npm
+
+# Interactive picker with install
+rolecraft mcp search github --interactive
+```
+
+**Options:**
+- `--interactive` — Pick a result and install it
+- `--npm` — Search npm registry instead of GitHub
+
+**Example output:**
+```
+$ rolecraft mcp search github
+
+🔍 MCP server search results for "github":
+
+   github/github-mcp-server
+   ├─ Official GitHub MCP server  ⭐ 8500  Go
+   └─ rolecraft mcp install gh:github/github-mcp-server
+
+   modelcontextprotocol/servers
+   ├─ MCP server implementations  ⭐ 12000  TypeScript
+   └─ rolecraft mcp install gh:modelcontextprotocol/servers
+
+12 result(s) found.
 ```
 
 ## Sources
