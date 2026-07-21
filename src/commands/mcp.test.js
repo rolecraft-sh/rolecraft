@@ -47,7 +47,7 @@ describe('mcp command', () => {
 
       const cursorConfig = join(process.env.HOME, '.cursor', 'mcp.json')
       assert.ok(existsSync(cursorConfig))
-      const ccConfig = join(process.env.HOME, '.claude', 'claude_code.json')
+      const ccConfig = join(process.env.HOME, '.claude.json')
       assert.ok(existsSync(ccConfig))
     }))
 

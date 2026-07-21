@@ -27,12 +27,13 @@ function withTempDir(fn) {
 
 describe('mcp', () => {
   describe('getSupportedMcpAgents', () => {
-    it('returns list of supported agents', () => {
+    it('returns only agents with MCP support', () => {
       const agents = mcpModule.getSupportedMcpAgents()
-      assert.ok(agents.includes('claude'))
-      assert.ok(agents.includes('cursor'))
-      assert.ok(agents.includes('copilot'))
-      assert.ok(agents.includes('continue'))
+      const supported = ['agents', 'claude', 'cursor', 'windsurf', 'devin', 'copilot', 'continue']
+      assert.equal(agents.length, supported.length)
+      for (const flag of supported) {
+        assert.ok(agents.includes(flag), `expected ${flag} to be in supported list`)
+      }
     })
   })
 
@@ -71,7 +72,7 @@ describe('mcp', () => {
         args: ['-y', '@modelcontextprotocol/github'],
       })
 
-      const configPath = join(process.env.HOME, '.claude', 'claude_code.json')
+      const configPath = join(process.env.HOME, '.claude.json')
       assert.ok(existsSync(configPath))
       const config = JSON.parse(readFileSync(configPath, 'utf-8'))
       assert.ok(config.mcpServers['github-server'])
