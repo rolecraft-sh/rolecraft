@@ -377,3 +377,99 @@ function withTempDir(fn) {
     }
   }
 }
+
+describe('mcpCheckCommand', () => {
+  after(() => {
+    mcpModule.setFetch(undefined)
+  })
+
+  it('shows no servers when lockfile is empty', withTempDir(async (td) => {
+    const { writeFileSync, mkdirSync } = await import('node:fs')
+    mkdirSync(join(td, '.agents'), { recursive: true })
+    writeFileSync(join(td, '.agents', '.mcp-lock.json'), JSON.stringify({ version: 1, servers: {} }))
+
+    const { logs, restore } = capture('log')
+    await mcpModule.mcpCheckCommand()
+    restore()
+    assert.ok(logs.some(l => l.includes('No MCP servers')))
+  }))
+
+  it('skips non-npm sources', withTempDir(async (td) => {
+    const { writeFileSync, mkdirSync } = await import('node:fs')
+    mkdirSync(join(td, '.agents'), { recursive: true })
+    const lock = { version: 1, servers: { 'local-server': { source: './local.js', agents: ['cursor'] } } }
+    writeFileSync(join(td, '.agents', '.mcp-lock.json'), JSON.stringify(lock))
+
+    const { logs, restore } = capture('log')
+    await mcpModule.mcpCheckCommand()
+    restore()
+    assert.ok(logs.some(l => l.includes('non-npm')))
+  }))
+
+  it('reports outdated npm package', withTempDir(async (td) => {
+    const { writeFileSync, mkdirSync } = await import('node:fs')
+    mkdirSync(join(td, '.agents'), { recursive: true })
+    const lock = { version: 1, servers: { 'test-server': { source: 'npm:@test/pkg@1.0.0', agents: ['cursor'] } } }
+    writeFileSync(join(td, '.agents', '.mcp-lock.json'), JSON.stringify(lock))
+
+    mcpModule.setFetch(() => Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({ version: '2.0.0' }),
+    }))
+
+    const { logs, restore } = capture('log')
+    await mcpModule.mcpCheckCommand()
+    restore()
+    assert.ok(logs.some(l => l.includes('1.0.0')))
+    assert.ok(logs.some(l => l.includes('2.0.0')))
+    assert.ok(logs.some(l => l.includes('update')))
+  }))
+
+  it('reports up-to-date npm package', withTempDir(async (td) => {
+    const { writeFileSync, mkdirSync } = await import('node:fs')
+    mkdirSync(join(td, '.agents'), { recursive: true })
+    const lock = { version: 1, servers: { 'test-server': { source: 'npm:@test/pkg@1.0.0', agents: ['cursor'] } } }
+    writeFileSync(join(td, '.agents', '.mcp-lock.json'), JSON.stringify(lock))
+
+    mcpModule.setFetch(() => Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({ version: '1.0.0' }),
+    }))
+
+    const { logs, restore } = capture('log')
+    await mcpModule.mcpCheckCommand()
+    restore()
+    assert.ok(logs.some(l => l.includes('is latest')))
+  }))
+
+  it('handles npm registry fetch failure', withTempDir(async (td) => {
+    const { writeFileSync, mkdirSync } = await import('node:fs')
+    mkdirSync(join(td, '.agents'), { recursive: true })
+    const lock = { version: 1, servers: { 'test-server': { source: 'npm:@test/pkg@1.0.0', agents: ['cursor'] } } }
+    writeFileSync(join(td, '.agents', '.mcp-lock.json'), JSON.stringify(lock))
+
+    mcpModule.setFetch(() => Promise.resolve({ ok: false, status: 404 }))
+
+    const { logs, restore } = capture('log')
+    await mcpModule.mcpCheckCommand()
+    restore()
+    assert.ok(logs.some(l => l.includes('could not check')))
+  }))
+
+  it('reports no version pinned as up to date', withTempDir(async (td) => {
+    const { writeFileSync, mkdirSync } = await import('node:fs')
+    mkdirSync(join(td, '.agents'), { recursive: true })
+    const lock = { version: 1, servers: { 'test-server': { source: 'npm:@test/pkg', agents: ['cursor'] } } }
+    writeFileSync(join(td, '.agents', '.mcp-lock.json'), JSON.stringify(lock))
+
+    mcpModule.setFetch(() => Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({ version: '2.0.0' }),
+    }))
+
+    const { logs, restore } = capture('log')
+    await mcpModule.mcpCheckCommand()
+    restore()
+    assert.ok(logs.some(l => l.includes('no version pinned')))
+  }))
+})
