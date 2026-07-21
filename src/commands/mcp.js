@@ -1,4 +1,5 @@
 import { addMcpServer, removeMcpServer, updateMcpServer, listMcpServers, getSupportedMcpAgents, resolveMcpSource, classifyMcpSource } from '../utils/mcp.js'
+import { scanMcpServer, classifyScore, formatSecurityReport } from '../utils/security.js'
 import { createInterface } from 'node:readline'
 import { stdin as input, stdout as output } from 'node:process'
 import agents from '../agents.js'
@@ -51,6 +52,18 @@ export async function mcpInstallCommand(source, options) {
   }
 
   const resolved = resolveMcpSource(source)
+
+  const scanResult = scanMcpServer(resolved)
+  if (scanResult.issues.length > 0) {
+    console.log(formatSecurityReport(scanResult))
+    if (classifyScore(scanResult.score) === 'danger' && !options.yes) {
+      const answer = await askConfirmation('\n❌ Security score is low. Continue with installation? [y/N] ')
+      if (answer !== 'y' && answer !== 'yes') {
+        console.log('Install cancelled.')
+        return
+      }
+    }
+  }
 
   const targets = options.agents && options.agents.length > 0
     ? options.agents

@@ -1,5 +1,15 @@
 const WEIGHTS = { critical: 20, high: 10, medium: 3, low: 1 }
 
+const MCP_NETWORK_PATTERNS = [
+  { severity: 'medium', category: 'network_request', pattern: /https?:\/\//, description: 'MCP server makes network requests' },
+  { severity: 'medium', category: 'file_access', pattern: /readFileSync|readFile|writeFileSync|writeFile|appendFile/, description: 'MCP server accesses local filesystem' },
+  { severity: 'medium', category: 'shell_exec', pattern: /execSync|spawnSync|exec\s*\(|spawn\s*\(/, description: 'MCP server executes shell commands' },
+  { severity: 'medium', category: 'env_access', pattern: /process\.env/, description: 'MCP server reads environment variables' },
+  { severity: 'high', category: 'credential_access', pattern: /process\.env\.(?:TOKEN|SECRET|PASSWORD|API_KEY|ACCESS_KEY|AUTH|CREDENTIAL)/i, description: 'MCP server accesses credential environment variables' },
+  { severity: 'high', category: 'data_exfiltration', pattern: /https?:\/\/(?:webhook|hook|requestbin|ngrok)\.[^\s]+/, description: 'Potential data exfiltration endpoint in MCP server' },
+  { severity: 'critical', category: 'command_injection', pattern: /(?:curl|wget)\s+['"]?https?:\/\/[^\s'"]+['"]?\s*[|;]\s*(?:bash|sh|zsh|python)/, description: 'MCP server downloads and executes remote code' },
+]
+
 const PATTERNS = [
   { severity: 'critical', category: 'prompt_injection', pattern: /ignore\s+(all|previous|above)\s+(instructions|directives|commands)/i, description: 'Prompt injection: attempts to override instructions' },
   { severity: 'critical', category: 'prompt_injection', pattern: /you\s+are\s+(now\s+)?a\s*(free|unrestricted|unlimited|unbounded|unconstrained|unfiltered)/i, description: 'Prompt injection: role override attempt' },
@@ -68,6 +78,50 @@ export function classifyScore(score) {
   if (score >= 90) return 'safe'
   if (score >= 70) return 'review'
   return 'danger'
+}
+
+export function scanMcpServer(resolved) {
+  const issues = []
+
+  if (resolved.fileContents && typeof resolved.fileContents === 'object') {
+    const seen = new Set()
+    const fileEntries = Object.entries(resolved.fileContents)
+    for (const [filename, content] of fileEntries) {
+      if (typeof content !== 'string') continue
+      for (const check of MCP_NETWORK_PATTERNS) {
+        const key = `${check.severity}:${check.category}:${check.description}:${filename}`
+        if (seen.has(key)) continue
+        if (check.pattern.test(content)) {
+          issues.push({ severity: check.severity, category: check.category, description: check.description, file: filename })
+          seen.add(key)
+        }
+      }
+    }
+
+    if (resolved.sourceType === 'github' && resolved.repo) {
+      const owner = resolved.repo.split('/')[0]
+      const knownSafe = ['github', 'modelcontextprotocol', 'anthropic', 'vercel', 'openai']
+      if (!knownSafe.includes(owner)) {
+        issues.push({ severity: 'low', category: 'untrusted_publisher', description: `MCP server published by "${owner}" (not a known trusted publisher)` })
+      }
+    }
+  }
+
+  if (resolved.sourceType === 'npm') {
+    issues.push({ severity: 'low', category: 'source_type', description: 'Installing from npm registry (published by anyone)' })
+  }
+
+  const deductions = {}
+  for (const issue of issues) {
+    deductions[issue.severity] = (deductions[issue.severity] || 0) + 1
+  }
+
+  let score = 100
+  for (const [severity, count] of Object.entries(deductions)) {
+    score -= count * (WEIGHTS[severity] || 0)
+  }
+
+  return { score: Math.max(0, score), issues }
 }
 
 export function formatSecurityReport({ score, issues }) {
