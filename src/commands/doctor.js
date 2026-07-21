@@ -85,33 +85,129 @@ function validateLockfileSchema(lock) {
   return null
 }
 
-async function readMcpServersForAllAgents(detected) {
+const KNOWN_MCP_COMMANDS = ['npx', 'node', 'uvx', 'pipx', 'go', 'deno', 'cargo', 'python3', 'python']
+
+function commandExists(cmd) {
+  try {
+    execSync(`which ${cmd} 2>/dev/null || command -v ${cmd} 2>/dev/null`, { stdio: 'pipe' })
+    return true
+  } catch {
+    return false
+  }
+}
+
+function validateMcpServers(detected) {
   const seenPaths = new Set()
-  let totalServers = 0
-  let configuredAgents = 0
+  const results = []
+
   for (const agent of agents) {
     if (!agent.mcp || !detected.some(d => d.flag === agent.flag)) continue
+
+    const configPath = agent.mcp.getPath()
+    if (seenPaths.has(configPath)) {
+      results.push({ agent: agent.flag, configPath, status: 'pass', detail: 'shared config (already validated)' })
+      continue
+    }
+    seenPaths.add(configPath)
+
+    let raw, data
     try {
-      const configPath = agent.mcp.getPath()
-      if (seenPaths.has(configPath)) continue
-      seenPaths.add(configPath)
-      const raw = readFileSync(configPath, 'utf-8')
-      const data = JSON.parse(raw)
-      let servers = []
-      if (Array.isArray(data.experimental?.mcpServers)) {
-        servers = data.experimental.mcpServers
-      } else if (data.servers && typeof data.servers === 'object') {
-        servers = Object.keys(data.servers)
-      } else if (data.mcpServers && typeof data.mcpServers === 'object') {
-        servers = Object.keys(data.mcpServers)
+      raw = readFileSync(configPath, 'utf-8')
+    } catch {
+      results.push({ agent: agent.flag, configPath, status: 'warn', detail: 'config file not found' })
+      continue
+    }
+
+    try {
+      data = JSON.parse(raw)
+    } catch {
+      results.push({ agent: agent.flag, configPath, status: 'error', detail: 'invalid JSON' })
+      continue
+    }
+
+    let entries = []
+    let format = 'mcpServers'
+
+    if (Array.isArray(data.experimental?.mcpServers)) {
+      entries = data.experimental.mcpServers
+      format = 'experimental.mcpServers (Continue)'
+    } else if (data.servers && typeof data.servers === 'object') {
+      entries = Object.entries(data.servers).map(([name, s]) => ({ name, ...s }))
+      format = 'servers (Copilot)'
+    } else if (data.mcpServers && typeof data.mcpServers === 'object') {
+      entries = Object.entries(data.mcpServers).map(([name, s]) => ({ name, ...s }))
+      format = 'mcpServers (standard)'
+    }
+
+    if (entries.length === 0) {
+      results.push({ agent: agent.flag, configPath, status: 'warn', detail: `no MCP servers configured (${format})` })
+      continue
+    }
+
+    let errors = 0
+    let warnings = 0
+    const issues = []
+
+    for (const entry of entries) {
+      const name = entry.name || '(unnamed)'
+      if (!entry.command) {
+        issues.push({ name, issue: 'missing command field' })
+        errors++
+        continue
       }
-      if (servers.length > 0) {
-        totalServers += servers.length
-        configuredAgents++
+
+      if (KNOWN_MCP_COMMANDS.includes(entry.command)) {
+        if (!commandExists(entry.command)) {
+          issues.push({ name, issue: `command "${entry.command}" not found in PATH` })
+          errors++
+          continue
+        }
       }
-    } catch {}
+
+      if (entry.command === 'node' && entry.args && entry.args.length > 0) {
+        for (const arg of entry.args) {
+          if (arg.startsWith('/') || arg.startsWith('./') || arg.startsWith('~')) {
+            const resolvedPath = arg.startsWith('~') ? join(homedir(), arg.slice(1)) : arg
+            try {
+              accessSync(resolvedPath, constants.F_OK)
+            } catch {
+              issues.push({ name, issue: `file not found: ${arg}` })
+              warnings++
+            }
+          }
+        }
+      }
+    }
+
+    const totalEntries = entries.length
+    const healthyEntries = totalEntries - errors
+    if (errors > 0) {
+      results.push({
+        agent: agent.flag,
+        configPath,
+        status: 'error',
+        detail: `${healthyEntries}/${totalEntries} server(s) OK, ${errors} error(s)`,
+        issues,
+      })
+    } else if (warnings > 0) {
+      results.push({
+        agent: agent.flag,
+        configPath,
+        status: 'warn',
+        detail: `${healthyEntries}/${totalEntries} server(s) OK, ${warnings} warning(s)`,
+        issues,
+      })
+    } else {
+      results.push({
+        agent: agent.flag,
+        configPath,
+        status: 'pass',
+        detail: `${totalEntries} server(s) OK`,
+      })
+    }
   }
-  return { totalServers, configuredAgents }
+
+  return results
 }
 
 export async function doctorCommand(options = {}) {
@@ -321,9 +417,34 @@ export async function doctorCommand(options = {}) {
   }
 
   // --- MCP server health ---
-  const mcpInfo = await readMcpServersForAllAgents(detected)
-  if (mcpInfo.totalServers > 0) {
-    checked('MCP servers', 'pass', `${mcpInfo.totalServers} configured across ${mcpInfo.configuredAgents} agent(s)`)
+  const mcpResults = validateMcpServers(detected)
+  const mcpPass = mcpResults.filter(r => r.status === 'pass').length
+  const mcpWarn = mcpResults.filter(r => r.status === 'warn').length
+  const mcpError = mcpResults.filter(r => r.status === 'error').length
+  const totalMcp = mcpResults.length
+
+  if (mcpPass > 0 || mcpWarn > 0) {
+    const detail = `${mcpPass} ok, ${mcpWarn} warning(s), ${mcpError} error(s) across ${totalMcp} agent(s)`
+    checked('MCP configs', mcpError > 0 ? 'warn' : 'pass', detail)
+    for (const result of mcpResults) {
+      if (result.status === 'pass') {
+        checked(`  └ ${result.agent}`, 'pass', result.detail)
+      } else {
+        let detail = result.detail
+        if (result.issues) {
+          for (const issue of result.issues) {
+            const icon = result.status === 'error' ? '❌' : '⚠️'
+            detail += `\n       ${icon} ${issue.name}: ${issue.issue}`
+          }
+        }
+        checked(`  └ ${result.agent}`, result.status, detail)
+      }
+    }
+  } else if (mcpError > 0) {
+    checked('MCP configs', 'error', `${mcpError} agent(s) with broken config`)
+    for (const result of mcpResults) {
+      checked(`  └ ${result.agent}`, 'error', result.detail)
+    }
   } else {
     checked('MCP servers', 'warn', 'none configured')
   }

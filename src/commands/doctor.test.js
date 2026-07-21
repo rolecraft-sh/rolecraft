@@ -343,14 +343,28 @@ describe('doctor command', () => {
   })
 
   it('reports no orphaned skill dirs when clean', async () => {
+    const { readdirSync } = await import('node:fs')
+    const skillsDir = join(tempDir, '.agents', 'skills')
+    const existingDirs = []
+    try {
+      for (const e of readdirSync(skillsDir, { withFileTypes: true })) {
+        if (e.isDirectory()) existingDirs.push(e.name)
+      }
+    } catch {}
+    const allSkills = Object.fromEntries(existingDirs.map(d => [d.replace(/-/g, '/'), { slug: d.replace(/-/g, '/') }]))
+    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
+      version: 3, skills: allSkills, dismissed: {}, lastSelectedAgents: [],
+    }))
+
     const { logs, restore } = capture()
     try {
       await doctorModule.doctorCommand()
     } finally {
       restore()
     }
-    assert.ok(logs.some(l => l.includes('Orphaned skill dirs')))
-    assert.ok(logs.some(l => l.includes('none')))
+    const orphanedLine = logs.find(l => l.includes('Orphaned'))
+    assert.ok(orphanedLine, 'Orphaned check not found. Logs: ' + logs.join('|'))
+    assert.ok(orphanedLine.includes('none'), 'Expected none: ' + orphanedLine)
   })
 
   it('reports mcp servers check', async () => {
@@ -360,7 +374,7 @@ describe('doctor command', () => {
     } finally {
       restore()
     }
-    assert.ok(logs.some(l => l.includes('MCP servers')))
+    assert.ok(logs.some(l => l.includes('MCP') && (l.includes('configs') || l.includes('servers'))))
   })
 
   it('outputs json with --json flag', async () => {
