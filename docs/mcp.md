@@ -141,6 +141,39 @@ More agents will be added as their MCP standards solidify.
 | `cargo:` | `cargo:my-mcp-server` | Rust crate via `cargo run` |
 | Local path | `./my-mcp-server/index.js` | Run directly with `node` |
 
+## Security Scanning
+
+When installing from `gh:` sources, rolecraft automatically scans the cloned repository for security issues before installation:
+
+| Severity | Example | Score Impact |
+|----------|---------|-------------|
+| 🔴 Critical | Command injection (`curl \| bash`) | -20 |
+| 🔴 High | Credential access (`process.env.TOKEN`), data exfiltration | -10 |
+| 🟡 Medium | Network requests, file access, shell execution, env access | -3 |
+| ⚪ Low | Untrusted publisher, npm registry source | -1 |
+
+The scan produces a score (0-100):
+
+| Score | Label | Behavior |
+|-------|-------|----------|
+| 90-100 | ✅ Safe | Installs normally |
+| 70-89 | ⚠️ Review | Shows warning, continues |
+| 0-69 | ❌ Danger | Blocks install unless `--yes` is passed |
+
+```bash
+# Security scan runs automatically during install
+rolecraft mcp install gh:untrusted-user/mcp-server
+# → Shows scan report before confirmation prompt
+
+# Skip security block with --yes
+rolecraft mcp install gh:untrusted-user/mcp-server --yes
+```
+
+### Trusted Publishers
+
+Repositories from these publishers are not flagged with low-severity untrusted publisher warnings:
+`github`, `modelcontextprotocol`, `anthropic`, `vercel`, `openai`
+
 ## Lockfile & CI Restore
 
 Every MCP server you install is tracked in `~/.agents/.mcp-lock.json`. This lockfile records:

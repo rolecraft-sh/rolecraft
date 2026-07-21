@@ -15,7 +15,7 @@ rolecraft mcp remove <name> [options]
 
 ### `install`
 
-Install an MCP server from a source.
+Install an MCP server from a source. Automatically scans `gh:` sources for security issues before installing.
 
 ```bash
 # npm / npx
@@ -59,6 +59,7 @@ rolecraft mcp install npm:@test/mcp --name my-server --cursor
 **Options:**
 - `--name <name>` — Override the server name (default: auto-detected from source)
 - `--dry-run` — Preview without making changes
+- `--yes`, `-y` — Skip confirmation and security blocks
 - `--agents`, `--cursor`, `--claude`, `--copilot`, `--continue`, etc. — Target specific agents
 - `--all` — Install to all supported MCP agents
 

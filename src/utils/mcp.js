@@ -3,7 +3,7 @@ import { join, dirname } from 'node:path'
 import { homedir } from 'node:os'
 import { execSync as defaultExecSync, spawnSync as defaultSpawnSync } from 'node:child_process'
 import { tmpdir } from 'node:os'
-import { mkdtempSync, readFileSync } from 'node:fs'
+import { mkdtempSync, readFileSync, readdirSync } from 'node:fs'
 import agents from '../agents.js'
 import { addServerToMcpLock, removeServerFromMcpLock } from './mcp-lock.js'
 
@@ -233,6 +233,7 @@ export function resolveMcpSource(source) {
     }
     const tmpDir = mkdtempSync(join(tmpdir(), 'rolecraft-mcp-'))
     const cloneDir = join(tmpDir, 'repo')
+    let fileContents
     try {
       const cloneArgs = ['clone', '--depth', '1', `https://github.com/${repo}.git`, cloneDir]
       if (ref) {
@@ -245,6 +246,24 @@ export function resolveMcpSource(source) {
       const bin = pkgJson.bin ? (typeof pkgJson.bin === 'string' ? pkgJson.bin : Object.values(pkgJson.bin)[0]) : null
       const command = bin ? join(cloneDir, bin) : join(cloneDir, main)
       const args = []
+
+      fileContents = {}
+      function readFilesRecursive(dir, baseDir) {
+        for (const entry of readdirSync(dir, { withFileTypes: true })) {
+          const fullPath = join(dir, entry.name)
+          if (entry.isDirectory()) {
+            if (entry.name === '.git' || entry.name === 'node_modules') continue
+            readFilesRecursive(fullPath, baseDir)
+          } else if (entry.isFile()) {
+            try {
+              const relPath = relative(baseDir, fullPath)
+              fileContents[relPath] = readFileSync(fullPath, 'utf-8')
+            } catch {}
+          }
+        }
+      }
+      readFilesRecursive(cloneDir, cloneDir)
+
       try { runSpawnSync('rm', ['-rf', tmpDir], { stdio: 'pipe' }) } catch {}
       return {
         command: 'node',
@@ -252,6 +271,7 @@ export function resolveMcpSource(source) {
         sourceType: 'github',
         repo,
         ref,
+        fileContents,
       }
     } catch (err) {
       try { runSpawnSync('rm', ['-rf', tmpDir], { stdio: 'pipe' }) } catch {}
