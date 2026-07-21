@@ -34,6 +34,10 @@ describe('completions command', () => {
     assert.ok(output.includes('_rolecraft'))
     assert.ok(output.includes('compgen'))
     assert.ok(output.includes('complete -F _rolecraft rolecraft'))
+    assert.ok(output.includes('mcp'))
+    ;['install', 'list', 'search', 'check', 'update', 'remove'].forEach(cmd => {
+      assert.ok(output.includes(cmd), `bash completions should include ${cmd}`)
+    })
   })
 
   it('generates zsh completions', async () => {
@@ -44,6 +48,7 @@ describe('completions command', () => {
     const output = logs.join('\n')
     assert.ok(output.includes('#compdef rolecraft'))
     assert.ok(output.includes('_arguments'))
+    assert.ok(output.includes('(install list search check update remove)'))
   })
 
   it('generates fish completions', async () => {
@@ -54,6 +59,9 @@ describe('completions command', () => {
     const output = logs.join('\n')
     assert.ok(output.includes('complete -f -c rolecraft'))
     assert.ok(output.includes('__fish_rolecraft_needs_command'))
+    assert.ok(output.includes('Install an MCP server'))
+    assert.ok(output.includes('Search for MCP servers'))
+    assert.ok(output.includes('Check for MCP updates'))
   })
 
   it('errors on unknown shell', async () => {

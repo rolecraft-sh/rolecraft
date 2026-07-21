@@ -2,7 +2,10 @@ const COMMANDS = [
   'install', 'bundle', 'use', 'list', 'remove', 'update',
   'setup', 'init', 'search', 'verify', 'ci', 'completions',
   'agents-xml', 'doctor', 'upgrade', 'help', 'version',
+  'mcp',
 ]
+
+const MCP_SUBCOMMANDS = 'install list search check update remove'
 
 const SCOPE_FLAGS = [
   '--global', '--project', '--claude', '--cursor', '--windsurf',
@@ -51,6 +54,13 @@ _rolecraft() {
   case "\${COMP_WORDS[1]}" in
     install|bundle|use|setup|upgrade)
       COMPREPLY=($(compgen -W "$scope_flags $option_flags" -- "$cur"))
+      ;;
+    mcp)
+      if [[ $COMP_CWORD -eq 2 ]]; then
+        COMPREPLY=($(compgen -W "${MCP_SUBCOMMANDS}" -- "$cur"))
+      else
+        COMPREPLY=($(compgen -W "--name --dry-run --yes -y --all" -- "$cur"))
+      fi
       ;;
     search)
       COMPREPLY=($(compgen -W "--interactive" -- "$cur"))
@@ -102,6 +112,9 @@ _rolecraft() {
       ;;
     args)
       case $words[1] in
+        mcp)
+          _arguments '1:subcommand:(install list search check update remove)'
+          ;;
         install|bundle|use|setup|upgrade)
           _arguments \\
             '--global[Install to ~/.agents/skills/]' \\
@@ -167,7 +180,7 @@ _rolecraft() {
         completions)
           _arguments '::shell:(bash zsh fish)'
           ;;
-        remove|update)
+        remove|update|mcp)
           _arguments '*:slug:'
           ;;
         bundle)
@@ -287,6 +300,22 @@ for cmd in install bundle use setup upgrade
 end
 
 # search flags
+# mcp subcommands
+complete -f -c rolecraft -n '__fish_rolecraft_using_command mcp' -a install -d 'Install an MCP server'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command mcp' -a list    -d 'List MCP servers'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command mcp' -a search  -d 'Search for MCP servers'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command mcp' -a check   -d 'Check for MCP updates'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command mcp' -a update  -d 'Update an MCP server'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command mcp' -a remove  -d 'Remove an MCP server'
+
+# mcp flags
+for cmd in install list search check update remove
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command mcp; and __fish_rolecraft_using_command $cmd" -l name -d 'Server name'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command mcp; and __fish_rolecraft_using_command $cmd" -l dry-run -d 'Preview without changes'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command mcp; and __fish_rolecraft_using_command $cmd" -l yes -d 'Skip confirmation'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command mcp; and __fish_rolecraft_using_command $cmd" -l all -d 'All agents'
+end
+
 complete -f -c rolecraft -n '__fish_rolecraft_using_command search' -l interactive -d 'Choose and install from results'
 
 # completions subcommands
