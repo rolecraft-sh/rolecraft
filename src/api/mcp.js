@@ -1,4 +1,4 @@
-import { addMcpServer, removeMcpServer, updateMcpServer, listMcpServers, getSupportedMcpAgents, resolveMcpSource, classifyMcpSource } from '../utils/mcp.js'
+import { addMcpServer, removeMcpServer, updateMcpServer, listMcpServers, getSupportedMcpAgents, resolveMcpSource } from '../utils/mcp.js'
 import { scanMcpServer } from '../utils/security.js'
 
 let runFetch = globalThis.fetch

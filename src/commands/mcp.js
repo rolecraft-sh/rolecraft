@@ -6,7 +6,6 @@ import {
 import { classifyMcpSource, getSupportedMcpAgents } from '../utils/mcp.js'
 
 export { setFetch } from '../api/mcp.js'
-import { classifyScore } from '../utils/security.js'
 import agents from '../agents.js'
 
 const CSI = '\x1b['

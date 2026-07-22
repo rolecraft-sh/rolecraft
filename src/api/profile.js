@@ -121,12 +121,9 @@ export async function apiProfileDelete(name, options = {}) {
 }
 
 export async function apiProfileImport(path) {
-  const { readFile } = await import('node:fs/promises')
-  const { resolve } = await import('node:path')
-  const { writeFile } = await import('node:fs/promises')
+  const { readFile, writeFile } = await import('node:fs/promises')
+  const { resolve, join } = await import('node:path')
   const { homedir } = await import('node:os')
-  const { join, dirname } = await import('node:path')
-  const { mkdir } = await import('node:fs/promises')
 
   let content
   const isUrl = path.startsWith('http://') || path.startsWith('https://')
