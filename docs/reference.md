@@ -2,6 +2,8 @@
 
 Complete reference for all rolecraft commands, flags, and options.
 
+> **Node.js API:** rolecraft also exposes a programmatic API. See [`src/index.js`](../src/index.js) or `import { ... } from 'rolecraft'`. All API functions return plain objects with no side-effects.
+
 ---
 
 ## Commands

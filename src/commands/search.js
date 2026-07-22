@@ -1,17 +1,9 @@
 import { stdin as input, stdout as output } from 'node:process'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
+import { apiSearch } from '../api/search.js'
 
-let runFetch = globalThis.fetch
-let promptUser = defaultPrompt
-
-export function setFetch(fn) {
-  runFetch = fn
-}
-
-export function setPromptUser(fn) {
-  promptUser = fn || defaultPrompt
-}
+export { setFetch } from '../api/search.js'
 
 const CSI = '\x1b['
 const sgr = (n) => `${CSI}${n}m`
@@ -34,10 +26,21 @@ export function formatRepo(r) {
   return `${bold(r.full_name)}\n  ${dim(desc)}  ${yellow(`⭐ ${stars}`)}  ${cyan(lang)}`
 }
 
-export function formatSkillsShItem(skill) {
-  const desc = skill.name || 'No description'
-  const installs = skill.installs || 0
-  return `${bold(skill.source + '/' + skill.skillId)}\n  ${dim(desc)}  ${yellow(`📦 ${installs}`)}  ${cyan('skills.sh')}`
+let promptUser = defaultPrompt
+
+async function defaultPrompt(query) {
+  const { createInterface } = await import('node:readline')
+  const rl = createInterface({ input, output })
+  return new Promise(resolve => {
+    rl.question(query, answer => {
+      rl.close()
+      resolve(answer.trim().toLowerCase())
+    })
+  })
+}
+
+export function setPromptUser(fn) {
+  promptUser = fn || defaultPrompt
 }
 
 const ITEM_LINES = 4
@@ -129,17 +132,6 @@ async function runTUI(items) {
   })
 }
 
-async function defaultPrompt(query) {
-  const { createInterface } = await import('node:readline')
-  const rl = createInterface({ input, output })
-  return new Promise(resolve => {
-    rl.question(query, answer => {
-      rl.close()
-      resolve(answer.trim().toLowerCase())
-    })
-  })
-}
-
 async function promptSelect(items) {
   console.log()
   for (let i = 0; i < items.length; i++) {
@@ -153,13 +145,11 @@ async function promptSelect(items) {
 
   const trimmed = (answer || '').trim().toLowerCase()
   if (trimmed === 'q') return -1
-
   const index = parseInt(trimmed, 10)
   if (isNaN(index) || index < 1 || index > items.length) {
     console.log(`Invalid choice. Enter a number between 1 and ${items.length}.`)
     return -2
   }
-
   return index - 1
 }
 
@@ -191,167 +181,80 @@ async function pickAndInstall(items) {
   }
 }
 
-function isGitHubRef(source) {
-  return /^[\w.-]+\/[\w.-]+$/.test(source) && !source.startsWith('/') && !source.startsWith('.')
-}
-
-async function searchGitHub(query, filenameFilter = true) {
-  const q = filenameFilter
-    ? `${encodeURIComponent(query)}+filename:SKILL.md`
-    : encodeURIComponent(query)
-  const url = `https://api.github.com/search/repositories?q=${q}&per_page=20&sort=stars`
-
-  const response = await runFetch(url, {
-    headers: { Accept: 'application/vnd.github.v3+json' },
-    signal: AbortSignal.timeout(10000),
-  })
-
-  if (response.status === 403) {
-    return { rateLimited: true }
-  }
-
-  if (!response.ok) {
-    return { error: `GitHub API error: ${response.status}` }
-  }
-
-  return await response.json()
-}
-
-async function searchSkillsSh(query) {
-  const url = `https://skills.sh/api/search?q=${encodeURIComponent(query)}`
-  const response = await runFetch(url, {
-    signal: AbortSignal.timeout(10000),
-  })
-  if (!response.ok) {
-    return { error: `skills.sh API error: ${response.status}` }
-  }
-  const data = await response.json()
-  return { items: data.skills || [] }
-}
-
-async function lookupGithubRepo(ref) {
-  const url = `https://api.github.com/repos/${ref}`
-  try {
-    const response = await runFetch(url, {
-      headers: { Accept: 'application/vnd.github.v3+json' },
-      signal: AbortSignal.timeout(10000),
-    })
-    if (!response.ok) return null
-    return await response.json()
-  } catch {
-    return null
-  }
-}
-
-async function searchOrLookup(query) {
-  if (isGitHubRef(query)) {
-    const repo = await lookupGithubRepo(query)
-    if (repo) {
-      const items = [{
-        full_name: repo.full_name,
-        description: repo.description,
-        stargazers_count: repo.stargazers_count,
-        language: repo.language,
-      }]
-      const data = await searchGitHub(query, true)
-      if (data.items && data.items.length > 0) {
-        return data
-      }
-      return { items, fromLookup: true }
-    }
-  }
-  return await searchGitHub(query, true)
-}
-
-function displayResults(data, query) {
-  const fromLookup = data.fromLookup
-  if (fromLookup) {
-    console.log(`\n🔍 Search results for "${query}":\n`)
-  } else {
-    console.log(`\n🔍 Search results for "${query}":\n`)
-  }
-
-  for (const repo of data.items) {
-    const desc = repo.description || 'No description'
-    console.log(`   ${repo.full_name}`)
-    console.log(`   ├─ ${desc}`)
-    console.log(`   ├─ ⭐ ${repo.stargazers_count}  📝 ${repo.language || 'N/A'}`)
-    console.log(`   └─ rolecraft install ${repo.full_name}`)
-    console.log()
-  }
-  console.log(`${data.items.length} result(s) found.`)
+export function formatSkillsShItem(skill) {
+  const desc = skill.name || 'No description'
+  const installs = skill.installs || 0
+  return `${bold(skill.source + '/' + skill.skillId)}\n  ${dim(desc)}  ${yellow(`📦 ${installs}`)}  ${cyan('skills.sh')}`
 }
 
 export async function searchCommand(query, options = {}) {
-  let data
-
   if (options.skillsSh) {
     try {
-      data = await searchSkillsSh(query)
-    } catch {
+      const data = await apiSearch(query, { skillsSh: true })
+      const items = data.results
+
+      if (items.length === 0) {
+        console.log(`\nNo skills found on skills.sh for "${query}".`)
+        return
+      }
+
+      console.log(`\n🔍 [Experimental] skills.sh results for "${query}":\n`)
+      for (const skill of items) {
+        const line = formatSkillsShItem(skill).split('\n')
+        console.log(`   ${line[0]}`)
+        console.log(`   ├─ ${line[1]}`)
+        console.log(`   └─ rolecraft install ${skill.installSource || skill.source + '/' + skill.skillId}`)
+        console.log()
+      }
+      console.log(`${items.length} result(s) found.`)
+      console.log('\n⚠️  skills.sh integration is experimental. The API may change or become unavailable.')
+    } catch (err) {
+      if (err.message?.includes('skills.sh API error')) {
+        throw err
+      }
       throw new Error('Failed to search skills.sh. Check your internet connection.')
     }
-
-    if (data.error) {
-      throw new Error(data.error)
-    }
-
-    if (data.items.length === 0) {
-      console.log(`\nNo skills found on skills.sh for "${query}".`)
-      return
-    }
-
-    console.log(`\n🔍 [Experimental] skills.sh results for "${query}":\n`)
-    for (const skill of data.items) {
-      const line = formatSkillsShItem(skill).split('\n')
-      console.log(`   ${line[0]}`)
-      console.log(`   ├─ ${line[1]}`)
-      console.log(`   └─ rolecraft install ${skill.source}/${skill.skillId}`)
-      console.log()
-    }
-    console.log(`${data.items.length} result(s) found.`)
-    console.log('\n⚠️  skills.sh integration is experimental. The API may change or become unavailable.')
     return
   }
 
+  let data
   try {
-    data = await searchOrLookup(query)
-  } catch {
-    throw new Error('Failed to search GitHub. Check your internet connection.')
+    data = await apiSearch(query)
+  } catch (err) {
+    if (err.message?.includes('rate limit')) {
+      console.log('\n⚠️  GitHub API rate limit reached. Try again later or use a GitHub token.')
+      return
+    }
+    if (err.message?.includes('GitHub API error')) {
+      throw err
+    }
+    throw new Error(`Failed to search GitHub. Check your internet connection.`)
   }
 
-  if (data.rateLimited) {
-    console.log('\n⚠️  GitHub API rate limit reached. Try again later or use a local source.\n')
+  const items = data.results
+
+  if (items.length === 0) {
+    console.log(`\nNo skills found for "${query}".`)
     return
   }
 
-  if (data.error) {
-    throw new Error(data.error)
-  }
-
-  if (data.items.length === 0) {
-    try {
-      data = await searchGitHub(query, false)
-    } catch {
-      throw new Error('Failed to search GitHub. Check your internet connection.')
-    }
-
-    if (data.rateLimited) {
-      console.log('\n⚠️  GitHub API rate limit reached. Try again later or use a local source.\n')
-      return
-    }
-
-    if (data.items.length === 0) {
-      console.log(`\nNo skills found for "${query}".`)
-      return
-    }
-
-    console.log(`\nNo skills found with SKILL.md file. Search results for "${query}":\n`)
+  if (data.fromLookup) {
+    console.log(`\n🔍 Search results for "${query}":\n`)
+  } else {
+    console.log(`\n🔍 Search results for "${query}":\n`)
   }
 
   if (options.interactive) {
-    await pickAndInstall(data.items)
+    await pickAndInstall(items)
   } else {
-    displayResults(data, query)
+    for (const repo of items) {
+      const desc = repo.description || 'No description'
+      console.log(`   ${repo.full_name}`)
+      console.log(`   ├─ ${desc}`)
+      console.log(`   ├─ ⭐ ${repo.stargazers_count}  📝 ${repo.language || 'N/A'}`)
+      console.log(`   └─ rolecraft install ${repo.full_name}`)
+      console.log()
+    }
+    console.log(`${items.length} result(s) found.`)
   }
 }
