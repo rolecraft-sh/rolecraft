@@ -52,7 +52,6 @@ function printSingleResult(result, options) {
   const color = useColor(options)
 
   const getIcon = emoji ? icon : iconAscii
-  const getGradeIcon = emoji ? gradeIcon : gradeIconAscii
 
   if (options.json) {
     console.log(JSON.stringify(result, null, 2))

@@ -191,7 +191,7 @@ function runAssertions(attrs, body, raw, filterNames) {
       continue
     }
 
-    if (pass !== null && typeof pass === 'object') {
+    if (typeof pass === 'object') {
       detail = pass.detail || ''
       pass = pass.pass
     }
