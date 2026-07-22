@@ -30,6 +30,7 @@ Complete reference for all rolecraft commands, flags, and options.
 | `mcp install/list/remove` | Install, list, and remove MCP servers |
 | `agents-xml [--write]` | Generate skills XML for AGENTS.md |
 | `completions bash\|zsh\|fish` | Generate shell completion scripts |
+| `test <skill-path>` | Test a skill quality with built-in assertions |
 | `upgrade` | Upgrade rolecraft to latest version |
 | `--help`, `-h` | Show usage |
 | `--version`, `-v` | Show version |
@@ -272,6 +273,18 @@ Generates XML block for AGENTS.md. Use `--write` to auto-insert.
 rolecraft completions bash >> ~/.bashrc
 rolecraft completions zsh >> ~/.zshrc
 rolecraft completions fish >> ~/.config/fish/completions/rolecraft.fish
+```
+
+### `rolecraft test <skill-path>`
+
+Test a SKILL.md quality with 13 built-in assertions. Supports single skill or batch mode.
+
+```bash
+rolecraft test ./my-skill/SKILL.md       # test a single skill
+rolecraft test --all                     # test all installed skills
+rolecraft test --all --json              # JSON output for CI
+rolecraft test ./skill --min-score 80    # fail if below 80
+rolecraft test ./skill --only name,slug  # run specific assertions
 ```
 
 ### `rolecraft upgrade`

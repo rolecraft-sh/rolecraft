@@ -69,6 +69,7 @@ npx rolecraft convert ./my-skill
 | `rolecraft use <source>` | Preview without installing |
 | `rolecraft completions bash\|zsh\|fish` | Generate shell completions |
 | `rolecraft convert <source>` | Convert between SKILL.md and .mdc formats |
+| `rolecraft test <skill-path>` | Test a skill quality with built-in assertions |
 
 ## Common flags
 
