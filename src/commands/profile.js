@@ -8,9 +8,7 @@ import {
   apiProfileDelete, apiProfileImport,
 } from '../api/profile.js'
 import {
-  readProfile, captureAllAgents, captureAgentFull, writeProfile,
-  listProfiles, profilePath, validateProfile, ensureProfileDir,
-  PROFILE_SCHEMA_VERSION,
+  readProfile, captureAllAgents, writeProfile,
 } from '../utils/profile.js'
 import agents from '../agents.js'
 
