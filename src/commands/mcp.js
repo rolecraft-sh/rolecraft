@@ -1,7 +1,12 @@
-import { addMcpServer, removeMcpServer, updateMcpServer, listMcpServers, getSupportedMcpAgents, resolveMcpSource, classifyMcpSource } from '../utils/mcp.js'
-import { scanMcpServer, classifyScore, formatSecurityReport } from '../utils/security.js'
-import { createInterface } from 'node:readline'
 import { stdin as input, stdout as output } from 'node:process'
+import { createInterface } from 'node:readline'
+import {
+  apiMcpInstall, apiMcpList, apiMcpUpdate, apiMcpRemove, apiMcpCheck, apiMcpSearch,
+} from '../api/mcp.js'
+import { classifyMcpSource, getSupportedMcpAgents } from '../utils/mcp.js'
+
+export { setFetch } from '../api/mcp.js'
+import { classifyScore } from '../utils/security.js'
 import agents from '../agents.js'
 
 const CSI = '\x1b['
@@ -17,12 +22,6 @@ const cyan = s => text(sgr(36), s)
 const yellow = s => text(sgr(33), s)
 const dim = s => text(sgr(2), s)
 const bold = s => text(sgr(1), s)
-
-let runFetch = globalThis.fetch
-
-export function setFetch(fn) {
-  runFetch = fn
-}
 
 function askConfirmation(query) {
   const rl = createInterface({ input, output })
@@ -51,68 +50,49 @@ export async function mcpInstallCommand(source, options) {
     }
   }
 
-  const resolved = resolveMcpSource(source)
-
-  const scanResult = scanMcpServer(resolved)
-  if (scanResult.issues.length > 0) {
-    console.log(formatSecurityReport(scanResult))
-    if (classifyScore(scanResult.score) === 'danger' && !options.yes) {
-      const answer = await askConfirmation('\n❌ Security score is low. Continue with installation? [y/N] ')
-      if (answer !== 'y' && answer !== 'yes') {
-        console.log('Install cancelled.')
-        return
-      }
-    }
-  }
-
-  const targets = options.agents && options.agents.length > 0
-    ? options.agents
-    : getSupportedMcpAgents()
-
   if (options.dryRun) {
+    const resolved = (await import('../utils/mcp.js')).resolveMcpSource(source)
+    const targets = options.agents?.length > 0 ? options.agents : getSupportedMcpAgents()
     console.log(`\n📋 [dry-run] Would install MCP server from: ${source}`)
     console.log(`   Command: ${resolved.command} ${resolved.args.join(' ')}`)
     console.log(`   Targets: ${targets.join(', ')}`)
     return
   }
 
-  const name = options.name || resolved.packageName || resolved.repo || resolved.path?.split('/').pop() || 'mcp-server'
+  const result = await apiMcpInstall(source, options)
 
-  const results = []
-  for (const agent of targets) {
-    const success = await addMcpServer(agent, name, resolved, source)
-    results.push({ agent, name, success })
-    if (success) {
-      console.log(`   ✅ ${agent}: MCP server "${name}" installed`)
+  for (const r of result.results) {
+    if (r.success) {
+      console.log(`   ✅ ${r.agent}: MCP server "${result.name}" installed`)
     } else {
-      console.log(`   ⚠️  ${agent}: not supported`)
+      console.log(`   ⚠️  ${r.agent}: not supported`)
     }
   }
 
-  const succeeded = results.filter(r => r.success).length
-  console.log(`\n✅ Installed MCP server "${name}" to ${succeeded}/${targets.length} agents`)
-  return results
+  const succeeded = result.results.filter(r => r.success).length
+  console.log(`\n✅ Installed MCP server "${result.name}" to ${succeeded}/${result.results.length} agents`)
+  return result.results
 }
 
 export async function mcpListCommand(options) {
-  const targets = options.agents && options.agents.length > 0
-    ? options.agents
-    : getSupportedMcpAgents()
+  const result = await apiMcpList(options)
 
-  let total = 0
-  for (const agent of targets) {
-    const servers = await listMcpServers(agent)
-    if (servers.length > 0) {
-      console.log(`\n${agent}:`)
-      for (const s of servers) {
-        console.log(`   - ${s.name} (${s.command} ${s.args.join(' ')})`)
-        total++
-      }
-    }
+  if (result.total === 0) {
+    console.log('No MCP servers configured.')
+    return
   }
 
-  if (total === 0) {
-    console.log('No MCP servers configured.')
+  const byAgent = {}
+  for (const s of result.servers) {
+    if (!byAgent[s.agent]) byAgent[s.agent] = []
+    byAgent[s.agent].push(s)
+  }
+
+  for (const [agent, servers] of Object.entries(byAgent)) {
+    console.log(`\n${agent}:`)
+    for (const s of servers) {
+      console.log(`   - ${s.name} (${s.command} ${(s.args || []).join(' ')})`)
+    }
   }
 }
 
@@ -128,121 +108,74 @@ export async function mcpUpdateCommand(source, options) {
     }
   }
 
-  const resolved = resolveMcpSource(source)
-
-  const targets = options.agents && options.agents.length > 0
-    ? options.agents
-    : getSupportedMcpAgents()
-
   if (options.dryRun) {
+    const resolved = (await import('../utils/mcp.js')).resolveMcpSource(source)
+    const targets = options.agents?.length > 0 ? options.agents : getSupportedMcpAgents()
     console.log(`\n📋 [dry-run] Would update MCP server from: ${source}`)
     console.log(`   Command: ${resolved.command} ${resolved.args.join(' ')}`)
     console.log(`   Targets: ${targets.join(', ')}`)
     return
   }
 
-  const name = options.name || resolved.packageName || resolved.repo || resolved.path?.split('/').pop() || 'mcp-server'
+  const result = await apiMcpUpdate(source, options)
 
-  const results = []
-  for (const agent of targets) {
-    const success = await updateMcpServer(agent, name, resolved, source)
-    results.push({ agent, name, success })
-    if (success) {
-      console.log(`   ✅ ${agent}: MCP server "${name}" updated`)
+  for (const r of result.results) {
+    if (r.success) {
+      console.log(`   ✅ ${r.agent}: MCP server "${result.name}" updated`)
     } else {
-      console.log(`   ⚠️  ${agent}: not supported`)
+      console.log(`   ⚠️  ${r.agent}: not supported`)
     }
   }
 
-  const succeeded = results.filter(r => r.success).length
-  console.log(`\n✅ Updated MCP server "${name}" on ${succeeded}/${targets.length} agents`)
-  return results
+  const succeeded = result.results.filter(r => r.success).length
+  console.log(`\n✅ Updated MCP server "${result.name}" on ${succeeded}/${result.results.length} agents`)
+  return result.results
 }
 
 export async function mcpRemoveCommand(name, options) {
-  const targets = options.agents && options.agents.length > 0
-    ? options.agents
-    : getSupportedMcpAgents()
+  const result = await apiMcpRemove(name, options)
 
-  const results = []
-  for (const agent of targets) {
-    const success = await removeMcpServer(agent, name)
-    results.push({ agent, name, success })
-    if (success) {
-      console.log(`   ✅ ${agent}: MCP server "${name}" removed`)
+  for (const r of result.results) {
+    if (r.success) {
+      console.log(`   ✅ ${r.agent}: MCP server "${name}" removed`)
     } else {
-      console.log(`   ⚠️  ${agent}: not supported`)
+      console.log(`   ⚠️  ${r.agent}: not supported`)
     }
   }
 
-  const succeeded = results.filter(r => r.success).length
+  const succeeded = result.results.filter(r => r.success).length
   if (succeeded === 0) {
     console.log(`No MCP server "${name}" found to remove.`)
   } else {
-    console.log(`\n✅ Removed MCP server "${name}" from ${succeeded}/${targets.length} agents`)
+    console.log(`\n✅ Removed MCP server "${name}" from ${succeeded}/${result.results.length} agents`)
   }
-  return results
-}
-
-async function fetchNpmLatestVersion(packageName) {
-  const encodedName = encodeURIComponent(packageName).replace(/^%40/, '@')
-  const url = `https://registry.npmjs.org/${encodedName}/latest`
-  const response = await runFetch(url, {
-    signal: AbortSignal.timeout(8000),
-  })
-  if (!response.ok) return null
-  const data = await response.json()
-  return data.version || null
+  return result.results
 }
 
 export async function mcpCheckCommand() {
-  const { readMcpLock } = await import('../utils/mcp-lock.js')
-  const lock = await readMcpLock()
-  const servers = Object.entries(lock.servers || {})
+  const result = await apiMcpCheck()
 
-  if (servers.length === 0) {
+  if (result.servers.length === 0) {
     console.log('\nNo MCP servers in lockfile.')
     return
   }
 
-  console.log(`\nChecking ${servers.length} MCP server(s) for updates...\n`)
+  console.log(`\nChecking ${result.servers.length} MCP server(s) for updates...\n`)
 
-  let updatesAvailable = 0
-  for (const [name, entry] of servers) {
-    const source = entry.source || ''
-    const agents = (entry.agents || []).join(', ')
-
-    if (!source.startsWith('npm:')) {
-      console.log(`   ⏭️  ${name.padEnd(30)} non-npm source (${source.slice(0, 3)}...), skipping`)
-      continue
-    }
-
-    const pkg = source.slice(4)
-    const atIdx = pkg.lastIndexOf('@')
-    const packageName = atIdx > 0 ? pkg.slice(0, atIdx) : pkg
-    const installedVersion = atIdx > 0 ? pkg.slice(atIdx + 1) : null
-
-    try {
-      const latestVersion = await fetchNpmLatestVersion(packageName)
-      if (!latestVersion) {
-        console.log(`   ❌ ${name.padEnd(30)} could not check (registry unreachable)`)
-        continue
-      }
-
-      if (installedVersion && installedVersion !== latestVersion) {
-        console.log(`   🔄 ${name.padEnd(30)} ${installedVersion} → ${latestVersion} (${agents})`)
-        updatesAvailable++
-      } else if (installedVersion) {
-        console.log(`   ✅ ${name.padEnd(30)} ${installedVersion} is latest (${agents})`)
-      } else {
-        console.log(`   ✅ ${name.padEnd(30)} latest: ${latestVersion} (no version pinned) (${agents})`)
-      }
-    } catch {
-      console.log(`   ❌ ${name.padEnd(30)} check failed (${source})`)
+  for (const s of result.servers) {
+    if (s.status === 'skipped') {
+      console.log(`   ⏭️  ${s.name.padEnd(30)} ${s.reason}`)
+    } else if (s.status === 'update_available') {
+      console.log(`   🔄 ${s.name.padEnd(30)} ${s.installedVersion} → ${s.latestVersion} (${s.agents})`)
+    } else if (s.status === 'up_to_date') {
+      const versionInfo = s.versionPinned === false ? `latest: ${s.version} (no version pinned)` : `${s.version} is latest`
+      console.log(`   ✅ ${s.name.padEnd(30)} ${versionInfo} (${s.agents})`)
+    } else if (s.status === 'error') {
+      console.log(`   ❌ ${s.name.padEnd(30)} ${s.reason}`)
     }
   }
 
-  console.log(`\n${updatesAvailable > 0 ? `⚠️  ${updatesAvailable} MCP server(s) have updates available.` : '✅ All MCP servers are up to date.'}\n`)
+  console.log(`\n${result.updatesAvailable > 0 ? `⚠️  ${result.updatesAvailable} MCP server(s) have updates available.` : '✅ All MCP servers are up to date.'}\n`)
 }
 
 function formatMcpRepo(r) {
@@ -250,7 +183,7 @@ function formatMcpRepo(r) {
   const stars = r.stargazers_count || 0
   const lang = r.language || 'N/A'
   const topics = r.topics && r.topics.length > 0 ? r.topics.slice(0, 3).join(', ') : ''
-  return `${bold(r.full_name)}\n  ${dim(desc)}  ${yellow(`⭐ ${stars}`)}  ${cyan(lang)}${topics ? `  ${dim(topics)}` : ''}`
+  return `${bold(r.name)}\n  ${dim(desc)}  ${yellow(`⭐ ${stars}`)}  ${cyan(lang)}${topics ? `  ${dim(topics)}` : ''}`
 }
 
 function formatMcpNpmItem(pkg) {
@@ -259,7 +192,7 @@ function formatMcpNpmItem(pkg) {
   return `${bold(pkg.name)}\n  ${dim(desc)}${keywords ? `  ${dim(keywords)}` : ''}`
 }
 
-const MCP_ITEM_LINES = 2
+const MCP_ITEM_LINES = 3
 
 function mcpTuiFormat(item, selected, sourceType) {
   const sel = selected ? `${sgr(7)} > ${sgr(0)}` : '   '
@@ -402,136 +335,44 @@ async function mcpPickAndInstall(items, sourceType, installOptions) {
   }
 }
 
-async function searchMcpGitHub(query) {
-  const q = query
-    ? `topic:mcp-server+${encodeURIComponent(query)}`
-    : 'topic:mcp-server'
-  const url = `https://api.github.com/search/repositories?q=${q}&per_page=20&sort=stars`
-
-  const response = await runFetch(url, {
-    headers: { Accept: 'application/vnd.github.v3+json' },
-    signal: AbortSignal.timeout(10000),
-  })
-
-  if (response.status === 403) {
-    return { rateLimited: true }
-  }
-
-  if (!response.ok) {
-    return { error: `GitHub API error: ${response.status}` }
-  }
-
-  return await response.json()
-}
-
-async function searchMcpNpm(query) {
-  const q = query
-    ? `keywords:mcp+${encodeURIComponent(query)}`
-    : 'keywords:mcp'
-  const url = `https://registry.npmjs.org/-/v1/search?text=${q}&size=20`
-
-  const response = await runFetch(url, {
-    signal: AbortSignal.timeout(10000),
-  })
-
-  if (!response.ok) {
-    return { error: `npm API error: ${response.status}` }
-  }
-
-  const data = await response.json()
-  return {
-    objects: data.objects || [],
-    total: data.total || 0,
-  }
-}
-
 export async function mcpSearchCommand(query, options = {}) {
   const sourceType = options.npm ? 'npm' : 'github'
-  let results
-
-  if (sourceType === 'npm') {
-    try {
-      results = await searchMcpNpm(query)
-    } catch {
-      throw new Error('Failed to search npm registry. Check your internet connection.')
-    }
-
-    if (results.error) {
-      throw new Error(results.error)
-    }
-
-    const items = (results.objects || []).map(o => ({
-      name: o.package.name,
-      description: o.package.description,
-      keywords: o.package.keywords,
-      version: o.package.version,
-    }))
-
-    if (items.length === 0) {
-      console.log(`\nNo MCP packages found on npm for "${query}".`)
-      return
-    }
-
-    if (options.interactive) {
-      await mcpPickAndInstall(items, 'npm', options)
-      return
-    }
-
-    console.log(`\n🔍 npm MCP packages for "${query}":\n`)
-    for (const pkg of items) {
-      const line = formatMcpNpmItem(pkg).split('\n')
-      console.log(`   ${line[0]}`)
-      console.log(`   ├─ ${line[1]}`)
-      console.log(`   └─ rolecraft mcp install npm:${pkg.name}`)
-      console.log()
-    }
-    console.log(`${items.length} result(s) found.`)
-    return
-  }
+  let data
 
   try {
-    results = await searchMcpGitHub(query)
-  } catch {
-    throw new Error('Failed to search GitHub. Check your internet connection.')
+    data = await apiMcpSearch(query, { npm: options.npm })
+  } catch (err) {
+    if (err.message?.includes('rate limit')) {
+      console.log('\n⚠️  GitHub API rate limit reached. Try again later.\n')
+      return
+    }
+    if (err.message?.includes('API error')) {
+      throw err
+    }
+    throw new Error(`Failed to search ${sourceType === 'npm' ? 'npm registry' : 'GitHub'}. Check your internet connection.`)
   }
 
-  if (results.rateLimited) {
-    console.log('\n⚠️  GitHub API rate limit reached. Try again later.\n')
+  const items = data.results
+
+  if (items.length === 0) {
+    console.log(`\nNo MCP ${sourceType === 'npm' ? 'packages' : 'servers'} found for "${query}".`)
     return
   }
-
-  if (results.error) {
-    throw new Error(results.error)
-  }
-
-  if (results.items && results.items.length === 0) {
-    console.log(`\nNo MCP servers found for "${query}".`)
-    return
-  }
-
-  const items = (results.items || []).map(r => ({
-    name: r.full_name,
-    description: r.description,
-    stargazers_count: r.stargazers_count,
-    language: r.language,
-    topics: r.topics,
-  }))
 
   if (options.interactive) {
-    await mcpPickAndInstall(items, 'github', options)
+    await mcpPickAndInstall(items, sourceType, options)
     return
   }
 
-  console.log(`\n🔍 MCP server search results for "${query}":\n`)
-  for (const repo of items) {
-    const line = formatMcpRepo(repo).split('\n')
+  console.log(`\n🔍 ${sourceType === 'npm' ? 'npm MCP packages' : 'MCP server search results'} for "${query}":\n`)
+  for (const item of items) {
+    const line = sourceType === 'npm' ? formatMcpNpmItem(item).split('\n') : formatMcpRepo(item).split('\n')
     console.log(`   ${line[0]}`)
     console.log(`   ├─ ${line[1]}`)
-    console.log(`   └─ rolecraft mcp install gh:${repo.name}`)
+    console.log(`   └─ rolecraft mcp install ${sourceType === 'npm' ? `npm:${item.name}` : `gh:${item.name}`}`)
     console.log()
   }
   console.log(`${items.length} result(s) found.`)
-  return items
 }
 
 export async function mcpCommand(args) {
@@ -539,7 +380,6 @@ export async function mcpCommand(args) {
   const rest = args.slice(1)
 
   const agentFlags = ['--agents', ...agents.map(a => `--${a.flag}`), '--all']
-
   const agentMap = Object.fromEntries(agents.map(a => [`--${a.flag}`, a.flag]))
 
   const options = {

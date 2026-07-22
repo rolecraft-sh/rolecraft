@@ -22,8 +22,9 @@
   <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/🤝-Contributing-green" alt="Contributing"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT"></a>
    <a href="https://rolecraft-sh.github.io/rolecraft/"><img src="https://img.shields.io/badge/📖-Docs%20site-blue" alt="Docs"></a>
-   <a href="package.json"><img src="https://img.shields.io/node/v/rolecraft" alt="Node"></a>
-  <a href="docs/security.md"><img src="https://img.shields.io/badge/🔒-security%20scoring-brightgreen" alt="Security scoring"></a>
+  <a href="package.json"><img src="https://img.shields.io/node/v/rolecraft" alt="Node"></a>
+   <a href="docs/api.md"><img src="https://img.shields.io/badge/📦-Node.js%20API-blue" alt="Node.js API"></a>
+   <a href="docs/security.md"><img src="https://img.shields.io/badge/🔒-security%20scoring-brightgreen" alt="Security scoring"></a>
   <a href="CODE_OF_CONDUCT.md"><img src="https://img.shields.io/badge/📖-Code%20of%20Conduct-orange" alt="Code of Conduct"></a>
   <a href="SUPPORT.md"><img src="https://img.shields.io/badge/💬-Support-blue" alt="Support"></a>
 </p>
@@ -155,6 +156,59 @@ Use the [rolecraft GitHub Action](https://github.com/marketplace/actions/rolecra
 ```
 
 See the [CI guide](docs/guides/ci.md) for more examples.
+
+---
+
+## Node.js API
+
+rolecraft exposes a programmatic API for use in your own Node.js scripts and tools:
+
+```js
+import { install, list, search, check, doctor, verify, ci, mcpInstall, profileSave } from 'rolecraft'
+
+// install a skill
+const result = await install('./my-skill', { global: true })
+console.log(result)
+
+// search GitHub for skills
+const results = await search('code-review')
+console.log(results.results)
+
+// system health check
+const health = await doctor()
+console.log(health.summary)
+
+// full API reference → [docs/reference.md](docs/reference.md)
+```
+
+All API functions return plain objects (no side-effects). Available exports:
+
+| Function | Description |
+|----------|-------------|
+| `install` | Install a skill with security scan |
+| `list` | List installed skills |
+| `search` | Search GitHub or skills.sh |
+| `resolve` | Resolve a source string |
+| `remove` | Uninstall a skill |
+| `update` | Re-install a skill |
+| `check` | Check for updates |
+| `verify` | Verify skill integrity |
+| `ci` | Re-install from lockfile |
+| `doctor` | System health check |
+| `use` | Preview a skill |
+| `mcpInstall` | Install an MCP server |
+| `mcpList` | List MCP servers |
+| `mcpUpdate` | Update an MCP server |
+| `mcpRemove` | Remove an MCP server |
+| `mcpCheck` | Check MCP server status |
+| `mcpSearch` | Search MCP servers |
+| `profileSave` | Save current config |
+| `profileApply` | Apply a saved profile |
+| `profileDiff` | Diff current vs saved |
+| `profileList` | List profiles |
+| `profileShow` | Show profile details |
+| `profileDelete` | Delete a profile |
+| `profileImport` | Import a profile |
 
 ---
 

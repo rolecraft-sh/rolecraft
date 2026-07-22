@@ -23,7 +23,21 @@
 rolecraft/
 ├── bin/rolecraft.js          # CLI entry point
 ├── src/
-│   ├── commands/
+│   ├── api/                  # Public Node.js API (programmatic interface)
+│   │   ├── check.js          #   skill update checking
+│   │   ├── ci.js             #   frozen lockfile install
+│   │   ├── doctor.js         #   system health check
+│   │   ├── install.js        #   skill installation + security scan
+│   │   ├── list.js           #   list installed skills
+│   │   ├── mcp.js            #   MCP server management
+│   │   ├── profile.js        #   agent config profile management
+│   │   ├── remove.js         #   skill removal
+│   │   ├── search.js         #   GitHub/skills.sh search
+│   │   ├── update.js         #   skill re-install
+│   │   ├── use.js            #   skill preview
+│   │   └── verify.js         #   integrity verification
+│   ├── index.js              # Public API entry point (re-exports all api/ modules)
+│   ├── commands/             # CLI wrappers (arg parse + console.log)
 │   │   ├── agents-xml.js     # generate skills XML for AGENTS.md
 │   │   ├── bundle.js         # multi-skill install from bundle file
 │   │   ├── check.js          # skill update checking
@@ -57,3 +71,15 @@ rolecraft/
 ├── docs/                     # Documentation
 └── README.md
 ```
+
+## Architecture overview
+
+The codebase follows a **layered architecture**:
+
+1. **`src/api/`** — Business logic layer. Each module exports async functions that accept options and return plain objects. No side-effects (no console.log, no process.exit). These can be imported programmatically via `import { ... } from 'rolecraft'`.
+
+2. **`src/commands/`** — CLI wrapper layer. Thin modules that parse CLI args, call the corresponding `api/` function, and format output. Each command exports a single function consumed by `bin/rolecraft.js`.
+
+3. **`src/utils/`** — Shared utilities used by both API and command layers. No circular dependencies.
+
+This separation allows rolecraft to be used both as a CLI tool and as a Node.js library.

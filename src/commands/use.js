@@ -1,11 +1,11 @@
-import { resolveSkills } from '../utils/resolver.js'
+import { apiUse } from '../api/use.js'
 
 export async function useCommand(source, options = {}) {
-  const allSkills = await resolveSkills(source)
+  const result = await apiUse(source, options)
 
   if (options.list) {
-    console.log(`\nFound ${allSkills.length} skill(s) from: ${source}\n`)
-    for (const s of allSkills) {
+    console.log(`\nFound ${result.skills.length} skill(s) from: ${source}\n`)
+    for (const s of result.skills) {
       console.log(`  ${s.name}`)
       console.log(`    Slug:       ${s.slug}`)
       console.log(`    Owner:      ${s.owner}`)
@@ -16,18 +16,7 @@ export async function useCommand(source, options = {}) {
     return
   }
 
-  let selectedSkills = allSkills
-  if (options.skill && options.skill.length > 0) {
-    const skillNames = options.skill.map(n => n.toLowerCase())
-    selectedSkills = allSkills.filter(s =>
-      skillNames.includes(s.name.toLowerCase()) || skillNames.includes(s.slug.toLowerCase())
-    )
-    if (selectedSkills.length === 0) {
-      throw new Error(`No matching skills found for: ${options.skill.join(', ')}. Available: ${allSkills.map(s => s.name).join(', ')}`)
-    }
-  }
-
-  for (const resolved of selectedSkills) {
+  for (const resolved of result.skills) {
     console.log(`\n📦 Skill: ${resolved.name}`)
     console.log(`   Slug:     ${resolved.slug}`)
     console.log(`   Owner:    ${resolved.owner}`)

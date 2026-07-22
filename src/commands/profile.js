@@ -3,19 +3,13 @@ import { tmpdir, homedir } from 'node:os'
 import { join, relative, resolve, dirname } from 'node:path'
 import { mkdtempSync, writeFileSync, readFileSync, unlinkSync, rmdirSync, existsSync } from 'node:fs'
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
-
 import {
-  readProfile,
-  writeProfile,
-  deleteProfile,
-  listProfiles,
-  captureAllAgents,
-  captureAgentFull,
-  applyProfileData,
-  formatApplyResults,
-  validateProfile,
-  ensureProfileDir,
-  profilePath,
+  apiProfileSave, apiProfileApply, apiProfileDiff, apiProfileList, apiProfileShow,
+  apiProfileDelete, apiProfileImport,
+} from '../api/profile.js'
+import {
+  readProfile, captureAllAgents, captureAgentFull, writeProfile,
+  listProfiles, profilePath, validateProfile, ensureProfileDir,
   PROFILE_SCHEMA_VERSION,
 } from '../utils/profile.js'
 import agents from '../agents.js'
@@ -116,10 +110,7 @@ Examples:
 
 function formatAgentSummary(entry) {
   const parts = []
-  if (entry.config) {
-    const scopes = Object.keys(entry.config)
-    parts.push(`config (${scopes.join(', ')})`)
-  }
+  if (entry.config) parts.push(`config (${Object.keys(entry.config).join(', ')})`)
   if (entry.mcpServers) parts.push(`MCP (${Object.keys(entry.mcpServers).length})`)
   if (entry.skills) parts.push(`skills (${entry.skills.length})`)
   if (entry.instructions) parts.push(`instructions (${entry.instructions.length})`)
@@ -132,41 +123,22 @@ export async function profileSaveCommand(name, options) {
     throw new Error('Missing profile name.')
   }
 
-  const { dryRun, targets } = options
-
-  let agentsData
-  if (targets && targets.length > 0) {
-    agentsData = {}
-    for (const flag of targets) {
-      const entry = await captureAgentFull(flag)
-      if (entry) agentsData[flag] = entry
-    }
-  } else {
-    agentsData = await captureAllAgents()
-  }
-
-  if (Object.keys(agentsData).length === 0) {
-    console.log('No agent configurations found to save.')
-    return
-  }
-
-  if (dryRun) {
+  if (options.dryRun) {
+    const result = await apiProfileSave(name, { ...options, dryRun: true })
     console.log(`\n📋 [dry-run] Would save profile "${name}" with:\n`)
-    for (const [flag, entry] of Object.entries(agentsData)) {
+    for (const [flag, entry] of Object.entries(result.agents)) {
       console.log(`   ${flag}: ${formatAgentSummary(entry)}`)
     }
     console.log()
     return
   }
 
-  const profileData = {
-    name,
-    description: `Saved on ${new Date().toLocaleDateString()}`,
-    agents: agentsData,
+  try {
+    const result = await apiProfileSave(name, options)
+    console.log(`\n✅ Profile "${name}" saved (${result.agents} agent(s))`)
+  } catch (err) {
+    console.log(err.message)
   }
-
-  await writeProfile(profileData)
-  console.log(`\n✅ Profile "${name}" saved (${Object.keys(agentsData).length} agent(s))`)
 }
 
 export async function profileApplyCommand(name, options) {
@@ -175,31 +147,33 @@ export async function profileApplyCommand(name, options) {
     throw new Error('Missing profile name.')
   }
 
-  const data = await readProfile(name)
-  if (!data) {
-    throw new Error(`Profile "${name}" not found.`)
-  }
-
-  const { dryRun, targets, skipMcp, skipSkills } = options
-
-  if (dryRun) {
+  if (options.dryRun) {
+    const result = await apiProfileApply(name, { ...options, dryRun: true })
     console.log(`\n📋 [dry-run] Would apply profile "${name}":\n`)
-    const agentsToApply = targets.length > 0
-      ? Object.fromEntries(Object.entries(data.agents).filter(([flag]) => targets.includes(flag)))
-      : data.agents
-
-    for (const [flag, entry] of Object.entries(agentsToApply)) {
+    for (const [flag, entry] of Object.entries(result.agents)) {
       console.log(`   ${flag}: ${formatAgentSummary(entry)}`)
     }
     console.log()
     return
   }
 
-  const results = await applyProfileData(data, { targets, skipMcp, skipSkills })
-  const formatted = formatApplyResults(results)
+  const result = await apiProfileApply(name, options)
+
+  const formattedLines = []
+  if (result.results) {
+    for (const [flag, r] of Object.entries(result.results)) {
+      if (r.config) formattedLines.push(`   ${flag}: config applied`)
+      if (r.mcpResults?.length > 0) formattedLines.push(`   ${flag}: ${r.mcpResults.length} MCP server(s) configured`)
+      if (r.skillResults?.length > 0) formattedLines.push(`   ${flag}: ${r.skillResults.length} skill(s) installed`)
+    }
+  }
 
   console.log(`\n✅ Applied profile "${name}":\n`)
-  console.log(formatted)
+  if (formattedLines.length > 0) {
+    for (const line of formattedLines) console.log(line)
+  } else {
+    console.log('   No changes applied.')
+  }
   console.log()
 }
 
@@ -210,57 +184,35 @@ export async function profileDiffCommand(name) {
   }
 
   const data = await readProfile(name)
-  if (!data) {
-    throw new Error(`Profile "${name}" not found.`)
-  }
+  if (!data) throw new Error(`Profile "${name}" not found.`)
 
   if (!data.agents || Object.keys(data.agents).length === 0) {
     console.log(`Profile "${name}" has no agent data.`)
     return
   }
 
+  const result = await apiProfileDiff(name)
+
   console.log(`\n📊 Diff for profile "${name}" vs current configuration:\n`)
 
-  let hasDiff = false
-  for (const [flag, profileEntry] of Object.entries(data.agents)) {
-    const currentEntry = await captureAgentFull(flag)
-    const differences = []
+  if (!result.hasChanges) {
+    for (const flag of Object.keys(data.agents)) {
+      console.log(`   ${flag}: no differences`)
+    }
+    console.log('\n   Profile matches current configuration — no changes to apply.')
+    console.log()
+    return
+  }
 
-    const profileConfig = profileEntry.config ?? null
-    const currentConfig = currentEntry?.config ?? null
-    const profileMcp = profileEntry.mcpServers ?? null
-    const currentMcp = currentEntry?.mcpServers ?? null
-    const profileSkills = profileEntry.skills ?? null
-    const currentSkills = currentEntry?.skills ?? null
-    const profileInstr = profileEntry.instructions ?? null
-    const currentInstr = currentEntry?.instructions ?? null
-
-    if (JSON.stringify(profileConfig) !== JSON.stringify(currentConfig)) {
-      differences.push('config differs')
-    }
-    if (JSON.stringify(profileMcp) !== JSON.stringify(currentMcp)) {
-      differences.push('MCP servers differ')
-    }
-    if (JSON.stringify(profileSkills) !== JSON.stringify(currentSkills)) {
-      differences.push('skills differ')
-    }
-    if (JSON.stringify(profileInstr) !== JSON.stringify(currentInstr)) {
-      differences.push('instructions differ')
-    }
-
-    if (differences.length > 0) {
-      hasDiff = true
+  for (const [flag, diff] of Object.entries(result.diffs)) {
+    if (diff.hasDiff) {
       console.log(`   ${flag}:`)
-      for (const diff of differences) {
-        console.log(`     └─ ${diff}`)
+      for (const d of diff.differences) {
+        console.log(`     └─ ${d === 'config' ? 'config differs' : d === 'mcpServers' ? 'MCP servers differ' : d === 'skills' ? 'skills differ' : 'instructions differ'}`)
       }
     } else {
       console.log(`   ${flag}: no differences`)
     }
-  }
-
-  if (!hasDiff) {
-    console.log('\n   Profile matches current configuration — no changes to apply.')
   }
   console.log()
 }
@@ -272,9 +224,7 @@ export async function profileEditCommand(name) {
   }
 
   const data = await readProfile(name)
-  if (!data) {
-    throw new Error(`Profile "${name}" not found.`)
-  }
+  if (!data) throw new Error(`Profile "${name}" not found.`)
 
   const editor = process.env.EDITOR || 'vi'
   const tmpDir = mkdtempSync(join(tmpdir(), 'rolecraft-profile-'))
@@ -291,15 +241,10 @@ export async function profileEditCommand(name) {
     await writeProfile(edited)
     console.log(`\n✅ Profile "${name}" updated.`)
   } catch (err) {
-    if (err instanceof SyntaxError) {
-      throw new Error(`Invalid JSON after editing. Profile not saved.`)
-    }
+    if (err instanceof SyntaxError) throw new Error(`Invalid JSON after editing. Profile not saved.`)
     throw err
   } finally {
-    try {
-      unlinkSync(tmpFile)
-      rmdirSync(tmpDir)
-    } catch {}
+    try { unlinkSync(tmpFile); rmdirSync(tmpDir) } catch {}
   }
 }
 
@@ -316,17 +261,7 @@ function relativizePaths(data, cwd) {
   for (const entry of Object.values(result.agents)) {
     if (entry.instructions) {
       for (const instr of entry.instructions) {
-        if (instr.file) {
-          const abs = resolve(instr.file)
-          instr.file = relative(cwd, abs)
-        }
-      }
-    }
-    if (entry.config) {
-      for (const [scope, val] of Object.entries(entry.config)) {
-        if (val && typeof val === 'object' && !Array.isArray(val)) {
-          entry.config[scope] = val
-        }
+        if (instr.file) instr.file = relative(cwd, resolve(instr.file))
       }
     }
   }
@@ -340,14 +275,10 @@ export async function profileExportCommand(name, options) {
   }
 
   const data = await readProfile(name)
-  if (!data) {
-    throw new Error(`Profile "${name}" not found.`)
-  }
+  if (!data) throw new Error(`Profile "${name}" not found.`)
 
   let output = cleanProfileForExport(data)
-  if (options.relative) {
-    output = relativizePaths(output, process.cwd())
-  }
+  if (options.relative) output = relativizePaths(output, process.cwd())
 
   const json = JSON.stringify(output, null, 2) + '\n'
 
@@ -367,62 +298,16 @@ export async function profileImportCommand(path) {
     throw new Error('Missing source path.')
   }
 
-  let content
-  const isUrl = path.startsWith('http://') || path.startsWith('https://')
-
-  if (isUrl) {
-    const res = await fetch(path)
-    if (!res.ok) throw new Error(`Failed to fetch ${path}: ${res.status}`)
-    content = await res.text()
-  } else {
-    content = await readFile(resolve(path), 'utf-8')
-  }
-
-  let data
-  try {
-    data = JSON.parse(content)
-  } catch {
-    throw new Error('Invalid JSON in profile.')
-  }
-
-  if (!data.name) {
-    const nameFromFile = path.split('/').pop()?.replace(/\.json$/i, '') || 'imported'
-    data.name = nameFromFile
-  }
-
-  data.agents = data.agents || {}
-
-  const validation = validateProfile(data)
-  if (!validation.valid) {
-    throw new Error(`Invalid profile data:\n  ${validation.errors.join('\n  ')}`)
-  }
-
-  const enriched = {
-    ...data,
-    name: data.name,
-    version: data.version ?? PROFILE_SCHEMA_VERSION,
-    updatedAt: new Date().toISOString(),
-    createdAt: data.createdAt ?? new Date().toISOString(),
-  }
-
-  await ensureProfileDir()
-  const profilePath_ = resolve(profilePath(data.name))
-  const profilesDir_ = resolve(join(homedir(), '.agents', 'profiles'))
-  if (!profilePath_.startsWith(profilesDir_)) {
-    throw new Error('Invalid profile path')
-  }
-  await writeFile(profilePath_, JSON.stringify(enriched, null, 2) + '\n', 'utf-8')
-  console.log(`\n✅ Profile "${data.name}" imported (${Object.keys(data.agents).length} agent(s)).`)
+  const result = await apiProfileImport(path)
+  console.log(`\n✅ Profile "${result.name}" imported (${result.agents} agent(s)).`)
 
   const current = await captureAllAgents()
   if (Object.keys(current).length > 0) {
-    console.log(`\n📊 Run \`rolecraft profile diff ${data.name}\` to see differences from current config.`)
+    console.log(`\n📊 Run \`rolecraft profile diff ${result.name}\` to see differences from current config.`)
   }
 }
 
-function getLinkPath(dir) {
-  return join(dir, LINK_FILE)
-}
+function getLinkPath(dir) { return join(dir, LINK_FILE) }
 
 function findLinkFile() {
   for (const dir of [process.cwd(), ...LINK_DIRS.slice(1)]) {
@@ -433,11 +318,7 @@ function findLinkFile() {
 }
 
 function readLinkFile(linkPath) {
-  try {
-    return JSON.parse(readFileSync(linkPath, 'utf-8'))
-  } catch {
-    return null
-  }
+  try { return JSON.parse(readFileSync(linkPath, 'utf-8')) } catch { return null }
 }
 
 export async function profileLinkCommand(name, options) {
@@ -472,24 +353,19 @@ export async function profileLinkCommand(name, options) {
   }
 
   const data = await readProfile(name)
-  if (!data) {
-    throw new Error(`Profile "${name}" not found.`)
-  }
+  if (!data) throw new Error(`Profile "${name}" not found.`)
 
-  const link = {
+  writeFileSync(getLinkPath(process.cwd()), JSON.stringify({
     profile: name,
     projectDir: process.cwd(),
     createdAt: new Date().toISOString(),
-  }
-
-  const linkPath = getLinkPath(process.cwd())
-  writeFileSync(linkPath, JSON.stringify(link, null, 2) + '\n', 'utf-8')
+  }, null, 2) + '\n', 'utf-8')
   console.log(`\n✅ Profile "${name}" linked to ${process.cwd()}`)
   console.log('   Run `rolecraft profile link` to see the linked profile.')
 }
 
 export async function profileListCommand() {
-  const profiles = await listProfiles()
+  const profiles = await apiProfileList()
 
   if (profiles.length === 0) {
     console.log('No profiles saved.')
@@ -498,9 +374,7 @@ export async function profileListCommand() {
 
   console.log('\nSaved profiles:\n')
   for (const p of profiles) {
-    const date = p.updatedAt
-      ? new Date(p.updatedAt).toLocaleDateString()
-      : 'unknown'
+    const date = p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : 'unknown'
     console.log(`   ${p.name}`)
     console.log(`   ├─ Agents: ${p.agentCount}`)
     if (p.description) console.log(`   ├─ ${p.description}`)
@@ -516,10 +390,7 @@ export async function profileShowCommand(name) {
     throw new Error('Missing profile name.')
   }
 
-  const data = await readProfile(name)
-  if (!data) {
-    throw new Error(`Profile "${name}" not found.`)
-  }
+  const data = await apiProfileShow(name)
 
   const agentCount = data.agents ? Object.keys(data.agents).length : 0
   console.log(`\nProfile: ${data.name}`)
@@ -544,8 +415,8 @@ export async function profileDeleteCommand(name, options) {
   }
 
   if (options.dryRun) {
-    const exists = await readProfile(name)
-    if (!exists) {
+    const result = await apiProfileDelete(name, { dryRun: true })
+    if (!result.exists) {
       console.log(`Profile "${name}" does not exist.`)
       return
     }
@@ -553,11 +424,7 @@ export async function profileDeleteCommand(name, options) {
     return
   }
 
-  const deleted = await deleteProfile(name)
-  if (!deleted) {
-    throw new Error(`Profile "${name}" not found.`)
-  }
-
+  await apiProfileDelete(name)
   console.log(`\n✅ Deleted profile "${name}".`)
 }
 

@@ -10,6 +10,11 @@
     "bin",
     "src"
   ],
+  "exports": {
+    ".": {
+      "import": "./src/index.js"
+    }
+  },
   "preferGlobal": true,
   "keywords": [
     "skill",

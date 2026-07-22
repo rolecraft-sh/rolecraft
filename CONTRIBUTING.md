@@ -23,6 +23,7 @@ Don't see anything you like? Open a [feature request](https://github.com/rolecra
 
 - Keep changes focused on a single concern
 - Follow existing code style (no semicolons, ES modules, zero-dependency)
+- **Business logic** goes in `src/api/`, **CLI output** goes in `src/commands/`
 - Add or update tests for any new functionality
 - Run `npm test` before submitting — all tests must pass
 

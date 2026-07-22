@@ -26,6 +26,7 @@ export default defineConfig({
       { text: 'CI/CD', link: '/guides/ci' },
       { text: 'Install', link: '/install' },
       { text: 'Commands', link: '/commands/install' },
+      { text: 'API', link: '/api' },
       { text: 'Reference', link: '/reference' },
       { text: 'MCP', link: '/mcp' },
       { text: 'Benchmark', link: '/benchmark/RESULTS' },
@@ -44,6 +45,7 @@ export default defineConfig({
             { text: 'CI/CD Integration', link: '/guides/ci' },
           ],
         },
+        { text: 'Node.js API', link: '/api' },
         { text: 'CLI Reference', link: '/reference' },
         {
           text: 'Commands',
