@@ -58,6 +58,7 @@ describe('check command', () => {
       restore()
     }
     assert.ok(logs.some(l => l.includes('no source info')))
+    assert.ok(logs.some(l => l.includes('Checked 1 skill: 0 updates available, 1 skipped (no source), 0 could not be checked.')))
   })
 
   it('reports skill as up to date when hash matches', async () => {
@@ -119,6 +120,7 @@ describe('check command', () => {
       restore()
     }
     assert.ok(logs.some(l => l.includes('could not check')))
+    assert.ok(logs.some(l => l.includes('Checked 1 skill: 0 updates available, 0 skipped (no source), 1 could not be checked.')))
   })
 
   it('merges skills from global and project locks', async () => {
