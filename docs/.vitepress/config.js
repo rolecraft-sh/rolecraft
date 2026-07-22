@@ -68,6 +68,7 @@ export default defineConfig({
             { text: 'remove', link: '/commands/remove' },
             { text: 'search', link: '/commands/search' },
             { text: 'setup', link: '/commands/setup' },
+            { text: 'test', link: '/commands/test' },
             { text: 'update', link: '/commands/update' },
             { text: 'upgrade', link: '/commands/upgrade' },
             { text: 'use', link: '/commands/use' },

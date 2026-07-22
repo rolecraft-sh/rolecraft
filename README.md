@@ -209,6 +209,7 @@ All API functions return plain objects (no side-effects). Available exports:
 | `profileShow` | Show profile details |
 | `profileDelete` | Delete a profile |
 | `profileImport` | Import a profile |
+| `test` | Test a skill quality with assertions |
 
 ---
 
@@ -235,6 +236,7 @@ All API functions return plain objects (no side-effects). Available exports:
 | `rolecraft ci`                          | Re-install all skills from lockfile (CI mode)                               | [docs](docs/commands/ci.md)          |
 | `rolecraft convert <source>`            | Convert between SKILL.md and .mdc formats                                   | [docs](docs/commands/convert.md)     |
 | `rolecraft upgrade`                     | Upgrade rolecraft to the latest version                                     | [docs](docs/commands/upgrade.md)     |
+| `rolecraft test <skill-path>`           | Test a skill quality with built-in assertions                               | [docs](docs/commands/test.md)       |
 | `rolecraft remove <slug>`               | Uninstall a skill                                                           | [docs](docs/commands/remove.md)      |
 | `rolecraft update <slug>`               | Re-install a skill to latest                                                | [docs](docs/commands/update.md)      |
 | `rolecraft --version`                   | Show version                                                                |                                      |

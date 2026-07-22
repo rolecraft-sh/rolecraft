@@ -23,6 +23,7 @@ import { mcpCommand } from '../src/commands/mcp.js'
 import { watchCommand } from '../src/commands/watch.js'
 import { convertCommand } from '../src/commands/convert.js'
 import { profileCommand } from '../src/commands/profile.js'
+import { testCommand } from '../src/commands/test.js'
 import agents from '../src/agents.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -64,6 +65,7 @@ Usage:
   rolecraft agents-xml --write      Write skills XML to AGENTS.md
   rolecraft upgrade                 Upgrade rolecraft to the latest version
   rolecraft convert <source>        Convert a skill between SKILL.md and .mdc formats
+  rolecraft test <skill-path>       Test a skill quality (--all, --json, --verbose)
   rolecraft help                    Show this help
 
 Options:
@@ -317,6 +319,30 @@ export async function main() {
       }
       const convertFlags = args.filter(a => a.startsWith('-'))
       await convertCommand(source, { dryRun: convertFlags.includes('--dry-run') })
+      break
+    }
+
+    case 'test': {
+      if (args.includes('--help') || args.includes('-h')) { usage(); return }
+      const testFlags = args.filter(a => a.startsWith('-'))
+      const testPos = args.filter(a => !a.startsWith('-'))
+      const skillPath = testPos[0]
+      const testOptions = {
+        json: testFlags.includes('--json'),
+        verbose: testFlags.includes('--verbose') || testFlags.includes('-v'),
+        noColor: testFlags.includes('--no-color'),
+        noEmoji: testFlags.includes('--no-emoji'),
+        all: testFlags.includes('--all'),
+      }
+      const minScoreIndex = testFlags.indexOf('--min-score')
+      if (minScoreIndex !== -1 && testFlags[minScoreIndex + 1] && !testFlags[minScoreIndex + 1].startsWith('-')) {
+        testOptions.minScore = parseInt(testFlags[minScoreIndex + 1], 10)
+      }
+      const onlyIndex = testFlags.indexOf('--only')
+      if (onlyIndex !== -1 && testFlags[onlyIndex + 1] && !testFlags[onlyIndex + 1].startsWith('-')) {
+        testOptions.only = testFlags[onlyIndex + 1].split(',').map(s => s.trim())
+      }
+      await testCommand(skillPath, testOptions)
       break
     }
 
