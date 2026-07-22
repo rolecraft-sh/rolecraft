@@ -1,5 +1,5 @@
-import { readFileSync, readdirSync, existsSync } from 'node:fs'
-import { join } from 'node:path'
+import { readFileSync, existsSync } from 'node:fs'
+import { join, basename } from 'node:path'
 import { homedir } from 'node:os'
 import { parseFrontmatter } from '../utils/converter.js'
 import { readLock } from '../utils/lockfile.js'
@@ -191,7 +191,7 @@ function runAssertions(attrs, body, raw, filterNames) {
       continue
     }
 
-    if (typeof pass === 'object' && pass !== null) {
+    if (pass !== null && typeof pass === 'object') {
       detail = pass.detail || ''
       pass = pass.pass
     }
@@ -252,7 +252,7 @@ export async function apiTest(skillPath, options = {}) {
   const { score, grade, label } = calculateScore(assertions)
   const suggestions = generateSuggestions(assertions)
 
-  const skillName = attrs.name || skillPath.replace(/.*\//, '')
+  const skillName = attrs.name || basename(skillPath)
 
   return {
     skill: skillName,
