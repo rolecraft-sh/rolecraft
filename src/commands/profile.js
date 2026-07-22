@@ -2,7 +2,7 @@ import { spawnSync } from 'node:child_process'
 import { tmpdir, homedir } from 'node:os'
 import { join, relative, resolve, dirname } from 'node:path'
 import { mkdtempSync, writeFileSync, readFileSync, unlinkSync, rmdirSync, existsSync } from 'node:fs'
-import { readFile, writeFile, mkdir } from 'node:fs/promises'
+import { writeFile, mkdir } from 'node:fs/promises'
 import {
   apiProfileSave, apiProfileApply, apiProfileDiff, apiProfileList, apiProfileShow,
   apiProfileDelete, apiProfileImport,
