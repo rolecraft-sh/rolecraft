@@ -6,10 +6,6 @@
   "bin": {
     "rolecraft": "bin/rolecraft.js"
   },
-  "files": [
-    "bin",
-    "src"
-  ],
   "exports": {
     ".": {
       "import": "./src/index.js"
