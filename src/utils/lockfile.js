@@ -7,6 +7,10 @@ function home(...parts) {
   return join(homedir(), ...parts)
 }
 
+export function normalizeSlug(slug) {
+  return slug.replace(/\//g, '-')
+}
+
 export function getGlobalLockPath() {
   return home('.agents', '.skill-lock.json')
 }
@@ -380,5 +384,4 @@ export function computeFileHashes(fileContents) {
   }
   return hashes
 }
-
 

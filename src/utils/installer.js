@@ -1,11 +1,7 @@
 import { mkdir, cp, writeFile, stat, symlink, rm } from 'node:fs/promises'
 import { join, relative, dirname } from 'node:path'
-import { addSkillToLock, getGlobalLockPath, getProjectLockPath, computeFileHashes } from './lockfile.js'
+import { addSkillToLock, getGlobalLockPath, getProjectLockPath, computeFileHashes, normalizeSlug } from './lockfile.js'
 import { getAgentByFlag } from '../agents.js'
-
-function normalizeSlug(slug) {
-  return slug.replace(/\//g, '-')
-}
 
 export async function installSkill(resolved, targets, mode = 'copy') {
   const slug = resolved.slug
