@@ -74,7 +74,6 @@ function printSingleResult(result, options) {
     }
   }
 
-  const gradeMark = getGradeIcon(result.grade)
   const scoreColor = result.score >= 75 ? 'green' : result.score >= 50 ? 'yellow' : 'red'
   console.log(`\n${colorize(`Score: ${result.score}/100 → ${result.grade} (${result.label})`, scoreColor, color)}`)
 
