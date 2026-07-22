@@ -16,14 +16,11 @@ import {
   getGlobalLockPath,
   getProjectLockPath,
   computeFileHashes,
+  normalizeSlug,
 } from './lockfile.js'
 import { getAgentByFlag } from '../agents.js'
 
 import { resolve, sep } from 'node:path'
-
-function normalizeSlug(slug) {
-  return slug.replace(/\//g, '-')
-}
 
 /**
  * Reject slugs that could escape their base directory.

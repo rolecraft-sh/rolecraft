@@ -5,12 +5,9 @@ import {
   removeSkillFromLock,
   getAgentsDir,
   getProjectLockPath,
+  normalizeSlug,
 } from '../utils/lockfile.js'
 import { assertSafeSlug } from '../utils/installer.js'
-
-function normalizeSlug(slug) {
-  return slug.replace(/\//g, '-')
-}
 
 function findActualSlug(slug, lock) {
   if (lock.skills[slug]) return slug

@@ -4,6 +4,10 @@ import { createHash } from 'node:crypto'
 import { getAgentByFlag } from '../agents.js'
 import { home } from './paths.js'
 
+export function normalizeSlug(slug) {
+  return slug.replace(/\//g, '-')
+}
+
 export function getGlobalLockPath() {
   return home('.agents', '.skill-lock.json')
 }
