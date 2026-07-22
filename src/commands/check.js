@@ -23,5 +23,11 @@ export async function checkCommand() {
     }
   }
 
-  console.log(`\n${updatesAvailable > 0 ? `⚠️  ${updatesAvailable} skill(s) have updates available. Run \`rolecraft update <slug>\` to update.` : '✅ All skills are up to date.'}\n`)
+  const skipped = skills.filter(s => s.status === 'skipped').length
+  const errors = skills.filter(s => s.status === 'error').length
+  const skillLabel = skills.length === 1 ? 'skill' : 'skills'
+  const updateLabel = updatesAvailable === 1 ? 'update' : 'updates'
+  const updateHint = updatesAvailable > 0 ? ' Run `rolecraft update <slug>` to update.' : ''
+
+  console.log(`\nChecked ${skills.length} ${skillLabel}: ${updatesAvailable} ${updateLabel} available, ${skipped} skipped (no source), ${errors} could not be checked.${updateHint}\n`)
 }
