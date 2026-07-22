@@ -1,10 +1,6 @@
 import { rm } from 'node:fs/promises'
 import { join } from 'node:path'
-import { readLock, removeSkillFromLock, getAgentsDir, getProjectLockPath } from '../utils/lockfile.js'
-
-function normalizeSlug(slug) {
-  return slug.replace(/\//g, '-')
-}
+import { readLock, removeSkillFromLock, getAgentsDir, getProjectLockPath, normalizeSlug } from '../utils/lockfile.js'
 
 function findActualSlug(slug, lock) {
   if (lock.skills[slug]) return slug
