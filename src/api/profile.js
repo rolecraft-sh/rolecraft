@@ -7,8 +7,6 @@ import {
   captureAgentFull,
   applyProfileData,
   validateProfile,
-  ensureProfileDir,
-  PROFILE_SCHEMA_VERSION,
 } from '../utils/profile.js'
 
 export async function apiProfileSave(name, options = {}) {
@@ -130,26 +128,27 @@ export async function apiProfileDelete(name, options = {}) {
 }
 
 export async function apiProfileImport(path) {
-  const { readFile, writeFile } = await import('node:fs/promises')
-  const { resolve, join } = await import('node:path')
-  const { homedir } = await import('node:os')
+  const { readFile } = await import('node:fs/promises')
+  const { resolve } = await import('node:path')
 
-  let content
+  function parseProfileJSON(raw) {
+    try {
+      return JSON.parse(raw)
+    } catch {
+      throw new Error('Invalid JSON in profile.')
+    }
+  }
+
+  let data
   const isUrl = path.startsWith('http://') || path.startsWith('https://')
   if (isUrl) {
     const res = await fetch(path)
     if (!res.ok) throw new Error(`Failed to fetch ${path}: ${res.status}`)
-    content = await res.text()
+    data = parseProfileJSON(await res.text())
   } else {
-    content = await readFile(resolve(path), 'utf-8')
+    data = parseProfileJSON(await readFile(resolve(path), 'utf-8'))
   }
 
-  let data
-  try {
-    data = JSON.parse(content)
-  } catch {
-    throw new Error('Invalid JSON in profile.')
-  }
   if (!data.name) {
     const nameFromFile =
       path
@@ -166,24 +165,11 @@ export async function apiProfileImport(path) {
       `Invalid profile data:\n  ${validation.errors.join('\n  ')}`,
     )
 
-  const enriched = {
-    ...data,
-    name: data.name,
-    version: data.version ?? PROFILE_SCHEMA_VERSION,
-    updatedAt: new Date().toISOString(),
-    createdAt: data.createdAt ?? new Date().toISOString(),
-  }
-
-  await ensureProfileDir()
-  const { profilePath } = await import('../utils/profile.js')
-  const pp = resolve(profilePath(data.name))
-  const profilesDir = resolve(join(homedir(), '.agents', 'profiles'))
-  if (!pp.startsWith(profilesDir)) throw new Error('Invalid profile path')
-  await writeFile(pp, `${JSON.stringify(enriched, null, 2)}\n`, 'utf-8')
+  const enriched = await writeProfile(data)
 
   return {
-    name: data.name,
-    agents: Object.keys(data.agents).length,
+    name: enriched.name,
+    agents: Object.keys(enriched.agents || {}).length,
     profile: enriched,
   }
 }

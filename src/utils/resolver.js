@@ -386,9 +386,10 @@ function fetchJson(url) {
   ) {
     throw new Error(`Fetch not allowed from ${parsed.hostname}`)
   }
+  const safeUrl = `${parsed.protocol}//${parsed.host}${parsed.pathname}${parsed.search}`
   return new Promise((resolve, reject) => {
     const req = runHttpsGet(
-      url,
+      safeUrl,
       { headers: { Accept: 'application/json' } },
       (res) => {
         let data = ''
@@ -399,7 +400,7 @@ function fetchJson(url) {
           if (res.statusCode !== 200) {
             reject(
               new Error(
-                `npm registry returned HTTP ${res.statusCode} for ${url}`,
+                `npm registry returned HTTP ${res.statusCode} for ${safeUrl}`,
               ),
             )
             return
