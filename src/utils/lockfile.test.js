@@ -22,7 +22,10 @@ after(async () => {
 
 describe('lockfile', () => {
   it('getGlobalLockPath returns path inside homedir', () => {
-    assert.equal(lockModule.getGlobalLockPath(), join(tempDir, '.agents', '.skill-lock.json'))
+    assert.equal(
+      lockModule.getGlobalLockPath(),
+      join(tempDir, '.agents', '.skill-lock.json'),
+    )
   })
 
   it('getAgentsDir returns path inside homedir', () => {
@@ -34,15 +37,24 @@ describe('lockfile', () => {
   })
 
   it('getCommandCodeDir returns path inside homedir', () => {
-    assert.equal(lockModule.getCommandCodeDir(), join(tempDir, '.commandcode', 'skills'))
+    assert.equal(
+      lockModule.getCommandCodeDir(),
+      join(tempDir, '.commandcode', 'skills'),
+    )
   })
 
   it('getCortexDir returns path inside homedir', () => {
-    assert.equal(lockModule.getCortexDir(), join(tempDir, '.snowflake', 'cortex', 'skills'))
+    assert.equal(
+      lockModule.getCortexDir(),
+      join(tempDir, '.snowflake', 'cortex', 'skills'),
+    )
   })
 
   it('getMistralVibeDir returns path inside homedir', () => {
-    assert.equal(lockModule.getMistralVibeDir(), join(tempDir, '.vibe', 'skills'))
+    assert.equal(
+      lockModule.getMistralVibeDir(),
+      join(tempDir, '.vibe', 'skills'),
+    )
   })
 
   it('getQwenCodeDir returns path inside homedir', () => {
@@ -50,11 +62,17 @@ describe('lockfile', () => {
   })
 
   it('getOpenClawDir returns path inside homedir', () => {
-    assert.equal(lockModule.getOpenClawDir(), join(tempDir, '.openclaw', 'skills'))
+    assert.equal(
+      lockModule.getOpenClawDir(),
+      join(tempDir, '.openclaw', 'skills'),
+    )
   })
 
   it('getCodeBuddyDir returns path inside homedir', () => {
-    assert.equal(lockModule.getCodeBuddyDir(), join(tempDir, '.codebuddy', 'skills'))
+    assert.equal(
+      lockModule.getCodeBuddyDir(),
+      join(tempDir, '.codebuddy', 'skills'),
+    )
   })
 
   it('getMuxDir returns path inside homedir', () => {
@@ -66,15 +84,24 @@ describe('lockfile', () => {
   })
 
   it('getAutohandCodeDir returns path inside homedir', () => {
-    assert.equal(lockModule.getAutohandCodeDir(), join(tempDir, '.autohand', 'skills'))
+    assert.equal(
+      lockModule.getAutohandCodeDir(),
+      join(tempDir, '.autohand', 'skills'),
+    )
   })
 
   it('getRovoDevDir returns path inside homedir', () => {
-    assert.equal(lockModule.getRovoDevDir(), join(tempDir, '.rovodev', 'skills'))
+    assert.equal(
+      lockModule.getRovoDevDir(),
+      join(tempDir, '.rovodev', 'skills'),
+    )
   })
 
   it('getFirebenderDir returns path inside homedir', () => {
-    assert.equal(lockModule.getFirebenderDir(), join(tempDir, '.firebender', 'skills'))
+    assert.equal(
+      lockModule.getFirebenderDir(),
+      join(tempDir, '.firebender', 'skills'),
+    )
   })
 
   it('getBobDir returns path inside homedir', () => {
@@ -82,19 +109,31 @@ describe('lockfile', () => {
   })
 
   it('getAiderDeskDir returns path inside homedir', () => {
-    assert.equal(lockModule.getAiderDeskDir(), join(tempDir, '.aider-desk', 'skills'))
+    assert.equal(
+      lockModule.getAiderDeskDir(),
+      join(tempDir, '.aider-desk', 'skills'),
+    )
   })
 
   it('getCopilotDir returns path inside homedir', () => {
-    assert.equal(lockModule.getCopilotDir(), join(tempDir, '.copilot', 'skills'))
+    assert.equal(
+      lockModule.getCopilotDir(),
+      join(tempDir, '.copilot', 'skills'),
+    )
   })
 
   it('getAstrbotDir returns path inside homedir', () => {
-    assert.equal(lockModule.getAstrbotDir(), join(tempDir, '.astrbot', 'data', 'skills'))
+    assert.equal(
+      lockModule.getAstrbotDir(),
+      join(tempDir, '.astrbot', 'data', 'skills'),
+    )
   })
 
   it('getQoderCnDir returns path inside homedir', () => {
-    assert.equal(lockModule.getQoderCnDir(), join(tempDir, '.qoder-cn', 'skills'))
+    assert.equal(
+      lockModule.getQoderCnDir(),
+      join(tempDir, '.qoder-cn', 'skills'),
+    )
   })
 
   it('getTraeCnDir returns path inside homedir', () => {
@@ -102,11 +141,17 @@ describe('lockfile', () => {
   })
 
   it('getZenflowDir returns path inside homedir', () => {
-    assert.equal(lockModule.getZenflowDir(), join(tempDir, '.zencoder', 'skills'))
+    assert.equal(
+      lockModule.getZenflowDir(),
+      join(tempDir, '.zencoder', 'skills'),
+    )
   })
 
   it('getNeovateDir returns path inside homedir', () => {
-    assert.equal(lockModule.getNeovateDir(), join(tempDir, '.neovate', 'skills'))
+    assert.equal(
+      lockModule.getNeovateDir(),
+      join(tempDir, '.neovate', 'skills'),
+    )
   })
 
   it('getPochiDir returns path inside homedir', () => {
@@ -122,15 +167,24 @@ describe('lockfile', () => {
   })
 
   it('getChatgptDir returns path inside homedir', () => {
-    assert.equal(lockModule.getChatgptDir(), join(tempDir, '.chatgpt', 'skills'))
+    assert.equal(
+      lockModule.getChatgptDir(),
+      join(tempDir, '.chatgpt', 'skills'),
+    )
   })
 
   it('getCodeartsAgentDir returns path inside homedir', () => {
-    assert.equal(lockModule.getCodeartsAgentDir(), join(tempDir, '.codeartsdoer', 'skills'))
+    assert.equal(
+      lockModule.getCodeartsAgentDir(),
+      join(tempDir, '.codeartsdoer', 'skills'),
+    )
   })
 
   it('getUniversalDir returns path inside homedir', () => {
-    assert.equal(lockModule.getUniversalDir(), join(tempDir, '.config', 'agents', 'skills'))
+    assert.equal(
+      lockModule.getUniversalDir(),
+      join(tempDir, '.config', 'agents', 'skills'),
+    )
   })
 
   it('getCursorDir returns path inside homedir', () => {
@@ -138,7 +192,10 @@ describe('lockfile', () => {
   })
 
   it('getWindsurfDir returns path inside homedir', () => {
-    assert.equal(lockModule.getWindsurfDir(), join(tempDir, '.windsurf', 'skills'))
+    assert.equal(
+      lockModule.getWindsurfDir(),
+      join(tempDir, '.windsurf', 'skills'),
+    )
   })
 
   it('getCodexDir returns path inside homedir', () => {
@@ -146,7 +203,10 @@ describe('lockfile', () => {
   })
 
   it('getCopilotProjectDir returns path relative to cwd', () => {
-    assert.equal(lockModule.getCopilotProjectDir(), join(process.cwd(), '.github', 'copilot', 'skills'))
+    assert.equal(
+      lockModule.getCopilotProjectDir(),
+      join(process.cwd(), '.github', 'copilot', 'skills'),
+    )
   })
 
   it('getAiderDir returns path inside homedir', () => {
@@ -170,7 +230,10 @@ describe('lockfile', () => {
   })
 
   it('getContinueDir returns path inside homedir', () => {
-    assert.equal(lockModule.getContinueDir(), join(tempDir, '.continue', 'skills'))
+    assert.equal(
+      lockModule.getContinueDir(),
+      join(tempDir, '.continue', 'skills'),
+    )
   })
 
   it('getWarpDir returns path inside homedir', () => {
@@ -178,7 +241,10 @@ describe('lockfile', () => {
   })
 
   it('getCodeiumDir returns path inside homedir', () => {
-    assert.equal(lockModule.getCodeiumDir(), join(tempDir, '.codeium', 'skills'))
+    assert.equal(
+      lockModule.getCodeiumDir(),
+      join(tempDir, '.codeium', 'skills'),
+    )
   })
 
   it('getFabricDir returns path inside homedir', () => {
@@ -190,15 +256,24 @@ describe('lockfile', () => {
   })
 
   it('getTabnineDir returns path inside homedir', () => {
-    assert.equal(lockModule.getTabnineDir(), join(tempDir, '.tabnine', 'skills'))
+    assert.equal(
+      lockModule.getTabnineDir(),
+      join(tempDir, '.tabnine', 'skills'),
+    )
   })
 
   it('getSupermavenDir returns path inside homedir', () => {
-    assert.equal(lockModule.getSupermavenDir(), join(tempDir, '.supermaven', 'skills'))
+    assert.equal(
+      lockModule.getSupermavenDir(),
+      join(tempDir, '.supermaven', 'skills'),
+    )
   })
 
   it('getPrPilotDir returns path inside homedir', () => {
-    assert.equal(lockModule.getPrPilotDir(), join(tempDir, '.pr-pilot', 'skills'))
+    assert.equal(
+      lockModule.getPrPilotDir(),
+      join(tempDir, '.pr-pilot', 'skills'),
+    )
   })
 
   it('getLoomDir returns path inside homedir', () => {
@@ -222,7 +297,10 @@ describe('lockfile', () => {
   })
 
   it('getAugmentDir returns path inside homedir', () => {
-    assert.equal(lockModule.getAugmentDir(), join(tempDir, '.augment', 'skills'))
+    assert.equal(
+      lockModule.getAugmentDir(),
+      join(tempDir, '.augment', 'skills'),
+    )
   })
 
   it('getKiloDir returns path inside homedir', () => {
@@ -230,7 +308,10 @@ describe('lockfile', () => {
   })
 
   it('getOpenHandsDir returns path inside homedir', () => {
-    assert.equal(lockModule.getOpenHandsDir(), join(tempDir, '.openhands', 'skills'))
+    assert.equal(
+      lockModule.getOpenHandsDir(),
+      join(tempDir, '.openhands', 'skills'),
+    )
   })
 
   it('getJunieDir returns path inside homedir', () => {
@@ -238,7 +319,10 @@ describe('lockfile', () => {
   })
 
   it('getFactoryDir returns path inside homedir', () => {
-    assert.equal(lockModule.getFactoryDir(), join(tempDir, '.factory', 'skills'))
+    assert.equal(
+      lockModule.getFactoryDir(),
+      join(tempDir, '.factory', 'skills'),
+    )
   })
 
   it('getZapDir returns path inside homedir', () => {
@@ -250,7 +334,10 @@ describe('lockfile', () => {
   })
 
   it('getKimiCodeDir returns path inside homedir', () => {
-    assert.equal(lockModule.getKimiCodeDir(), join(tempDir, '.kimi-code', 'skills'))
+    assert.equal(
+      lockModule.getKimiCodeDir(),
+      join(tempDir, '.kimi-code', 'skills'),
+    )
   })
 
   it('getZCodeDir returns path inside homedir', () => {
@@ -258,15 +345,24 @@ describe('lockfile', () => {
   })
 
   it('getCodeArtsDoerDir returns path inside homedir', () => {
-    assert.equal(lockModule.getCodeArtsDoerDir(), join(tempDir, '.codeartsdoer', 'skills'))
+    assert.equal(
+      lockModule.getCodeArtsDoerDir(),
+      join(tempDir, '.codeartsdoer', 'skills'),
+    )
   })
 
   it('getCodeMakerDir returns path inside homedir', () => {
-    assert.equal(lockModule.getCodeMakerDir(), join(tempDir, '.codemaker', 'skills'))
+    assert.equal(
+      lockModule.getCodeMakerDir(),
+      join(tempDir, '.codemaker', 'skills'),
+    )
   })
 
   it('getCodeStudioDir returns path inside homedir', () => {
-    assert.equal(lockModule.getCodeStudioDir(), join(tempDir, '.codestudio', 'skills'))
+    assert.equal(
+      lockModule.getCodeStudioDir(),
+      join(tempDir, '.codestudio', 'skills'),
+    )
   })
 
   it('getCrushDir returns path inside homedir', () => {
@@ -282,7 +378,10 @@ describe('lockfile', () => {
   })
 
   it('getInferenceShDir returns path inside homedir', () => {
-    assert.equal(lockModule.getInferenceShDir(), join(tempDir, '.inferencesh', 'skills'))
+    assert.equal(
+      lockModule.getInferenceShDir(),
+      join(tempDir, '.inferencesh', 'skills'),
+    )
   })
 
   it('getJazzDir returns path inside homedir', () => {
@@ -294,7 +393,10 @@ describe('lockfile', () => {
   })
 
   it('getKiloCodeDir returns path inside homedir', () => {
-    assert.equal(lockModule.getKiloCodeDir(), join(tempDir, '.kilocode', 'skills'))
+    assert.equal(
+      lockModule.getKiloCodeDir(),
+      join(tempDir, '.kilocode', 'skills'),
+    )
   })
 
   it('getKodeDir returns path inside homedir', () => {
@@ -322,43 +424,76 @@ describe('lockfile', () => {
   })
 
   it('getReasonixDir returns path inside homedir', () => {
-    assert.equal(lockModule.getReasonixDir(), join(tempDir, '.reasonix', 'skills'))
+    assert.equal(
+      lockModule.getReasonixDir(),
+      join(tempDir, '.reasonix', 'skills'),
+    )
   })
 
   it('getTerraMindDir returns path inside homedir', () => {
-    assert.equal(lockModule.getTerraMindDir(), join(tempDir, '.terramind', 'skills'))
+    assert.equal(
+      lockModule.getTerraMindDir(),
+      join(tempDir, '.terramind', 'skills'),
+    )
   })
 
   it('getTinyCloudDir returns path inside homedir', () => {
-    assert.equal(lockModule.getTinyCloudDir(), join(tempDir, '.tinycloud', 'skills'))
+    assert.equal(
+      lockModule.getTinyCloudDir(),
+      join(tempDir, '.tinycloud', 'skills'),
+    )
   })
 
   it('getZencoderDir returns path inside homedir', () => {
-    assert.equal(lockModule.getZencoderDir(), join(tempDir, '.zencoder', 'skills'))
+    assert.equal(
+      lockModule.getZencoderDir(),
+      join(tempDir, '.zencoder', 'skills'),
+    )
   })
 
   it('getProjectLockPath returns path relative to cwd', () => {
-    assert.equal(lockModule.getProjectLockPath(process.cwd()), join(process.cwd(), '.agents', '.skill-lock.json'))
+    assert.equal(
+      lockModule.getProjectLockPath(process.cwd()),
+      join(process.cwd(), '.agents', '.skill-lock.json'),
+    )
   })
 
   it('readLock returns default when no file exists', async () => {
     const lock = await lockModule.readLock()
     assert.deepEqual(lock, {
-      version: 3, skills: {}, dismissed: {}, lastSelectedAgents: [],
+      version: 3,
+      skills: {},
+      dismissed: {},
+      lastSelectedAgents: [],
     })
   })
 
   it('readLock parses existing lock file', async () => {
-    const data = { version: 3, skills: { test: { name: 'x' } }, dismissed: {}, lastSelectedAgents: [] }
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify(data))
+    const data = {
+      version: 3,
+      skills: { test: { name: 'x' } },
+      dismissed: {},
+      lastSelectedAgents: [],
+    }
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify(data),
+    )
     const lock = await lockModule.readLock()
     assert.deepEqual(lock, data)
   })
 
   it('writeLock writes lock file', async () => {
-    const data = { version: 3, skills: { w: {} }, dismissed: {}, lastSelectedAgents: [] }
+    const data = {
+      version: 3,
+      skills: { w: {} },
+      dismissed: {},
+      lastSelectedAgents: [],
+    }
     await lockModule.writeLock(data)
-    const written = JSON.parse(readFileSync(join(tempDir, '.agents', '.skill-lock.json'), 'utf-8'))
+    const written = JSON.parse(
+      readFileSync(join(tempDir, '.agents', '.skill-lock.json'), 'utf-8'),
+    )
     assert.deepEqual(written, data)
   })
 
@@ -371,7 +506,9 @@ describe('lockfile', () => {
 
   it('addSkillToLock merges agents instead of overwriting', async () => {
     await lockModule.addSkillToLock('merge-skill', { agents: ['claude-code'] })
-    await lockModule.addSkillToLock('merge-skill', { agents: ['cursor', 'warp'] })
+    await lockModule.addSkillToLock('merge-skill', {
+      agents: ['cursor', 'warp'],
+    })
     const lock = await lockModule.readLock()
     const agents = lock.skills['merge-skill'].agents
     assert.ok(agents.includes('claude-code'))
@@ -388,21 +525,36 @@ describe('lockfile', () => {
   })
 
   it('computeContentHash produces deterministic hash', () => {
-    const h1 = lockModule.computeContentHash({ 'SKILL.md': 'content', 'helper.js': 'x' })
-    const h2 = lockModule.computeContentHash({ 'helper.js': 'x', 'SKILL.md': 'content' })
+    const h1 = lockModule.computeContentHash({
+      'SKILL.md': 'content',
+      'helper.js': 'x',
+    })
+    const h2 = lockModule.computeContentHash({
+      'helper.js': 'x',
+      'SKILL.md': 'content',
+    })
     assert.equal(h1, h2)
     assert.equal(h1.length, 64)
   })
 
   it('computeContentHash changes when content changes', () => {
-    const h1 = lockModule.computeContentHash({ 'SKILL.md': 'same', 'extra.js': 'a' })
-    const h2 = lockModule.computeContentHash({ 'SKILL.md': 'same', 'extra.js': 'b' })
+    const h1 = lockModule.computeContentHash({
+      'SKILL.md': 'same',
+      'extra.js': 'a',
+    })
+    const h2 = lockModule.computeContentHash({
+      'SKILL.md': 'same',
+      'extra.js': 'b',
+    })
     assert.notEqual(h1, h2)
   })
 
   it('computeContentHash returns different hash for different files', () => {
     const h1 = lockModule.computeContentHash({ 'SKILL.md': 'x' })
-    const h2 = lockModule.computeContentHash({ 'SKILL.md': 'x', 'extra.js': 'y' })
+    const h2 = lockModule.computeContentHash({
+      'SKILL.md': 'x',
+      'extra.js': 'y',
+    })
     assert.notEqual(h1, h2)
   })
 })

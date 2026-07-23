@@ -1,6 +1,6 @@
 import { readLock, getProjectLockPath } from '../utils/lockfile.js'
 
-export async function apiList(cwd, options = {}) {
+export async function apiList(cwd, _options = {}) {
   const [globalLock, projectLock] = await Promise.all([
     readLock(),
     cwd ? readLock(getProjectLockPath(cwd)) : Promise.resolve(null),
@@ -16,7 +16,12 @@ export async function apiList(cwd, options = {}) {
   for (const [slug, entry] of skills) {
     const inProject = projectSkills.has(slug)
     const inGlobal = slug in globalLock.skills
-    const scope = inProject && inGlobal ? 'global, project' : inProject ? 'project' : 'global'
+    const scope =
+      inProject && inGlobal
+        ? 'global, project'
+        : inProject
+          ? 'project'
+          : 'global'
 
     result[slug] = {
       ...entry,

@@ -9,7 +9,9 @@ export async function ciCommand() {
   }
 
   if (result.skillCount > 0) {
-    console.log(`\n🔒 Installing ${result.skillCount} skill(s) from lockfile...\n`)
+    console.log(
+      `\n🔒 Installing ${result.skillCount} skill(s) from lockfile...\n`,
+    )
     for (const inst of result.installed) {
       console.log(`   ✅ ${inst.slug} installed`)
     }
@@ -20,9 +22,13 @@ export async function ciCommand() {
   }
 
   if (result.mcpCount > 0) {
-    console.log(`🔌 Installing ${result.mcpCount} MCP server(s) from lockfile...\n`)
+    console.log(
+      `🔌 Installing ${result.mcpCount} MCP server(s) from lockfile...\n`,
+    )
     for (const inst of result.mcpInstalled) {
-      console.log(`   ✅ ${inst.name} installed to ${inst.agents.length} agent(s)`)
+      console.log(
+        `   ✅ ${inst.name} installed to ${inst.agents.length} agent(s)`,
+      )
     }
     for (const f of result.mcpFailed) {
       console.error(`   ❌ ${f.name}: ${f.reason}`)

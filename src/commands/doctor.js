@@ -8,7 +8,11 @@ export async function doctorCommand(options = {}) {
   const result = await apiDoctor(process.cwd(), options)
 
   if (options.json) {
-    const jsonOutput = { status: result.status, checks: {}, summary: result.summary }
+    const jsonOutput = {
+      status: result.status,
+      checks: {},
+      summary: result.summary,
+    }
     for (const c of result.checks) {
       jsonOutput.checks[c.label] = { status: c.status, detail: c.detail }
     }
@@ -25,7 +29,9 @@ export async function doctorCommand(options = {}) {
   if (result.agents?.length > 0) {
     for (const agent of result.agents) {
       const skillInfo = `${agent.skillCount} skill(s)`
-      console.log(`   ${icon('pass')} ${`  └ ${agent.label}`.padEnd(38)} ${skillInfo}`)
+      console.log(
+        `   ${icon('pass')} ${`  └ ${agent.label}`.padEnd(38)} ${skillInfo}`,
+      )
     }
   }
 
@@ -37,10 +43,14 @@ export async function doctorCommand(options = {}) {
           detail += `\n       ${m.status === 'error' ? '❌' : '⚠️'} ${issue.name}: ${issue.issue}`
         }
       }
-      console.log(`   ${icon(m.status)} ${`  └ ${m.agent}`.padEnd(38)} ${detail}`)
+      console.log(
+        `   ${icon(m.status)} ${`  └ ${m.agent}`.padEnd(38)} ${detail}`,
+      )
     }
   }
 
   const { passed, warnings, errors, total } = result.summary
-  console.log(`\n📋 Summary: ${passed}/${total} passed, ${warnings} warnings, ${errors} errors\n`)
+  console.log(
+    `\n📋 Summary: ${passed}/${total} passed, ${warnings} warnings, ${errors} errors\n`,
+  )
 }

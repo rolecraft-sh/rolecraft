@@ -1,12 +1,15 @@
-import { readLock, getProjectLockPath, computeContentHash, getAgentsDir } from '../utils/lockfile.js'
+import {
+  readLock,
+  getProjectLockPath,
+  computeContentHash,
+  getAgentsDir,
+} from '../utils/lockfile.js'
 import { readFile, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { createHash } from 'node:crypto'
 import agents from '../agents.js'
 
-const agentDirMap = Object.fromEntries(
-  agents.map(a => [a.name, a.getDir])
-)
+const agentDirMap = Object.fromEntries(agents.map((a) => [a.name, a.getDir]))
 
 async function readFilesFromDir(dir) {
   try {
@@ -27,7 +30,9 @@ function findFileChanges(installedFiles, expectedHashes) {
 
   for (const name of installedNames) {
     if (expectedHashes && expectedHashes[name] !== undefined) {
-      const currentHash = createHash('sha256').update(installedFiles[name]).digest('hex')
+      const currentHash = createHash('sha256')
+        .update(installedFiles[name])
+        .digest('hex')
       if (currentHash !== expectedHashes[name]) {
         changes.push(`modified: ${name}`)
       }
@@ -47,7 +52,9 @@ function findFileChanges(installedFiles, expectedHashes) {
 
 export async function apiVerify(cwd = process.cwd(), frozen = false) {
   const globalLock = await readLock()
-  const projectLock = await readLock(getProjectLockPath(cwd)).catch(() => ({ skills: {} }))
+  const projectLock = await readLock(getProjectLockPath(cwd)).catch(() => ({
+    skills: {},
+  }))
 
   const allSkills = { ...globalLock.skills }
   for (const [slug, entry] of Object.entries(projectLock.skills)) {
@@ -69,11 +76,13 @@ export async function apiVerify(cwd = process.cwd(), frozen = false) {
     }
 
     const normSlug = slug.replace(/\//g, '-')
-    const dirsToCheck = (entry.agents || []).map(name => {
-      if (name === 'project') return join(cwd, '.agents', 'skills', normSlug)
-      const dirFn = agentDirMap[name]
-      return dirFn ? join(dirFn(), normSlug) : null
-    }).filter(Boolean)
+    const dirsToCheck = (entry.agents || [])
+      .map((name) => {
+        if (name === 'project') return join(cwd, '.agents', 'skills', normSlug)
+        const dirFn = agentDirMap[name]
+        return dirFn ? join(dirFn(), normSlug) : null
+      })
+      .filter(Boolean)
 
     if (dirsToCheck.length === 0) {
       dirsToCheck.push(
@@ -94,7 +103,13 @@ export async function apiVerify(cwd = process.cwd(), frozen = false) {
       const hash = computeContentHash(fc)
       if (hash !== entry.contentSha) {
         const changes = findFileChanges(fc, entry.fileHashes)
-        dirResults.push({ dir, hash, expected: entry.contentSha, status: 'mismatch', changes })
+        dirResults.push({
+          dir,
+          hash,
+          expected: entry.contentSha,
+          status: 'mismatch',
+          changes,
+        })
         allMatch = false
         allPassed = false
       } else {
@@ -111,9 +126,18 @@ export async function apiVerify(cwd = process.cwd(), frozen = false) {
     if (allMatch) {
       verified.push({ slug, dirs: dirResults, contentSha: entry.contentSha })
     } else {
-      failed.push({ slug, dirs: dirResults.filter(d => d.status !== 'match') })
+      failed.push({
+        slug,
+        dirs: dirResults.filter((d) => d.status !== 'match'),
+      })
     }
   }
 
-  return { verified, failed, allPassed, totalVerified: verified.length, totalFailed: failed.length }
+  return {
+    verified,
+    failed,
+    allPassed,
+    totalVerified: verified.length,
+    totalFailed: failed.length,
+  }
 }

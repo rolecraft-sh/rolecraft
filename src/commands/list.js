@@ -6,10 +6,16 @@ export async function listCommand(cwd, options = {}) {
   const entries = Object.entries(result.skills)
 
   if (options.json) {
-    console.log(JSON.stringify({
-      skills: result.skills,
-      total: entries.length,
-    }, null, 2))
+    console.log(
+      JSON.stringify(
+        {
+          skills: result.skills,
+          total: entries.length,
+        },
+        null,
+        2,
+      ),
+    )
     return
   }
 

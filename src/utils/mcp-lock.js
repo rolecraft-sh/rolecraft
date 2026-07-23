@@ -25,24 +25,34 @@ export async function readMcpLock(lockPath = getMcpLockPath()) {
 
 export async function writeMcpLock(data, lockPath = getMcpLockPath()) {
   await ensureParentDir(lockPath)
-  await writeFile(lockPath, JSON.stringify(data, null, 2) + '\n', 'utf-8')
+  await writeFile(lockPath, `${JSON.stringify(data, null, 2)}\n`, 'utf-8')
 }
 
-export async function addServerToMcpLock(serverName, entry, lockPath = getMcpLockPath()) {
+export async function addServerToMcpLock(
+  serverName,
+  entry,
+  lockPath = getMcpLockPath(),
+) {
   const lock = await readMcpLock(lockPath)
   const existing = lock.servers[serverName]
   const mergedAgents = existing?.agents
     ? [...new Set([...existing.agents, ...(entry.agents || [])])]
-    : (entry.agents || [])
+    : entry.agents || []
   lock.servers[serverName] = { ...entry, agents: mergedAgents }
   await writeMcpLock(lock, lockPath)
   return lock
 }
 
-export async function removeServerFromMcpLock(serverName, agentToRemove, lockPath = getMcpLockPath()) {
+export async function removeServerFromMcpLock(
+  serverName,
+  agentToRemove,
+  lockPath = getMcpLockPath(),
+) {
   const lock = await readMcpLock(lockPath)
   if (!lock.servers[serverName]) return lock
-  const remaining = (lock.servers[serverName].agents || []).filter(a => a !== agentToRemove)
+  const remaining = (lock.servers[serverName].agents || []).filter(
+    (a) => a !== agentToRemove,
+  )
   if (remaining.length === 0) {
     delete lock.servers[serverName]
   } else {

@@ -36,7 +36,18 @@
 - **Branch strategy:** Always branch from latest main for any work that requires a commit, unless the user explicitly says otherwise.
 
 ## Code style
-- Keep the zero-dependency principle (don't add new dependencies to package.json)
+- Keep the zero-dependency principle for runtime (don't add production deps)
+- DevDependencies (Biome, VitePress) are allowed — they never ship to users
 - Use ES modules (`import`/`export`, no `require`)
 - Prefer built-in modules like `node:fs`, `node:path`
 - Tests are written with `node:test` and `node:assert`
+- Formatting is enforced by Biome (`biome.json`): 2-space indent, single quotes, no semicolons
+- Linting is enforced by Biome: `noUnusedVariables`, `noUnusedImports`, `noUnreachable` are errors
+
+## Linting rules
+- `npm run lint` runs `node --check` (syntax) then `biome check` (semantic + format)
+- Must be zero errors before pushing — CI fails on lint errors
+- Run `npx biome check --write` to auto-fix formatting and unused imports
+- Run `npx biome check --write --unsafe` for unsafe fixes (review the diff before committing)
+- Common CodeQL-equivalent traps Biome catches before push: `js/unused-local-variable`, `js/redundant-operation`, unreachable code
+- Biome does NOT catch security issues like `js/http-to-file-access`, `js/log-injection`, `js/insecure-temporary-file` — keep CodeQL enabled in CI for those

@@ -31,7 +31,15 @@ before(async () => {
   process.chdir(tempDir)
 
   mkdirSync(join(tempDir, '.agents'), { recursive: true })
-  await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({ version: 3, skills: {}, dismissed: {}, lastSelectedAgents: [] }))
+  await writeFile(
+    join(tempDir, '.agents', '.skill-lock.json'),
+    JSON.stringify({
+      version: 3,
+      skills: {},
+      dismissed: {},
+      lastSelectedAgents: [],
+    }),
+  )
 
   bundleModule = await import('./bundle.js')
 })
@@ -46,11 +54,17 @@ describe('bundle command', () => {
   it('installs from a JSON array file', async () => {
     const skillDir1 = join(tempDir, 'bundle-skill-1')
     mkdirSync(skillDir1, { recursive: true })
-    writeFileSync(join(skillDir1, 'SKILL.md'), '# slug: test/bundle1\nname: bundle1\nContent')
+    writeFileSync(
+      join(skillDir1, 'SKILL.md'),
+      '# slug: test/bundle1\nname: bundle1\nContent',
+    )
 
     const skillDir2 = join(tempDir, 'bundle-skill-2')
     mkdirSync(skillDir2, { recursive: true })
-    writeFileSync(join(skillDir2, 'SKILL.md'), '# slug: test/bundle2\nname: bundle2\nContent')
+    writeFileSync(
+      join(skillDir2, 'SKILL.md'),
+      '# slug: test/bundle2\nname: bundle2\nContent',
+    )
 
     const bundlePath = join(tempDir, 'test-bundle.json')
     writeFileSync(bundlePath, JSON.stringify([skillDir1, skillDir2]))
@@ -59,13 +73,16 @@ describe('bundle command', () => {
     await bundleModule.bundleCommand(bundlePath)
     restoreLog()
 
-    assert.ok(logs.some(l => l.includes('All 2 skill(s) installed')))
+    assert.ok(logs.some((l) => l.includes('All 2 skill(s) installed')))
   })
 
   it('installs from a JSON object with skills key', async () => {
     const skillDir = join(tempDir, 'bundle-obj-skill')
     mkdirSync(skillDir, { recursive: true })
-    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/bundle-obj\nname: bundle-obj\nContent')
+    writeFileSync(
+      join(skillDir, 'SKILL.md'),
+      '# slug: test/bundle-obj\nname: bundle-obj\nContent',
+    )
 
     const bundlePath = join(tempDir, 'test-bundle-obj.json')
     writeFileSync(bundlePath, JSON.stringify({ skills: [skillDir] }))
@@ -74,13 +91,16 @@ describe('bundle command', () => {
     await bundleModule.bundleCommand(bundlePath)
     restoreLog()
 
-    assert.ok(logs.some(l => l.includes('All 1 skill(s) installed')))
+    assert.ok(logs.some((l) => l.includes('All 1 skill(s) installed')))
   })
 
   it('reads skills from a text file', async () => {
     const skillDir = join(tempDir, 'bundle-txt-skill')
     mkdirSync(skillDir, { recursive: true })
-    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/bundle-txt\nname: bundle-txt\nContent')
+    writeFileSync(
+      join(skillDir, 'SKILL.md'),
+      '# slug: test/bundle-txt\nname: bundle-txt\nContent',
+    )
 
     const bundlePath = join(tempDir, 'test-bundle.txt')
     writeFileSync(bundlePath, `# comment\n${skillDir}\n`)
@@ -89,7 +109,7 @@ describe('bundle command', () => {
     await bundleModule.bundleCommand(bundlePath)
     restoreLog()
 
-    assert.ok(logs.some(l => l.includes('All 1 skill(s) installed')))
+    assert.ok(logs.some((l) => l.includes('All 1 skill(s) installed')))
   })
 
   it('handles empty bundle file gracefully', async () => {
@@ -100,19 +120,22 @@ describe('bundle command', () => {
     await bundleModule.bundleCommand(bundlePath)
     restoreLog()
 
-    assert.ok(logs.some(l => l.includes('No skills')))
+    assert.ok(logs.some((l) => l.includes('No skills')))
   })
 
   it('installs inline sources when multiple args given', async () => {
     const skillDir = join(tempDir, 'inline-skill-1')
     mkdirSync(skillDir, { recursive: true })
-    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/inline1\nname: inline1\nContent')
+    writeFileSync(
+      join(skillDir, 'SKILL.md'),
+      '# slug: test/inline1\nname: inline1\nContent',
+    )
 
     capture()
     await bundleModule.bundleCommand([skillDir], {})
     restoreLog()
 
-    assert.ok(logs.some(l => l.includes('All 1 skill(s) installed')))
+    assert.ok(logs.some((l) => l.includes('All 1 skill(s) installed')))
   })
 
   it('shows dry-run with inline sources', async () => {
@@ -120,14 +143,17 @@ describe('bundle command', () => {
     await bundleModule.bundleCommand(['owner/fake-skill'], { dryRun: true })
     restoreLog()
 
-    assert.ok(logs.some(l => l.includes('Would install')))
-    assert.ok(logs.some(l => l.includes('1 skill')))
+    assert.ok(logs.some((l) => l.includes('Would install')))
+    assert.ok(logs.some((l) => l.includes('1 skill')))
   })
 
   it('shows dry-run with file bundle', async () => {
     const skillDir = join(tempDir, 'dry-bundle-skill')
     mkdirSync(skillDir, { recursive: true })
-    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/dry-bundle\nname: dry-bundle\nContent')
+    writeFileSync(
+      join(skillDir, 'SKILL.md'),
+      '# slug: test/dry-bundle\nname: dry-bundle\nContent',
+    )
 
     const bundlePath = join(tempDir, 'dry-bundle.json')
     writeFileSync(bundlePath, JSON.stringify([skillDir]))
@@ -136,21 +162,24 @@ describe('bundle command', () => {
     await bundleModule.bundleCommand(bundlePath, { dryRun: true })
     restoreLog()
 
-    assert.ok(logs.some(l => l.includes('Would install')))
-    assert.ok(logs.some(l => l.includes('1 skill')))
+    assert.ok(logs.some((l) => l.includes('Would install')))
+    assert.ok(logs.some((l) => l.includes('1 skill')))
   })
 
   it('treats single arg as source when file not found', async () => {
     capture()
-    await bundleModule.bundleCommand('owner/nonexistent-skill', { global: true })
+    await bundleModule.bundleCommand('owner/nonexistent-skill', {
+      global: true,
+    })
     restoreLog()
 
-    assert.ok(logs.some(l => l.includes('[1/1] owner/nonexistent-skill')))
+    assert.ok(logs.some((l) => l.includes('[1/1] owner/nonexistent-skill')))
   })
 
   it('throws when bundle file read fails', async () => {
     await assert.rejects(
-      () => bundleModule.bundleCommand(join(tempDir, 'nonexistent-bundle.json')),
+      () =>
+        bundleModule.bundleCommand(join(tempDir, 'nonexistent-bundle.json')),
       /Bundle file not found/,
     )
   })
@@ -160,7 +189,7 @@ describe('bundle command', () => {
     await bundleModule.bundleCreateCommand('test-collection')
     restoreLog()
 
-    assert.ok(logs.some(l => l.includes('Created')))
+    assert.ok(logs.some((l) => l.includes('Created')))
 
     const { readFileSync, existsSync } = await import('node:fs')
     const createdPath = join(tempDir, 'test-collection.json')
@@ -184,16 +213,16 @@ describe('bundle command', () => {
     const bundlePath = join(tempDir, 'malformed.json')
     writeFileSync(bundlePath, 'not json')
 
-    await assert.rejects(
-      () => bundleModule.bundleCommand(bundlePath),
-      /JSON/,
-    )
+    await assert.rejects(() => bundleModule.bundleCommand(bundlePath), /JSON/)
   })
 
   it('resolves bundle using candidate paths when arg is a bare name', async () => {
     const skillDir = join(tempDir, 'bare-skill')
     mkdirSync(skillDir, { recursive: true })
-    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/bare\nname: bare\nContent')
+    writeFileSync(
+      join(skillDir, 'SKILL.md'),
+      '# slug: test/bare\nname: bare\nContent',
+    )
 
     const bundlePath = join(tempDir, 'my-bundle.json')
     writeFileSync(bundlePath, JSON.stringify([skillDir]))
@@ -205,7 +234,7 @@ describe('bundle command', () => {
     restoreLog()
     process.cwd = origCwd
 
-    assert.ok(logs.some(l => l.includes('All 1 skill(s) installed')))
+    assert.ok(logs.some((l) => l.includes('All 1 skill(s) installed')))
   })
 
   it('creates a bundle interactively when no name is given', async () => {
@@ -233,7 +262,7 @@ describe('bundle command', () => {
     await freshBundle.bundleCreateCommand()
     restoreLog()
 
-    assert.ok(logs.some(l => l.includes('Created')))
+    assert.ok(logs.some((l) => l.includes('Created')))
 
     const createdPath = join(tempDir, 'my-test-bundle.json')
     assert.ok(readFileSync(createdPath, 'utf-8'))
@@ -281,7 +310,7 @@ describe('bundle command', () => {
     await freshBundle.bundleCreateCommand('test-overwrite-bundle')
     restoreLog()
 
-    assert.ok(logs.some(l => l.includes('Created')))
+    assert.ok(logs.some((l) => l.includes('Created')))
 
     const { existsSync } = await import('node:fs')
     assert.ok(existsSync(bundlePath))

@@ -1,26 +1,40 @@
 import { spawnSync } from 'node:child_process'
 import { tmpdir, homedir } from 'node:os'
 import { join, relative, resolve, dirname } from 'node:path'
-import { mkdtempSync, writeFileSync, readFileSync, unlinkSync, rmdirSync, existsSync } from 'node:fs'
+import {
+  mkdtempSync,
+  writeFileSync,
+  readFileSync,
+  unlinkSync,
+  rmdirSync,
+  existsSync,
+} from 'node:fs'
 import { writeFile, mkdir } from 'node:fs/promises'
 import {
-  apiProfileSave, apiProfileApply, apiProfileDiff, apiProfileList, apiProfileShow,
-  apiProfileDelete, apiProfileImport,
+  apiProfileSave,
+  apiProfileApply,
+  apiProfileDiff,
+  apiProfileList,
+  apiProfileShow,
+  apiProfileDelete,
+  apiProfileImport,
 } from '../api/profile.js'
 import {
-  readProfile, captureAllAgents, writeProfile,
+  readProfile,
+  captureAllAgents,
+  writeProfile,
 } from '../utils/profile.js'
 import agents from '../agents.js'
 
 const LINK_FILE = '.agent-profile.json'
 const LINK_DIRS = [process.cwd(), homedir()]
 
-const AGENT_FLAGS = ['--agents', ...agents.map(a => `--${a.flag}`), '--all']
-const AGENT_MAP = Object.fromEntries(agents.map(a => [`--${a.flag}`, a.flag]))
+const AGENT_FLAGS = ['--agents', ...agents.map((a) => `--${a.flag}`), '--all']
+const AGENT_MAP = Object.fromEntries(agents.map((a) => [`--${a.flag}`, a.flag]))
 
 function parseOptions(args) {
-  const flags = args.filter(a => a.startsWith('--'))
-  const namedArgs = args.filter(a => !a.startsWith('--'))
+  const flags = args.filter((a) => a.startsWith('--'))
+  const namedArgs = args.filter((a) => !a.startsWith('--'))
 
   const options = {
     dryRun: flags.includes('--dry-run'),
@@ -50,7 +64,7 @@ function parseOptions(args) {
     }
   }
 
-  const hasScope = flags.some(f => AGENT_FLAGS.includes(f))
+  const hasScope = flags.some((f) => AGENT_FLAGS.includes(f))
   if (hasScope) {
     for (const [flag, agent] of Object.entries(AGENT_MAP)) {
       if (flags.includes(flag) || flags.includes('--all')) {
@@ -70,7 +84,7 @@ Usage:
   rolecraft profile save <name>        Save current agent configs to a profile
   rolecraft profile apply <name>       Apply a profile's settings to agents
   rolecraft profile diff <name>        Show differences between profile and current config
-  rolecraft profile edit <name>        Edit a profile with \$EDITOR
+  rolecraft profile edit <name>        Edit a profile with $EDITOR
   rolecraft profile list               List saved profiles
   rolecraft profile show <name>        Display a profile's contents
   rolecraft profile delete <name>      Delete a profile
@@ -108,16 +122,21 @@ Examples:
 
 function formatAgentSummary(entry) {
   const parts = []
-  if (entry.config) parts.push(`config (${Object.keys(entry.config).join(', ')})`)
-  if (entry.mcpServers) parts.push(`MCP (${Object.keys(entry.mcpServers).length})`)
+  if (entry.config)
+    parts.push(`config (${Object.keys(entry.config).join(', ')})`)
+  if (entry.mcpServers)
+    parts.push(`MCP (${Object.keys(entry.mcpServers).length})`)
   if (entry.skills) parts.push(`skills (${entry.skills.length})`)
-  if (entry.instructions) parts.push(`instructions (${entry.instructions.length})`)
+  if (entry.instructions)
+    parts.push(`instructions (${entry.instructions.length})`)
   return parts.join(', ')
 }
 
 export async function profileSaveCommand(name, options) {
   if (!name) {
-    console.error('Usage: rolecraft profile save <name> [--agents --cursor ...]')
+    console.error(
+      'Usage: rolecraft profile save <name> [--agents --cursor ...]',
+    )
     throw new Error('Missing profile name.')
   }
 
@@ -141,7 +160,9 @@ export async function profileSaveCommand(name, options) {
 
 export async function profileApplyCommand(name, options) {
   if (!name) {
-    console.error('Usage: rolecraft profile apply <name> [--dry-run] [--skip-mcp] [--skip-skills]')
+    console.error(
+      'Usage: rolecraft profile apply <name> [--dry-run] [--skip-mcp] [--skip-skills]',
+    )
     throw new Error('Missing profile name.')
   }
 
@@ -161,8 +182,14 @@ export async function profileApplyCommand(name, options) {
   if (result.results) {
     for (const [flag, r] of Object.entries(result.results)) {
       if (r.config) formattedLines.push(`   ${flag}: config applied`)
-      if (r.mcpResults?.length > 0) formattedLines.push(`   ${flag}: ${r.mcpResults.length} MCP server(s) configured`)
-      if (r.skillResults?.length > 0) formattedLines.push(`   ${flag}: ${r.skillResults.length} skill(s) installed`)
+      if (r.mcpResults?.length > 0)
+        formattedLines.push(
+          `   ${flag}: ${r.mcpResults.length} MCP server(s) configured`,
+        )
+      if (r.skillResults?.length > 0)
+        formattedLines.push(
+          `   ${flag}: ${r.skillResults.length} skill(s) installed`,
+        )
     }
   }
 
@@ -197,7 +224,9 @@ export async function profileDiffCommand(name) {
     for (const flag of Object.keys(data.agents)) {
       console.log(`   ${flag}: no differences`)
     }
-    console.log('\n   Profile matches current configuration — no changes to apply.')
+    console.log(
+      '\n   Profile matches current configuration — no changes to apply.',
+    )
     console.log()
     return
   }
@@ -206,7 +235,9 @@ export async function profileDiffCommand(name) {
     if (diff.hasDiff) {
       console.log(`   ${flag}:`)
       for (const d of diff.differences) {
-        console.log(`     └─ ${d === 'config' ? 'config differs' : d === 'mcpServers' ? 'MCP servers differ' : d === 'skills' ? 'skills differ' : 'instructions differ'}`)
+        console.log(
+          `     └─ ${d === 'config' ? 'config differs' : d === 'mcpServers' ? 'MCP servers differ' : d === 'skills' ? 'skills differ' : 'instructions differ'}`,
+        )
       }
     } else {
       console.log(`   ${flag}: no differences`)
@@ -227,22 +258,31 @@ export async function profileEditCommand(name) {
   const editor = process.env.EDITOR || 'vi'
   const tmpDir = mkdtempSync(join(tmpdir(), 'rolecraft-profile-'))
   const tmpFile = join(tmpDir, `${name}.json`)
-  writeFileSync(tmpFile, JSON.stringify(data, null, 2) + '\n', 'utf-8')
+  writeFileSync(tmpFile, `${JSON.stringify(data, null, 2)}\n`, 'utf-8')
 
   try {
     const [editorCmd, ...editorArgs] = editor.split(/\s+/)
-    const result = spawnSync(editorCmd, [...editorArgs, tmpFile], { stdio: 'inherit' })
+    const result = spawnSync(editorCmd, [...editorArgs, tmpFile], {
+      stdio: 'inherit',
+    })
     if (result.error) throw result.error
-    if (result.status !== 0) throw new Error(`Command failed: ${editorCmd} exited with code ${result.status}`)
+    if (result.status !== 0)
+      throw new Error(
+        `Command failed: ${editorCmd} exited with code ${result.status}`,
+      )
     const edited = JSON.parse(readFileSync(tmpFile, 'utf-8'))
     edited.name = name
     await writeProfile(edited)
     console.log(`\n✅ Profile "${name}" updated.`)
   } catch (err) {
-    if (err instanceof SyntaxError) throw new Error(`Invalid JSON after editing. Profile not saved.`)
+    if (err instanceof SyntaxError)
+      throw new Error(`Invalid JSON after editing. Profile not saved.`)
     throw err
   } finally {
-    try { unlinkSync(tmpFile); rmdirSync(tmpDir) } catch {}
+    try {
+      unlinkSync(tmpFile)
+      rmdirSync(tmpDir)
+    } catch {}
   }
 }
 
@@ -268,7 +308,9 @@ function relativizePaths(data, cwd) {
 
 export async function profileExportCommand(name, options) {
   if (!name) {
-    console.error('Usage: rolecraft profile export <name> [--file <path>] [--relative]')
+    console.error(
+      'Usage: rolecraft profile export <name> [--file <path>] [--relative]',
+    )
     throw new Error('Missing profile name.')
   }
 
@@ -278,7 +320,7 @@ export async function profileExportCommand(name, options) {
   let output = cleanProfileForExport(data)
   if (options.relative) output = relativizePaths(output, process.cwd())
 
-  const json = JSON.stringify(output, null, 2) + '\n'
+  const json = `${JSON.stringify(output, null, 2)}\n`
 
   if (options.filePath) {
     const targetPath = resolve(options.filePath)
@@ -297,15 +339,21 @@ export async function profileImportCommand(path) {
   }
 
   const result = await apiProfileImport(path)
-  console.log(`\n✅ Profile "${result.name}" imported (${result.agents} agent(s)).`)
+  console.log(
+    `\n✅ Profile "${result.name}" imported (${result.agents} agent(s)).`,
+  )
 
   const current = await captureAllAgents()
   if (Object.keys(current).length > 0) {
-    console.log(`\n📊 Run \`rolecraft profile diff ${result.name}\` to see differences from current config.`)
+    console.log(
+      `\n📊 Run \`rolecraft profile diff ${result.name}\` to see differences from current config.`,
+    )
   }
 }
 
-function getLinkPath(dir) { return join(dir, LINK_FILE) }
+function getLinkPath(dir) {
+  return join(dir, LINK_FILE)
+}
 
 function findLinkFile() {
   for (const dir of [process.cwd(), ...LINK_DIRS.slice(1)]) {
@@ -316,7 +364,11 @@ function findLinkFile() {
 }
 
 function readLinkFile(linkPath) {
-  try { return JSON.parse(readFileSync(linkPath, 'utf-8')) } catch { return null }
+  try {
+    return JSON.parse(readFileSync(linkPath, 'utf-8'))
+  } catch {
+    return null
+  }
 }
 
 export async function profileLinkCommand(name, options) {
@@ -339,13 +391,16 @@ export async function profileLinkCommand(name, options) {
       return
     }
     const link = readLinkFile(linkPath)
-    if (!link || !link.profile) {
+    if (!link?.profile) {
       console.log('Link file is invalid.')
       return
     }
     console.log(`\n   Linked profile: ${link.profile}`)
     if (link.projectDir) console.log(`   Project: ${link.projectDir}`)
-    if (link.createdAt) console.log(`   Created: ${new Date(link.createdAt).toLocaleDateString()}`)
+    if (link.createdAt)
+      console.log(
+        `   Created: ${new Date(link.createdAt).toLocaleDateString()}`,
+      )
     console.log()
     return
   }
@@ -353,11 +408,19 @@ export async function profileLinkCommand(name, options) {
   const data = await readProfile(name)
   if (!data) throw new Error(`Profile "${name}" not found.`)
 
-  writeFileSync(getLinkPath(process.cwd()), JSON.stringify({
-    profile: name,
-    projectDir: process.cwd(),
-    createdAt: new Date().toISOString(),
-  }, null, 2) + '\n', 'utf-8')
+  writeFileSync(
+    getLinkPath(process.cwd()),
+    `${JSON.stringify(
+      {
+        profile: name,
+        projectDir: process.cwd(),
+        createdAt: new Date().toISOString(),
+      },
+      null,
+      2,
+    )}\n`,
+    'utf-8',
+  )
   console.log(`\n✅ Profile "${name}" linked to ${process.cwd()}`)
   console.log('   Run `rolecraft profile link` to see the linked profile.')
 }
@@ -372,7 +435,9 @@ export async function profileListCommand() {
 
   console.log('\nSaved profiles:\n')
   for (const p of profiles) {
-    const date = p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : 'unknown'
+    const date = p.updatedAt
+      ? new Date(p.updatedAt).toLocaleDateString()
+      : 'unknown'
     console.log(`   ${p.name}`)
     console.log(`   ├─ Agents: ${p.agentCount}`)
     if (p.description) console.log(`   ├─ ${p.description}`)
@@ -394,8 +459,12 @@ export async function profileShowCommand(name) {
   console.log(`\nProfile: ${data.name}`)
   console.log(`Description: ${data.description || '(not set)'}`)
   console.log(`Version: ${data.version ?? '(not set)'}`)
-  console.log(`Created: ${data.createdAt ? new Date(data.createdAt).toLocaleDateString() : 'unknown'}`)
-  console.log(`Updated: ${data.updatedAt ? new Date(data.updatedAt).toLocaleDateString() : 'unknown'}`)
+  console.log(
+    `Created: ${data.createdAt ? new Date(data.createdAt).toLocaleDateString() : 'unknown'}`,
+  )
+  console.log(
+    `Updated: ${data.updatedAt ? new Date(data.updatedAt).toLocaleDateString() : 'unknown'}`,
+  )
   console.log(`Agents: ${agentCount}\n`)
 
   if (data.agents) {
@@ -468,7 +537,9 @@ export async function profileCommand(args) {
       await profileDeleteCommand(namedArgs[0], options)
       break
     default:
-      console.error(`Unknown profile subcommand: "${subcommand}". Use: save, apply, diff, edit, export, import, link, list, show, delete`)
+      console.error(
+        `Unknown profile subcommand: "${subcommand}". Use: save, apply, diff, edit, export, import, link, list, show, delete`,
+      )
       profileUsage()
   }
 }

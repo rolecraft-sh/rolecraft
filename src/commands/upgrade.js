@@ -5,7 +5,9 @@ import { execSync } from 'node:child_process'
 import { createSpinner } from '../utils/spinner.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const pkg = JSON.parse(readFileSync(join(__dirname, '..', '..', 'package.json'), 'utf-8'))
+const pkg = JSON.parse(
+  readFileSync(join(__dirname, '..', '..', 'package.json'), 'utf-8'),
+)
 
 const SAFE_VERSION = /^\d+\.\d+\.\d+(-[\w.]+)?$/
 
@@ -55,7 +57,9 @@ export async function upgradeCommand(options = {}) {
   }
 
   if (!latest) {
-    console.log('   ⚠️  Could not check for updates. Check your internet connection.')
+    console.log(
+      '   ⚠️  Could not check for updates. Check your internet connection.',
+    )
     console.log('   Latest: https://www.npmjs.com/package/rolecraft\n')
     return
   }
@@ -68,7 +72,7 @@ export async function upgradeCommand(options = {}) {
     return
   }
 
-    console.log(`   ⬆️  Upgrading to v${latest}...\n`)
+  console.log(`   ⬆️  Upgrading to v${latest}...\n`)
 
   const runExecSync = options.execSync || execSync
 
@@ -78,11 +82,19 @@ export async function upgradeCommand(options = {}) {
     }
     runExecSync(`npm install -g ${pkg.name}@${latest}`, {
       stdio: 'inherit',
-      env: { ...process.env, npm_config_fund: 'false', npm_config_audit: 'false' },
+      env: {
+        ...process.env,
+        npm_config_fund: 'false',
+        npm_config_audit: 'false',
+      },
     })
     console.log(`\n   ✅ Upgraded to v${latest}\n`)
-    console.log('   Restart your terminal or re-source your shell to use the new version.\n')
+    console.log(
+      '   Restart your terminal or re-source your shell to use the new version.\n',
+    )
   } catch {
-    throw new Error('Upgrade failed. Try running manually: npm install -g rolecraft')
+    throw new Error(
+      'Upgrade failed. Try running manually: npm install -g rolecraft',
+    )
   }
 }

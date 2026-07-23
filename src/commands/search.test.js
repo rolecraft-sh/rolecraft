@@ -17,15 +17,22 @@ function capture(name) {
   console[name] = (...args) => {
     if (args.length) logs.push(String(args[0]))
   }
-  return { logs, restore: () => { console[name] = orig } }
+  return {
+    logs,
+    restore: () => {
+      console[name] = orig
+    },
+  }
 }
 
 function mockFetch(status, body) {
-  searchModule.setFetch(() => Promise.resolve({
-    status,
-    ok: status >= 200 && status < 300,
-    json: () => Promise.resolve(body),
-  }))
+  searchModule.setFetch(() =>
+    Promise.resolve({
+      status,
+      ok: status >= 200 && status < 300,
+      json: () => Promise.resolve(body),
+    }),
+  )
 }
 
 function mockSequentialFetch(responses) {
@@ -35,7 +42,7 @@ function mockSequentialFetch(responses) {
     if (resp) idx++
     return Promise.resolve({
       status: resp?.status || 200,
-      ok: resp?.status ? (resp.status >= 200 && resp.status < 300) : true,
+      ok: resp?.status ? resp.status >= 200 && resp.status < 300 : true,
       json: () => Promise.resolve(resp?.body || {}),
     })
   })
@@ -88,8 +95,18 @@ describe('search command', () => {
   it('shows results when items found', async () => {
     mockFetch(200, {
       items: [
-        { full_name: 'user1/skill1', description: 'A code review skill', stargazers_count: 42, language: 'JavaScript' },
-        { full_name: 'user2/skill2', description: null, stargazers_count: 5, language: null },
+        {
+          full_name: 'user1/skill1',
+          description: 'A code review skill',
+          stargazers_count: 42,
+          language: 'JavaScript',
+        },
+        {
+          full_name: 'user2/skill2',
+          description: null,
+          stargazers_count: 5,
+          language: null,
+        },
       ],
     })
 
@@ -97,13 +114,13 @@ describe('search command', () => {
     await searchModule.searchCommand('code-review')
     restore()
 
-    assert.ok(logs.some(l => l.includes('Search results')))
-    assert.ok(logs.some(l => l.includes('user1/skill1')))
-    assert.ok(logs.some(l => l.includes('user2/skill2')))
-    assert.ok(logs.some(l => l.includes('A code review skill')))
-    assert.ok(logs.some(l => l.includes('No description')))
-    assert.ok(logs.some(l => l.includes('42')))
-    assert.ok(logs.some(l => l.includes('N/A')))
+    assert.ok(logs.some((l) => l.includes('Search results')))
+    assert.ok(logs.some((l) => l.includes('user1/skill1')))
+    assert.ok(logs.some((l) => l.includes('user2/skill2')))
+    assert.ok(logs.some((l) => l.includes('A code review skill')))
+    assert.ok(logs.some((l) => l.includes('No description')))
+    assert.ok(logs.some((l) => l.includes('42')))
+    assert.ok(logs.some((l) => l.includes('N/A')))
   })
 
   it('shows no results message when empty', async () => {
@@ -113,7 +130,7 @@ describe('search command', () => {
     await searchModule.searchCommand('nonexistent-skill')
     restore()
 
-    assert.ok(logs.some(l => l.includes('No skills found')))
+    assert.ok(logs.some((l) => l.includes('No skills found')))
   })
 
   it('handles 403 rate limit gracefully', async () => {
@@ -123,7 +140,7 @@ describe('search command', () => {
     await searchModule.searchCommand('test')
     restore()
 
-    assert.ok(logs.some(l => l.includes('rate limit')))
+    assert.ok(logs.some((l) => l.includes('rate limit')))
   })
 
   it('throws on non-ok response', async () => {
@@ -146,7 +163,15 @@ describe('search command', () => {
 
   it('shows repo from lookup when owner/repo query has no SKILL.md search results', async () => {
     mockSequentialFetch([
-      { status: 200, body: { full_name: 'owner/skill-repo', description: 'A skill repo', stargazers_count: 10, language: 'TypeScript' } },
+      {
+        status: 200,
+        body: {
+          full_name: 'owner/skill-repo',
+          description: 'A skill repo',
+          stargazers_count: 10,
+          language: 'TypeScript',
+        },
+      },
       { status: 200, body: { items: [] } },
     ])
 
@@ -154,9 +179,9 @@ describe('search command', () => {
     await searchModule.searchCommand('owner/skill-repo')
     restore()
 
-    assert.ok(logs.some(l => l.includes('owner/skill-repo')))
-    assert.ok(logs.some(l => l.includes('A skill repo')))
-    assert.ok(logs.some(l => l.includes('10')))
+    assert.ok(logs.some((l) => l.includes('owner/skill-repo')))
+    assert.ok(logs.some((l) => l.includes('A skill repo')))
+    assert.ok(logs.some((l) => l.includes('10')))
   })
 
   it('falls back to broader search when lookup fails', async () => {
@@ -170,7 +195,7 @@ describe('search command', () => {
     await searchModule.searchCommand('owner/skill-repo')
     restore()
 
-    assert.ok(logs.some(l => l.includes('No skills found')))
+    assert.ok(logs.some((l) => l.includes('No skills found')))
   })
 
   it('handles network error in lookup catch block', async () => {
@@ -179,7 +204,8 @@ describe('search command', () => {
       callCount++
       if (callCount === 1) return Promise.reject(new Error('network failure'))
       return Promise.resolve({
-        status: 200, ok: true,
+        status: 200,
+        ok: true,
         json: () => Promise.resolve({ items: [] }),
       })
     })
@@ -188,7 +214,7 @@ describe('search command', () => {
     await searchModule.searchCommand('owner/skill-repo')
     restore()
 
-    assert.ok(logs.some(l => l.includes('No skills found')))
+    assert.ok(logs.some((l) => l.includes('No skills found')))
   })
 
   it('throws on network error in broader search fallback', async () => {
@@ -197,7 +223,8 @@ describe('search command', () => {
       callCount++
       if (callCount === 1) {
         return Promise.resolve({
-          status: 200, ok: true,
+          status: 200,
+          ok: true,
           json: () => Promise.resolve({ items: [] }),
         })
       }
@@ -216,12 +243,14 @@ describe('search command', () => {
       callCount++
       if (callCount === 1) {
         return Promise.resolve({
-          status: 200, ok: true,
+          status: 200,
+          ok: true,
           json: () => Promise.resolve({ items: [] }),
         })
       }
       return Promise.resolve({
-        status: 403, ok: false,
+        status: 403,
+        ok: false,
         json: () => Promise.resolve({}),
       })
     })
@@ -230,13 +259,18 @@ describe('search command', () => {
     await searchModule.searchCommand('some-query')
     restore()
 
-    assert.ok(logs.some(l => l.includes('rate limit')))
+    assert.ok(logs.some((l) => l.includes('rate limit')))
   })
 
   it('displays results when interactive is explicitly false', async () => {
     mockFetch(200, {
       items: [
-        { full_name: 'org/repo', description: 'A repo', stargazers_count: 10, language: 'Go' },
+        {
+          full_name: 'org/repo',
+          description: 'A repo',
+          stargazers_count: 10,
+          language: 'Go',
+        },
       ],
     })
 
@@ -244,10 +278,10 @@ describe('search command', () => {
     await searchModule.searchCommand('go-skill', { interactive: false })
     restore()
 
-    assert.ok(logs.some(l => l.includes('org/repo')))
-    assert.ok(logs.some(l => l.includes('A repo')))
-    assert.ok(logs.some(l => l.includes('10')))
-    assert.ok(logs.some(l => l.includes('1 result(s) found')))
+    assert.ok(logs.some((l) => l.includes('org/repo')))
+    assert.ok(logs.some((l) => l.includes('A repo')))
+    assert.ok(logs.some((l) => l.includes('10')))
+    assert.ok(logs.some((l) => l.includes('1 result(s) found')))
   })
 
   describe('interactive mode', () => {
@@ -260,7 +294,12 @@ describe('search command', () => {
       searchModule.setPromptUser(() => Promise.resolve('q'))
       mockFetch(200, {
         items: [
-          { full_name: 'user1/skill1', description: 'desc', stargazers_count: 1, language: 'JS' },
+          {
+            full_name: 'user1/skill1',
+            description: 'desc',
+            stargazers_count: 1,
+            language: 'JS',
+          },
         ],
       })
 
@@ -268,14 +307,19 @@ describe('search command', () => {
       await searchModule.searchCommand('test', { interactive: true })
       restore()
 
-      assert.ok(logs.some(l => l.includes('Aborted')))
+      assert.ok(logs.some((l) => l.includes('Aborted')))
     })
 
     it('shows invalid choice message', async () => {
       searchModule.setPromptUser(() => Promise.resolve('99'))
       mockFetch(200, {
         items: [
-          { full_name: 'user1/skill1', description: 'desc', stargazers_count: 1, language: 'JS' },
+          {
+            full_name: 'user1/skill1',
+            description: 'desc',
+            stargazers_count: 1,
+            language: 'JS',
+          },
         ],
       })
 
@@ -283,14 +327,19 @@ describe('search command', () => {
       await searchModule.searchCommand('test', { interactive: true })
       restore()
 
-      assert.ok(logs.some(l => l.includes('Invalid choice')))
+      assert.ok(logs.some((l) => l.includes('Invalid choice')))
     })
 
     it('shows numbered list before prompt', async () => {
       searchModule.setPromptUser(() => Promise.resolve('q'))
       mockFetch(200, {
         items: [
-          { full_name: 'user1/skill1', description: 'desc', stargazers_count: 1, language: 'JS' },
+          {
+            full_name: 'user1/skill1',
+            description: 'desc',
+            stargazers_count: 1,
+            language: 'JS',
+          },
         ],
       })
 
@@ -298,8 +347,8 @@ describe('search command', () => {
       await searchModule.searchCommand('test', { interactive: true })
       restore()
 
-      assert.ok(logs.some(l => l.includes('user1/skill1')))
-      assert.ok(logs.some(l => l.includes('1')))
+      assert.ok(logs.some((l) => l.includes('user1/skill1')))
+      assert.ok(logs.some((l) => l.includes('1')))
     })
 
     it('installs selected skill from interactive search', async () => {
@@ -310,12 +359,20 @@ describe('search command', () => {
 
       const skillDir = join(testDir, 'interactive-install-skill')
       mkdirSync(skillDir, { recursive: true })
-      writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/interactive-install\nname: interactive-skill\nContent')
+      writeFileSync(
+        join(skillDir, 'SKILL.md'),
+        '# slug: test/interactive-install\nname: interactive-skill\nContent',
+      )
 
       searchModule.setPromptUser(() => Promise.resolve('1'))
       mockFetch(200, {
         items: [
-          { full_name: skillDir, description: 'A test skill', stargazers_count: 1, language: 'JS' },
+          {
+            full_name: skillDir,
+            description: 'A test skill',
+            stargazers_count: 1,
+            language: 'JS',
+          },
         ],
       })
 
@@ -326,8 +383,8 @@ describe('search command', () => {
       process.env.HOME = origHome
       await rm(testDir, { recursive: true, force: true })
 
-      assert.ok(logs.some(l => l.includes('Installed')))
-      assert.ok(logs.some(l => l.includes('interactive-skill')))
+      assert.ok(logs.some((l) => l.includes('Installed')))
+      assert.ok(logs.some((l) => l.includes('interactive-skill')))
     })
 
     it('handles install failure in interactive search', async () => {
@@ -337,7 +394,12 @@ describe('search command', () => {
       searchModule.setPromptUser(() => Promise.resolve('1'))
       mockFetch(200, {
         items: [
-          { full_name: join(testDir, 'empty-dir'), description: 'Broken', stargazers_count: 0, language: 'N/A' },
+          {
+            full_name: join(testDir, 'empty-dir'),
+            description: 'Broken',
+            stargazers_count: 0,
+            language: 'N/A',
+          },
         ],
       })
 
@@ -348,7 +410,7 @@ describe('search command', () => {
       errCapture.restore()
       await rm(testDir, { recursive: true, force: true })
 
-      assert.ok(errCapture.logs.some(l => l.includes('Failed to install')))
+      assert.ok(errCapture.logs.some((l) => l.includes('Failed to install')))
     })
 
     it('uses promptSelect when output is not a TTY', async () => {
@@ -359,7 +421,12 @@ describe('search command', () => {
         searchModule.setPromptUser(() => Promise.resolve('q'))
         mockFetch(200, {
           items: [
-            { full_name: 'user/skill1', description: 'A test', stargazers_count: 5, language: 'JS' },
+            {
+              full_name: 'user/skill1',
+              description: 'A test',
+              stargazers_count: 5,
+              language: 'JS',
+            },
           ],
         })
 
@@ -367,7 +434,7 @@ describe('search command', () => {
         await searchModule.searchCommand('test', { interactive: true })
         restore()
 
-        assert.ok(logs.some(l => l.includes('Aborted')))
+        assert.ok(logs.some((l) => l.includes('Aborted')))
       } finally {
         process.stdout.isTTY = origIsTTY
       }
@@ -403,8 +470,18 @@ describe('search command', () => {
     it('shows results from skills.sh', async () => {
       mockFetch(200, {
         skills: [
-          { skillId: 'skill-one', name: 'Skill One', installs: 100, source: 'user1/repo' },
-          { skillId: 'skill-two', name: 'Skill Two', installs: 50, source: 'user2/repo' },
+          {
+            skillId: 'skill-one',
+            name: 'Skill One',
+            installs: 100,
+            source: 'user1/repo',
+          },
+          {
+            skillId: 'skill-two',
+            name: 'Skill Two',
+            installs: 50,
+            source: 'user2/repo',
+          },
         ],
       })
 
@@ -412,11 +489,11 @@ describe('search command', () => {
       await searchModule.searchCommand('test', { skillsSh: true })
       restore()
 
-      assert.ok(logs.some(l => l.includes('Experimental')))
-      assert.ok(logs.some(l => l.includes('skill-one')))
-      assert.ok(logs.some(l => l.includes('skill-two')))
-      assert.ok(logs.some(l => l.includes('100')))
-      assert.ok(logs.some(l => l.includes('2 result(s) found')))
+      assert.ok(logs.some((l) => l.includes('Experimental')))
+      assert.ok(logs.some((l) => l.includes('skill-one')))
+      assert.ok(logs.some((l) => l.includes('skill-two')))
+      assert.ok(logs.some((l) => l.includes('100')))
+      assert.ok(logs.some((l) => l.includes('2 result(s) found')))
     })
 
     it('shows no results message when skills.sh returns empty', async () => {
@@ -426,7 +503,7 @@ describe('search command', () => {
       await searchModule.searchCommand('nonexistent', { skillsSh: true })
       restore()
 
-      assert.ok(logs.some(l => l.includes('No skills found')))
+      assert.ok(logs.some((l) => l.includes('No skills found')))
     })
 
     it('throws on skills.sh network error', async () => {

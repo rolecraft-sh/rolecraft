@@ -1,6 +1,6 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, existsSync, constants } from 'node:fs'
+import { mkdtempSync, existsSync } from 'node:fs'
 import { mkdir, rm, writeFile, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
@@ -64,7 +64,10 @@ describe('profile utils', () => {
 
   describe('getProfilesDir', () => {
     it('returns path inside homedir', () => {
-      assert.equal(profileModule.getProfilesDir(), join(tempDir, '.agents', 'profiles'))
+      assert.equal(
+        profileModule.getProfilesDir(),
+        join(tempDir, '.agents', 'profiles'),
+      )
     })
   })
 
@@ -75,7 +78,10 @@ describe('profile utils', () => {
     })
 
     it('throws for invalid name', () => {
-      assert.throws(() => profileModule.profilePath('../bad'), /Invalid profile name/)
+      assert.throws(
+        () => profileModule.profilePath('../bad'),
+        /Invalid profile name/,
+      )
     })
   })
 
@@ -99,13 +105,16 @@ describe('profile utils', () => {
     it('rejects missing name', () => {
       const result = profileModule.validateProfile({ agents: {} })
       assert.equal(result.valid, false)
-      assert.ok(result.errors.some(e => e.includes('name')))
+      assert.ok(result.errors.some((e) => e.includes('name')))
     })
 
     it('rejects non-object agents', () => {
-      const result = profileModule.validateProfile({ name: 'test', agents: 'bad' })
+      const result = profileModule.validateProfile({
+        name: 'test',
+        agents: 'bad',
+      })
       assert.equal(result.valid, false)
-      assert.ok(result.errors.some(e => e.includes('agents')))
+      assert.ok(result.errors.some((e) => e.includes('agents')))
     })
 
     it('rejects array agents', () => {
@@ -119,7 +128,7 @@ describe('profile utils', () => {
         agents: { opencode: { skills: 'not-array' } },
       })
       assert.equal(result.valid, false)
-      assert.ok(result.errors.some(e => e.includes('skills')))
+      assert.ok(result.errors.some((e) => e.includes('skills')))
     })
 
     it('rejects non-object mcpServers', () => {
@@ -148,9 +157,13 @@ describe('profile utils', () => {
     })
 
     it('rejects invalid version type', () => {
-      const result = profileModule.validateProfile({ name: 'test', version: 'string-not-number', agents: {} })
+      const result = profileModule.validateProfile({
+        name: 'test',
+        version: 'string-not-number',
+        agents: {},
+      })
       assert.equal(result.valid, false)
-      assert.ok(result.errors.some(e => e.includes('version')))
+      assert.ok(result.errors.some((e) => e.includes('version')))
     })
 
     it('rejects non-object localOverrides', () => {
@@ -160,7 +173,7 @@ describe('profile utils', () => {
         localOverrides: 'bad',
       })
       assert.equal(result.valid, false)
-      assert.ok(result.errors.some(e => e.includes('localOverrides')))
+      assert.ok(result.errors.some((e) => e.includes('localOverrides')))
     })
 
     it('rejects null agent entry value', () => {
@@ -169,7 +182,7 @@ describe('profile utils', () => {
         agents: { opencode: null },
       })
       assert.equal(result.valid, false)
-      assert.ok(result.errors.some(e => e.includes('agents.opencode')))
+      assert.ok(result.errors.some((e) => e.includes('agents.opencode')))
     })
 
     it('rejects non-object agent entry config', () => {
@@ -178,7 +191,7 @@ describe('profile utils', () => {
         agents: { opencode: { config: 'string-not-object' } },
       })
       assert.equal(result.valid, false)
-      assert.ok(result.errors.some(e => e.includes('config')))
+      assert.ok(result.errors.some((e) => e.includes('config')))
     })
 
     it('rejects array mcpServers', () => {
@@ -187,19 +200,25 @@ describe('profile utils', () => {
         agents: { opencode: { mcpServers: [] } },
       })
       assert.equal(result.valid, false)
-      assert.ok(result.errors.some(e => e.includes('mcpServers')))
+      assert.ok(result.errors.some((e) => e.includes('mcpServers')))
     })
 
     it('rejects invalid profile name characters', () => {
-      const result = profileModule.validateProfile({ name: 'bad/name', agents: {} })
+      const result = profileModule.validateProfile({
+        name: 'bad/name',
+        agents: {},
+      })
       assert.equal(result.valid, false)
-      assert.ok(result.errors.some(e => e.includes('Invalid profile name')))
+      assert.ok(result.errors.some((e) => e.includes('Invalid profile name')))
     })
 
     it('rejects name with spaces', () => {
-      const result = profileModule.validateProfile({ name: 'my profile', agents: {} })
+      const result = profileModule.validateProfile({
+        name: 'my profile',
+        agents: {},
+      })
       assert.equal(result.valid, false)
-      assert.ok(result.errors.some(e => e.includes('Invalid profile name')))
+      assert.ok(result.errors.some((e) => e.includes('Invalid profile name')))
     })
   })
 
@@ -214,7 +233,10 @@ describe('profile utils', () => {
       const read = await profileModule.readProfile('test-profile')
       assert.equal(read.name, 'test-profile')
       assert.equal(read.agents.opencode.config.model, 'gpt-4')
-      assert.deepEqual(read.agents.opencode.skills, ['owner/repo-a', 'owner/repo-b'])
+      assert.deepEqual(read.agents.opencode.skills, [
+        'owner/repo-a',
+        'owner/repo-b',
+      ])
     })
 
     it('sets defaults for createdAt and version', async () => {
@@ -236,16 +258,13 @@ describe('profile utils', () => {
       const path = profilePath('corrupted')
       await writeFile(path, 'not valid json', 'utf-8')
 
-      await assert.rejects(
-        () => profileModule.readProfile('corrupted'),
-        /JSON/
-      )
+      await assert.rejects(() => profileModule.readProfile('corrupted'), /JSON/)
     })
 
     it('throws on invalid profile data', async () => {
       await assert.rejects(
         () => profileModule.writeProfile({ name: '' }),
-        /Invalid profile/
+        /Invalid profile/,
       )
     })
   })
@@ -253,7 +272,7 @@ describe('profile utils', () => {
   describe('listProfiles', () => {
     it('returns empty array when no profiles exist', async () => {
       // isolate: use a clean subdirectory
-      const subDir = join(tempDir, 'list-empty-' + Date.now())
+      const subDir = join(tempDir, `list-empty-${Date.now()}`)
       process.env.HOME = subDir
       const freshModule = await import('./profile.js')
       const list = await freshModule.listProfiles()
@@ -262,53 +281,71 @@ describe('profile utils', () => {
     })
 
     it('lists created profiles', async () => {
-      const subDir = join(tempDir, 'list-with-' + Date.now())
+      const subDir = join(tempDir, `list-with-${Date.now()}`)
       process.env.HOME = subDir
       const freshModule = await import('./profile.js')
-      await freshModule.writeProfile({ name: 'profile-a', agents: { opencode: {} } })
-      await freshModule.writeProfile({ name: 'profile-b', agents: { opencode: {}, cursor: {} } })
+      await freshModule.writeProfile({
+        name: 'profile-a',
+        agents: { opencode: {} },
+      })
+      await freshModule.writeProfile({
+        name: 'profile-b',
+        agents: { opencode: {}, cursor: {} },
+      })
 
       const list = await freshModule.listProfiles()
       assert.equal(list.length, 2)
 
-      const names = list.map(p => p.name).sort()
+      const names = list.map((p) => p.name).sort()
       assert.deepEqual(names, ['profile-a', 'profile-b'])
 
-      const a = list.find(p => p.name === 'profile-a')
+      const a = list.find((p) => p.name === 'profile-a')
       assert.equal(a.agentCount, 1)
       assert.ok(a.updatedAt)
 
-      const b = list.find(p => p.name === 'profile-b')
+      const b = list.find((p) => p.name === 'profile-b')
       assert.equal(b.agentCount, 2)
       process.env.HOME = tempDir
     })
 
     it('sorts profiles with missing updatedAt as lower priority', async () => {
-      const subDir = join(tempDir, 'list-sort-' + Date.now())
+      const subDir = join(tempDir, `list-sort-${Date.now()}`)
       process.env.HOME = subDir
       const freshModule = await import('./profile.js')
       await freshModule.writeProfile({ name: 'has-date', agents: {} })
       const { writeFile } = await import('node:fs/promises')
       const { profilePath } = await import('./profile.js')
-      await writeFile(profilePath('no-date'), JSON.stringify({ name: 'no-date', agents: {} }), 'utf-8')
+      await writeFile(
+        profilePath('no-date'),
+        JSON.stringify({ name: 'no-date', agents: {} }),
+        'utf-8',
+      )
 
       const list = await freshModule.listProfiles()
       assert.equal(list.length, 2)
-      assert.ok(list.find(p => p.name === 'has-date'))
-      assert.ok(list.find(p => p.name === 'no-date'))
+      assert.ok(list.find((p) => p.name === 'has-date'))
+      assert.ok(list.find((p) => p.name === 'no-date'))
 
       process.env.HOME = tempDir
     })
 
     it('sorts alphabetically when both have no updatedAt', async () => {
-      const subDir = join(tempDir, 'list-sort-alpha-' + Date.now())
+      const subDir = join(tempDir, `list-sort-alpha-${Date.now()}`)
       process.env.HOME = subDir
       const freshModule = await import('./profile.js')
       const profilesDir = join(subDir, '.agents', 'profiles')
       await mkdir(profilesDir, { recursive: true })
       const { writeFile } = await import('node:fs/promises')
-      await writeFile(join(profilesDir, 'b-profile.json'), JSON.stringify({ name: 'b-profile', agents: {} }), 'utf-8')
-      await writeFile(join(profilesDir, 'a-profile.json'), JSON.stringify({ name: 'a-profile', agents: {} }), 'utf-8')
+      await writeFile(
+        join(profilesDir, 'b-profile.json'),
+        JSON.stringify({ name: 'b-profile', agents: {} }),
+        'utf-8',
+      )
+      await writeFile(
+        join(profilesDir, 'a-profile.json'),
+        JSON.stringify({ name: 'a-profile', agents: {} }),
+        'utf-8',
+      )
 
       const list = await freshModule.listProfiles()
       assert.equal(list.length, 2)
@@ -391,7 +428,10 @@ describe('profile capture', () => {
 
     it('captures config when file exists', async () => {
       const configPath = join(captureDir, '.opencode.json')
-      await writeFile(configPath, JSON.stringify({ model: 'gpt-4', permission: { read: 'allow' } }))
+      await writeFile(
+        configPath,
+        JSON.stringify({ model: 'gpt-4', permission: { read: 'allow' } }),
+      )
 
       const result = await captureModule.captureAgentConfig('agents')
       assert.ok(result)
@@ -434,7 +474,7 @@ describe('profile capture', () => {
     })
 
     it('returns null when config file does not exist', async () => {
-      const rawDir = join(captureDir, 'raw-no-file-' + Date.now())
+      const rawDir = join(captureDir, `raw-no-file-${Date.now()}`)
       process.env.HOME = rawDir
       process.cwd = () => rawDir
       const freshModule = await import('./profile.js')
@@ -445,7 +485,7 @@ describe('profile capture', () => {
     })
 
     it('reads raw config content when file exists', async () => {
-      const rawDir = join(captureDir, 'raw-with-file-' + Date.now())
+      const rawDir = join(captureDir, `raw-with-file-${Date.now()}`)
       await mkdir(rawDir, { recursive: true })
       const configPath = join(rawDir, '.opencode.json')
       await writeFile(configPath, JSON.stringify({ model: 'gpt-4' }))
@@ -470,12 +510,15 @@ describe('profile capture', () => {
 
     it('captures MCP servers when configured', async () => {
       const mcpPath = join(captureDir, '.agents', 'mcp.json')
-      await writeFile(mcpPath, JSON.stringify({
-        mcpServers: {
-          github: { command: 'npx', args: ['-y', '@test/github'] },
-          db: { command: 'node', args: ['/path/to/db.js'] },
-        },
-      }))
+      await writeFile(
+        mcpPath,
+        JSON.stringify({
+          mcpServers: {
+            github: { command: 'npx', args: ['-y', '@test/github'] },
+            db: { command: 'node', args: ['/path/to/db.js'] },
+          },
+        }),
+      )
 
       const result = await captureModule.captureMcpServers('agents')
       assert.ok(result)
@@ -494,14 +537,20 @@ describe('profile capture', () => {
 
     it('captures skills from lockfile for the agent', async () => {
       const lockPath = join(captureDir, '.agents', '.skill-lock.json')
-      await writeFile(lockPath, JSON.stringify({
-        version: 3,
-        skills: {
-          'owner/repo-a': { slug: 'owner/repo-a', agents: ['agents'] },
-          'owner/repo-b': { slug: 'owner/repo-b', agents: ['cursor'] },
-          'owner/repo-c': { slug: 'owner/repo-c', agents: ['agents', 'cursor'] },
-        },
-      }))
+      await writeFile(
+        lockPath,
+        JSON.stringify({
+          version: 3,
+          skills: {
+            'owner/repo-a': { slug: 'owner/repo-a', agents: ['agents'] },
+            'owner/repo-b': { slug: 'owner/repo-b', agents: ['cursor'] },
+            'owner/repo-c': {
+              slug: 'owner/repo-c',
+              agents: ['agents', 'cursor'],
+            },
+          },
+        }),
+      )
 
       const result = await captureModule.captureSkills('agents')
       assert.ok(result)
@@ -512,12 +561,18 @@ describe('profile capture', () => {
 
     it('captures skills with "all" agent flag', async () => {
       const lockPath = join(captureDir, '.agents', '.skill-lock.json')
-      await writeFile(lockPath, JSON.stringify({
-        version: 3,
-        skills: {
-          'owner/global-skill': { slug: 'owner/global-skill', agents: ['agents'] },
-        },
-      }))
+      await writeFile(
+        lockPath,
+        JSON.stringify({
+          version: 3,
+          skills: {
+            'owner/global-skill': {
+              slug: 'owner/global-skill',
+              agents: ['agents'],
+            },
+          },
+        }),
+      )
 
       const result = await captureModule.captureSkills('opencode')
       assert.ok(result)
@@ -528,9 +583,12 @@ describe('profile capture', () => {
   describe('captureInstructions', () => {
     it('captures opencode instructions from config', async () => {
       const configPath = join(captureDir, '.opencode.json')
-      await writeFile(configPath, JSON.stringify({
-        instructions: ['AGENTS.md', 'CONTRIBUTING.md'],
-      }))
+      await writeFile(
+        configPath,
+        JSON.stringify({
+          instructions: ['AGENTS.md', 'CONTRIBUTING.md'],
+        }),
+      )
 
       const result = await captureModule.captureInstructions('agents')
       assert.ok(result)
@@ -547,7 +605,7 @@ describe('profile capture', () => {
 
   describe('captureAgentFull', () => {
     it('returns null when nothing is configured', async () => {
-      const subDir = join(captureDir, 'full-empty-' + Date.now())
+      const subDir = join(captureDir, `full-empty-${Date.now()}`)
       await mkdir(subDir, { recursive: true })
       process.env.HOME = subDir
       process.cwd = () => subDir
@@ -561,7 +619,7 @@ describe('profile capture', () => {
     })
 
     it('combines all captures for an agent', async () => {
-      const subDir = join(captureDir, 'full-with-' + Date.now())
+      const subDir = join(captureDir, `full-with-${Date.now()}`)
       await mkdir(subDir, { recursive: true })
       process.env.HOME = subDir
       process.cwd = () => subDir
@@ -588,7 +646,9 @@ describe('profile capture', () => {
     })
 
     it('captures configured agents', async () => {
-      await mkdir(join(captureDir, '.agents', 'skills', 'test-skill'), { recursive: true })
+      await mkdir(join(captureDir, '.agents', 'skills', 'test-skill'), {
+        recursive: true,
+      })
       const configPath = join(captureDir, '.opencode.json')
       await writeFile(configPath, JSON.stringify({ model: 'gpt-4' }))
 
@@ -658,7 +718,7 @@ describe('profile apply', () => {
     })
 
     it('writes project-scoped config', async () => {
-      const projectDir = join(applyDir, 'project')
+      const _projectDir = join(applyDir, 'project')
       const configData = {
         project: { model: 'deepseek-v4' },
       }
@@ -672,7 +732,9 @@ describe('profile apply', () => {
     })
 
     it('returns empty array for unknown agent', async () => {
-      const result = await applyModule.applyAgentConfig('unknown', { global: {} })
+      const result = await applyModule.applyAgentConfig('unknown', {
+        global: {},
+      })
       assert.deepEqual(result, [])
     })
 
@@ -703,7 +765,6 @@ describe('profile apply', () => {
       const result = await applyModule.applyMcpServers('agents', null)
       assert.equal(result.length, 0)
     })
-
   })
 
   describe('applyInstructions', () => {
@@ -723,7 +784,9 @@ describe('profile apply', () => {
     })
 
     it('returns empty array for unknown agent', async () => {
-      const result = await applyModule.applyInstructions('unknown', [{ file: 'test.md' }])
+      const result = await applyModule.applyInstructions('unknown', [
+        { file: 'test.md' },
+      ])
       assert.deepEqual(result, [])
     })
 
@@ -737,7 +800,9 @@ describe('profile apply', () => {
       await mkdir(cursorDir, { recursive: true })
       process.cwd = () => cursorDir
 
-      const result = await applyModule.applyInstructions('cursor', [{ content: 'Be helpful' }])
+      const result = await applyModule.applyInstructions('cursor', [
+        { content: 'Be helpful' },
+      ])
       assert.ok(result.length > 0)
 
       const rulesPath = join(cursorDir, '.cursorrules')
@@ -749,7 +814,9 @@ describe('profile apply', () => {
   describe('applyProfileEntry', () => {
     it('returns result object with dry-run', async () => {
       const entry = { config: { global: { model: 'gpt-4' } } }
-      const result = await applyModule.applyProfileEntry('agents', entry, { dryRun: true })
+      const result = await applyModule.applyProfileEntry('agents', entry, {
+        dryRun: true,
+      })
 
       assert.equal(result.agent, 'agents')
       assert.equal(result.config.applied.length, 0)
@@ -759,11 +826,15 @@ describe('profile apply', () => {
     it('applies a complete entry', async () => {
       const entry = {
         config: { global: { model: 'gpt-4', instructions: ['AGENTS.md'] } },
-        mcpServers: { 'test-mcp': { command: 'npx', args: ['-y', '@test/mcp'] } },
+        mcpServers: {
+          'test-mcp': { command: 'npx', args: ['-y', '@test/mcp'] },
+        },
         instructions: [{ file: 'AGENTS.md' }],
       }
 
-      const result = await applyModule.applyProfileEntry('agents', entry, { skipSkills: true })
+      const result = await applyModule.applyProfileEntry('agents', entry, {
+        skipSkills: true,
+      })
       assert.equal(result.agent, 'agents')
       assert.ok(result.config.applied.length > 0)
       assert.ok(result.backup)
@@ -771,38 +842,71 @@ describe('profile apply', () => {
     })
 
     it('skips config when entry has no config field', async () => {
-      const result = await applyModule.applyProfileEntry('agents', { mcpServers: {}, skills: [], instructions: [] }, { skipSkills: true, skipMcp: true })
-      assert.ok(result.config.skipped.some(s => s.includes('no config data')))
+      const result = await applyModule.applyProfileEntry(
+        'agents',
+        { mcpServers: {}, skills: [], instructions: [] },
+        { skipSkills: true, skipMcp: true },
+      )
+      assert.ok(result.config.skipped.some((s) => s.includes('no config data')))
     })
 
     it('skips MCP servers when skipMcp is true', async () => {
-      const entry = { config: { global: { model: 'test' } }, mcpServers: { m: { command: 'npx', args: ['x'] } } }
-      const result = await applyModule.applyProfileEntry('agents', entry, { skipSkills: true, skipMcp: true })
-      assert.ok(result.mcpServers.skipped.some(s => s.includes('skipped via flag')))
+      const entry = {
+        config: { global: { model: 'test' } },
+        mcpServers: { m: { command: 'npx', args: ['x'] } },
+      }
+      const result = await applyModule.applyProfileEntry('agents', entry, {
+        skipSkills: true,
+        skipMcp: true,
+      })
+      assert.ok(
+        result.mcpServers.skipped.some((s) => s.includes('skipped via flag')),
+      )
     })
 
     it('skips MCP servers when entry has no mcpServers field', async () => {
       const entry = { config: { global: { model: 'test' } }, instructions: [] }
-      const result = await applyModule.applyProfileEntry('agents', entry, { skipSkills: true })
-      assert.ok(result.mcpServers.skipped.some(s => s.includes('no MCP data')))
+      const result = await applyModule.applyProfileEntry('agents', entry, {
+        skipSkills: true,
+      })
+      assert.ok(
+        result.mcpServers.skipped.some((s) => s.includes('no MCP data')),
+      )
     })
 
     it('skips skills when skipSkills is true', async () => {
-      const entry = { config: { global: { model: 'test' } }, skills: ['some-slug'] }
-      const result = await applyModule.applyProfileEntry('agents', entry, { skipSkills: true, skipMcp: true })
-      assert.ok(result.skills.skipped.some(s => s.includes('skipped via flag')))
+      const entry = {
+        config: { global: { model: 'test' } },
+        skills: ['some-slug'],
+      }
+      const result = await applyModule.applyProfileEntry('agents', entry, {
+        skipSkills: true,
+        skipMcp: true,
+      })
+      assert.ok(
+        result.skills.skipped.some((s) => s.includes('skipped via flag')),
+      )
     })
 
     it('skips skills when entry has no skills field', async () => {
       const entry = { config: { global: { model: 'test' } }, instructions: [] }
-      const result = await applyModule.applyProfileEntry('agents', entry, { skipMcp: true })
-      assert.ok(result.skills.skipped.some(s => s.includes('no skills data')))
+      const result = await applyModule.applyProfileEntry('agents', entry, {
+        skipMcp: true,
+      })
+      assert.ok(result.skills.skipped.some((s) => s.includes('no skills data')))
     })
 
     it('skips instructions when entry has no instructions field', async () => {
       const entry = { config: { global: { model: 'test' } } }
-      const result = await applyModule.applyProfileEntry('agents', entry, { skipSkills: true, skipMcp: true })
-      assert.ok(result.instructions.skipped.some(s => s.includes('no instructions data')))
+      const result = await applyModule.applyProfileEntry('agents', entry, {
+        skipSkills: true,
+        skipMcp: true,
+      })
+      assert.ok(
+        result.instructions.skipped.some((s) =>
+          s.includes('no instructions data'),
+        ),
+      )
     })
 
     it('processes skills field (installed or already-installed)', async () => {
@@ -811,7 +915,9 @@ describe('profile apply', () => {
         skills: ['bench-skill'],
       }
 
-      const result = await applyModule.applyProfileEntry('agents', entry, { skipMcp: true })
+      const result = await applyModule.applyProfileEntry('agents', entry, {
+        skipMcp: true,
+      })
       const all = [...result.skills.applied, ...result.skills.skipped]
       assert.ok(all.length > 0 || result.skills.failed.length > 0)
     })
@@ -827,7 +933,10 @@ describe('profile apply', () => {
         },
       }
 
-      const results = await applyModule.applyProfileData(data, { skipSkills: true, skipMcp: true })
+      const results = await applyModule.applyProfileData(data, {
+        skipSkills: true,
+        skipMcp: true,
+      })
       assert.ok(results.agents)
       assert.ok(results.agents.config.applied.length > 0)
     })
@@ -835,21 +944,21 @@ describe('profile apply', () => {
     it('throws when data is null', async () => {
       await assert.rejects(
         () => applyModule.applyProfileData(null),
-        /must contain an "agents" object/
+        /must contain an "agents" object/,
       )
     })
 
     it('throws when agents is missing', async () => {
       await assert.rejects(
         () => applyModule.applyProfileData({}),
-        /must contain an "agents" object/
+        /must contain an "agents" object/,
       )
     })
 
     it('throws when agents is not an object', async () => {
       await assert.rejects(
         () => applyModule.applyProfileData({ agents: 'string' }),
-        /must contain an "agents" object/
+        /must contain an "agents" object/,
       )
     })
   })
@@ -868,12 +977,22 @@ describe('profile apply', () => {
     it('skips already installed skills from lockfile', async () => {
       const lockDir = join(applyDir, '.agents')
       await mkdir(lockDir, { recursive: true })
-      await writeFile(join(lockDir, '.skill-lock.json'), JSON.stringify({
-        version: 3,
-        skills: { 'already-installed-slug': { slug: 'already-installed-slug', agents: ['agents'] } },
-      }))
+      await writeFile(
+        join(lockDir, '.skill-lock.json'),
+        JSON.stringify({
+          version: 3,
+          skills: {
+            'already-installed-slug': {
+              slug: 'already-installed-slug',
+              agents: ['agents'],
+            },
+          },
+        }),
+      )
 
-      const result = await applyModule.ensureSkillsInstalled(['already-installed-slug'])
+      const result = await applyModule.ensureSkillsInstalled([
+        'already-installed-slug',
+      ])
       assert.equal(result.length, 1)
       assert.equal(result[0].slug, 'already-installed-slug')
       assert.equal(result[0].action, 'skipped')
@@ -883,20 +1002,33 @@ describe('profile apply', () => {
     it('installs a local skill from file path', async () => {
       const skillDir = join(applyDir, 'local-skill-test')
       await mkdir(skillDir, { recursive: true })
-      await writeFile(join(skillDir, 'SKILL.md'), '---\nslug: local-install-skill\nname: Local Test\n---\n# Test', 'utf-8')
+      await writeFile(
+        join(skillDir, 'SKILL.md'),
+        '---\nslug: local-install-skill\nname: Local Test\n---\n# Test',
+        'utf-8',
+      )
 
       const result = await applyModule.ensureSkillsInstalled([skillDir])
       assert.equal(result.length, 1)
       assert.equal(result[0].slug, skillDir)
       assert.equal(result[0].action, 'installed')
 
-      const installedDir = join(applyDir, '.agents', 'skills', 'local-install-skill')
-      const stat = await import('node:fs/promises').then(m => m.stat(installedDir))
+      const installedDir = join(
+        applyDir,
+        '.agents',
+        'skills',
+        'local-install-skill',
+      )
+      const _stat = await import('node:fs/promises').then((m) =>
+        m.stat(installedDir),
+      )
       assert.ok(true)
     })
 
     it('reports failed installation when source is invalid', async () => {
-      const result = await applyModule.ensureSkillsInstalled(['/nonexistent/skill/path'])
+      const result = await applyModule.ensureSkillsInstalled([
+        '/nonexistent/skill/path',
+      ])
       assert.equal(result.length, 1)
       assert.equal(result[0].action, 'failed')
     })
@@ -906,7 +1038,10 @@ describe('profile apply', () => {
     it('formats results into readable string', () => {
       const results = {
         opencode: {
-          config: { applied: [{ scope: 'global', path: '/tmp/test' }], skipped: [] },
+          config: {
+            applied: [{ scope: 'global', path: '/tmp/test' }],
+            skipped: [],
+          },
           mcpServers: { applied: ['github'], skipped: [] },
           skills: { applied: [], skipped: ['already-installed'], failed: [] },
           instructions: { applied: [], skipped: ['no data'] },

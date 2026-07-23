@@ -1,6 +1,11 @@
 import { mkdir, cp, writeFile, stat, symlink, rm } from 'node:fs/promises'
 import { join, relative, dirname } from 'node:path'
-import { addSkillToLock, getGlobalLockPath, getProjectLockPath, computeFileHashes } from './lockfile.js'
+import {
+  addSkillToLock,
+  getGlobalLockPath,
+  getProjectLockPath,
+  computeFileHashes,
+} from './lockfile.js'
 import { getAgentByFlag } from '../agents.js'
 
 function normalizeSlug(slug) {
@@ -11,7 +16,7 @@ export async function installSkill(resolved, targets, mode = 'copy') {
   const slug = resolved.slug
   const results = []
 
-  const agentNames = targets.map(t => {
+  const agentNames = targets.map((t) => {
     const agent = getAgentByFlag(t)
     return agent ? agent.name : t
   })
@@ -56,19 +61,26 @@ export async function installSkill(resolved, targets, mode = 'copy') {
       }
     }
 
-    const lockPath = target === 'project'
-      ? getProjectLockPath(process.cwd())
-      : getGlobalLockPath()
+    const lockPath =
+      target === 'project'
+        ? getProjectLockPath(process.cwd())
+        : getGlobalLockPath()
 
-    await addSkillToLock(slug, {
+    await addSkillToLock(
       slug,
-      contentSha: resolved.contentSha,
-      fileHashes: resolved.fileContents ? computeFileHashes(resolved.fileContents) : undefined,
-      installedAt: new Date().toISOString(),
-      agents: agentNames,
-      source: resolved.sourcePath,
-      sourceType: resolved.sourceType,
-    }, lockPath)
+      {
+        slug,
+        contentSha: resolved.contentSha,
+        fileHashes: resolved.fileContents
+          ? computeFileHashes(resolved.fileContents)
+          : undefined,
+        installedAt: new Date().toISOString(),
+        agents: agentNames,
+        source: resolved.sourcePath,
+        sourceType: resolved.sourceType,
+      },
+      lockPath,
+    )
 
     results.push({ target, path: slugDir, label })
   }

@@ -23,5 +23,7 @@ export async function checkCommand() {
     }
   }
 
-  console.log(`\n${updatesAvailable > 0 ? `⚠️  ${updatesAvailable} skill(s) have updates available. Run \`rolecraft update <slug>\` to update.` : '✅ All skills are up to date.'}\n`)
+  console.log(
+    `\n${updatesAvailable > 0 ? `⚠️  ${updatesAvailable} skill(s) have updates available. Run \`rolecraft update <slug>\` to update.` : '✅ All skills are up to date.'}\n`,
+  )
 }

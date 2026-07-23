@@ -89,7 +89,10 @@ describe('api test', () => {
     const result = await testApi.apiTest(fp)
 
     assert.ok(result.score >= 70, `Expected score >= 70, got ${result.score}`)
-    assert.ok(['A', 'B'].includes(result.grade), `Expected grade A or B, got ${result.grade}`)
+    assert.ok(
+      ['A', 'B'].includes(result.grade),
+      `Expected grade A or B, got ${result.grade}`,
+    )
     assert.ok(result.assertions.length > 0)
     assert.ok(Array.isArray(result.suggestions))
   })
@@ -105,7 +108,7 @@ describe('api test', () => {
   it('returns name-defined assertion result', async () => {
     const fp = createSkill(GOOD_SKILL)
     const result = await testApi.apiTest(fp)
-    const assertion = result.assertions.find(a => a.name === 'name-defined')
+    const assertion = result.assertions.find((a) => a.name === 'name-defined')
     assert.ok(assertion)
     assert.equal(assertion.pass, true)
   })
@@ -113,7 +116,7 @@ describe('api test', () => {
   it('returns slug-defined assertion result', async () => {
     const fp = createSkill(GOOD_SKILL)
     const result = await testApi.apiTest(fp)
-    const assertion = result.assertions.find(a => a.name === 'slug-defined')
+    const assertion = result.assertions.find((a) => a.name === 'slug-defined')
     assert.ok(assertion)
     assert.equal(assertion.pass, true)
   })
@@ -121,7 +124,9 @@ describe('api test', () => {
   it('returns description-length assertion result', async () => {
     const fp = createSkill(GOOD_SKILL)
     const result = await testApi.apiTest(fp)
-    const assertion = result.assertions.find(a => a.name === 'description-length')
+    const assertion = result.assertions.find(
+      (a) => a.name === 'description-length',
+    )
     assert.ok(assertion)
     assert.equal(assertion.pass, true)
   })
@@ -129,7 +134,7 @@ describe('api test', () => {
   it('returns agent-targets assertion result', async () => {
     const fp = createSkill(GOOD_SKILL)
     const result = await testApi.apiTest(fp)
-    const assertion = result.assertions.find(a => a.name === 'agent-targets')
+    const assertion = result.assertions.find((a) => a.name === 'agent-targets')
     assert.ok(assertion)
     assert.equal(assertion.pass, true)
   })
@@ -145,7 +150,9 @@ rm -rf /
 `
     const fp = createSkill(dangerous)
     const result = await testApi.apiTest(fp)
-    const assertion = result.assertions.find(a => a.name === 'dangerous-patterns')
+    const assertion = result.assertions.find(
+      (a) => a.name === 'dangerous-patterns',
+    )
     assert.ok(assertion)
     assert.equal(assertion.pass, false)
   })
@@ -161,14 +168,16 @@ Just a single paragraph with no markdown sections.
 `
     const fp = createSkill(noSections)
     const result = await testApi.apiTest(fp)
-    const assertion = result.assertions.find(a => a.name === 'has-sections')
+    const assertion = result.assertions.find((a) => a.name === 'has-sections')
     assert.ok(assertion)
     assert.equal(assertion.pass, false)
   })
 
   it('supports --only filter', async () => {
     const fp = createSkill(GOOD_SKILL)
-    const result = await testApi.apiTest(fp, { only: ['name-defined', 'slug-defined'] })
+    const result = await testApi.apiTest(fp, {
+      only: ['name-defined', 'slug-defined'],
+    })
     assert.equal(result.assertions.length, 2)
     assert.equal(result.assertions[0].name, 'name-defined')
     assert.equal(result.assertions[1].name, 'slug-defined')
@@ -177,7 +186,7 @@ Just a single paragraph with no markdown sections.
   it('handles non-existent file', async () => {
     await assert.rejects(
       () => testApi.apiTest(join(tempDir, 'nonexistent.SKILL.md')),
-      /ENOENT/
+      /ENOENT/,
     )
   })
 
@@ -192,14 +201,17 @@ Just a single paragraph with no markdown sections.
     mkdirSync(skillDir, { recursive: true })
     writeFileSync(join(skillDir, 'SKILL.md'), GOOD_SKILL)
 
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3,
-      skills: {
-        'test-installed': { slug: 'test-installed', agents: ['cursor'] },
-      },
-      dismissed: {},
-      lastSelectedAgents: [],
-    }))
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'test-installed': { slug: 'test-installed', agents: ['cursor'] },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
 
     const result = await testApi.apiTest(null, { all: true })
     assert.equal(result.summary.total, 1)
@@ -210,13 +222,13 @@ Just a single paragraph with no markdown sections.
     const fp = createSkill(BAD_SKILL)
     const result = await testApi.apiTest(fp)
     assert.ok(result.suggestions.length > 0)
-    assert.ok(result.suggestions.every(s => typeof s === 'string'))
+    assert.ok(result.suggestions.every((s) => typeof s === 'string'))
   })
 
   it('returns null pass for optional mcp-referenced when no MCP refs', async () => {
     const fp = createSkill(GOOD_SKILL)
     const result = await testApi.apiTest(fp)
-    const assertion = result.assertions.find(a => a.name === 'mcp-referenced')
+    const assertion = result.assertions.find((a) => a.name === 'mcp-referenced')
     assert.ok(assertion)
     assert.equal(assertion.pass, null)
   })

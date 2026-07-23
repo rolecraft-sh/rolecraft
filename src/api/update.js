@@ -12,9 +12,11 @@ function normalizeSlug(slug) {
 function findActualSlug(slug, lock) {
   if (lock.skills[slug]) return slug
   const normalized = normalizeSlug(slug)
-  const found = Object.keys(lock.skills).find(k => normalizeSlug(k) === normalized)
+  const found = Object.keys(lock.skills).find(
+    (k) => normalizeSlug(k) === normalized,
+  )
   if (found) return found
-  return Object.keys(lock.skills).find(k => {
+  return Object.keys(lock.skills).find((k) => {
     const namePart = k.split('/').pop()
     return namePart === slug || normalizeSlug(namePart) === normalized
   })
@@ -58,7 +60,7 @@ export async function apiUpdate(slug, cwd = process.cwd(), options = {}) {
     throw new Error(`Skill "${slug}" not found.`)
   }
 
-  let targets = detectTargets(actualSlug, cwd)
+  const targets = detectTargets(actualSlug, cwd)
   if (targets.length === 0) targets.push('agents')
 
   if (options.dryRun) {

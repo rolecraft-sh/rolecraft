@@ -3,7 +3,9 @@ import { resolveSource } from '../utils/resolver.js'
 
 export async function apiCheck(cwd = process.cwd()) {
   const globalLock = await readLock()
-  const projectLock = await readLock(getProjectLockPath(cwd)).catch(() => ({ skills: {} }))
+  const projectLock = await readLock(getProjectLockPath(cwd)).catch(() => ({
+    skills: {},
+  }))
   const allSkills = { ...globalLock.skills, ...projectLock.skills }
 
   const entries = Object.entries(allSkills)
@@ -25,13 +27,23 @@ export async function apiCheck(cwd = process.cwd()) {
       const newHash = resolved.contentSha || ''
 
       if (oldHash && newHash && oldHash !== newHash) {
-        results.push({ slug, status: 'update_available', oldHash, newHash, source })
+        results.push({
+          slug,
+          status: 'update_available',
+          oldHash,
+          newHash,
+          source,
+        })
         updatesAvailable++
       } else {
         results.push({ slug, status: 'up_to_date', hash: oldHash, source })
       }
     } catch {
-      results.push({ slug, status: 'error', reason: `could not check (source: ${source})` })
+      results.push({
+        slug,
+        status: 'error',
+        reason: `could not check (source: ${source})`,
+      })
     }
   }
 

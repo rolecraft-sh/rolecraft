@@ -6,7 +6,9 @@ export async function removeCommand(slug, options = {}) {
     console.log(`\n📋 [dry-run] Would remove skill:\n`)
     console.log(`   Skill:  ${result.slug}`)
     for (const d of result.dirs) {
-      console.log(`   ${d.scope === 'global' ? 'Global' : 'Project'}: ${d.path}`)
+      console.log(
+        `   ${d.scope === 'global' ? 'Global' : 'Project'}: ${d.path}`,
+      )
     }
     console.log()
     return

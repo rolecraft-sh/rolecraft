@@ -1,0 +1,20 @@
+#!/bin/sh
+# .git/hooks/pre-commit — runs lint + tests before allowing a commit
+# Installed by: npm install / npm run setup-hooks / node scripts/setup-hooks.mjs
+
+set -e
+
+# Only run in rolecraft project dir
+PKG=$(node -p "require('./package.json').name" 2>/dev/null || echo "")
+if [ "$PKG" != "rolecraft" ]; then
+  exit 0
+fi
+
+# Run lint (syntax + biome). Skip if biome not installed.
+if [ -x node_modules/.bin/biome ]; then
+  echo "→ pre-commit: running npm run lint"
+  if ! npm run --silent lint; then
+    echo "pre-commit: lint failed. Run 'npx biome check --write' to auto-fix." >&2
+    exit 1
+  fi
+fi
