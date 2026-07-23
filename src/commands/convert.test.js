@@ -138,6 +138,16 @@ describe('convert command', () => {
     )
   })
 
+  it('throws for an empty source file', async () => {
+    const emptyPath = join(tempDir, 'empty-SKILL.md')
+    await writeFile(emptyPath, '')
+
+    await assert.rejects(
+      () => commandModule.convertCommand(emptyPath, { output: tempDir }),
+      /Source is empty/,
+    )
+  })
+
   it('preserves mcp_servers during round-trip', async () => {
     const skillContent =
       '---\nname: mcp-skill\nslug: mcp-skill\ndescription: Has MCP\nmcp_servers:\n  - name: github\n    source: gh:github/github-mcp-server\n---\n\nBody\n'
