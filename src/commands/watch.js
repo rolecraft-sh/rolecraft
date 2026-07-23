@@ -5,15 +5,19 @@ import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 import agents from '../agents.js'
 
-const agentNameToTarget = Object.fromEntries(agents.map(a => [a.name, a.flag]))
+const agentNameToTarget = Object.fromEntries(
+  agents.map((a) => [a.name, a.flag]),
+)
 
-async function reinstallSkill(slug, skills, cwd) {
+async function reinstallSkill(slug, skills, _cwd) {
   const entry = skills[slug]
-  if (!entry || entry.sourceType !== 'local') return false
+  if (entry?.sourceType !== 'local') return false
 
   try {
     const resolved = await resolveSource(entry.source)
-    const targets = (entry.agents || []).map(a => agentNameToTarget[a] || a).filter(Boolean)
+    const targets = (entry.agents || [])
+      .map((a) => agentNameToTarget[a] || a)
+      .filter(Boolean)
     if (targets.length === 0) targets.push('project')
 
     await installSkill(resolved, targets)
@@ -74,7 +78,7 @@ export async function watchCommand(slug, cwd = process.cwd(), options = {}) {
 
     const sourcePath = entry.source.replace(/^~/, homedir())
 
-    const handler = (eventType, filename) => {
+    const handler = (_eventType, filename) => {
       if (!filename || filename.startsWith('.')) return
 
       const key = `watch-${s}`
@@ -84,7 +88,9 @@ export async function watchCommand(slug, cwd = process.cwd(), options = {}) {
         const timestamp = new Date().toLocaleTimeString()
         console.log(`  [${timestamp}] ${s}: ${filename} changed, syncing...`)
         const ok = await reinstallSkill(s, mergedSkills, cwd)
-        console.log(`  [${timestamp}] ${s}: ${ok ? 'synced successfully' : 'sync failed'}`)
+        console.log(
+          `  [${timestamp}] ${s}: ${ok ? 'synced successfully' : 'sync failed'}`,
+        )
       }, 300)
     }
 

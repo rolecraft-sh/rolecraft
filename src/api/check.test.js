@@ -32,12 +32,15 @@ describe('api check', () => {
   })
 
   it('reports skill with no source info', async () => {
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3,
-      skills: { 'test/no-source': { slug: 'test/no-source' } },
-      dismissed: {},
-      lastSelectedAgents: [],
-    }))
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: { 'test/no-source': { slug: 'test/no-source' } },
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
 
     const result = await apiCheck(process.cwd())
 
@@ -58,14 +61,17 @@ Some content.`
     await writeFile(join(skillDir, 'SKILL.md'), content)
     const contentSha = computeContentHash({ 'SKILL.md': content })
 
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3,
-      skills: {
-        'test/match': { slug: 'test/match', source: skillDir, contentSha },
-      },
-      dismissed: {},
-      lastSelectedAgents: [],
-    }))
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'test/match': { slug: 'test/match', source: skillDir, contentSha },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
 
     const result = await apiCheck(process.cwd())
 
@@ -75,7 +81,6 @@ Some content.`
 
   it('reports update available when hash differs', async () => {
     const skillDir = join(tempDir, 'agents', 'skill-update')
-    mkdirSync: mkdir
     await mkdir(skillDir, { recursive: true })
     const content = `---
 name: skill-update
@@ -84,17 +89,20 @@ name: skill-update
 New content.`
     await writeFile(join(skillDir, 'SKILL.md'), content)
 
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3,
-      skills: {
-        'test/update': {
-          source: skillDir,
-          contentSha: 'old-hash-that-does-not-match',
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'test/update': {
+            source: skillDir,
+            contentSha: 'old-hash-that-does-not-match',
+          },
         },
-      },
-      dismissed: {},
-      lastSelectedAgents: [],
-    }))
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
 
     const result = await apiCheck(process.cwd())
 

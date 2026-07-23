@@ -1,6 +1,11 @@
 import { rm } from 'node:fs/promises'
 import { join } from 'node:path'
-import { readLock, removeSkillFromLock, getAgentsDir, getProjectLockPath } from '../utils/lockfile.js'
+import {
+  readLock,
+  removeSkillFromLock,
+  getAgentsDir,
+  getProjectLockPath,
+} from '../utils/lockfile.js'
 
 function normalizeSlug(slug) {
   return slug.replace(/\//g, '-')
@@ -9,9 +14,11 @@ function normalizeSlug(slug) {
 function findActualSlug(slug, lock) {
   if (lock.skills[slug]) return slug
   const normalized = normalizeSlug(slug)
-  const found = Object.keys(lock.skills).find(k => normalizeSlug(k) === normalized)
+  const found = Object.keys(lock.skills).find(
+    (k) => normalizeSlug(k) === normalized,
+  )
   if (found) return found
-  return Object.keys(lock.skills).find(k => {
+  return Object.keys(lock.skills).find((k) => {
     const namePart = k.split('/').pop()
     return namePart === slug || normalizeSlug(namePart) === normalized
   })
@@ -34,8 +41,16 @@ export async function apiRemove(slug, cwd = process.cwd(), options = {}) {
 
   if (options.dryRun) {
     const dirs = []
-    if (globalFound) dirs.push({ scope: 'global', path: join(getAgentsDir(), normalizeSlug(actualSlug)) })
-    if (projectFound) dirs.push({ scope: 'project', path: join(cwd, '.agents', 'skills', normalizeSlug(actualSlug)) })
+    if (globalFound)
+      dirs.push({
+        scope: 'global',
+        path: join(getAgentsDir(), normalizeSlug(actualSlug)),
+      })
+    if (projectFound)
+      dirs.push({
+        scope: 'project',
+        path: join(cwd, '.agents', 'skills', normalizeSlug(actualSlug)),
+      })
     return { dryRun: true, slug: actualSlug, dirs }
   }
 

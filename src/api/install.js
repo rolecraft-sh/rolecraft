@@ -1,14 +1,21 @@
 import { resolveSource, resolveSkills } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 import { scanSkill } from '../utils/security.js'
-import { parseMcpServersFromSkill, resolveMcpSource, addMcpServer, getSupportedMcpAgents } from '../utils/mcp.js'
+import {
+  parseMcpServersFromSkill,
+  resolveMcpSource,
+  addMcpServer,
+  getSupportedMcpAgents,
+} from '../utils/mcp.js'
 import agents from '../agents.js'
 
 function selectSkills(allSkills, skillNames, yes) {
   if (skillNames && skillNames.length > 0) {
-    const names = skillNames.map(n => n.toLowerCase())
-    return allSkills.filter(s =>
-      names.includes(s.name.toLowerCase()) || names.includes(s.slug.toLowerCase())
+    const names = skillNames.map((n) => n.toLowerCase())
+    return allSkills.filter(
+      (s) =>
+        names.includes(s.name.toLowerCase()) ||
+        names.includes(s.slug.toLowerCase()),
     )
   }
   if (allSkills.length === 1 || yes) return allSkills
@@ -30,7 +37,9 @@ export async function apiInstallSkills(source, options = {}) {
   const scope = options.scope || { project: true }
 
   if (options.frozenLockfile) {
-    const { readLock, getProjectLockPath } = await import('../utils/lockfile.js')
+    const { readLock, getProjectLockPath } = await import(
+      '../utils/lockfile.js'
+    )
     const [globalLock, projectLock] = await Promise.all([
       readLock(),
       readLock(getProjectLockPath(cwd)).catch(() => ({ skills: {} })),
@@ -38,7 +47,9 @@ export async function apiInstallSkills(source, options = {}) {
     const { slug } = await resolveSource(source)
     const existing = globalLock.skills[slug] || projectLock.skills[slug]
     if (existing) {
-      throw new Error(`Skill "${slug}" already installed. Use update() to update or omit frozenLockfile to overwrite.`)
+      throw new Error(
+        `Skill "${slug}" already installed. Use update() to update or omit frozenLockfile to overwrite.`,
+      )
     }
   }
 
@@ -46,11 +57,15 @@ export async function apiInstallSkills(source, options = {}) {
   const selectedSkills = selectSkills(allSkills, options.skill, options.yes)
 
   if (!selectedSkills) {
-    throw new Error(`Multiple skills found (${allSkills.length}). Provide --skill or --yes to select.`)
+    throw new Error(
+      `Multiple skills found (${allSkills.length}). Provide --skill or --yes to select.`,
+    )
   }
 
   if (selectedSkills.length === 0) {
-    throw new Error(`No matching skills found for: ${options.skill?.join(', ')}. Available: ${allSkills.map(s => s.name).join(', ')}`)
+    throw new Error(
+      `No matching skills found for: ${options.skill?.join(', ')}. Available: ${allSkills.map((s) => s.name).join(', ')}`,
+    )
   }
 
   const targets = options.targets || resolveTargets(scope)
@@ -58,7 +73,7 @@ export async function apiInstallSkills(source, options = {}) {
   if (options.dryRun) {
     return {
       dryRun: true,
-      skills: selectedSkills.map(s => ({
+      skills: selectedSkills.map((s) => ({
         name: s.name,
         slug: s.slug,
         source,
@@ -80,17 +95,26 @@ export async function apiInstallSkills(source, options = {}) {
     }
 
     const security = scanSkill(resolved)
-    const level = security.score >= 90 ? 'safe' : security.score >= 70 ? 'review' : 'danger'
+    const level =
+      security.score >= 90 ? 'safe' : security.score >= 70 ? 'review' : 'danger'
 
     if (level === 'danger' && !options.yes) {
-      throw new Error(`Install of "${resolved.name}" blocked by security scan (score: ${security.score}). Use yes:true to force.`)
+      throw new Error(
+        `Install of "${resolved.name}" blocked by security scan (score: ${security.score}). Use yes:true to force.`,
+      )
     }
 
     if (level === 'review' && !options.yes) {
-      throw new Error(`"${resolved.name}" requires security review (score: ${security.score}). Use yes:true to skip.`)
+      throw new Error(
+        `"${resolved.name}" requires security review (score: ${security.score}). Use yes:true to skip.`,
+      )
     }
 
-    const installResults = await installSkill(resolved, targets, options.symlink ? 'symlink' : 'copy')
+    const installResults = await installSkill(
+      resolved,
+      targets,
+      options.symlink ? 'symlink' : 'copy',
+    )
     results.push({
       name: resolved.name,
       slug: resolved.slug,
@@ -103,7 +127,9 @@ export async function apiInstallSkills(source, options = {}) {
       const mcpServers = parseMcpServersFromSkill(resolved.content)
       if (mcpServers.length > 0) {
         const supportedAgents = getSupportedMcpAgents()
-        const mcpTargets = targets.filter(t => t !== 'project' && supportedAgents.includes(t))
+        const mcpTargets = targets.filter(
+          (t) => t !== 'project' && supportedAgents.includes(t),
+        )
         for (const server of mcpServers) {
           const resolvedMcp = resolveMcpSource(server.source)
           const installed = []
@@ -111,7 +137,11 @@ export async function apiInstallSkills(source, options = {}) {
             const ok = await addMcpServer(agent, server.name, resolvedMcp)
             installed.push({ agent, name: server.name, success: ok })
           }
-          mcpResults.push({ server: server.name, source: server.source, installed })
+          mcpResults.push({
+            server: server.name,
+            source: server.source,
+            installed,
+          })
         }
       }
     }

@@ -19,13 +19,18 @@ after(async () => {
 
 describe('convert command', () => {
   it('converts SKILL.md to .mdc', async () => {
-    const skillContent = '---\nname: test-skill\nslug: org/test-skill\ndescription: A test skill\n---\n\n# Test Skill\n\nSome instructions.\n'
+    const skillContent =
+      '---\nname: test-skill\nslug: org/test-skill\ndescription: A test skill\n---\n\n# Test Skill\n\nSome instructions.\n'
     await writeFile(join(tempDir, 'SKILL.md'), skillContent)
 
     const logs = []
-    mock.method(console, 'log', (...args) => { logs.push(String(args[0])) })
+    mock.method(console, 'log', (...args) => {
+      logs.push(String(args[0]))
+    })
 
-    await commandModule.convertCommand(join(tempDir, 'SKILL.md'), { output: tempDir })
+    await commandModule.convertCommand(join(tempDir, 'SKILL.md'), {
+      output: tempDir,
+    })
 
     const outPath = join(tempDir, 'org-test-skill.mdc')
     const outContent = readFileSync(outPath, 'utf-8')
@@ -33,16 +38,19 @@ describe('convert command', () => {
     assert.match(outContent, /alwaysApply: false/)
     assert.match(outContent, /# Test Skill/)
     assert.match(outContent, /Some instructions/)
-    assert.ok(logs.some(l => l.includes('Converted')))
+    assert.ok(logs.some((l) => l.includes('Converted')))
   })
 
   it('converts .mdc to SKILL.md', async () => {
-    const mdcContent = '---\ndescription: My rule\nalwaysApply: false\nglobs: src/**/*.ts\n---\n\n# My Rule\n\nDo not use any.\n'
+    const mdcContent =
+      '---\ndescription: My rule\nalwaysApply: false\nglobs: src/**/*.ts\n---\n\n# My Rule\n\nDo not use any.\n'
     const mdcPath = join(tempDir, 'my-rule.mdc')
     await writeFile(mdcPath, mdcContent)
 
     const logs = []
-    mock.method(console, 'log', (...args) => { logs.push(String(args[0])) })
+    mock.method(console, 'log', (...args) => {
+      logs.push(String(args[0]))
+    })
 
     await commandModule.convertCommand(mdcPath, { output: tempDir })
 
@@ -52,7 +60,7 @@ describe('convert command', () => {
     assert.match(outContent, /slug: my-rule/)
     assert.match(outContent, /owner: local/)
     assert.match(outContent, /# My Rule/)
-    assert.ok(logs.some(l => l.includes('Converted')))
+    assert.ok(logs.some((l) => l.includes('Converted')))
   })
 
   it('converts a directory containing SKILL.md', async () => {
@@ -62,23 +70,33 @@ describe('convert command', () => {
     await writeFile(join(skillDir, 'SKILL.md'), skillContent)
 
     const logs = []
-    mock.method(console, 'log', (...args) => { logs.push(String(args[0])) })
+    mock.method(console, 'log', (...args) => {
+      logs.push(String(args[0]))
+    })
 
     await commandModule.convertCommand(skillDir, { output: tempDir })
 
     const outPath = join(tempDir, 'dir-skill.mdc')
     assert.ok(readFileSync(outPath, 'utf-8').includes('Body'))
-    assert.ok(logs.some(l => l.includes('Converted')))
+    assert.ok(logs.some((l) => l.includes('Converted')))
   })
 
   it('converts a directory containing .mdc files', async () => {
     const mdcDir = join(tempDir, 'rules')
     await mkdir(mdcDir, { recursive: true })
-    await writeFile(join(mdcDir, 'rule1.mdc'), '---\ndescription: Rule 1\nalwaysApply: false\n---\nContent 1\n')
-    await writeFile(join(mdcDir, 'rule2.mdc'), '---\ndescription: Rule 2\nalwaysApply: false\n---\nContent 2\n')
+    await writeFile(
+      join(mdcDir, 'rule1.mdc'),
+      '---\ndescription: Rule 1\nalwaysApply: false\n---\nContent 1\n',
+    )
+    await writeFile(
+      join(mdcDir, 'rule2.mdc'),
+      '---\ndescription: Rule 2\nalwaysApply: false\n---\nContent 2\n',
+    )
 
     const logs = []
-    mock.method(console, 'log', (...args) => { logs.push(String(args[0])) })
+    mock.method(console, 'log', (...args) => {
+      logs.push(String(args[0]))
+    })
 
     await commandModule.convertCommand(mdcDir, { output: tempDir })
 
@@ -88,14 +106,22 @@ describe('convert command', () => {
   })
 
   it('dry-run shows plan without writing', async () => {
-    await writeFile(join(tempDir, 'SKILL.md'), '---\nname: dry\nslug: dry\n---\nBody\n')
+    await writeFile(
+      join(tempDir, 'SKILL.md'),
+      '---\nname: dry\nslug: dry\n---\nBody\n',
+    )
 
     const logs = []
-    mock.method(console, 'log', (...args) => { logs.push(String(args[0])) })
+    mock.method(console, 'log', (...args) => {
+      logs.push(String(args[0]))
+    })
 
-    await commandModule.convertCommand(join(tempDir, 'SKILL.md'), { dryRun: true, output: tempDir })
+    await commandModule.convertCommand(join(tempDir, 'SKILL.md'), {
+      dryRun: true,
+      output: tempDir,
+    })
 
-    assert.ok(logs.some(l => l.includes('Would convert')))
+    assert.ok(logs.some((l) => l.includes('Would convert')))
     const outPath = join(tempDir, 'dry.mdc')
     try {
       readFileSync(outPath, 'utf-8')
@@ -108,15 +134,18 @@ describe('convert command', () => {
   it('throws for nonexistent source', async () => {
     await assert.rejects(
       () => commandModule.convertCommand(join(tempDir, 'nonexistent')),
-      /Source not found/
+      /Source not found/,
     )
   })
 
   it('preserves mcp_servers during round-trip', async () => {
-    const skillContent = '---\nname: mcp-skill\nslug: mcp-skill\ndescription: Has MCP\nmcp_servers:\n  - name: github\n    source: gh:github/github-mcp-server\n---\n\nBody\n'
+    const skillContent =
+      '---\nname: mcp-skill\nslug: mcp-skill\ndescription: Has MCP\nmcp_servers:\n  - name: github\n    source: gh:github/github-mcp-server\n---\n\nBody\n'
     await writeFile(join(tempDir, 'SKILL.md'), skillContent)
 
-    await commandModule.convertCommand(join(tempDir, 'SKILL.md'), { output: tempDir })
+    await commandModule.convertCommand(join(tempDir, 'SKILL.md'), {
+      output: tempDir,
+    })
     const mdcPath = join(tempDir, 'mcp-skill.mdc')
     const mdcContent = readFileSync(mdcPath, 'utf-8')
 
@@ -126,7 +155,10 @@ describe('convert command', () => {
 
   it('converts .mdc back to SKILL.md preserving body', async () => {
     const mdcPath = join(tempDir, 'test-rule.mdc')
-    await writeFile(mdcPath, '---\ndescription: Test rule\nalwaysApply: true\n---\n\n# Test\n\nRule body here.\n')
+    await writeFile(
+      mdcPath,
+      '---\ndescription: Test rule\nalwaysApply: true\n---\n\n# Test\n\nRule body here.\n',
+    )
 
     await commandModule.convertCommand(mdcPath, { output: tempDir })
     const skillPath = join(tempDir, 'SKILL.md')
@@ -142,7 +174,9 @@ describe('convert command', () => {
     const bodyOnly = '# Just Content\n\nNo frontmatter here.\n'
     await writeFile(join(tempDir, 'SKILL.md'), bodyOnly)
 
-    await commandModule.convertCommand(join(tempDir, 'SKILL.md'), { output: tempDir })
+    await commandModule.convertCommand(join(tempDir, 'SKILL.md'), {
+      output: tempDir,
+    })
     const outPath = join(tempDir, 'skill.mdc')
     const content = readFileSync(outPath, 'utf-8')
 
@@ -157,12 +191,13 @@ describe('convert command', () => {
 
     await assert.rejects(
       () => commandModule.convertCommand(emptyDir),
-      /No SKILL.md or .mdc files found/
+      /No SKILL.md or .mdc files found/,
     )
   })
 
   it('detects format by content when filename is ambiguous', async () => {
-    const skillContent = '---\nname: test-skill\nslug: test-skill\n---\n\nBody\n'
+    const skillContent =
+      '---\nname: test-skill\nslug: test-skill\n---\n\nBody\n'
     const ambiguousPath = join(tempDir, 'rules.txt')
     await writeFile(ambiguousPath, skillContent)
 
@@ -175,7 +210,8 @@ describe('convert command', () => {
   })
 
   it('detects mdc format by content when filename is ambiguous', async () => {
-    const mdcContent = '---\ndescription: My rule\nalwaysApply: true\nglobs: src/**/*.ts\n---\n\n# Rule\n'
+    const mdcContent =
+      '---\ndescription: My rule\nalwaysApply: true\nglobs: src/**/*.ts\n---\n\n# Rule\n'
     const ambiguousPath = join(tempDir, 'rules.txt')
     await writeFile(ambiguousPath, mdcContent)
 
@@ -193,21 +229,29 @@ describe('convert command', () => {
 
     await assert.rejects(
       () => commandModule.convertCommand(ambiguousPath),
-      /Cannot detect format/
+      /Cannot detect format/,
     )
   })
 
   it('mdc dry-run shows plan without writing', async () => {
     const mdcPath = join(tempDir, 'test.mdc')
-    await writeFile(mdcPath, '---\ndescription: Test\nalwaysApply: false\n---\nBody\n')
+    await writeFile(
+      mdcPath,
+      '---\ndescription: Test\nalwaysApply: false\n---\nBody\n',
+    )
 
     const logs = []
-    mock.method(console, 'log', (...args) => { logs.push(String(args[0])) })
+    mock.method(console, 'log', (...args) => {
+      logs.push(String(args[0]))
+    })
 
-    await commandModule.convertCommand(mdcPath, { dryRun: true, output: tempDir })
+    await commandModule.convertCommand(mdcPath, {
+      dryRun: true,
+      output: tempDir,
+    })
 
-    assert.ok(logs.some(l => l.includes('Would convert')))
-    assert.ok(logs.some(l => l.includes('SKILL.md')))
+    assert.ok(logs.some((l) => l.includes('Would convert')))
+    assert.ok(logs.some((l) => l.includes('SKILL.md')))
     const outPath = join(tempDir, 'SKILL.md')
     try {
       readFileSync(outPath, 'utf-8')
@@ -233,7 +277,7 @@ describe('converter utilities', () => {
 
   it('serializes non-object array items', () => {
     const result = converterModule.serializeFrontmatter({ tags: ['a', 'b'] })
-    assert.match(result, /tags:\n  - a\n  - b/)
+    assert.match(result, /tags:\n {2}- a\n {2}- b/)
   })
 
   it('detectFormat returns null for unknown extension', () => {
@@ -242,7 +286,8 @@ describe('converter utilities', () => {
   })
 
   it('mdcToSkill preserves mcp_servers from mdc', () => {
-    const mdcContent = '---\ndescription: MCP skill\nalwaysApply: false\nmcp_servers:\n  - name: git\n    source: gh:git/mcp\n---\nBody\n'
+    const mdcContent =
+      '---\ndescription: MCP skill\nalwaysApply: false\nmcp_servers:\n  - name: git\n    source: gh:git/mcp\n---\nBody\n'
     const result = converterModule.mdcToSkill(mdcContent, 'test.mdc')
     assert.match(result, /mcp_servers/)
     assert.match(result, /git/)

@@ -13,9 +13,15 @@ before(async () => {
   origHome = process.env.HOME
   process.env.HOME = tempDir
   await mkdir(join(tempDir, '.agents'), { recursive: true })
-  await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-    version: 3, skills: {}, dismissed: {}, lastSelectedAgents: [],
-  }))
+  await writeFile(
+    join(tempDir, '.agents', '.skill-lock.json'),
+    JSON.stringify({
+      version: 3,
+      skills: {},
+      dismissed: {},
+      lastSelectedAgents: [],
+    }),
+  )
 })
 
 after(async () => {
@@ -23,10 +29,16 @@ after(async () => {
   await rm(tempDir, { recursive: true, force: true })
 })
 
-async function resetLockfile() {
-  await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-    version: 3, skills: {}, dismissed: {}, lastSelectedAgents: [],
-  }))
+async function _resetLockfile() {
+  await writeFile(
+    join(tempDir, '.agents', '.skill-lock.json'),
+    JSON.stringify({
+      version: 3,
+      skills: {},
+      dismissed: {},
+      lastSelectedAgents: [],
+    }),
+  )
 }
 
 describe('api list', () => {
@@ -51,7 +63,7 @@ describe('api list', () => {
         },
         dismissed: {},
         lastSelectedAgents: [],
-      })
+      }),
     )
 
     const result = await apiList(tempDir)
@@ -111,7 +123,10 @@ describe('api list', () => {
       JSON.stringify({
         version: 3,
         skills: {
-          'test/both': { source: 'owner/repo', installedAt: '2025-01-01T00:00:00.000Z' },
+          'test/both': {
+            source: 'owner/repo',
+            installedAt: '2025-01-01T00:00:00.000Z',
+          },
         },
         dismissed: {},
         lastSelectedAgents: [],
@@ -122,7 +137,10 @@ describe('api list', () => {
       JSON.stringify({
         version: 3,
         skills: {
-          'test/both': { source: 'owner/repo', installedAt: '2025-02-01T00:00:00.000Z' },
+          'test/both': {
+            source: 'owner/repo',
+            installedAt: '2025-02-01T00:00:00.000Z',
+          },
         },
         dismissed: {},
         lastSelectedAgents: [],

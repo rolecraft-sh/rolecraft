@@ -46,9 +46,14 @@ export async function apiProfileApply(name, options = {}) {
   if (!data) throw new Error(`Profile "${name}" not found.`)
 
   if (options.dryRun) {
-    const agentsToApply = options.targets?.length > 0
-      ? Object.fromEntries(Object.entries(data.agents).filter(([flag]) => options.targets.includes(flag)))
-      : data.agents
+    const agentsToApply =
+      options.targets?.length > 0
+        ? Object.fromEntries(
+            Object.entries(data.agents).filter(([flag]) =>
+              options.targets.includes(flag),
+            ),
+          )
+        : data.agents
     return { dryRun: true, name, agents: agentsToApply }
   }
 
@@ -81,10 +86,14 @@ export async function apiProfileDiff(name) {
     const profileInstr = profileEntry.instructions ?? null
     const currentInstr = currentEntry?.instructions ?? null
 
-    if (JSON.stringify(profileConfig) !== JSON.stringify(currentConfig)) differences.push('config')
-    if (JSON.stringify(profileMcp) !== JSON.stringify(currentMcp)) differences.push('mcpServers')
-    if (JSON.stringify(profileSkills) !== JSON.stringify(currentSkills)) differences.push('skills')
-    if (JSON.stringify(profileInstr) !== JSON.stringify(currentInstr)) differences.push('instructions')
+    if (JSON.stringify(profileConfig) !== JSON.stringify(currentConfig))
+      differences.push('config')
+    if (JSON.stringify(profileMcp) !== JSON.stringify(currentMcp))
+      differences.push('mcpServers')
+    if (JSON.stringify(profileSkills) !== JSON.stringify(currentSkills))
+      differences.push('skills')
+    if (JSON.stringify(profileInstr) !== JSON.stringify(currentInstr))
+      differences.push('instructions')
 
     diffs[flag] = { differences, hasDiff: differences.length > 0 }
     if (differences.length > 0) hasChanges = true
@@ -95,7 +104,7 @@ export async function apiProfileDiff(name) {
 
 export async function apiProfileList() {
   const profiles = await listProfiles()
-  return profiles.map(p => ({
+  return profiles.map((p) => ({
     name: p.name,
     description: p.description,
     agentCount: p.agentCount,
@@ -136,15 +145,26 @@ export async function apiProfileImport(path) {
   }
 
   let data
-  try { data = JSON.parse(content) } catch { throw new Error('Invalid JSON in profile.') }
+  try {
+    data = JSON.parse(content)
+  } catch {
+    throw new Error('Invalid JSON in profile.')
+  }
   if (!data.name) {
-    const nameFromFile = path.split('/').pop()?.replace(/\.json$/i, '') || 'imported'
+    const nameFromFile =
+      path
+        .split('/')
+        .pop()
+        ?.replace(/\.json$/i, '') || 'imported'
     data.name = nameFromFile
   }
   data.agents = data.agents || {}
 
   const validation = validateProfile(data)
-  if (!validation.valid) throw new Error(`Invalid profile data:\n  ${validation.errors.join('\n  ')}`)
+  if (!validation.valid)
+    throw new Error(
+      `Invalid profile data:\n  ${validation.errors.join('\n  ')}`,
+    )
 
   const enriched = {
     ...data,
@@ -159,7 +179,11 @@ export async function apiProfileImport(path) {
   const pp = resolve(profilePath(data.name))
   const profilesDir = resolve(join(homedir(), '.agents', 'profiles'))
   if (!pp.startsWith(profilesDir)) throw new Error('Invalid profile path')
-  await writeFile(pp, JSON.stringify(enriched, null, 2) + '\n', 'utf-8')
+  await writeFile(pp, `${JSON.stringify(enriched, null, 2)}\n`, 'utf-8')
 
-  return { name: data.name, agents: Object.keys(data.agents).length, profile: enriched }
+  return {
+    name: data.name,
+    agents: Object.keys(data.agents).length,
+    profile: enriched,
+  }
 }

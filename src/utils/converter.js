@@ -10,7 +10,10 @@ export function parseFrontmatter(content) {
 
   const yaml = match[1]
   const bodyStart = match[0].length
-  const body = content[bodyStart] === '\n' ? content.slice(bodyStart + 1) : content.slice(bodyStart)
+  const body =
+    content[bodyStart] === '\n'
+      ? content.slice(bodyStart + 1)
+      : content.slice(bodyStart)
 
   const attrs = {}
   const lines = yaml.split('\n')
@@ -22,7 +25,11 @@ export function parseFrontmatter(content) {
       currentKey = keyMatch[1]
       const val = parseYamlValue(keyMatch[2])
       if (val.startsWith('[')) {
-        try { attrs[currentKey] = JSON.parse(val.replace(/'/g, '"')) } catch { attrs[currentKey] = val }
+        try {
+          attrs[currentKey] = JSON.parse(val.replace(/'/g, '"'))
+        } catch {
+          attrs[currentKey] = val
+        }
       } else {
         attrs[currentKey] = val
       }
@@ -36,7 +43,11 @@ export function parseFrontmatter(content) {
       } else {
         attrs[currentKey].push(itemStr)
       }
-    } else if (currentKey && Array.isArray(attrs[currentKey]) && /^\s{4,}\w+:/.test(line)) {
+    } else if (
+      currentKey &&
+      Array.isArray(attrs[currentKey]) &&
+      /^\s{4,}\w+:/.test(line)
+    ) {
       const last = attrs[currentKey][attrs[currentKey].length - 1]
       if (typeof last === 'object') {
         const sub = line.trim().match(/^(\w+):\s*(.*)$/)
@@ -71,7 +82,7 @@ export function serializeFrontmatter(attrs) {
     }
   }
   lines.push('---')
-  return lines.join('\n') + '\n'
+  return `${lines.join('\n')}\n`
 }
 
 export function skillToMdc(content) {

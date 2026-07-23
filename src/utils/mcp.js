@@ -1,17 +1,20 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { join, dirname } from 'node:path'
 import { homedir } from 'node:os'
-import { execSync as defaultExecSync, spawnSync as defaultSpawnSync } from 'node:child_process'
+import {
+  execSync as defaultExecSync,
+  spawnSync as defaultSpawnSync,
+} from 'node:child_process'
 import { tmpdir } from 'node:os'
 import { mkdtempSync, readFileSync, readdirSync } from 'node:fs'
 import agents from '../agents.js'
 import { addServerToMcpLock, removeServerFromMcpLock } from './mcp-lock.js'
 
-let runExec = defaultExecSync
+let _runExec = defaultExecSync
 let runSpawnSync = defaultSpawnSync
 
 export function setExecSync(fn) {
-  runExec = fn
+  _runExec = fn
 }
 
 export function setSpawnSync(fn) {
@@ -19,9 +22,7 @@ export function setSpawnSync(fn) {
 }
 
 const AGENT_MCP_PATHS = Object.fromEntries(
-  agents
-    .filter(a => a.mcp)
-    .map(a => [a.flag, a.mcp.getPath])
+  agents.filter((a) => a.mcp).map((a) => [a.flag, a.mcp.getPath]),
 )
 
 function getMcpConfigPath(agent) {
@@ -48,14 +49,23 @@ function setMcpServerEntry(data, agent, name, serverConfig) {
   if (agent === 'copilot') {
     if (!data.servers) data.servers = {}
     if (!data.inputs) data.inputs = []
-    data.servers[name] = { command: serverConfig.command, args: serverConfig.args }
+    data.servers[name] = {
+      command: serverConfig.command,
+      args: serverConfig.args,
+    }
     return data
   }
   if (agent === 'continue') {
     if (!data.experimental) data.experimental = {}
     if (!data.experimental.mcpServers) data.experimental.mcpServers = []
-    const existing = data.experimental.mcpServers.findIndex(s => s.name === name)
-    const entry = { name, command: serverConfig.command, args: serverConfig.args }
+    const existing = data.experimental.mcpServers.findIndex(
+      (s) => s.name === name,
+    )
+    const entry = {
+      name,
+      command: serverConfig.command,
+      args: serverConfig.args,
+    }
     if (serverConfig.env) entry.env = serverConfig.env
     if (existing >= 0) {
       data.experimental.mcpServers[existing] = entry
@@ -78,7 +88,9 @@ function setMcpServerEntry(data, agent, name, serverConfig) {
 function removeMcpServerEntry(data, agent, name) {
   if (agent === 'continue') {
     if (data.experimental?.mcpServers) {
-      data.experimental.mcpServers = data.experimental.mcpServers.filter(s => s.name !== name)
+      data.experimental.mcpServers = data.experimental.mcpServers.filter(
+        (s) => s.name !== name,
+      )
     }
     return data
   }
@@ -92,7 +104,7 @@ function removeMcpServerEntry(data, agent, name) {
 
 function listMcpServerEntries(data, agent) {
   if (agent === 'continue') {
-    return (data.experimental?.mcpServers || []).map(s => ({
+    return (data.experimental?.mcpServers || []).map((s) => ({
       name: s.name,
       command: s.command,
       args: s.args,
@@ -118,7 +130,7 @@ export async function addMcpServer(agent, name, serverConfig, source = null) {
   const { configPath, data } = result
   setMcpServerEntry(data, agent, name, serverConfig)
   await mkdir(dirname(configPath), { recursive: true })
-  await writeFile(configPath, JSON.stringify(data, null, 2) + '\n', 'utf-8')
+  await writeFile(configPath, `${JSON.stringify(data, null, 2)}\n`, 'utf-8')
 
   await addServerToMcpLock(name, {
     source: source || reconstructMcpSource(serverConfig, name),
@@ -138,14 +150,19 @@ export async function removeMcpServer(agent, name) {
   const after = JSON.stringify(data)
   if (before === after) return false
   await mkdir(dirname(configPath), { recursive: true })
-  await writeFile(configPath, JSON.stringify(data, null, 2) + '\n', 'utf-8')
+  await writeFile(configPath, `${JSON.stringify(data, null, 2)}\n`, 'utf-8')
 
   await removeServerFromMcpLock(name, agent)
 
   return true
 }
 
-export async function updateMcpServer(agent, name, serverConfig, source = null) {
+export async function updateMcpServer(
+  agent,
+  name,
+  serverConfig,
+  source = null,
+) {
   await removeMcpServer(agent, name)
   return addMcpServer(agent, name, serverConfig, source)
 }
@@ -161,7 +178,7 @@ export function parseMcpServersFromSkill(content) {
   if (!frontmatterMatch) return []
   const yaml = frontmatterMatch[1]
 
-  const mcpLine = yaml.split('\n').findIndex(l => l.trim() === 'mcp_servers:')
+  const mcpLine = yaml.split('\n').findIndex((l) => l.trim() === 'mcp_servers:')
   if (mcpLine === -1) return []
 
   const yamlLines = yaml.split('\n')
@@ -235,15 +252,33 @@ export function resolveMcpSource(source) {
     const cloneDir = join(tmpDir, 'repo')
     let fileContents
     try {
-      const cloneArgs = ['clone', '--depth', '1', `https://github.com/${repo}.git`, cloneDir]
+      const cloneArgs = [
+        'clone',
+        '--depth',
+        '1',
+        `https://github.com/${repo}.git`,
+        cloneDir,
+      ]
       if (ref) {
         cloneArgs.splice(2, 0, '--branch', ref)
       }
-      const result = runSpawnSync('git', cloneArgs, { stdio: 'pipe', timeout: 30000 })
-      if (result.status !== 0) throw new Error(`Failed to clone ${repo}: ${result.stderr?.toString() || result.status}`)
-      const pkgJson = JSON.parse(readFileSync(join(cloneDir, 'package.json'), 'utf-8'))
+      const result = runSpawnSync('git', cloneArgs, {
+        stdio: 'pipe',
+        timeout: 30000,
+      })
+      if (result.status !== 0)
+        throw new Error(
+          `Failed to clone ${repo}: ${result.stderr?.toString() || result.status}`,
+        )
+      const pkgJson = JSON.parse(
+        readFileSync(join(cloneDir, 'package.json'), 'utf-8'),
+      )
       const main = pkgJson.main || 'index.js'
-      const bin = pkgJson.bin ? (typeof pkgJson.bin === 'string' ? pkgJson.bin : Object.values(pkgJson.bin)[0]) : null
+      const bin = pkgJson.bin
+        ? typeof pkgJson.bin === 'string'
+          ? pkgJson.bin
+          : Object.values(pkgJson.bin)[0]
+        : null
       const command = bin ? join(cloneDir, bin) : join(cloneDir, main)
       const args = []
 
@@ -264,7 +299,9 @@ export function resolveMcpSource(source) {
       }
       readFilesRecursive(cloneDir, cloneDir)
 
-      try { runSpawnSync('rm', ['-rf', tmpDir], { stdio: 'pipe' }) } catch {}
+      try {
+        runSpawnSync('rm', ['-rf', tmpDir], { stdio: 'pipe' })
+      } catch {}
       return {
         command: 'node',
         args: [command, ...args],
@@ -274,7 +311,9 @@ export function resolveMcpSource(source) {
         fileContents,
       }
     } catch (err) {
-      try { runSpawnSync('rm', ['-rf', tmpDir], { stdio: 'pipe' }) } catch {}
+      try {
+        runSpawnSync('rm', ['-rf', tmpDir], { stdio: 'pipe' })
+      } catch {}
       throw err
     }
   }
@@ -323,8 +362,14 @@ export function resolveMcpSource(source) {
       packageName: pkg,
     }
   }
-  if (source.startsWith('/') || source.startsWith('.') || source.startsWith('~')) {
-    const resolvedPath = source.startsWith('~') ? join(homedir(), source.slice(1)) : source
+  if (
+    source.startsWith('/') ||
+    source.startsWith('.') ||
+    source.startsWith('~')
+  ) {
+    const resolvedPath = source.startsWith('~')
+      ? join(homedir(), source.slice(1))
+      : source
     return {
       command: 'node',
       args: [resolvedPath],
@@ -332,12 +377,22 @@ export function resolveMcpSource(source) {
       path: resolvedPath,
     }
   }
-  throw new Error(`Unknown MCP source format: ${source}. Use npm:package, gh:owner/repo, uvx:package, pipx:package, go:package, deno:module, cargo:crate, or a local path.`)
+  throw new Error(
+    `Unknown MCP source format: ${source}. Use npm:package, gh:owner/repo, uvx:package, pipx:package, go:package, deno:module, cargo:crate, or a local path.`,
+  )
 }
 
 function reconstructMcpSource(serverConfig, name) {
-  const { sourceType, packageName, packageVersion, repo, ref, path: mcpPath } = serverConfig
-  if (sourceType === 'npm') return `npm:${packageName}${packageVersion ? `@${packageVersion}` : ''}`
+  const {
+    sourceType,
+    packageName,
+    packageVersion,
+    repo,
+    ref,
+    path: mcpPath,
+  } = serverConfig
+  if (sourceType === 'npm')
+    return `npm:${packageName}${packageVersion ? `@${packageVersion}` : ''}`
   if (sourceType === 'github') return `gh:${repo}${ref ? `@${ref}` : ''}`
   if (sourceType === 'uvx') return `uvx:${packageName}`
   if (sourceType === 'pipx') return `pipx:${packageName}`
@@ -355,7 +410,12 @@ export async function installMcpServersFromSkill(skillContent, targets) {
   for (const server of servers) {
     const resolved = resolveMcpSource(server.source)
     for (const agent of targets) {
-      const success = await addMcpServer(agent, server.name, resolved, server.source)
+      const success = await addMcpServer(
+        agent,
+        server.name,
+        resolved,
+        server.source,
+      )
       results.push({ agent, name: server.name, success })
     }
   }

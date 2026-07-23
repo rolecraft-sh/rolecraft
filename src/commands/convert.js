@@ -1,7 +1,12 @@
 import { readFile, writeFile, readdir, mkdir } from 'node:fs/promises'
 import { join, basename } from 'node:path'
 import { homedir } from 'node:os'
-import { detectFormat, skillToMdc, mdcToSkill, parseFrontmatter } from '../utils/converter.js'
+import {
+  detectFormat,
+  skillToMdc,
+  mdcToSkill,
+  parseFrontmatter,
+} from '../utils/converter.js'
 
 function findSkillFile(dir, entries) {
   for (const e of entries) {
@@ -11,32 +16,43 @@ function findSkillFile(dir, entries) {
 }
 
 function findMdcFiles(dir, entries) {
-  return entries.filter(e => e.isFile() && e.name.endsWith('.mdc')).map(e => join(dir, e.name))
+  return entries
+    .filter((e) => e.isFile() && e.name.endsWith('.mdc'))
+    .map((e) => join(dir, e.name))
 }
 
 export async function convertCommand(source, options = {}) {
-  const expanded = source.startsWith('~') ? join(homedir(), source.slice(1)) : source
+  const expanded = source.startsWith('~')
+    ? join(homedir(), source.slice(1))
+    : source
   const outDir = options.output || process.cwd()
 
-  const entries = await readdir(expanded, { withFileTypes: true }).catch(async () => {
-    // Not a directory — read as a single file
-    const content = await readFile(expanded, 'utf-8').catch(() => {
-      throw new Error(`Source not found: ${expanded}`)
-    })
+  const entries = await readdir(expanded, { withFileTypes: true }).catch(
+    async () => {
+      // Not a directory — read as a single file
+      const content = await readFile(expanded, 'utf-8').catch(() => {
+        throw new Error(`Source not found: ${expanded}`)
+      })
 
-    const format = detectFormat(expanded)
-    if (!format) {
-      if (content.includes('slug:')) {
-        await convertSingleFile(expanded, 'skill', outDir, options)
-      } else if (content.includes('alwaysApply:') || content.includes('globs:')) {
-        await convertSingleFile(expanded, 'mdc', outDir, options)
-      } else {
-        throw new Error(`Cannot detect format. Name file SKILL.md (skill) or use .mdc extension.`)
+      const format = detectFormat(expanded)
+      if (!format) {
+        if (content.includes('slug:')) {
+          await convertSingleFile(expanded, 'skill', outDir, options)
+        } else if (
+          content.includes('alwaysApply:') ||
+          content.includes('globs:')
+        ) {
+          await convertSingleFile(expanded, 'mdc', outDir, options)
+        } else {
+          throw new Error(
+            `Cannot detect format. Name file SKILL.md (skill) or use .mdc extension.`,
+          )
+        }
+        return
       }
-      return
-    }
-    await convertSingleFile(expanded, format, outDir, options)
-  })
+      await convertSingleFile(expanded, format, outDir, options)
+    },
+  )
 
   if (!entries) return
 
@@ -76,7 +92,10 @@ async function convertSingleFile(inputPath, format, outDir, options) {
 
   if (format === 'skill') {
     const parsed = parseFrontmatter(content)
-    const slug = (parsed.attrs.slug || parsed.attrs.name || 'skill').replace(/\//g, '-')
+    const slug = (parsed.attrs.slug || parsed.attrs.name || 'skill').replace(
+      /\//g,
+      '-',
+    )
     const outPath = join(outDir, `${slug}.mdc`)
     await writeFile(outPath, skillToMdc(content), 'utf-8')
     console.log(`  Converted:    ${inputPath}`)

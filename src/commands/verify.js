@@ -8,7 +8,9 @@ export async function verifyCommand(frozen) {
     return
   }
 
-  console.log(`\n🔍 Verifying ${result.verified.length + result.failed.length} skill(s)...\n`)
+  console.log(
+    `\n🔍 Verifying ${result.verified.length + result.failed.length} skill(s)...\n`,
+  )
 
   for (const v of result.verified) {
     console.log(`   ✅ ${v.slug} (hash match)`)
@@ -20,7 +22,8 @@ export async function verifyCommand(frozen) {
       console.error(`   ❌ ${f.slug}: missing source in lockfile`)
     } else if (f.dirs) {
       for (const d of f.dirs) {
-        const changes = d.changes?.length > 0 ? ` (${d.changes.join(', ')})` : ''
+        const changes =
+          d.changes?.length > 0 ? ` (${d.changes.join(', ')})` : ''
         console.error(`   ❌ ${f.slug}: hash mismatch in ${d.dir}${changes}`)
       }
     } else {
@@ -30,7 +33,9 @@ export async function verifyCommand(frozen) {
 
   console.log()
   if (result.allPassed) {
-    console.log(`✅ All ${result.totalVerified} skill(s) verified successfully.`)
+    console.log(
+      `✅ All ${result.totalVerified} skill(s) verified successfully.`,
+    )
   } else {
     console.error(`❌ Some skills failed verification.`)
     if (frozen) throw new Error('Some skills failed verification.')

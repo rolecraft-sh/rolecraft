@@ -351,11 +351,15 @@ A: Review the security report, fix the flagged patterns, or use `--yes` to force
 ```bash
 git clone https://github.com/rolecraft-sh/rolecraft.git
 cd rolecraft
+npm install                # sets up the pre-commit hook automatically
 npm link                   # rolecraft CLI runs from local checkout
-npm install                # for docs site (VitePress)
-npm run docs:dev           # local docs preview
-npm test                   # 730+ tests, 0 fails expected
+npm run lint               # syntax + Biome (format & unused-variable checks)
+npm run lint:fix           # auto-fix formatting and unused imports
+npm run docs:dev           # local docs preview (VitePress)
+npm test                   # 828+ tests, 0 fails expected
 ```
+
+A `pre-commit` hook runs lint automatically on every commit and rejects commits that don't pass. Zero-runtime-dependency policy is preserved — Biome and VitePress are devDependencies only.
 
 [→ Contributing guide](CONTRIBUTING.md)
 

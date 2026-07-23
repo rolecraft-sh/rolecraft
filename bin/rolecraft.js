@@ -27,16 +27,20 @@ import { testCommand } from '../src/commands/test.js'
 import agents from '../src/agents.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'))
+const pkg = JSON.parse(
+  readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'),
+)
 
 function usage() {
-  const agentFlags = agents.map(a => `  --${a.flag.padEnd(15)} Also install to ${a.label}`)
+  const agentFlags = agents.map(
+    (a) => `  --${a.flag.padEnd(15)} Also install to ${a.label}`,
+  )
 
   console.log(`
 rolecraft — Install AI agent skills like roles & behaviors
 
 Zero dependencies, no marketplace required.
-Works with ${agents.length} agents: ${agents.map(a => a.name).join(', ')}, and all spec-compliant agents.
+Works with ${agents.length} agents: ${agents.map((a) => a.name).join(', ')}, and all spec-compliant agents.
 
 Usage:
   rolecraft install <source>        Install a skill (local path, owner/repo, or npm:package)
@@ -112,30 +116,44 @@ Examples:
 }
 
 export async function main() {
-  const [,, cmd, ...args] = process.argv
+  const [, , cmd, ...args] = process.argv
   switch (cmd) {
     case 'install': {
       if (args.includes('--help') || args.includes('-h')) {
         usage()
         return
       }
-      const installFlags = args.filter(a => a.startsWith('-'))
-      const installPos = args.filter(a => !a.startsWith('-'))
+      const installFlags = args.filter((a) => a.startsWith('-'))
+      const installPos = args.filter((a) => !a.startsWith('-'))
       const source = installPos[0]
       if (!source) {
         console.error('Usage: rolecraft install <source>')
-        console.error('Source can be a local path (./, /, ~), GitHub ref (owner/repo), or npm package (npm:package)')
+        console.error(
+          'Source can be a local path (./, /, ~), GitHub ref (owner/repo), or npm package (npm:package)',
+        )
         throw new Error('Missing source argument.')
       }
 
       const flags = installFlags
-      const scopeFlags = ['--global', '--project', '--all', ...agents.map(a => `--${a.flag}`)]
-      const hasScopeFlag = flags.some(f => scopeFlags.includes(f))
-      const options = hasScopeFlag ? {
-        global: flags.includes('--global') || flags.includes('--all'),
-        project: flags.includes('--project') || flags.includes('--all'),
-        ...Object.fromEntries(agents.map(a => [a.flag, flags.includes(`--${a.flag}`) || flags.includes('--all')])),
-      } : {}
+      const scopeFlags = [
+        '--global',
+        '--project',
+        '--all',
+        ...agents.map((a) => `--${a.flag}`),
+      ]
+      const hasScopeFlag = flags.some((f) => scopeFlags.includes(f))
+      const options = hasScopeFlag
+        ? {
+            global: flags.includes('--global') || flags.includes('--all'),
+            project: flags.includes('--project') || flags.includes('--all'),
+            ...Object.fromEntries(
+              agents.map((a) => [
+                a.flag,
+                flags.includes(`--${a.flag}`) || flags.includes('--all'),
+              ]),
+            ),
+          }
+        : {}
       options.frozenLockfile = flags.includes('--frozen-lockfile')
       options.symlink = flags.includes('--symlink')
       options.dryRun = flags.includes('--dry-run')
@@ -144,8 +162,12 @@ export async function main() {
       options.list = flags.includes('--list')
 
       const skillIndex = flags.indexOf('--skill')
-      if (skillIndex !== -1 && flags[skillIndex + 1] && !flags[skillIndex + 1].startsWith('-')) {
-        options.skill = flags[skillIndex + 1].split(',').map(s => s.trim())
+      if (
+        skillIndex !== -1 &&
+        flags[skillIndex + 1] &&
+        !flags[skillIndex + 1].startsWith('-')
+      ) {
+        options.skill = flags[skillIndex + 1].split(',').map((s) => s.trim())
       }
 
       await installCommand(source, options)
@@ -162,98 +184,139 @@ export async function main() {
     }
 
     case 'remove': {
-      if (args.includes('--help') || args.includes('-h')) { usage(); return }
+      if (args.includes('--help') || args.includes('-h')) {
+        usage()
+        return
+      }
       const slug = args[0]
       if (!slug) {
         console.error('Usage: rolecraft remove <slug>')
         throw new Error('Missing slug argument.')
       }
-      const removeFlags = args.filter(a => a.startsWith('-'))
+      const removeFlags = args.filter((a) => a.startsWith('-'))
       await removeCommand(slug, { dryRun: removeFlags.includes('--dry-run') })
       break
     }
 
     case 'update': {
-      if (args.includes('--help') || args.includes('-h')) { usage(); return }
+      if (args.includes('--help') || args.includes('-h')) {
+        usage()
+        return
+      }
       const slug = args[0]
       if (!slug) {
         console.error('Usage: rolecraft update <slug>')
         throw new Error('Missing slug argument.')
       }
-      const updateFlags = args.filter(a => a.startsWith('-'))
+      const updateFlags = args.filter((a) => a.startsWith('-'))
       await updateCommand(slug, { dryRun: updateFlags.includes('--dry-run') })
       break
     }
 
     case 'use': {
-      if (args.includes('--help') || args.includes('-h')) { usage(); return }
+      if (args.includes('--help') || args.includes('-h')) {
+        usage()
+        return
+      }
       const source = args[0]
       if (!source) {
         console.error('Usage: rolecraft use <source>')
-        console.error('Source can be a local path (./, /, ~), GitHub ref (owner/repo), or npm package (npm:package)')
+        console.error(
+          'Source can be a local path (./, /, ~), GitHub ref (owner/repo), or npm package (npm:package)',
+        )
         throw new Error('Missing source argument.')
       }
-      const useFlags = args.filter(a => a.startsWith('-'))
+      const useFlags = args.filter((a) => a.startsWith('-'))
       const useOptions = {
         list: useFlags.includes('--list'),
       }
       const skillIndex = useFlags.indexOf('--skill')
-      if (skillIndex !== -1 && useFlags[skillIndex + 1] && !useFlags[skillIndex + 1].startsWith('-')) {
-        useOptions.skill = useFlags[skillIndex + 1].split(',').map(s => s.trim())
+      if (
+        skillIndex !== -1 &&
+        useFlags[skillIndex + 1] &&
+        !useFlags[skillIndex + 1].startsWith('-')
+      ) {
+        useOptions.skill = useFlags[skillIndex + 1]
+          .split(',')
+          .map((s) => s.trim())
       }
       await useCommand(source, useOptions)
       break
     }
 
     case 'init': {
-      if (args.includes('--help') || args.includes('-h')) { usage(); return }
+      if (args.includes('--help') || args.includes('-h')) {
+        usage()
+        return
+      }
       const name = args[0]
       await initCommand(name)
       break
     }
 
     case 'search': {
-      if (args.includes('--help') || args.includes('-h')) { usage(); return }
+      if (args.includes('--help') || args.includes('-h')) {
+        usage()
+        return
+      }
       const query = args[0]
       const flags = args.slice(1)
       if (!query) {
         console.error('Usage: rolecraft search <query> [--interactive]')
         throw new Error('Missing query argument.')
       }
-      await searchCommand(query, { interactive: flags.includes('--interactive'), skillsSh: flags.includes('--skills-sh') })
+      await searchCommand(query, {
+        interactive: flags.includes('--interactive'),
+        skillsSh: flags.includes('--skills-sh'),
+      })
       break
     }
 
     case 'completions': {
-      if (args.includes('--help') || args.includes('-h')) { usage(); return }
+      if (args.includes('--help') || args.includes('-h')) {
+        usage()
+        return
+      }
       const shell = args[0]
       await completionsCommand(shell)
       break
     }
 
     case 'verify': {
-      if (args.includes('--help') || args.includes('-h')) { usage(); return }
+      if (args.includes('--help') || args.includes('-h')) {
+        usage()
+        return
+      }
       await verifyCommand(true)
       break
     }
 
     case 'check':
     case 'check-updates': {
-      if (args.includes('--help') || args.includes('-h')) { usage(); return }
+      if (args.includes('--help') || args.includes('-h')) {
+        usage()
+        return
+      }
       await checkCommand()
       break
     }
 
     case 'ci': {
-      if (args.includes('--help') || args.includes('-h')) { usage(); return }
+      if (args.includes('--help') || args.includes('-h')) {
+        usage()
+        return
+      }
       await ciCommand()
       break
     }
 
     case 'setup': {
-      if (args.includes('--help') || args.includes('-h')) { usage(); return }
-      const setupFlags = args.filter(a => a.startsWith('-'))
-      const setupPos = args.filter(a => !a.startsWith('-'))
+      if (args.includes('--help') || args.includes('-h')) {
+        usage()
+        return
+      }
+      const setupFlags = args.filter((a) => a.startsWith('-'))
+      const setupPos = args.filter((a) => !a.startsWith('-'))
       const source = setupPos[0]
       const setupOptions = {
         dryRun: setupFlags.includes('--dry-run'),
@@ -261,32 +324,52 @@ export async function main() {
         list: setupFlags.includes('--list'),
       }
       const skillIndex = setupFlags.indexOf('--skill')
-      if (skillIndex !== -1 && setupFlags[skillIndex + 1] && !setupFlags[skillIndex + 1].startsWith('-')) {
-        setupOptions.skill = setupFlags[skillIndex + 1].split(',').map(s => s.trim())
+      if (
+        skillIndex !== -1 &&
+        setupFlags[skillIndex + 1] &&
+        !setupFlags[skillIndex + 1].startsWith('-')
+      ) {
+        setupOptions.skill = setupFlags[skillIndex + 1]
+          .split(',')
+          .map((s) => s.trim())
       }
       await setupCommand(source, setupOptions)
       break
     }
 
     case 'upgrade': {
-      if (args.includes('--help') || args.includes('-h')) { usage(); return }
+      if (args.includes('--help') || args.includes('-h')) {
+        usage()
+        return
+      }
       const flags = args
       await upgradeCommand({ dryRun: flags.includes('--dry-run') })
       break
     }
 
     case 'doctor': {
-      if (args.includes('--help') || args.includes('-h')) { usage(); return }
-      const doctorFlags = args.filter(a => a.startsWith('-'))
-      await doctorCommand({ json: doctorFlags.includes('--json'), network: doctorFlags.includes('--network') })
+      if (args.includes('--help') || args.includes('-h')) {
+        usage()
+        return
+      }
+      const doctorFlags = args.filter((a) => a.startsWith('-'))
+      await doctorCommand({
+        json: doctorFlags.includes('--json'),
+        network: doctorFlags.includes('--network'),
+      })
       break
     }
 
     case 'watch': {
-      if (args.includes('--help') || args.includes('-h')) { usage(); return }
+      if (args.includes('--help') || args.includes('-h')) {
+        usage()
+        return
+      }
       const slug = args[0]
-      const watchFlags = args.filter(a => a.startsWith('-'))
-      const { watchers } = await watchCommand(slug, process.cwd(), { dryRun: watchFlags.includes('--dry-run') })
+      const watchFlags = args.filter((a) => a.startsWith('-'))
+      const { watchers } = await watchCommand(slug, process.cwd(), {
+        dryRun: watchFlags.includes('--dry-run'),
+      })
       if (watchers.length === 0) {
         return
       }
@@ -300,7 +383,10 @@ export async function main() {
     }
 
     case 'agents-xml':
-      if (args.includes('--help') || args.includes('-h')) { usage(); return }
+      if (args.includes('--help') || args.includes('-h')) {
+        usage()
+        return
+      }
       await agentsXmlCommand(args.includes('--write'))
       break
 
@@ -311,21 +397,29 @@ export async function main() {
       break
 
     case 'convert': {
-      if (args.includes('--help') || args.includes('-h')) { usage(); return }
+      if (args.includes('--help') || args.includes('-h')) {
+        usage()
+        return
+      }
       const source = args[0]
       if (!source) {
         console.error('Usage: rolecraft convert <source>')
         throw new Error('Missing source argument.')
       }
-      const convertFlags = args.filter(a => a.startsWith('-'))
-      await convertCommand(source, { dryRun: convertFlags.includes('--dry-run') })
+      const convertFlags = args.filter((a) => a.startsWith('-'))
+      await convertCommand(source, {
+        dryRun: convertFlags.includes('--dry-run'),
+      })
       break
     }
 
     case 'test': {
-      if (args.includes('--help') || args.includes('-h')) { usage(); return }
-      const testFlags = args.filter(a => a.startsWith('-'))
-      const testPos = args.filter(a => !a.startsWith('-'))
+      if (args.includes('--help') || args.includes('-h')) {
+        usage()
+        return
+      }
+      const testFlags = args.filter((a) => a.startsWith('-'))
+      const testPos = args.filter((a) => !a.startsWith('-'))
       const skillPath = testPos[0]
       const testOptions = {
         json: testFlags.includes('--json'),
@@ -335,19 +429,32 @@ export async function main() {
         all: testFlags.includes('--all'),
       }
       const minScoreIndex = testFlags.indexOf('--min-score')
-      if (minScoreIndex !== -1 && testFlags[minScoreIndex + 1] && !testFlags[minScoreIndex + 1].startsWith('-')) {
+      if (
+        minScoreIndex !== -1 &&
+        testFlags[minScoreIndex + 1] &&
+        !testFlags[minScoreIndex + 1].startsWith('-')
+      ) {
         testOptions.minScore = parseInt(testFlags[minScoreIndex + 1], 10)
       }
       const onlyIndex = testFlags.indexOf('--only')
-      if (onlyIndex !== -1 && testFlags[onlyIndex + 1] && !testFlags[onlyIndex + 1].startsWith('-')) {
-        testOptions.only = testFlags[onlyIndex + 1].split(',').map(s => s.trim())
+      if (
+        onlyIndex !== -1 &&
+        testFlags[onlyIndex + 1] &&
+        !testFlags[onlyIndex + 1].startsWith('-')
+      ) {
+        testOptions.only = testFlags[onlyIndex + 1]
+          .split(',')
+          .map((s) => s.trim())
       }
       await testCommand(skillPath, testOptions)
       break
     }
 
     case 'bundle': {
-      if (args.includes('--help') || args.includes('-h')) { usage(); return }
+      if (args.includes('--help') || args.includes('-h')) {
+        usage()
+        return
+      }
       if (args.length === 0) {
         console.error('Usage: rolecraft bundle <source> [...]')
         console.error('       rolecraft bundle <file>')
@@ -355,13 +462,19 @@ export async function main() {
         throw new Error('Missing arguments.')
       }
       if (args[0] === 'create') {
-        if (args.includes('--help') || args.includes('-h')) { usage(); return }
+        if (args.includes('--help') || args.includes('-h')) {
+          usage()
+          return
+        }
         await bundleCreateCommand(args[1])
         break
       }
-      const flags = args.filter(a => a.startsWith('--'))
-      const sources = args.filter(a => !a.startsWith('--'))
-      const opts = { dryRun: flags.includes('--dry-run'), noMcp: flags.includes('--no-mcp') }
+      const flags = args.filter((a) => a.startsWith('--'))
+      const sources = args.filter((a) => !a.startsWith('--'))
+      const opts = {
+        dryRun: flags.includes('--dry-run'),
+        noMcp: flags.includes('--no-mcp'),
+      }
       if (sources.length === 1) {
         await bundleCommand(sources[0], opts)
       } else {
@@ -376,14 +489,13 @@ export async function main() {
     }
 
     case 'mcp': {
-      if (args.includes('--help') || args.includes('-h')) { usage(); return }
+      if (args.includes('--help') || args.includes('-h')) {
+        usage()
+        return
+      }
       await mcpCommand(args)
       break
     }
-
-    case 'help':
-    case '--help':
-    case '-h':
     default:
       usage()
       break
@@ -394,13 +506,19 @@ export async function run() {
   try {
     await main()
   } catch (err) {
-    console.error('\n❌ %s', String(err?.message || err).replace(/\n/g, '\\n').replace(/\r/g, '\\r'))
+    console.error(
+      '\n❌ %s',
+      String(err?.message || err)
+        .replace(/\n/g, '\\n')
+        .replace(/\r/g, '\\r'),
+    )
     process.exit(1)
   }
 }
 
-const isEntryPoint = process.argv[1]
-  && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))
+const isEntryPoint =
+  process.argv[1] &&
+  realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))
 
 if (isEntryPoint) {
   run()

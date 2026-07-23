@@ -6,9 +6,15 @@ const INTERVAL = 80
 export function createSpinner(text) {
   if (!stdout.isTTY) {
     return {
-      start() { console.log(text) },
-      succeed(msg) { if (msg) console.log(msg) },
-      fail(msg) { if (msg) console.error(msg) },
+      start() {
+        console.log(text)
+      },
+      succeed(msg) {
+        if (msg) console.log(msg)
+      },
+      fail(msg) {
+        if (msg) console.error(msg)
+      },
     }
   }
 

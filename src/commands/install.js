@@ -9,8 +9,8 @@ let askQuestion = defaultAskQuestion
 
 function defaultAskQuestion(query) {
   const rl = createInterface({ input, output })
-  return new Promise(resolve => {
-    rl.question(query, answer => {
+  return new Promise((resolve) => {
+    rl.question(query, (answer) => {
       rl.close()
       resolve(answer.trim().toLowerCase())
     })
@@ -38,9 +38,12 @@ async function askScope() {
   const answer = await askQuestion('Choice [1/2/3] (default: 2): ')
 
   switch (answer) {
-    case '1': return { global: true, project: false }
-    case '3': return { global: true, project: true }
-    default:  return { global: false, project: true }
+    case '1':
+      return { global: true, project: false }
+    case '3':
+      return { global: true, project: true }
+    default:
+      return { global: false, project: true }
   }
 }
 
@@ -60,10 +63,14 @@ async function selectSkillsInteractive(skills) {
 
   while (true) {
     console.log()
-    const answer = await askQuestion('Enter numbers (space-separated) to select, "all" for all, or press Enter to confirm selection: ')
+    const answer = await askQuestion(
+      'Enter numbers (space-separated) to select, "all" for all, or press Enter to confirm selection: ',
+    )
 
     if (answer === '' || answer === null || answer === undefined) {
-      const selected = choices.filter(c => c.selected).map(c => skills[c.index])
+      const selected = choices
+        .filter((c) => c.selected)
+        .map((c) => skills[c.index])
       if (selected.length === 0) {
         const retry = await askQuestion('No skills selected. Try again? [Y/n] ')
         if (retry === 'n' || retry === 'no') return null
@@ -78,9 +85,9 @@ async function selectSkillsInteractive(skills) {
       return skills.slice()
     }
 
-    const parts = answer.split(/\s+/).map(p => parseInt(p, 10))
+    const parts = answer.split(/\s+/).map((p) => parseInt(p, 10))
     for (const p of parts) {
-      if (!isNaN(p) && p >= 1 && p <= choices.length) {
+      if (!Number.isNaN(p) && p >= 1 && p <= choices.length) {
         choices[p - 1].selected = !choices[p - 1].selected
         const status = choices[p - 1].selected ? 'selected' : 'deselected'
         console.log(`  ${choices[p - 1].label} ${status}`)
@@ -90,8 +97,13 @@ async function selectSkillsInteractive(skills) {
 }
 
 export async function installCommand(source, options) {
-  const hasScopeFlags = options.global || options.project || agents.some(a => options[a.flag])
-  const scope = hasScopeFlags ? options : options.yes ? { global: false, project: true } : await askScope()
+  const hasScopeFlags =
+    options.global || options.project || agents.some((a) => options[a.flag])
+  const scope = hasScopeFlags
+    ? options
+    : options.yes
+      ? { global: false, project: true }
+      : await askScope()
 
   if (options.list) {
     const spinner = createSpinner('Resolving skills...')
@@ -135,12 +147,15 @@ export async function installCommand(source, options) {
         console.log('Install cancelled.')
         return
       }
-      apiOptions.skill = result.map(s => s.slug)
+      apiOptions.skill = result.map((s) => s.slug)
     }
   }
 
   if (options.dryRun) {
-    const result = await apiInstallSkills(source, { ...apiOptions, dryRun: true })
+    const result = await apiInstallSkills(source, {
+      ...apiOptions,
+      dryRun: true,
+    })
     const mode = options.symlink ? 'symlink' : 'copy'
     console.log(`\n[dry-run] Would install ${result.skills.length} skill(s):\n`)
     for (const skill of result.skills) {
@@ -161,7 +176,9 @@ export async function installCommand(source, options) {
   } catch (err) {
     if (err.message?.includes('security review') && !options.yes) {
       console.log('\n   Security scan: REVIEW')
-      const answer = await askQuestion(`\n  Skill requires review. Continue? [y/N] `)
+      const answer = await askQuestion(
+        `\n  Skill requires review. Continue? [y/N] `,
+      )
       if (answer !== 'y' && answer !== 'yes') {
         console.log('  Skipping.')
         return

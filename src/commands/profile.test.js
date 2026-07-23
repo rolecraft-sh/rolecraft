@@ -17,13 +17,16 @@ before(async () => {
   process.cwd = () => join(tempDir, 'project')
 
   editHelperPath = join(tempDir, 'edit-helper.cjs')
-  writeFileSync(editHelperPath, `
+  writeFileSync(
+    editHelperPath,
+    `
 const fs = require('fs')
 const p = process.argv[2]
 const d = JSON.parse(fs.readFileSync(p, 'utf8'))
 d.description = 'edited via editor'
 fs.writeFileSync(p, JSON.stringify(d, null, 2) + '\\n', 'utf8')
-`)
+`,
+  )
 
   await mkdir(join(tempDir, '.agents', 'profiles'), { recursive: true })
   await mkdir(join(tempDir, 'project'), { recursive: true })
@@ -49,23 +52,23 @@ describe('profile command dispatcher', () => {
   it('shows usage for --help', async () => {
     const logs = captureLogs()
     await profileCmd.profileCommand(['--help'])
-    assert.ok(logs.some(l => l.includes('rolecraft profile')))
-    assert.ok(logs.some(l => l.includes('save')))
-    assert.ok(logs.some(l => l.includes('apply')))
+    assert.ok(logs.some((l) => l.includes('rolecraft profile')))
+    assert.ok(logs.some((l) => l.includes('save')))
+    assert.ok(logs.some((l) => l.includes('apply')))
   })
 
   it('shows usage for -h', async () => {
     const logs = captureLogs()
     await profileCmd.profileCommand(['-h'])
-    assert.ok(logs.some(l => l.includes('rolecraft profile')))
-    assert.ok(logs.some(l => l.includes('save')))
+    assert.ok(logs.some((l) => l.includes('rolecraft profile')))
+    assert.ok(logs.some((l) => l.includes('save')))
   })
 
   it('shows usage for no args', async () => {
     const logs = captureLogs()
     await profileCmd.profileCommand([])
-    assert.ok(logs.some(l => l.includes('rolecraft profile')))
-    assert.ok(logs.some(l => l.includes('save')))
+    assert.ok(logs.some((l) => l.includes('rolecraft profile')))
+    assert.ok(logs.some((l) => l.includes('save')))
   })
 
   it('shows error for unknown subcommand', async () => {
@@ -74,7 +77,7 @@ describe('profile command dispatcher', () => {
       if (args.length) logs.push(String(args[0]))
     })
     await profileCmd.profileCommand(['unknown'])
-    assert.ok(logs.some(l => l.includes('Unknown profile subcommand')))
+    assert.ok(logs.some((l) => l.includes('Unknown profile subcommand')))
   })
 
   it('dispatches export with --file through parseArgs', async () => {
@@ -82,8 +85,13 @@ describe('profile command dispatcher', () => {
     await writeProfile({ name: 'dispatch-export', agents: { agents: {} } })
 
     const exportPath = join(tempDir, 'dispatch-export.json')
-    const logs = captureLogs()
-    await profileCmd.profileCommand(['export', 'dispatch-export', '--file', exportPath])
+    const _logs = captureLogs()
+    await profileCmd.profileCommand([
+      'export',
+      'dispatch-export',
+      '--file',
+      exportPath,
+    ])
     assert.ok(existsSync(exportPath))
   })
 
@@ -92,16 +100,23 @@ describe('profile command dispatcher', () => {
     await writeProfile({ name: 'dispatch-file-flag', agents: { agents: {} } })
 
     const exportPath = join(tempDir, 'dispatch-file-flag.json')
-    const logs = captureLogs()
-    await profileCmd.profileCommand(['export', 'dispatch-file-flag', '--file', exportPath, '--dry-run'])
+    const _logs = captureLogs()
+    await profileCmd.profileCommand([
+      'export',
+      'dispatch-file-flag',
+      '--file',
+      exportPath,
+      '--dry-run',
+    ])
     assert.ok(existsSync(exportPath))
   })
 
   it('parses --agents flag to add targets', async () => {
-    const { writeProfile, readProfile } = await import('../utils/profile.js')
-    const saveDir = join(tempDir, 'agents-flag-' + Date.now())
+    const saveDir = join(tempDir, `agents-flag-${Date.now()}`)
     await mkdir(join(saveDir, '.agents', 'profiles'), { recursive: true })
-    await mkdir(join(saveDir, '.agents', 'skills', 'test-skill'), { recursive: true })
+    await mkdir(join(saveDir, '.agents', 'skills', 'test-skill'), {
+      recursive: true,
+    })
     const opencodeConfig = join(saveDir, '.opencode.json')
     await writeFile(opencodeConfig, JSON.stringify({ model: 'gpt-4' }))
 
@@ -112,7 +127,7 @@ describe('profile command dispatcher', () => {
     const logs = captureLogs()
     await freshCmd.profileCommand(['save', 'agents-flag-prof', '--agents'])
 
-    assert.ok(logs.some(l => l.includes('agents-flag-prof')))
+    assert.ok(logs.some((l) => l.includes('agents-flag-prof')))
 
     process.env.HOME = tempDir
     process.cwd = () => join(tempDir, 'project')
@@ -120,26 +135,36 @@ describe('profile command dispatcher', () => {
 
   it('dispatches import with --file through parseArgs', async () => {
     const importPath = join(tempDir, 'dispatch-import.json')
-    await writeFile(importPath, JSON.stringify({ name: 'dispatch-import', agents: { agents: {} } }))
+    await writeFile(
+      importPath,
+      JSON.stringify({ name: 'dispatch-import', agents: { agents: {} } }),
+    )
 
     const logs = captureLogs()
     await profileCmd.profileCommand(['import', importPath])
-    assert.ok(logs.some(l => l.includes('dispatch-import')))
+    assert.ok(logs.some((l) => l.includes('dispatch-import')))
   })
 
   it('dispatches save subcommand', async () => {
-    const saveDir = join(tempDir, 'dispatch-save-' + Date.now())
+    const saveDir = join(tempDir, `dispatch-save-${Date.now()}`)
     await mkdir(join(saveDir, '.agents', 'profiles'), { recursive: true })
-    await mkdir(join(saveDir, '.agents', 'skills', 'test-skill'), { recursive: true })
-    await writeFile(join(saveDir, '.opencode.json'), JSON.stringify({ model: 'gpt-4' }))
+    await mkdir(join(saveDir, '.agents', 'skills', 'test-skill'), {
+      recursive: true,
+    })
+    await writeFile(
+      join(saveDir, '.opencode.json'),
+      JSON.stringify({ model: 'gpt-4' }),
+    )
 
     process.env.HOME = saveDir
     process.cwd = () => saveDir
     const freshCmd = await import('./profile.js')
     const logs = []
-    mock.method(console, 'log', (...args) => { if (args.length) logs.push(String(args[0])) })
+    mock.method(console, 'log', (...args) => {
+      if (args.length) logs.push(String(args[0]))
+    })
     await freshCmd.profileCommand(['save', 'saved-via-dispatch'])
-    assert.ok(logs.some(l => l.includes('saved-via-dispatch')))
+    assert.ok(logs.some((l) => l.includes('saved-via-dispatch')))
 
     process.env.HOME = tempDir
     process.cwd = () => join(tempDir, 'project')
@@ -147,24 +172,36 @@ describe('profile command dispatcher', () => {
 
   it('dispatches apply subcommand', async () => {
     const { writeProfile } = await import('../utils/profile.js')
-    await writeProfile({ name: 'apply-via-dispatch', agents: { agents: { config: { global: { model: 'gpt-4' } } } } })
+    await writeProfile({
+      name: 'apply-via-dispatch',
+      agents: { agents: { config: { global: { model: 'gpt-4' } } } },
+    })
     const logs = captureLogs()
-    await profileCmd.profileCommand(['apply', 'apply-via-dispatch', '--dry-run'])
-    assert.ok(logs.some(l => l.includes('Would apply')))
+    await profileCmd.profileCommand([
+      'apply',
+      'apply-via-dispatch',
+      '--dry-run',
+    ])
+    assert.ok(logs.some((l) => l.includes('Would apply')))
   })
 
   it('dispatches diff subcommand', async () => {
     const { writeProfile } = await import('../utils/profile.js')
-    await writeProfile({ name: 'diff-via-dispatch', agents: { agents: { config: { global: { model: 'gpt-4' } } } } })
+    await writeProfile({
+      name: 'diff-via-dispatch',
+      agents: { agents: { config: { global: { model: 'gpt-4' } } } },
+    })
     const logs = captureLogs()
     await profileCmd.profileCommand(['diff', 'diff-via-dispatch'])
-    assert.ok(logs.some(l => l.includes('diff-via-dispatch')))
+    assert.ok(logs.some((l) => l.includes('diff-via-dispatch')))
   })
 
   it('dispatches list subcommand', async () => {
     const logs = captureLogs()
     await profileCmd.profileCommand(['list'])
-    assert.ok(logs.some(l => l.includes('profile') || l.includes('No profiles')))
+    assert.ok(
+      logs.some((l) => l.includes('profile') || l.includes('No profiles')),
+    )
   })
 
   it('dispatches show subcommand', async () => {
@@ -172,18 +209,24 @@ describe('profile command dispatcher', () => {
     await writeProfile({ name: 'show-via-dispatch', agents: { agents: {} } })
     const logs = captureLogs()
     await profileCmd.profileCommand(['show', 'show-via-dispatch'])
-    assert.ok(logs.some(l => l.includes('show-via-dispatch')))
+    assert.ok(logs.some((l) => l.includes('show-via-dispatch')))
   })
 
   it('dispatches link subcommand', async () => {
     const { writeProfile } = await import('../utils/profile.js')
     await writeProfile({ name: 'link-via-dispatch', agents: {} })
     const linkPath = join(process.cwd(), '.agent-profile.json')
-    try { const { unlinkSync } = await import('node:fs'); unlinkSync(linkPath) } catch {}
+    try {
+      const { unlinkSync } = await import('node:fs')
+      unlinkSync(linkPath)
+    } catch {}
     const logs = captureLogs()
     await profileCmd.profileCommand(['link', 'link-via-dispatch'])
-    assert.ok(logs.some(l => l.includes('link-via-dispatch')))
-    try { const { unlinkSync } = await import('node:fs'); unlinkSync(linkPath) } catch {}
+    assert.ok(logs.some((l) => l.includes('link-via-dispatch')))
+    try {
+      const { unlinkSync } = await import('node:fs')
+      unlinkSync(linkPath)
+    } catch {}
   })
 
   it('dispatches delete subcommand', async () => {
@@ -191,26 +234,33 @@ describe('profile command dispatcher', () => {
     await writeProfile({ name: 'del-via-dispatch', agents: {} })
     const logs = captureLogs()
     await profileCmd.profileCommand(['delete', 'del-via-dispatch'])
-    assert.ok(logs.some(l => l.includes('del-via-dispatch')))
+    assert.ok(logs.some((l) => l.includes('del-via-dispatch')))
   })
 
   it('dispatches edit subcommand', async () => {
     const { writeProfile, readProfile } = await import('../utils/profile.js')
     const editName = 'edit-via-dispatch'
-    await writeProfile({ name: editName, description: 'original', agents: { agents: {} } })
+    await writeProfile({
+      name: editName,
+      description: 'original',
+      agents: { agents: {} },
+    })
     const editScriptPath = join(tempDir, 'edit-dispatch-helper.cjs')
     const { writeFileSync } = await import('node:fs')
-    writeFileSync(editScriptPath, `
+    writeFileSync(
+      editScriptPath,
+      `
 const fs = require('fs')
 const p = process.argv[2]
 const d = JSON.parse(fs.readFileSync(p, 'utf8'))
 d.description = 'edited via dispatch'
 fs.writeFileSync(p, JSON.stringify(d, null, 2) + '\\n', 'utf8')
-`)
+`,
+    )
     process.env.EDITOR = `node ${editScriptPath}`
     const logs = captureLogs()
     await profileCmd.profileCommand(['edit', editName])
-    assert.ok(logs.some(l => l.includes('updated')))
+    assert.ok(logs.some((l) => l.includes('updated')))
     const updated = await readProfile(editName)
     assert.equal(updated.description, 'edited via dispatch')
     process.env.EDITOR = origEditor
@@ -221,7 +271,7 @@ describe('profile save command', () => {
   it('throws if no name given', async () => {
     await assert.rejects(
       () => profileCmd.profileSaveCommand(null, {}),
-      /Missing profile name/
+      /Missing profile name/,
     )
   })
 
@@ -238,7 +288,7 @@ describe('profile save command', () => {
     const logs = captureLogs()
     await freshCmd.profileSaveCommand('my-profile', { targets: [] })
 
-    assert.ok(logs.some(l => l.includes('my-profile')))
+    assert.ok(logs.some((l) => l.includes('my-profile')))
 
     const saveDir = join(logDir, '.agents', 'profiles')
     assert.ok(existsSync(join(saveDir, 'my-profile.json')))
@@ -249,15 +299,23 @@ describe('profile save command', () => {
 
   it('supports dry-run', async () => {
     const logDir = join(tempDir, 'dry-run-test')
-    await mkdir(join(logDir, '.agents', 'skills', 'test-skill'), { recursive: true })
-    await writeFile(join(logDir, '.opencode.json'), JSON.stringify({ model: 'gpt-4' }))
+    await mkdir(join(logDir, '.agents', 'skills', 'test-skill'), {
+      recursive: true,
+    })
+    await writeFile(
+      join(logDir, '.opencode.json'),
+      JSON.stringify({ model: 'gpt-4' }),
+    )
     process.env.HOME = logDir
     process.cwd = () => logDir
     const freshCmd = await import('./profile.js')
 
     const logs = captureLogs()
-    await freshCmd.profileSaveCommand('test-profile', { dryRun: true, targets: ['agents'] })
-    assert.ok(logs.some(l => l.includes('Would save profile')))
+    await freshCmd.profileSaveCommand('test-profile', {
+      dryRun: true,
+      targets: ['agents'],
+    })
+    assert.ok(logs.some((l) => l.includes('Would save profile')))
 
     process.env.HOME = tempDir
     process.cwd = () => join(tempDir, 'project')
@@ -266,7 +324,9 @@ describe('profile save command', () => {
   it('saves with specific agent targets', async () => {
     const logDir = join(tempDir, 'save-test-targets')
     await mkdir(join(logDir, '.agents', 'profiles'), { recursive: true })
-    await mkdir(join(logDir, '.agents', 'skills', 'test-skill'), { recursive: true })
+    await mkdir(join(logDir, '.agents', 'skills', 'test-skill'), {
+      recursive: true,
+    })
     const opencodeConfig = join(logDir, '.opencode.json')
     await writeFile(opencodeConfig, JSON.stringify({ model: 'gpt-4' }))
 
@@ -275,9 +335,11 @@ describe('profile save command', () => {
     const freshCmd = await import('./profile.js')
 
     const logs = captureLogs()
-    await freshCmd.profileSaveCommand('targeted-profile', { targets: ['agents'] })
+    await freshCmd.profileSaveCommand('targeted-profile', {
+      targets: ['agents'],
+    })
 
-    assert.ok(logs.some(l => l.includes('targeted-profile')))
+    assert.ok(logs.some((l) => l.includes('targeted-profile')))
 
     process.env.HOME = tempDir
     process.cwd = () => join(tempDir, 'project')
@@ -286,7 +348,7 @@ describe('profile save command', () => {
 
 describe('profile list command', () => {
   it('shows no profiles message', async () => {
-    const listDir = join(tempDir, 'list-empty-' + Date.now())
+    const listDir = join(tempDir, `list-empty-${Date.now()}`)
     await mkdir(join(listDir, '.agents', 'profiles'), { recursive: true })
     process.env.HOME = listDir
     process.cwd = () => listDir
@@ -294,14 +356,14 @@ describe('profile list command', () => {
     const freshCmd = await import('./profile.js')
     const logs = captureLogs()
     await freshCmd.profileListCommand()
-    assert.ok(logs.some(l => l.includes('No profiles saved')))
+    assert.ok(logs.some((l) => l.includes('No profiles saved')))
 
     process.env.HOME = tempDir
     process.cwd = () => join(tempDir, 'project')
   })
 
   it('lists saved profiles', async () => {
-    const listDir = join(tempDir, 'list-with-' + Date.now())
+    const listDir = join(tempDir, `list-with-${Date.now()}`)
     await mkdir(join(listDir, '.agents', 'profiles'), { recursive: true })
     process.env.HOME = listDir
     process.cwd = () => listDir
@@ -309,14 +371,17 @@ describe('profile list command', () => {
     const freshCmd = await import('./profile.js')
     const { writeProfile } = await import('../utils/profile.js')
     await writeProfile({ name: 'list-test-a', agents: { agents: {} } })
-    await writeProfile({ name: 'list-test-b', agents: { agents: {}, cursor: {} } })
+    await writeProfile({
+      name: 'list-test-b',
+      agents: { agents: {}, cursor: {} },
+    })
 
     const logs = captureLogs()
     await freshCmd.profileListCommand()
 
-    assert.ok(logs.some(l => l.includes('list-test-a')))
-    assert.ok(logs.some(l => l.includes('list-test-b')))
-    assert.ok(logs.some(l => l.includes('2 profile(s)')))
+    assert.ok(logs.some((l) => l.includes('list-test-a')))
+    assert.ok(logs.some((l) => l.includes('list-test-b')))
+    assert.ok(logs.some((l) => l.includes('2 profile(s)')))
 
     process.env.HOME = tempDir
     process.cwd = () => join(tempDir, 'project')
@@ -327,7 +392,7 @@ describe('profile show command', () => {
   it('throws if no name given', async () => {
     await assert.rejects(
       () => profileCmd.profileShowCommand(null),
-      /Missing profile name/
+      /Missing profile name/,
     )
   })
 
@@ -342,15 +407,15 @@ describe('profile show command', () => {
     const logs = captureLogs()
     await profileCmd.profileShowCommand('show-test')
 
-    assert.ok(logs.some(l => l.includes('show-test')))
-    assert.ok(logs.some(l => l.includes('Test profile')))
-    assert.ok(logs.some(l => l.includes('agents')))
+    assert.ok(logs.some((l) => l.includes('show-test')))
+    assert.ok(logs.some((l) => l.includes('Test profile')))
+    assert.ok(logs.some((l) => l.includes('agents')))
   })
 
   it('throws for missing profile', async () => {
     await assert.rejects(
       () => profileCmd.profileShowCommand('does-not-exist'),
-      /not found/
+      /not found/,
     )
   })
 
@@ -361,7 +426,9 @@ describe('profile show command', () => {
       agents: { agents: {} },
     })
 
-    const data = await (await import('../utils/profile.js')).readProfile('no-meta')
+    const data = await (await import('../utils/profile.js')).readProfile(
+      'no-meta',
+    )
     data.description = undefined
     data.version = undefined
     delete data.description
@@ -374,7 +441,7 @@ describe('profile show command', () => {
     const logs = captureLogs()
     await profileCmd.profileShowCommand('no-meta')
 
-    assert.ok(logs.some(l => l.includes('(not set)')))
+    assert.ok(logs.some((l) => l.includes('(not set)')))
   })
 })
 
@@ -382,14 +449,14 @@ describe('profile delete command', () => {
   it('throws if no name given', async () => {
     await assert.rejects(
       () => profileCmd.profileDeleteCommand(null, {}),
-      /Missing profile name/
+      /Missing profile name/,
     )
   })
 
   it('supports dry-run', async () => {
     const logs = captureLogs()
     await profileCmd.profileDeleteCommand('non-existent', { dryRun: true })
-    assert.ok(logs.some(l => l.includes('does not exist')))
+    assert.ok(logs.some((l) => l.includes('does not exist')))
   })
 
   it('dry-run on existing profile shows would-delete', async () => {
@@ -398,7 +465,7 @@ describe('profile delete command', () => {
 
     const logs = captureLogs()
     await profileCmd.profileDeleteCommand('dry-del', { dryRun: true })
-    assert.ok(logs.some(l => l.includes('Would delete')))
+    assert.ok(logs.some((l) => l.includes('Would delete')))
   })
 
   it('deletes a profile', async () => {
@@ -411,7 +478,7 @@ describe('profile delete command', () => {
     const logs = captureLogs()
     await profileCmd.profileDeleteCommand('delete-me', {})
 
-    assert.ok(logs.some(l => l.includes('delete-me')))
+    assert.ok(logs.some((l) => l.includes('delete-me')))
 
     exists = await readProfile('delete-me')
     assert.equal(exists, null)
@@ -420,7 +487,7 @@ describe('profile delete command', () => {
   it('throws for missing profile', async () => {
     await assert.rejects(
       () => profileCmd.profileDeleteCommand('not-here', {}),
-      /not found/
+      /not found/,
     )
   })
 })
@@ -429,14 +496,14 @@ describe('profile apply command', () => {
   it('throws if no name given', async () => {
     await assert.rejects(
       () => profileCmd.profileApplyCommand(null, {}),
-      /Missing profile name/
+      /Missing profile name/,
     )
   })
 
   it('throws for missing profile', async () => {
     await assert.rejects(
       () => profileCmd.profileApplyCommand('not-here', {}),
-      /not found/
+      /not found/,
     )
   })
 
@@ -448,8 +515,13 @@ describe('profile apply command', () => {
     })
 
     const logs = captureLogs()
-    await profileCmd.profileApplyCommand('apply-dry', { dryRun: true, targets: [], skipMcp: false, skipSkills: false })
-    assert.ok(logs.some(l => l.includes('Would apply profile')))
+    await profileCmd.profileApplyCommand('apply-dry', {
+      dryRun: true,
+      targets: [],
+      skipMcp: false,
+      skipSkills: false,
+    })
+    assert.ok(logs.some((l) => l.includes('Would apply profile')))
   })
 
   it('applies a profile and shows results', async () => {
@@ -467,10 +539,15 @@ describe('profile apply command', () => {
     await writeFile(opencodeConfig, JSON.stringify({ model: 'gpt-3.5' }))
 
     const logs = captureLogs()
-    await profileCmd.profileApplyCommand('apply-full', { dryRun: false, targets: [], skipMcp: true, skipSkills: true })
+    await profileCmd.profileApplyCommand('apply-full', {
+      dryRun: false,
+      targets: [],
+      skipMcp: true,
+      skipSkills: true,
+    })
 
-    assert.ok(logs.some(l => l.includes('Applied profile')))
-    assert.ok(logs.some(l => l.includes('agents')))
+    assert.ok(logs.some((l) => l.includes('Applied profile')))
+    assert.ok(logs.some((l) => l.includes('agents')))
   })
 
   it('applies with specific agent targets in dry-run', async () => {
@@ -484,11 +561,19 @@ describe('profile apply command', () => {
     })
 
     const logs = captureLogs()
-    await profileCmd.profileApplyCommand('apply-targeted', { dryRun: true, targets: ['agents'], skipMcp: false, skipSkills: false })
+    await profileCmd.profileApplyCommand('apply-targeted', {
+      dryRun: true,
+      targets: ['agents'],
+      skipMcp: false,
+      skipSkills: false,
+    })
 
-    assert.ok(logs.some(l => l.includes('Would apply profile')))
-    assert.ok(logs.some(l => l.includes('agents')))
-    assert.equal(logs.some(l => l.includes('cursor')), false)
+    assert.ok(logs.some((l) => l.includes('Would apply profile')))
+    assert.ok(logs.some((l) => l.includes('agents')))
+    assert.equal(
+      logs.some((l) => l.includes('cursor')),
+      false,
+    )
   })
 
   it('applies with specific agent targets', async () => {
@@ -501,26 +586,30 @@ describe('profile apply command', () => {
     })
 
     const logs = captureLogs()
-    await profileCmd.profileApplyCommand('apply-targeted-real', { dryRun: false, targets: ['agents'], skipMcp: true, skipSkills: true })
+    await profileCmd.profileApplyCommand('apply-targeted-real', {
+      dryRun: false,
+      targets: ['agents'],
+      skipMcp: true,
+      skipSkills: true,
+    })
 
-    assert.ok(logs.some(l => l.includes('Applied profile')))
-    assert.ok(logs.some(l => l.includes('agents')))
+    assert.ok(logs.some((l) => l.includes('Applied profile')))
+    assert.ok(logs.some((l) => l.includes('agents')))
   })
-
 })
 
 describe('profile diff command', () => {
   it('throws if no name given', async () => {
     await assert.rejects(
       () => profileCmd.profileDiffCommand(null),
-      /Missing profile name/
+      /Missing profile name/,
     )
   })
 
   it('throws for missing profile', async () => {
     await assert.rejects(
       () => profileCmd.profileDiffCommand('not-here'),
-      /not found/
+      /not found/,
     )
   })
 
@@ -539,8 +628,8 @@ describe('profile diff command', () => {
     const logs = captureLogs()
     await profileCmd.profileDiffCommand('diff-test')
 
-    assert.ok(logs.some(l => l.includes('diff-test')))
-    assert.ok(logs.some(l => l.includes('skills differ')))
+    assert.ok(logs.some((l) => l.includes('diff-test')))
+    assert.ok(logs.some((l) => l.includes('skills differ')))
   })
 
   it('shows no differences when profile matches current', async () => {
@@ -560,7 +649,9 @@ describe('profile diff command', () => {
       agents: {
         agents: {
           config: { global: { model: 'gpt-4' } },
-          instructions: [{ file: opencodeConfig, contentSha: null, scope: 'global' }],
+          instructions: [
+            { file: opencodeConfig, contentSha: null, scope: 'global' },
+          ],
         },
       },
     })
@@ -568,7 +659,7 @@ describe('profile diff command', () => {
     const logs = captureLogs()
     await freshCmd.profileDiffCommand('diff-match-prof')
 
-    assert.ok(logs.some(l => l.includes('no differences')))
+    assert.ok(logs.some((l) => l.includes('no differences')))
 
     process.env.HOME = tempDir
     process.cwd = () => join(tempDir, 'project')
@@ -588,7 +679,9 @@ describe('profile diff command', () => {
       agents: {
         agents: {
           config: { global: { model: 'gpt-5' } },
-          mcpServers: { 'test-mcp': { command: 'npx', args: ['-y', '@test/one'] } },
+          mcpServers: {
+            'test-mcp': { command: 'npx', args: ['-y', '@test/one'] },
+          },
         },
       },
     })
@@ -597,13 +690,16 @@ describe('profile diff command', () => {
     await writeFile(opencodeConfig, JSON.stringify({ model: 'gpt-4' }))
 
     const { addMcpServer } = await import('../utils/mcp.js')
-    await addMcpServer('agents', 'test-mcp', { command: 'npx', args: ['-y', '@test/two'] })
+    await addMcpServer('agents', 'test-mcp', {
+      command: 'npx',
+      args: ['-y', '@test/two'],
+    })
 
     const logs = captureLogs()
     await freshCmd.profileDiffCommand('diff-config-mcp-prof')
 
-    assert.ok(logs.some(l => l.includes('config differs')))
-    assert.ok(logs.some(l => l.includes('MCP servers differ')))
+    assert.ok(logs.some((l) => l.includes('config differs')))
+    assert.ok(logs.some((l) => l.includes('MCP servers differ')))
 
     process.env.HOME = tempDir
     process.cwd = () => join(tempDir, 'project')
@@ -614,14 +710,14 @@ describe('profile edit command', () => {
   it('throws if no name given', async () => {
     await assert.rejects(
       () => profileCmd.profileEditCommand(null),
-      /Missing profile name/
+      /Missing profile name/,
     )
   })
 
   it('throws for missing profile', async () => {
     await assert.rejects(
       () => profileCmd.profileEditCommand('not-here'),
-      /not found/
+      /not found/,
     )
   })
 
@@ -638,7 +734,7 @@ describe('profile edit command', () => {
     const logs = captureLogs()
     await profileCmd.profileEditCommand('edit-test')
 
-    assert.ok(logs.some(l => l.includes('updated')))
+    assert.ok(logs.some((l) => l.includes('updated')))
 
     const updated = await readProfile('edit-test')
     assert.equal(updated.description, 'edited via editor')
@@ -657,7 +753,7 @@ describe('profile edit command', () => {
     const logs = captureLogs()
     await profileCmd.profileEditCommand('edit-nochange')
 
-    assert.ok(logs.some(l => l.includes('updated')))
+    assert.ok(logs.some((l) => l.includes('updated')))
 
     const updated = await readProfile('edit-nochange')
     assert.equal(updated.description, 'same')
@@ -675,7 +771,7 @@ describe('profile edit command', () => {
 
     await assert.rejects(
       () => profileCmd.profileEditCommand('edit-error'),
-      /Command failed/
+      /Command failed/,
     )
   })
 
@@ -696,7 +792,7 @@ describe('profile edit command', () => {
 
     await assert.rejects(
       () => profileCmd.profileEditCommand('edit-bad-json'),
-      /Invalid JSON/
+      /Invalid JSON/,
     )
   })
 })
@@ -705,14 +801,14 @@ describe('profile export command', () => {
   it('throws if no name given', async () => {
     await assert.rejects(
       () => profileCmd.profileExportCommand(null, {}),
-      /Missing profile name/
+      /Missing profile name/,
     )
   })
 
   it('throws for missing profile', async () => {
     await assert.rejects(
       () => profileCmd.profileExportCommand('not-here', {}),
-      /not found/
+      /not found/,
     )
   })
 
@@ -725,10 +821,13 @@ describe('profile export command', () => {
     })
 
     const logs = captureLogs()
-    await profileCmd.profileExportCommand('export-test', { relative: false, filePath: null })
+    await profileCmd.profileExportCommand('export-test', {
+      relative: false,
+      filePath: null,
+    })
 
-    assert.ok(logs.some(l => l.includes('"name": "export-test"')))
-    assert.ok(logs.some(l => l.includes('"agents"')))
+    assert.ok(logs.some((l) => l.includes('"name": "export-test"')))
+    assert.ok(logs.some((l) => l.includes('"agents"')))
   })
 
   it('exports to file with --file option', async () => {
@@ -739,7 +838,10 @@ describe('profile export command', () => {
     })
 
     const exportPath = join(tempDir, 'exports', 'my-profile.json')
-    await profileCmd.profileExportCommand('file-export', { relative: false, filePath: exportPath })
+    await profileCmd.profileExportCommand('file-export', {
+      relative: false,
+      filePath: exportPath,
+    })
 
     const exported = JSON.parse(await readFile(exportPath, 'utf-8'))
     assert.equal(exported.name, 'file-export')
@@ -757,7 +859,10 @@ describe('profile export command', () => {
     })
 
     const exportPath = join(tempDir, 'exports', 'clean.json')
-    await profileCmd.profileExportCommand('clean-export', { relative: false, filePath: exportPath })
+    await profileCmd.profileExportCommand('clean-export', {
+      relative: false,
+      filePath: exportPath,
+    })
 
     const exported = JSON.parse(await readFile(exportPath, 'utf-8'))
     assert.equal(exported.name, 'clean-export')
@@ -771,24 +876,29 @@ describe('profile import command', () => {
   it('throws if no source given', async () => {
     await assert.rejects(
       () => profileCmd.profileImportCommand(null),
-      /Missing source path/
+      /Missing source path/,
     )
   })
 
   it('imports from a local JSON file', async () => {
     const importFile = join(tempDir, 'imports', 'imported-profile.json')
     await mkdir(dirname(importFile), { recursive: true })
-    await writeFile(importFile, JSON.stringify({
-      name: 'imported',
-      agents: { agents: { config: { global: { model: 'gpt-4' } } } },
-    }))
+    await writeFile(
+      importFile,
+      JSON.stringify({
+        name: 'imported',
+        agents: { agents: { config: { global: { model: 'gpt-4' } } } },
+      }),
+    )
 
     const logs = captureLogs()
     await profileCmd.profileImportCommand(importFile)
 
-    assert.ok(logs.some(l => l.includes('imported')))
+    assert.ok(logs.some((l) => l.includes('imported')))
 
-    const data = await (await import('../utils/profile.js')).readProfile('imported')
+    const data = await (await import('../utils/profile.js')).readProfile(
+      'imported',
+    )
     assert.ok(data)
     assert.equal(data.name, 'imported')
   })
@@ -796,14 +906,17 @@ describe('profile import command', () => {
   it('assigns name from filename when missing', async () => {
     const importFile = join(tempDir, 'imports', 'nameless.json')
     await mkdir(dirname(importFile), { recursive: true })
-    await writeFile(importFile, JSON.stringify({
-      agents: { agents: {} },
-    }))
+    await writeFile(
+      importFile,
+      JSON.stringify({
+        agents: { agents: {} },
+      }),
+    )
 
     const logs = captureLogs()
     await profileCmd.profileImportCommand(importFile)
 
-    assert.ok(logs.some(l => l.includes('nameless')))
+    assert.ok(logs.some((l) => l.includes('nameless')))
   })
 
   it('throws on invalid JSON', async () => {
@@ -813,12 +926,12 @@ describe('profile import command', () => {
 
     await assert.rejects(
       () => profileCmd.profileImportCommand(importFile),
-      /Invalid JSON/
+      /Invalid JSON/,
     )
   })
 
   it('imports from a URL', async () => {
-    const urlDir = join(tempDir, 'url-import-' + Date.now())
+    const urlDir = join(tempDir, `url-import-${Date.now()}`)
     await mkdir(join(urlDir, '.agents', 'profiles'), { recursive: true })
 
     process.env.HOME = urlDir
@@ -827,13 +940,14 @@ describe('profile import command', () => {
 
     const fetchMock = mock.method(global, 'fetch', async () => ({
       ok: true,
-      text: async () => JSON.stringify({ name: 'url-profile', agents: { agents: {} } }),
+      text: async () =>
+        JSON.stringify({ name: 'url-profile', agents: { agents: {} } }),
     }))
 
     const logs = captureLogs()
     await freshCmd.profileImportCommand('https://example.com/test-profile.json')
 
-    assert.ok(logs.some(l => l.includes('url-profile')))
+    assert.ok(logs.some((l) => l.includes('url-profile')))
     fetchMock.mock.restore()
 
     process.env.HOME = tempDir
@@ -849,13 +963,19 @@ describe('profile import command', () => {
     const freshCmd = await import('./profile.js')
 
     const importFile = join(logDir, 'noagent-import.json')
-    await writeFile(importFile, JSON.stringify({ name: 'noagent', agents: { agents: {} } }))
+    await writeFile(
+      importFile,
+      JSON.stringify({ name: 'noagent', agents: { agents: {} } }),
+    )
 
     const logs = captureLogs()
     await freshCmd.profileImportCommand(importFile)
 
-    assert.ok(logs.some(l => l.includes('noagent')))
-    assert.equal(logs.some(l => l.includes('diff')), false)
+    assert.ok(logs.some((l) => l.includes('noagent')))
+    assert.equal(
+      logs.some((l) => l.includes('diff')),
+      false,
+    )
 
     process.env.HOME = tempDir
     process.cwd = () => join(tempDir, 'project')
@@ -865,23 +985,29 @@ describe('profile import command', () => {
     const hintDir = join(tempDir, 'import-hint')
     await mkdir(join(hintDir, '.agents', 'profiles'), { recursive: true })
     await mkdir(join(hintDir, '.agents', 'skills'), { recursive: true })
-    await writeFile(join(hintDir, '.opencode.json'), JSON.stringify({ model: 'gpt-4' }))
+    await writeFile(
+      join(hintDir, '.opencode.json'),
+      JSON.stringify({ model: 'gpt-4' }),
+    )
 
     process.env.HOME = hintDir
     process.cwd = () => hintDir
     const freshCmd = await import('./profile.js')
 
     const importFile = join(hintDir, 'hint-import.json')
-    await writeFile(importFile, JSON.stringify({
-      name: 'hint-profile',
-      agents: { agents: { config: { global: { model: 'gpt-4' } } } },
-    }))
+    await writeFile(
+      importFile,
+      JSON.stringify({
+        name: 'hint-profile',
+        agents: { agents: { config: { global: { model: 'gpt-4' } } } },
+      }),
+    )
 
     const logs = captureLogs()
     await freshCmd.profileImportCommand(importFile)
 
-    assert.ok(logs.some(l => l.includes('hint-profile')))
-    assert.ok(logs.some(l => l.includes('diff')))
+    assert.ok(logs.some((l) => l.includes('hint-profile')))
+    assert.ok(logs.some((l) => l.includes('diff')))
 
     process.env.HOME = tempDir
     process.cwd = () => join(tempDir, 'project')
@@ -891,13 +1017,15 @@ describe('profile import command', () => {
 describe('profile link command', () => {
   after(async () => {
     const linkPath = join(process.cwd(), '.agent-profile.json')
-    try { unlinkSync(linkPath) } catch {}
+    try {
+      unlinkSync(linkPath)
+    } catch {}
   })
 
   it('shows no link message when no link exists', async () => {
     const logs = captureLogs()
     await profileCmd.profileLinkCommand(undefined, { unlink: false })
-    assert.ok(logs.some(l => l.includes('No profile linked')))
+    assert.ok(logs.some((l) => l.includes('No profile linked')))
   })
 
   it('creates a link to a profile', async () => {
@@ -907,7 +1035,7 @@ describe('profile link command', () => {
     const logs = captureLogs()
     await profileCmd.profileLinkCommand('linkable', { unlink: false })
 
-    assert.ok(logs.some(l => l.includes('linkable')))
+    assert.ok(logs.some((l) => l.includes('linkable')))
 
     const linkPath = join(process.cwd(), '.agent-profile.json')
     assert.ok(existsSync(linkPath))
@@ -920,14 +1048,14 @@ describe('profile link command', () => {
     const logs = captureLogs()
     await profileCmd.profileLinkCommand(undefined, { unlink: false })
 
-    assert.ok(logs.some(l => l.includes('linkable')))
+    assert.ok(logs.some((l) => l.includes('linkable')))
   })
 
   it('unlinks a profile', async () => {
     const logs = captureLogs()
     await profileCmd.profileLinkCommand(undefined, { unlink: true })
 
-    assert.ok(logs.some(l => l.includes('removed')))
+    assert.ok(logs.some((l) => l.includes('removed')))
 
     const linkPath = join(process.cwd(), '.agent-profile.json')
     assert.equal(existsSync(linkPath), false)
@@ -936,14 +1064,14 @@ describe('profile link command', () => {
   it('throws for non-existent profile when linking', async () => {
     await assert.rejects(
       () => profileCmd.profileLinkCommand('not-here', { unlink: false }),
-      /not found/
+      /not found/,
     )
   })
 
   it('shows unlink message when no link exists', async () => {
     const logs = captureLogs()
     await profileCmd.profileLinkCommand(undefined, { unlink: true })
-    assert.ok(logs.some(l => l.includes('No project link')))
+    assert.ok(logs.some((l) => l.includes('No project link')))
   })
 
   it('shows invalid message for corrupted link file', async () => {
@@ -952,7 +1080,7 @@ describe('profile link command', () => {
 
     const logs = captureLogs()
     await profileCmd.profileLinkCommand(undefined, { unlink: false })
-    assert.ok(logs.some(l => l.includes('Link file is invalid')))
+    assert.ok(logs.some((l) => l.includes('Link file is invalid')))
 
     unlinkSync(linkPath)
   })
@@ -963,7 +1091,7 @@ describe('profile link command', () => {
 
     const logs = captureLogs()
     await profileCmd.profileLinkCommand(undefined, { unlink: false })
-    assert.ok(logs.some(l => l.includes('Link file is invalid')))
+    assert.ok(logs.some((l) => l.includes('Link file is invalid')))
 
     unlinkSync(linkPath)
   })
@@ -980,7 +1108,7 @@ describe('profile edge cases', () => {
 
     const logs = captureLogs()
     await freshCmd.profileSaveCommand('empty-profile', { targets: [] })
-    assert.ok(logs.some(l => l.includes('No agent configurations')))
+    assert.ok(logs.some((l) => l.includes('No agent configurations')))
 
     process.env.HOME = tempDir
     process.cwd = () => join(tempDir, 'project')
@@ -993,7 +1121,7 @@ describe('profile edge cases', () => {
     const logs = captureLogs()
     await profileCmd.profileDiffCommand('empty-agents')
 
-    assert.ok(logs.some(l => l.includes('has no agent data')))
+    assert.ok(logs.some((l) => l.includes('has no agent data')))
   })
 
   it('export with --relative handles paths', async () => {
@@ -1004,14 +1132,23 @@ describe('profile edge cases', () => {
       agents: {
         agents: {
           config: { global: { model: 'gpt-4' } },
-          instructions: [{ file: '/absolute/path/to/rules.md', contentSha: null, scope: 'global' }],
+          instructions: [
+            {
+              file: '/absolute/path/to/rules.md',
+              contentSha: null,
+              scope: 'global',
+            },
+          ],
         },
       },
     })
 
     const exportPath = join(tempDir, 'exports', 'relative.json')
     await mkdir(dirname(exportPath), { recursive: true })
-    await profileCmd.profileExportCommand('rel-export', { relative: true, filePath: exportPath })
+    await profileCmd.profileExportCommand('rel-export', {
+      relative: true,
+      filePath: exportPath,
+    })
 
     const exported = JSON.parse(await readFile(exportPath, 'utf-8'))
     const instr = exported.agents.agents.instructions[0]
@@ -1021,7 +1158,7 @@ describe('profile edge cases', () => {
   it('import from non-existent file throws', async () => {
     await assert.rejects(
       () => profileCmd.profileImportCommand('/nonexistent/path/file.json'),
-      /ENOENT/
+      /ENOENT/,
     )
   })
 
@@ -1030,7 +1167,10 @@ describe('profile edge cases', () => {
     await writeProfile({ name: 'deep-export', agents: {} })
 
     const deepPath = join(tempDir, 'deep', 'nested', 'dir', 'profile.json')
-    await profileCmd.profileExportCommand('deep-export', { relative: false, filePath: deepPath })
+    await profileCmd.profileExportCommand('deep-export', {
+      relative: false,
+      filePath: deepPath,
+    })
 
     assert.ok(existsSync(deepPath))
   })

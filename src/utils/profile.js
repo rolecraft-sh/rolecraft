@@ -1,4 +1,11 @@
-import { mkdir, readFile, writeFile, readdir, rm, access } from 'node:fs/promises'
+import {
+  mkdir,
+  readFile,
+  writeFile,
+  readdir,
+  rm,
+  access,
+} from 'node:fs/promises'
 import { join, dirname } from 'node:path'
 import { homedir } from 'node:os'
 import agents from '../agents.js'
@@ -68,13 +75,20 @@ export async function ensureProfileDir() {
 
 export function profilePath(name) {
   if (!isValidProfileName(name)) {
-    throw new Error(`Invalid profile name: "${name}". Use only letters, digits, hyphens, underscores, or dots.`)
+    throw new Error(
+      `Invalid profile name: "${name}". Use only letters, digits, hyphens, underscores, or dots.`,
+    )
   }
   return join(getProfilesDir(), `${name}.json`)
 }
 
 export function isValidProfileName(name) {
-  return typeof name === 'string' && name.length >= 1 && name.length <= 64 && PROFILE_NAME_RE.test(name)
+  return (
+    typeof name === 'string' &&
+    name.length >= 1 &&
+    name.length <= 64 &&
+    PROFILE_NAME_RE.test(name)
+  )
 }
 
 export function validateProfile(data) {
@@ -87,7 +101,9 @@ export function validateProfile(data) {
   if (!data.name || typeof data.name !== 'string') {
     errors.push('Missing or invalid "name": must be a non-empty string')
   } else if (!isValidProfileName(data.name)) {
-    errors.push(`Invalid profile name "${data.name}": use only letters, digits, hyphens, underscores, or dots`)
+    errors.push(
+      `Invalid profile name "${data.name}": use only letters, digits, hyphens, underscores, or dots`,
+    )
   }
 
   if (data.version !== undefined && typeof data.version !== 'number') {
@@ -95,7 +111,11 @@ export function validateProfile(data) {
   }
 
   if (data.agents !== undefined) {
-    if (typeof data.agents !== 'object' || data.agents === null || Array.isArray(data.agents)) {
+    if (
+      typeof data.agents !== 'object' ||
+      data.agents === null ||
+      Array.isArray(data.agents)
+    ) {
       errors.push('"agents" must be a non-null object')
     } else {
       for (const [agentKey, agentVal] of Object.entries(data.agents)) {
@@ -103,15 +123,27 @@ export function validateProfile(data) {
           errors.push(`"agents.${agentKey}" must be a non-null object`)
           continue
         }
-        if (agentVal.config !== undefined && typeof agentVal.config !== 'object') {
+        if (
+          agentVal.config !== undefined &&
+          typeof agentVal.config !== 'object'
+        ) {
           errors.push(`"agents.${agentKey}.config" must be an object`)
         }
-        if (agentVal.instructions !== undefined && !Array.isArray(agentVal.instructions)) {
+        if (
+          agentVal.instructions !== undefined &&
+          !Array.isArray(agentVal.instructions)
+        ) {
           errors.push(`"agents.${agentKey}.instructions" must be an array`)
         }
         if (agentVal.mcpServers !== undefined) {
-          if (typeof agentVal.mcpServers !== 'object' || agentVal.mcpServers === null || Array.isArray(agentVal.mcpServers)) {
-            errors.push(`"agents.${agentKey}.mcpServers" must be a non-null object`)
+          if (
+            typeof agentVal.mcpServers !== 'object' ||
+            agentVal.mcpServers === null ||
+            Array.isArray(agentVal.mcpServers)
+          ) {
+            errors.push(
+              `"agents.${agentKey}.mcpServers" must be a non-null object`,
+            )
           }
         }
         if (agentVal.skills !== undefined && !Array.isArray(agentVal.skills)) {
@@ -122,13 +154,21 @@ export function validateProfile(data) {
   }
 
   if (data.projectOverrides !== undefined) {
-    if (typeof data.projectOverrides !== 'object' || data.projectOverrides === null || Array.isArray(data.projectOverrides)) {
+    if (
+      typeof data.projectOverrides !== 'object' ||
+      data.projectOverrides === null ||
+      Array.isArray(data.projectOverrides)
+    ) {
       errors.push('"projectOverrides" must be a non-null object')
     }
   }
 
   if (data.localOverrides !== undefined) {
-    if (typeof data.localOverrides !== 'object' || data.localOverrides === null || Array.isArray(data.localOverrides)) {
+    if (
+      typeof data.localOverrides !== 'object' ||
+      data.localOverrides === null ||
+      Array.isArray(data.localOverrides)
+    ) {
       errors.push('"localOverrides" must be a non-null object')
     }
   }
@@ -150,7 +190,9 @@ export async function readProfile(name) {
 export async function writeProfile(data) {
   const validation = validateProfile(data)
   if (!validation.valid) {
-    throw new Error(`Invalid profile data:\n  ${validation.errors.join('\n  ')}`)
+    throw new Error(
+      `Invalid profile data:\n  ${validation.errors.join('\n  ')}`,
+    )
   }
 
   const enriched = {
@@ -162,7 +204,11 @@ export async function writeProfile(data) {
   }
 
   await ensureProfileDir()
-  await writeFile(profilePath(data.name), JSON.stringify(enriched, null, 2) + '\n', 'utf-8')
+  await writeFile(
+    profilePath(data.name),
+    `${JSON.stringify(enriched, null, 2)}\n`,
+    'utf-8',
+  )
   return enriched
 }
 
@@ -207,7 +253,8 @@ export async function listProfiles() {
   }
 
   results.sort((a, b) => {
-    if (a.updatedAt && b.updatedAt) return b.updatedAt.localeCompare(a.updatedAt)
+    if (a.updatedAt && b.updatedAt)
+      return b.updatedAt.localeCompare(a.updatedAt)
     if (a.updatedAt) return -1
     if (b.updatedAt) return 1
     return a.name.localeCompare(b.name)
@@ -297,7 +344,11 @@ export async function captureSkills(agentFlag) {
 
   for (const [slug, entry] of Object.entries(allSkills)) {
     const targetAgents = entry.agents || []
-    if (targetAgents.includes(agentFlag) || targetAgents.includes('all') || targetAgents.includes('agents')) {
+    if (
+      targetAgents.includes(agentFlag) ||
+      targetAgents.includes('all') ||
+      targetAgents.includes('agents')
+    ) {
       slugs.push(slug)
     }
   }
@@ -395,7 +446,11 @@ export async function applyAgentConfig(agentFlag, configData) {
 
     const targetPath = getPath()
     await mkdir(dirname(targetPath), { recursive: true })
-    await writeFile(targetPath, JSON.stringify(scopeData, null, 2) + '\n', 'utf-8')
+    await writeFile(
+      targetPath,
+      `${JSON.stringify(scopeData, null, 2)}\n`,
+      'utf-8',
+    )
     results.push({ scope, path: targetPath })
   }
 
@@ -442,7 +497,11 @@ export async function ensureSkillsInstalled(skills, targetFlags) {
       const resolved = await resolveSource(slug)
       const installTargets = targetFlags || ['agents']
       const installResults = await installSkill(resolved, installTargets)
-      results.push({ slug, action: 'installed', targets: installResults.map(r => r.target) })
+      results.push({
+        slug,
+        action: 'installed',
+        targets: installResults.map((r) => r.target),
+      })
     } catch (err) {
       results.push({ slug, action: 'failed', reason: err.message })
     }
@@ -452,13 +511,18 @@ export async function ensureSkillsInstalled(skills, targetFlags) {
 }
 
 export async function applyInstructions(agentFlag, instructions) {
-  if (!instructions || !Array.isArray(instructions) || instructions.length === 0) return []
+  if (
+    !instructions ||
+    !Array.isArray(instructions) ||
+    instructions.length === 0
+  )
+    return []
 
   if (agentFlag === 'agents') {
     const paths = AGENT_CONFIG_PATHS[agentFlag]
     if (!paths) return []
 
-    const filePaths = instructions.map(i => i.file)
+    const filePaths = instructions.map((i) => i.file)
     const applied = []
 
     for (const [scope, getPath] of Object.entries(paths)) {
@@ -466,11 +530,19 @@ export async function applyInstructions(agentFlag, instructions) {
       let config = {}
       const existing = await readFileIfExists(targetPath)
       if (existing) {
-        try { config = JSON.parse(existing) } catch { config = {} }
+        try {
+          config = JSON.parse(existing)
+        } catch {
+          config = {}
+        }
       }
       config.instructions = filePaths
       await mkdir(dirname(targetPath), { recursive: true })
-      await writeFile(targetPath, JSON.stringify(config, null, 2) + '\n', 'utf-8')
+      await writeFile(
+        targetPath,
+        `${JSON.stringify(config, null, 2)}\n`,
+        'utf-8',
+      )
       applied.push({ scope, path: targetPath })
     }
 
@@ -478,9 +550,9 @@ export async function applyInstructions(agentFlag, instructions) {
   }
 
   if (agentFlag === 'cursor') {
-    const content = instructions.map(i => i.content || i.file).join('\n')
+    const content = instructions.map((i) => i.content || i.file).join('\n')
     const targetPath = join(process.cwd(), '.cursorrules')
-    await writeFile(targetPath, content + '\n', 'utf-8')
+    await writeFile(targetPath, `${content}\n`, 'utf-8')
     return [{ scope: 'project', path: targetPath }]
   }
 
@@ -514,7 +586,9 @@ export async function applyProfileEntry(agentFlag, entry, options = {}) {
       else result.mcpServers.skipped.push(r.name)
     }
   } else {
-    result.mcpServers.skipped.push(options.skipMcp ? 'skipped via flag' : 'no MCP data in profile')
+    result.mcpServers.skipped.push(
+      options.skipMcp ? 'skipped via flag' : 'no MCP data in profile',
+    )
   }
 
   if (!options.skipSkills && entry.skills) {
@@ -522,11 +596,14 @@ export async function applyProfileEntry(agentFlag, entry, options = {}) {
     const skillResult = await ensureSkillsInstalled(entry.skills, targets)
     for (const r of skillResult) {
       if (r.action === 'installed') result.skills.applied.push(r.slug)
-      else if (r.action === 'failed') result.skills.failed.push({ slug: r.slug, reason: r.reason })
+      else if (r.action === 'failed')
+        result.skills.failed.push({ slug: r.slug, reason: r.reason })
       else result.skills.skipped.push(r.slug)
     }
   } else {
-    result.skills.skipped.push(options.skipSkills ? 'skipped via flag' : 'no skills data in profile')
+    result.skills.skipped.push(
+      options.skipSkills ? 'skipped via flag' : 'no skills data in profile',
+    )
   }
 
   if (entry.instructions) {
@@ -540,7 +617,7 @@ export async function applyProfileEntry(agentFlag, entry, options = {}) {
 }
 
 export async function applyProfileData(data, options = {}) {
-  if (!data || !data.agents || typeof data.agents !== 'object') {
+  if (!data?.agents || typeof data.agents !== 'object') {
     throw new Error('Profile must contain an "agents" object')
   }
 
@@ -558,10 +635,14 @@ export function formatApplyResults(results) {
   for (const [agent, result] of Object.entries(results)) {
     const changes = []
 
-    if (result.config.applied.length > 0) changes.push(`config (${result.config.applied.length} scope(s))`)
-    if (result.mcpServers.applied.length > 0) changes.push(`MCP (${result.mcpServers.applied.length})`)
-    if (result.skills.applied.length > 0) changes.push(`skills (${result.skills.applied.length})`)
-    if (result.instructions.applied.length > 0) changes.push(`instructions (${result.instructions.applied.length})`)
+    if (result.config.applied.length > 0)
+      changes.push(`config (${result.config.applied.length} scope(s))`)
+    if (result.mcpServers.applied.length > 0)
+      changes.push(`MCP (${result.mcpServers.applied.length})`)
+    if (result.skills.applied.length > 0)
+      changes.push(`skills (${result.skills.applied.length})`)
+    if (result.instructions.applied.length > 0)
+      changes.push(`instructions (${result.instructions.applied.length})`)
 
     if (changes.length > 0) {
       lines.push(`  ${agent}: ${changes.join(', ')}`)

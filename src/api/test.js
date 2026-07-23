@@ -63,7 +63,7 @@ const ASSERTIONS = [
     run(_attrs, body) {
       const fences = body.match(/```[\s\S]*?```/g) || []
       if (fences.length === 0) return null
-      const langless = fences.filter(f => {
+      const langless = fences.filter((f) => {
         const firstLine = f.split('\n')[0].replace(/```/, '').trim()
         return !firstLine
       })
@@ -96,7 +96,7 @@ const ASSERTIONS = [
     description: 'No lines exceed 120 characters',
     run(_attrs, body) {
       const lines = body.split('\n')
-      const long = lines.filter(l => l.length > 120)
+      const long = lines.filter((l) => l.length > 120)
       if (long.length === 0) return true
       return { pass: false, detail: `${long.length} line(s)` }
     },
@@ -154,27 +154,36 @@ function generateSuggestions(assertions) {
     'name-defined': 'Add "name" field to frontmatter',
     'description-defined': 'Add "description" field to frontmatter',
     'description-length': 'Description must be at least 20 characters',
-    'frontmatter-valid': 'Frontmatter is not valid YAML, must start with --- and end with ---',
+    'frontmatter-valid':
+      'Frontmatter is not valid YAML, must start with --- and end with ---',
     'slug-defined': 'Add "slug" field to frontmatter',
-    'content-not-empty': 'Skill content is too short, must be at least 50 words',
-    'code-block-lang': 'Use language tags in code blocks (```javascript, ```bash, etc.)',
+    'content-not-empty':
+      'Skill content is too short, must be at least 50 words',
+    'code-block-lang':
+      'Use language tags in code blocks (```javascript, ```bash, etc.)',
     'dangerous-patterns': 'Dangerous patterns detected (rm -rf, eval, exec)',
     'line-length': 'Reduce line length (max 120 characters)',
     'example-commands': 'Add example commands ($ prefix or ```bash block)',
-    'mcp-referenced': 'If MCP servers are referenced, define mcp_servers in frontmatter',
-    'agent-targets': 'Specify which agents this skill is for (agents: or scope: field)',
+    'mcp-referenced':
+      'If MCP servers are referenced, define mcp_servers in frontmatter',
+    'agent-targets':
+      'Specify which agents this skill is for (agents: or scope: field)',
     'has-sections': 'Add at least 2 "## " section headings',
   }
   return assertions
-    .filter(a => a.pass === false)
-    .map(a => map[a.name] || `${a.name}: failed`)
+    .filter((a) => a.pass === false)
+    .map((a) => map[a.name] || `${a.name}: failed`)
 }
 
 function runAssertions(attrs, body, raw, filterNames) {
   const results = []
 
   for (const assertion of ASSERTIONS) {
-    if (filterNames && filterNames.length > 0 && !filterNames.includes(assertion.name)) {
+    if (
+      filterNames &&
+      filterNames.length > 0 &&
+      !filterNames.includes(assertion.name)
+    ) {
       continue
     }
 
@@ -226,7 +235,8 @@ function calculateScore(assertions) {
     if (a.pass) earnedWeight += a.weight
   }
 
-  const score = totalWeight > 0 ? Math.round((earnedWeight / totalWeight) * 100) : 0
+  const score =
+    totalWeight > 0 ? Math.round((earnedWeight / totalWeight) * 100) : 0
   const { grade, label } = calculateGrade(score)
 
   return { score, grade, label }
@@ -240,7 +250,9 @@ function readSkillFile(skillPath) {
 
 export async function apiTest(skillPath, options = {}) {
   const onlyNames = options.only
-    ? (Array.isArray(options.only) ? options.only : [options.only])
+    ? Array.isArray(options.only)
+      ? options.only
+      : [options.only]
     : null
 
   if (options.all) {
@@ -270,20 +282,23 @@ async function testAllSkills(options) {
   const results = []
 
   const globalLock = await readLock()
-  const allSlugs = [...new Set([
-    ...Object.keys(globalLock.skills),
-  ])]
+  const allSlugs = [...new Set([...Object.keys(globalLock.skills)])]
 
   let projectLock = null
   try {
-    projectLock = await readLock(join(process.cwd(), '.agents', '.skill-lock.json'))
+    projectLock = await readLock(
+      join(process.cwd(), '.agents', '.skill-lock.json'),
+    )
     for (const slug of Object.keys(projectLock.skills)) {
       if (!allSlugs.includes(slug)) allSlugs.push(slug)
     }
   } catch {}
 
   if (allSlugs.length === 0) {
-    return { results: [], summary: { total: 0, passed: 0, failed: 0, skipped: 0 } }
+    return {
+      results: [],
+      summary: { total: 0, passed: 0, failed: 0, skipped: 0 },
+    }
   }
 
   for (const slug of allSlugs) {
@@ -296,7 +311,13 @@ async function testAllSkills(options) {
     }
 
     if (!existsSync(skillFile)) {
-      results.push({ skill: slug, score: 0, grade: 'F', label: 'Unusable', error: 'SKILL.md not found' })
+      results.push({
+        skill: slug,
+        score: 0,
+        grade: 'F',
+        label: 'Unusable',
+        error: 'SKILL.md not found',
+      })
       continue
     }
 
@@ -304,12 +325,18 @@ async function testAllSkills(options) {
       const result = await apiTest(skillFile, { ...options, all: false })
       results.push(result)
     } catch (err) {
-      results.push({ skill: slug, score: 0, grade: 'F', label: 'Unusable', error: err.message })
+      results.push({
+        skill: slug,
+        score: 0,
+        grade: 'F',
+        label: 'Unusable',
+        error: err.message,
+      })
     }
   }
 
-  const passed = results.filter(r => r.score >= (options.minScore || 50))
-  const failed = results.filter(r => r.score < (options.minScore || 50))
+  const passed = results.filter((r) => r.score >= (options.minScore || 50))
+  const failed = results.filter((r) => r.score < (options.minScore || 50))
 
   return {
     results,

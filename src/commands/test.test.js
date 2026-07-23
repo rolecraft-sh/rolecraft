@@ -54,8 +54,15 @@ Testing is important for maintaining quality.
 function capture() {
   const logs = []
   const origLog = console.log
-  console.log = (...args) => { if (args.length) logs.push(String(args[0])) }
-  return { logs, restore: () => { console.log = origLog } }
+  console.log = (...args) => {
+    if (args.length) logs.push(String(args[0]))
+  }
+  return {
+    logs,
+    restore: () => {
+      console.log = origLog
+    },
+  }
 }
 
 describe('test command', () => {
@@ -86,8 +93,8 @@ describe('test command', () => {
       restore()
     }
 
-    assert.ok(logs.some(l => l.includes('Score:')))
-    assert.ok(logs.some(l => l.includes('/100')))
+    assert.ok(logs.some((l) => l.includes('Score:')))
+    assert.ok(logs.some((l) => l.includes('/100')))
   })
 
   it('prints skill name in output', async () => {
@@ -101,15 +108,18 @@ describe('test command', () => {
       restore()
     }
 
-    assert.ok(logs.some(l => l.includes('Testing:')))
+    assert.ok(logs.some((l) => l.includes('Testing:')))
   })
 
   it('prints suggestions for low quality skills', async () => {
     const fp = join(tempDir, 'bad-skill.SKILL.md')
-    writeFileSync(fp, `---
+    writeFileSync(
+      fp,
+      `---
 name: Mini
 ---
-Mini`)
+Mini`,
+    )
 
     const { logs, restore } = capture()
     try {
@@ -118,7 +128,7 @@ Mini`)
       restore()
     }
 
-    assert.ok(logs.some(l => l.includes('Score:')))
+    assert.ok(logs.some((l) => l.includes('Score:')))
   })
 
   it('outputs JSON with --json flag', async () => {
@@ -142,7 +152,7 @@ Mini`)
   it('throws error for non-existent file', async () => {
     await assert.rejects(
       () => testCmd.testCommand(join(tempDir, 'nonexistent.SKILL.md')),
-      /not found/
+      /not found/,
     )
   })
 
@@ -154,7 +164,7 @@ Mini`)
       restore()
     }
 
-    assert.ok(logs.some(l => l.includes('Testing all installed skills')))
+    assert.ok(logs.some((l) => l.includes('Testing all installed skills')))
   })
 
   it('handles --all flag with installed skills', async () => {
@@ -162,12 +172,17 @@ Mini`)
     mkdirSync(skillDir, { recursive: true })
     writeFileSync(join(skillDir, 'SKILL.md'), GOOD_SKILL)
 
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3,
-      skills: { 'installed-skill': { slug: 'installed-skill', agents: ['cursor'] } },
-      dismissed: {},
-      lastSelectedAgents: [],
-    }))
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'installed-skill': { slug: 'installed-skill', agents: ['cursor'] },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
 
     const { logs, restore } = capture()
     try {
@@ -176,6 +191,9 @@ Mini`)
       restore()
     }
 
-    assert.ok(logs.some(l => l.includes('Test Skill')) || logs.some(l => l.includes('installed-skill')))
+    assert.ok(
+      logs.some((l) => l.includes('Test Skill')) ||
+        logs.some((l) => l.includes('installed-skill')),
+    )
   })
 })

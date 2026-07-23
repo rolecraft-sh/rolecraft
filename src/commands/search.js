@@ -14,10 +14,10 @@ const showCursor = `${CSI}?25h`
 const clearScreen = `${CSI}2J${CSI}H`
 
 const text = (code, s) => `${code}${s}${sgr(0)}`
-const cyan = s => text(sgr(36), s)
-const yellow = s => text(sgr(33), s)
-const dim = s => text(sgr(2), s)
-const bold = s => text(sgr(1), s)
+const cyan = (s) => text(sgr(36), s)
+const yellow = (s) => text(sgr(33), s)
+const dim = (s) => text(sgr(2), s)
+const bold = (s) => text(sgr(1), s)
 
 export function formatRepo(r) {
   const desc = r.description || 'No description'
@@ -31,8 +31,8 @@ let promptUser = defaultPrompt
 async function defaultPrompt(query) {
   const { createInterface } = await import('node:readline')
   const rl = createInterface({ input, output })
-  return new Promise(resolve => {
-    rl.question(query, answer => {
+  return new Promise((resolve) => {
+    rl.question(query, (answer) => {
       rl.close()
       resolve(answer.trim().toLowerCase())
     })
@@ -67,7 +67,10 @@ async function runTUI(items) {
   const termRows = output.rows || 24
   const reservedRows = 2
   const availRows = termRows - reservedRows
-  const visibleCount = Math.min(Math.max(1, Math.floor(availRows / ITEM_LINES)), items.length)
+  const visibleCount = Math.min(
+    Math.max(1, Math.floor(availRows / ITEM_LINES)),
+    items.length,
+  )
   const statusRow = termRows
 
   function render() {
@@ -76,9 +79,14 @@ async function runTUI(items) {
     const end = Math.min(scrollOffset + visibleCount, items.length)
     for (let i = scrollOffset; i < end; i++) {
       const lines = tuiFormat(items[i], i === selectedIndex)
-      for (const line of lines) out += line + '\n'
+      for (const line of lines) out += `${line}\n`
     }
-    out += cursorTo(statusRow, 1) + eraseLine + sgr(7) + '  ↑/↓ move · Enter select · q quit  ' + sgr(0)
+    out +=
+      cursorTo(statusRow, 1) +
+      eraseLine +
+      sgr(7) +
+      '  ↑/↓ move · Enter select · q quit  ' +
+      sgr(0)
     output.write(out)
   }
 
@@ -141,12 +149,14 @@ async function promptSelect(items) {
     console.log()
   }
 
-  const answer = await promptUser(`Which skill to install? [1-${items.length}, q to quit]: `)
+  const answer = await promptUser(
+    `Which skill to install? [1-${items.length}, q to quit]: `,
+  )
 
   const trimmed = (answer || '').trim().toLowerCase()
   if (trimmed === 'q') return -1
   const index = parseInt(trimmed, 10)
-  if (isNaN(index) || index < 1 || index > items.length) {
+  if (Number.isNaN(index) || index < 1 || index > items.length) {
     console.log(`Invalid choice. Enter a number between 1 and ${items.length}.`)
     return -2
   }
@@ -184,7 +194,7 @@ async function pickAndInstall(items) {
 export function formatSkillsShItem(skill) {
   const desc = skill.name || 'No description'
   const installs = skill.installs || 0
-  return `${bold(skill.source + '/' + skill.skillId)}\n  ${dim(desc)}  ${yellow(`📦 ${installs}`)}  ${cyan('skills.sh')}`
+  return `${bold(`${skill.source}/${skill.skillId}`)}\n  ${dim(desc)}  ${yellow(`📦 ${installs}`)}  ${cyan('skills.sh')}`
 }
 
 export async function searchCommand(query, options = {}) {
@@ -203,16 +213,22 @@ export async function searchCommand(query, options = {}) {
         const line = formatSkillsShItem(skill).split('\n')
         console.log(`   ${line[0]}`)
         console.log(`   ├─ ${line[1]}`)
-        console.log(`   └─ rolecraft install ${skill.installSource || skill.source + '/' + skill.skillId}`)
+        console.log(
+          `   └─ rolecraft install ${skill.installSource || `${skill.source}/${skill.skillId}`}`,
+        )
         console.log()
       }
       console.log(`${items.length} result(s) found.`)
-      console.log('\n⚠️  skills.sh integration is experimental. The API may change or become unavailable.')
+      console.log(
+        '\n⚠️  skills.sh integration is experimental. The API may change or become unavailable.',
+      )
     } catch (err) {
       if (err.message?.includes('skills.sh API error')) {
         throw err
       }
-      throw new Error('Failed to search skills.sh. Check your internet connection.')
+      throw new Error(
+        'Failed to search skills.sh. Check your internet connection.',
+      )
     }
     return
   }
@@ -222,7 +238,9 @@ export async function searchCommand(query, options = {}) {
     data = await apiSearch(query)
   } catch (err) {
     if (err.message?.includes('rate limit')) {
-      console.log('\n⚠️  GitHub API rate limit reached. Try again later or use a GitHub token.')
+      console.log(
+        '\n⚠️  GitHub API rate limit reached. Try again later or use a GitHub token.',
+      )
       return
     }
     if (err.message?.includes('GitHub API error')) {
@@ -251,7 +269,9 @@ export async function searchCommand(query, options = {}) {
       const desc = repo.description || 'No description'
       console.log(`   ${repo.full_name}`)
       console.log(`   ├─ ${desc}`)
-      console.log(`   ├─ ⭐ ${repo.stargazers_count}  📝 ${repo.language || 'N/A'}`)
+      console.log(
+        `   ├─ ⭐ ${repo.stargazers_count}  📝 ${repo.language || 'N/A'}`,
+      )
       console.log(`   └─ rolecraft install ${repo.full_name}`)
       console.log()
     }

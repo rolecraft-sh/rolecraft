@@ -13,7 +13,12 @@ function capture(name) {
   console[name] = (...args) => {
     if (args.length) logs.push(String(args[0]))
   }
-  return { logs, restore: () => { console[name] = orig } }
+  return {
+    logs,
+    restore: () => {
+      console[name] = orig
+    },
+  }
 }
 
 describe('completions command', () => {
@@ -22,7 +27,11 @@ describe('completions command', () => {
     await completionsModule.completionsCommand()
     restore()
 
-    assert.ok(logs.some(l => l.includes('Usage: rolecraft completions bash|zsh|fish')))
+    assert.ok(
+      logs.some((l) =>
+        l.includes('Usage: rolecraft completions bash|zsh|fish'),
+      ),
+    )
   })
 
   it('generates bash completions', async () => {
@@ -35,9 +44,14 @@ describe('completions command', () => {
     assert.ok(output.includes('compgen'))
     assert.ok(output.includes('complete -F _rolecraft rolecraft'))
     assert.ok(output.includes('mcp'))
-    ;['install', 'list', 'search', 'check', 'update', 'remove'].forEach(cmd => {
-      assert.ok(output.includes(cmd), `bash completions should include ${cmd}`)
-    })
+    ;['install', 'list', 'search', 'check', 'update', 'remove'].forEach(
+      (cmd) => {
+        assert.ok(
+          output.includes(cmd),
+          `bash completions should include ${cmd}`,
+        )
+      },
+    )
   })
 
   it('generates zsh completions', async () => {
@@ -65,7 +79,7 @@ describe('completions command', () => {
   })
 
   it('errors on unknown shell', async () => {
-    const { logs, restore } = capture('error')
+    const { restore } = capture('error')
     await assert.rejects(
       () => completionsModule.completionsCommand('tcsh'),
       /Unknown shell: tcsh/,

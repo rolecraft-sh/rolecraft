@@ -7,7 +7,11 @@ export function setFetch(fn) {
 }
 
 function isGitHubRef(source) {
-  return /^[\w.-]+\/[\w.-]+$/.test(source) && !source.startsWith('/') && !source.startsWith('.')
+  return (
+    /^[\w.-]+\/[\w.-]+$/.test(source) &&
+    !source.startsWith('/') &&
+    !source.startsWith('.')
+  )
 }
 
 async function searchGitHub(query, filenameFilter = true) {
@@ -43,14 +47,23 @@ async function lookupGithubRepo(ref) {
     })
     if (!response.ok) return null
     return await response.json()
-  } catch { return null }
+  } catch {
+    return null
+  }
 }
 
 async function searchOrLookup(query) {
   if (isGitHubRef(query)) {
     const repo = await lookupGithubRepo(query)
     if (repo) {
-      const items = [{ full_name: repo.full_name, description: repo.description, stargazers_count: repo.stargazers_count, language: repo.language }]
+      const items = [
+        {
+          full_name: repo.full_name,
+          description: repo.description,
+          stargazers_count: repo.stargazers_count,
+          language: repo.language,
+        },
+      ]
       const data = await searchGitHub(query, true)
       if (data.items && data.items.length > 0) return data
       return { items, fromLookup: true }
@@ -65,7 +78,7 @@ export async function apiSearch(query, options = {}) {
     if (data.error) throw new Error(data.error)
     if (data.items.length === 0) return { results: [], source: 'skills.sh' }
     return {
-      results: data.items.map(s => ({
+      results: data.items.map((s) => ({
         source: s.source,
         skillId: s.skillId,
         name: s.name,
@@ -87,7 +100,7 @@ export async function apiSearch(query, options = {}) {
   }
 
   return {
-    results: (data.items || []).map(r => ({
+    results: (data.items || []).map((r) => ({
       full_name: r.full_name,
       description: r.description,
       stargazers_count: r.stargazers_count,

@@ -342,21 +342,32 @@ export async function readLock(lockPath = getGlobalLockPath()) {
 
 export async function writeLock(data, lockPath = getGlobalLockPath()) {
   await ensureParentDir(lockPath)
-  await writeFile(lockPath, JSON.stringify(data, null, 2) + '\n', 'utf-8')
+  await writeFile(lockPath, `${JSON.stringify(data, null, 2)}\n`, 'utf-8')
 }
 
-export async function addSkillToLock(slug, entry, lockPath = getGlobalLockPath()) {
+export async function addSkillToLock(
+  slug,
+  entry,
+  lockPath = getGlobalLockPath(),
+) {
   const lock = await readLock(lockPath)
   const existing = lock.skills[slug]
   const mergedAgents = existing?.agents
     ? [...new Set([...existing.agents, ...(entry.agents || [])])]
-    : (entry.agents || [])
-  lock.skills[slug] = { ...entry, agents: mergedAgents, installedAt: new Date().toISOString() }
+    : entry.agents || []
+  lock.skills[slug] = {
+    ...entry,
+    agents: mergedAgents,
+    installedAt: new Date().toISOString(),
+  }
   await writeLock(lock, lockPath)
   return lock
 }
 
-export async function removeSkillFromLock(slug, lockPath = getGlobalLockPath()) {
+export async function removeSkillFromLock(
+  slug,
+  lockPath = getGlobalLockPath(),
+) {
   const lock = await readLock(lockPath)
   delete lock.skills[slug]
   await writeLock(lock, lockPath)
@@ -380,5 +391,3 @@ export function computeFileHashes(fileContents) {
   }
   return hashes
 }
-
-

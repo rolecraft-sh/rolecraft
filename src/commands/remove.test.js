@@ -12,19 +12,24 @@ before(async () => {
   origHome = process.env.HOME
   process.env.HOME = tempDir
 
-  await mkdir(join(tempDir, '.agents', 'skills', 'test-skill'), { recursive: true })
+  await mkdir(join(tempDir, '.agents', 'skills', 'test-skill'), {
+    recursive: true,
+  })
 
   const lockPath = join(tempDir, '.agents', '.skill-lock.json')
-  await writeFile(lockPath, JSON.stringify({
-    version: 3,
-    skills: {
-      'test/skill': { name: 'Test Skill' },
-      'other/skill': { name: 'Other Skill' },
-      'exact/skill': { name: 'Exact Skill' },
-    },
-    dismissed: {},
-    lastSelectedAgents: [],
-  }))
+  await writeFile(
+    lockPath,
+    JSON.stringify({
+      version: 3,
+      skills: {
+        'test/skill': { name: 'Test Skill' },
+        'other/skill': { name: 'Other Skill' },
+        'exact/skill': { name: 'Exact Skill' },
+      },
+      dismissed: {},
+      lastSelectedAgents: [],
+    }),
+  )
 
   removeModule = await import('./remove.js')
 })
@@ -43,8 +48,8 @@ describe('remove command', () => {
 
     await removeModule.removeCommand('test/skill', { dryRun: true })
 
-    assert.ok(logs.some(l => l.includes('[dry-run]')))
-    assert.ok(logs.some(l => l.includes('test/skill')))
+    assert.ok(logs.some((l) => l.includes('[dry-run]')))
+    assert.ok(logs.some((l) => l.includes('test/skill')))
   })
 
   it('removes an installed skill by exact slug from global', async () => {
@@ -55,9 +60,11 @@ describe('remove command', () => {
 
     await removeModule.removeCommand('exact/skill')
 
-    const lock = JSON.parse(await readFile(join(tempDir, '.agents', '.skill-lock.json'), 'utf-8'))
+    const lock = JSON.parse(
+      await readFile(join(tempDir, '.agents', '.skill-lock.json'), 'utf-8'),
+    )
     assert.ok(!lock.skills['exact/skill'])
-    assert.ok(logs.some(l => l.includes('Removed')))
+    assert.ok(logs.some((l) => l.includes('Removed')))
   })
 
   it('removes from project lock when skill is project-scoped', async () => {
@@ -71,14 +78,18 @@ describe('remove command', () => {
 
     await removeModule.removeCommand('test/skill')
 
-    const globalLock = JSON.parse(await readFile(join(tempDir, '.agents', '.skill-lock.json'), 'utf-8'))
+    const globalLock = JSON.parse(
+      await readFile(join(tempDir, '.agents', '.skill-lock.json'), 'utf-8'),
+    )
     assert.ok(!globalLock.skills['test/skill'])
-    assert.ok(logs.some(l => l.includes('Removed')))
+    assert.ok(logs.some((l) => l.includes('Removed')))
     process.cwd = origCwd
   })
 
   it('matches via normalized slug (replacing / with -)', async () => {
-    mkdirSync(join(tempDir, '.agents', 'skills', 'other-skill'), { recursive: true })
+    mkdirSync(join(tempDir, '.agents', 'skills', 'other-skill'), {
+      recursive: true,
+    })
 
     const logs = []
     mock.method(console, 'log', (...args) => {
@@ -87,9 +98,11 @@ describe('remove command', () => {
 
     await removeModule.removeCommand('other-skill')
 
-    const lock = JSON.parse(await readFile(join(tempDir, '.agents', '.skill-lock.json'), 'utf-8'))
+    const lock = JSON.parse(
+      await readFile(join(tempDir, '.agents', '.skill-lock.json'), 'utf-8'),
+    )
     assert.ok(!lock.skills['other/skill'])
-    assert.ok(logs.some(l => l.includes('Removed')))
+    assert.ok(logs.some((l) => l.includes('Removed')))
   })
 
   it('exits with error when skill not found', async () => {
@@ -98,5 +111,4 @@ describe('remove command', () => {
       /not found/,
     )
   })
-
 })

@@ -1,8 +1,6 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert/strict'
-import {
-  mkdtempSync, mkdirSync, writeFileSync, symlinkSync,
-} from 'node:fs'
+import { mkdtempSync, mkdirSync, writeFileSync, symlinkSync } from 'node:fs'
 import { rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
@@ -16,7 +14,7 @@ async function freshImport() {
   resolverModule = await import('./resolver.js')
   resolverModule.setExecSync(execSync)
   resolverModule.setSpawnSync(spawnSync)
-  resolverModule.setHttpsGet((url, opts, cb) => {
+  resolverModule.setHttpsGet((_url, opts, cb) => {
     if (typeof opts === 'function') {
       cb = opts
     }
@@ -56,9 +54,12 @@ describe('resolver', () => {
       const relDir = 'dot-local-skill'
       const absDir = join(process.cwd(), relDir)
       mkdirSync(absDir, { recursive: true })
-      writeFileSync(join(absDir, 'SKILL.md'), '# slug: test/dot\nname: dot-path\nContent')
+      writeFileSync(
+        join(absDir, 'SKILL.md'),
+        '# slug: test/dot\nname: dot-path\nContent',
+      )
 
-      const result = await resolverModule.resolveSource('./' + relDir)
+      const result = await resolverModule.resolveSource(`./${relDir}`)
       assert.equal(result.name, 'dot-path')
       assert.equal(result.sourceType, 'local')
       await rm(absDir, { recursive: true, force: true })
@@ -68,7 +69,10 @@ describe('resolver', () => {
       await freshImport()
       const skillDir = join(tempDir, 'abs-skill')
       mkdirSync(skillDir, { recursive: true })
-      writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/abs\nname: abs-skill\nContent')
+      writeFileSync(
+        join(skillDir, 'SKILL.md'),
+        '# slug: test/abs\nname: abs-skill\nContent',
+      )
 
       const result = await resolverModule.resolveSource(skillDir)
       assert.equal(result.name, 'abs-skill')
@@ -80,11 +84,16 @@ describe('resolver', () => {
         if (cmd === 'git' && args[0] === 'clone') {
           const d = args[4]
           mkdirSync(d, { recursive: true })
-          writeFileSync(join(d, 'SKILL.md'), '# slug: test/git-skill\nname: git-skill\nContent')
+          writeFileSync(
+            join(d, 'SKILL.md'),
+            '# slug: test/git-skill\nname: git-skill\nContent',
+          )
         }
         return { status: 0, stdout: '', stderr: '' }
       })
-      const result = await resolverModule.resolveSource('git@github.com:owner/repo.git')
+      const result = await resolverModule.resolveSource(
+        'git@github.com:owner/repo.git',
+      )
       assert.equal(result.name, 'git-skill')
       assert.equal(result.slug, 'test/git-skill')
       assert.equal(result.owner, 'remote')
@@ -114,9 +123,14 @@ describe('resolver', () => {
     it('resolves a SKILL.md file path', async () => {
       const skillDir = join(tempDir, 'file-skill')
       mkdirSync(skillDir, { recursive: true })
-      writeFileSync(join(skillDir, 'SKILL.md'), '# slug: a/b\nname: file-skill\n# owner: someone\nData')
+      writeFileSync(
+        join(skillDir, 'SKILL.md'),
+        '# slug: a/b\nname: file-skill\n# owner: someone\nData',
+      )
 
-      const result = await resolverModule.resolveSource(join(skillDir, 'SKILL.md'))
+      const result = await resolverModule.resolveSource(
+        join(skillDir, 'SKILL.md'),
+      )
       assert.equal(result.name, 'file-skill')
       assert.equal(result.slug, 'a/b')
       assert.equal(result.owner, 'someone')
@@ -126,7 +140,10 @@ describe('resolver', () => {
     it('resolves a directory containing SKILL.md', async () => {
       const skillDir = join(tempDir, 'dir-skill')
       mkdirSync(skillDir, { recursive: true })
-      writeFileSync(join(skillDir, 'SKILL.md'), '# slug: c/d\nname: dir-skill\nContent')
+      writeFileSync(
+        join(skillDir, 'SKILL.md'),
+        '# slug: c/d\nname: dir-skill\nContent',
+      )
 
       const result = await resolverModule.resolveSource(skillDir)
       assert.equal(result.name, 'dir-skill')
@@ -157,7 +174,10 @@ describe('resolver', () => {
 
       const skillDir = join(tempDir, 'tilde-skill')
       mkdirSync(skillDir, { recursive: true })
-      writeFileSync(join(skillDir, 'SKILL.md'), '# slug: t/tilde\nname: tilde-skill\nContent')
+      writeFileSync(
+        join(skillDir, 'SKILL.md'),
+        '# slug: t/tilde\nname: tilde-skill\nContent',
+      )
 
       const result = await resolverModule.resolveSource('~/tilde-skill')
       assert.equal(result.name, 'tilde-skill')
@@ -168,7 +188,10 @@ describe('resolver', () => {
       const parent = join(tempDir, 'parent')
       const nested = join(parent, 'sub', 'deep')
       mkdirSync(nested, { recursive: true })
-      writeFileSync(join(nested, 'SKILL.md'), '# slug: x/nested\nname: nested-skill\nContent')
+      writeFileSync(
+        join(nested, 'SKILL.md'),
+        '# slug: x/nested\nname: nested-skill\nContent',
+      )
 
       const result = await resolverModule.resolveSource(parent)
       assert.equal(result.name, 'nested-skill')
@@ -178,7 +201,10 @@ describe('resolver', () => {
       const parent = join(tempDir, 'with-git')
       mkdirSync(join(parent, '.git'), { recursive: true })
       mkdirSync(join(parent, 'real'), { recursive: true })
-      writeFileSync(join(parent, 'real', 'SKILL.md'), '# slug: r/real\nname: real-skill\nContent')
+      writeFileSync(
+        join(parent, 'real', 'SKILL.md'),
+        '# slug: r/real\nname: real-skill\nContent',
+      )
 
       const result = await resolverModule.resolveSource(parent)
       assert.equal(result.name, 'real-skill')
@@ -188,7 +214,10 @@ describe('resolver', () => {
       const parent = join(tempDir, 'deep-parent')
       const tooDeep = join(parent, 'a', 'b', 'c', 'd')
       mkdirSync(tooDeep, { recursive: true })
-      writeFileSync(join(tooDeep, 'SKILL.md'), '# slug: d/deep\nname: deep-skill\nContent')
+      writeFileSync(
+        join(tooDeep, 'SKILL.md'),
+        '# slug: d/deep\nname: deep-skill\nContent',
+      )
 
       await assert.rejects(
         () => resolverModule.resolveSource(parent),
@@ -213,7 +242,10 @@ describe('resolver', () => {
       mkdirSync(join(parent, 'good'), { recursive: true })
       mkdirSync(join(parent, 'locked'), { recursive: true })
       chmodSync(join(parent, 'locked'), 0o000)
-      writeFileSync(join(parent, 'good', 'SKILL.md'), '# slug: s/good\nname: good\nContent')
+      writeFileSync(
+        join(parent, 'good', 'SKILL.md'),
+        '# slug: s/good\nname: good\nContent',
+      )
 
       const result = await resolverModule.resolveSource(parent)
       assert.equal(result.name, 'good')
@@ -224,7 +256,10 @@ describe('resolver', () => {
     it('includes files list in result, excluding .git', async () => {
       const skillDir = join(tempDir, 'multi-file')
       mkdirSync(skillDir, { recursive: true })
-      writeFileSync(join(skillDir, 'SKILL.md'), '# slug: m/multi\nname: multi\nContent')
+      writeFileSync(
+        join(skillDir, 'SKILL.md'),
+        '# slug: m/multi\nname: multi\nContent',
+      )
       writeFileSync(join(skillDir, 'helper.js'), 'x')
       writeFileSync(join(skillDir, 'config.json'), '{}')
 
@@ -240,7 +275,10 @@ describe('resolver', () => {
     it('uses name from name field over slug-derived name', async () => {
       const d = join(tempDir, 'meta1')
       mkdirSync(d, { recursive: true })
-      writeFileSync(join(d, 'SKILL.md'), '# slug: owner/name\nname: my-name\n# owner: me\nContent')
+      writeFileSync(
+        join(d, 'SKILL.md'),
+        '# slug: owner/name\nname: my-name\n# owner: me\nContent',
+      )
       const r = await resolverModule.resolveSource(d)
       assert.equal(r.name, 'my-name')
       assert.equal(r.slug, 'owner/name')
@@ -270,7 +308,9 @@ describe('resolver', () => {
     it('parses YAML frontmatter with --- delimiters', async () => {
       const d = join(tempDir, 'meta4')
       mkdirSync(d, { recursive: true })
-      writeFileSync(join(d, 'SKILL.md'), `---
+      writeFileSync(
+        join(d, 'SKILL.md'),
+        `---
 name: my-skill
 slug: my-org/my-skill
 owner: my-org
@@ -278,7 +318,8 @@ description: A test skill
 ---
 
 Content here
-`)
+`,
+      )
       const r = await resolverModule.resolveSource(d)
       assert.equal(r.name, 'my-skill')
       assert.equal(r.slug, 'my-org/my-skill')
@@ -289,12 +330,15 @@ Content here
     it('parses YAML frontmatter without slug/owner (falls back to defaults)', async () => {
       const d = join(tempDir, 'meta5')
       mkdirSync(d, { recursive: true })
-      writeFileSync(join(d, 'SKILL.md'), `---
+      writeFileSync(
+        join(d, 'SKILL.md'),
+        `---
 name: simple-skill
 ---
 
 Just content
-`)
+`,
+      )
       const r = await resolverModule.resolveSource(d)
       assert.equal(r.name, 'simple-skill')
       assert.equal(r.slug, 'simple-skill')
@@ -310,16 +354,22 @@ Just content
       const prodDir = join(multiDir, 'skills', 'productivity', 'skill-b')
       mkdirSync(engDir, { recursive: true })
       mkdirSync(prodDir, { recursive: true })
-      writeFileSync(join(engDir, 'SKILL.md'), '---\nname: skill-a\nslug: eng/skill-a\nowner: tester\ndescription: First skill\n---\nContent A')
-      writeFileSync(join(prodDir, 'SKILL.md'), '---\nname: skill-b\nslug: prod/skill-b\nowner: tester\ndescription: Second skill\n---\nContent B')
+      writeFileSync(
+        join(engDir, 'SKILL.md'),
+        '---\nname: skill-a\nslug: eng/skill-a\nowner: tester\ndescription: First skill\n---\nContent A',
+      )
+      writeFileSync(
+        join(prodDir, 'SKILL.md'),
+        '---\nname: skill-b\nslug: prod/skill-b\nowner: tester\ndescription: Second skill\n---\nContent B',
+      )
       writeFileSync(join(engDir, 'helper.js'), 'x')
 
       const result = await resolverModule.resolveSkills(multiDir)
 
       assert.equal(result.length, 2)
-      assert.ok(result.some(s => s.name === 'skill-a'))
-      assert.ok(result.some(s => s.name === 'skill-b'))
-      const skillA = result.find(s => s.name === 'skill-a')
+      assert.ok(result.some((s) => s.name === 'skill-a'))
+      assert.ok(result.some((s) => s.name === 'skill-b'))
+      const skillA = result.find((s) => s.name === 'skill-a')
       assert.ok(skillA.files.includes('SKILL.md'))
       assert.ok(skillA.files.includes('helper.js'))
       assert.equal(skillA.owner, 'tester')
@@ -329,7 +379,10 @@ Just content
     it('resolveSkills from single-skill source returns array of 1', async () => {
       const singleDir = join(tempDir, 'single-resolve-skills')
       mkdirSync(singleDir, { recursive: true })
-      writeFileSync(join(singleDir, 'SKILL.md'), '---\nname: solo\ndescription: A lone skill\n---\nContent')
+      writeFileSync(
+        join(singleDir, 'SKILL.md'),
+        '---\nname: solo\ndescription: A lone skill\n---\nContent',
+      )
 
       const result = await resolverModule.resolveSkills(singleDir)
 
@@ -345,8 +398,14 @@ Just content
           const d = args[4]
           mkdirSync(join(d, 'skills', 'alpha'), { recursive: true })
           mkdirSync(join(d, 'skills', 'beta'), { recursive: true })
-          writeFileSync(join(d, 'skills', 'alpha', 'SKILL.md'), '---\nname: alpha\nslug: gh/alpha\ndescription: Alpha\n---\nA')
-          writeFileSync(join(d, 'skills', 'beta', 'SKILL.md'), '---\nname: beta\nslug: gh/beta\ndescription: Beta\n---\nB')
+          writeFileSync(
+            join(d, 'skills', 'alpha', 'SKILL.md'),
+            '---\nname: alpha\nslug: gh/alpha\ndescription: Alpha\n---\nA',
+          )
+          writeFileSync(
+            join(d, 'skills', 'beta', 'SKILL.md'),
+            '---\nname: beta\nslug: gh/beta\ndescription: Beta\n---\nB',
+          )
         }
         return { status: 0, stdout: '', stderr: '' }
       })
@@ -354,8 +413,8 @@ Just content
       const result = await resolverModule.resolveSkills('user/multi-repo')
 
       assert.equal(result.length, 2)
-      assert.ok(result.some(s => s.name === 'alpha'))
-      assert.ok(result.some(s => s.name === 'beta'))
+      assert.ok(result.some((s) => s.name === 'alpha'))
+      assert.ok(result.some((s) => s.name === 'beta'))
       for (const s of result) {
         assert.equal(s.owner, 'user')
         assert.equal(s.sourceType, 'github')
@@ -364,7 +423,6 @@ Just content
   })
 
   describe('resolveGitHub', () => {
-
     it('throws for invalid GitHub ref', async () => {
       await freshImport()
       await assert.rejects(
@@ -376,7 +434,8 @@ Just content
     it('throws when GitHub clone fails', async () => {
       await freshImport()
       await assert.rejects(
-        () => resolverModule.resolveSource('nonexistent-owner/nonexistent-repo'),
+        () =>
+          resolverModule.resolveSource('nonexistent-owner/nonexistent-repo'),
         /Failed to clone/,
       )
     })
@@ -387,9 +446,14 @@ Just content
         if (cmd === 'git' && args[0] === 'clone') {
           const d = args[4]
           mkdirSync(d, { recursive: true })
-          writeFileSync(join(d, 'SKILL.md'), '# slug: test/skill\nname: test-skill\nContent')
+          writeFileSync(
+            join(d, 'SKILL.md'),
+            '# slug: test/skill\nname: test-skill\nContent',
+          )
           writeFileSync(join(d, 'helper.js'), 'x')
-          try { symlinkSync('/nonexistent-target', join(d, 'broken.txt')) } catch {}
+          try {
+            symlinkSync('/nonexistent-target', join(d, 'broken.txt'))
+          } catch {}
         }
         return { status: 0, stdout: '', stderr: '' }
       })
@@ -422,8 +486,6 @@ Just content
         /No SKILL.md found/,
       )
     })
-
-
   })
 
   describe('resolveNpm', () => {
@@ -443,14 +505,19 @@ Just content
           cb(res)
 
           // Single call: metadata fetch
-          const data = Buffer.from(JSON.stringify({
-            'dist-tags': { latest: '1.0.0' },
-            versions: {
-              '1.0.0': {
-                dist: { tarball: 'https://registry.npmjs.org/test-pkg/-/test-pkg-1.0.0.tgz' },
+          const data = Buffer.from(
+            JSON.stringify({
+              'dist-tags': { latest: '1.0.0' },
+              versions: {
+                '1.0.0': {
+                  dist: {
+                    tarball:
+                      'https://registry.npmjs.org/test-pkg/-/test-pkg-1.0.0.tgz',
+                  },
+                },
               },
-            },
-          }))
+            }),
+          )
           res.emit('data', data)
           res.emit('end')
         })
@@ -493,7 +560,10 @@ Just content
           const extractDir = args[3]
           const packageDir = join(extractDir, 'package')
           mkdirSync(packageDir, { recursive: true })
-          writeFileSync(join(packageDir, 'SKILL.md'), '# slug: test/npm-skill\nname: npm-skill\nContent')
+          writeFileSync(
+            join(packageDir, 'SKILL.md'),
+            '# slug: test/npm-skill\nname: npm-skill\nContent',
+          )
           writeFileSync(join(packageDir, 'helper.js'), 'x')
         }
         return { status: 0, stdout: '', stderr: '' }
@@ -522,7 +592,10 @@ Just content
           const extractDir = args[3]
           const packageDir = join(extractDir, 'package')
           mkdirSync(packageDir, { recursive: true })
-          writeFileSync(join(packageDir, 'SKILL.md'), '---\nname: my-skill\nslug: org/skill\n---\nContent')
+          writeFileSync(
+            join(packageDir, 'SKILL.md'),
+            '---\nname: my-skill\nslug: org/skill\n---\nContent',
+          )
         }
         return { status: 0, stdout: '', stderr: '' }
       })
@@ -545,7 +618,10 @@ Just content
           const extractDir = args[3]
           const packageDir = join(extractDir, 'package')
           mkdirSync(packageDir, { recursive: true })
-          writeFileSync(join(packageDir, 'SKILL.md'), '# slug: s/skill\nname: scoped-skill\nContent')
+          writeFileSync(
+            join(packageDir, 'SKILL.md'),
+            '# slug: s/skill\nname: scoped-skill\nContent',
+          )
         }
         return { status: 0, stdout: '', stderr: '' }
       })
@@ -566,7 +642,10 @@ Just content
         if (cmd === 'tar' && args[0] === '-xzf') {
           const extractDir = args[3]
           mkdirSync(join(extractDir, 'package'), { recursive: true })
-          writeFileSync(join(extractDir, 'package', 'README.md'), 'no skill here')
+          writeFileSync(
+            join(extractDir, 'package', 'README.md'),
+            'no skill here',
+          )
         }
         return { status: 0, stdout: '', stderr: '' }
       })
@@ -636,10 +715,15 @@ Just content
           res.headers = {}
           res.resume = () => {}
           cb(res)
-          res.emit('data', Buffer.from(JSON.stringify({
-            'dist-tags': {},
-            versions: {},
-          })))
+          res.emit(
+            'data',
+            Buffer.from(
+              JSON.stringify({
+                'dist-tags': {},
+                versions: {},
+              }),
+            ),
+          )
           res.emit('end')
         })
         return req
@@ -661,10 +745,15 @@ Just content
           res.headers = {}
           res.resume = () => {}
           cb(res)
-          res.emit('data', Buffer.from(JSON.stringify({
-            'dist-tags': { latest: '2.0.0' },
-            versions: {},
-          })))
+          res.emit(
+            'data',
+            Buffer.from(
+              JSON.stringify({
+                'dist-tags': { latest: '2.0.0' },
+                versions: {},
+              }),
+            ),
+          )
           res.emit('end')
         })
         return req
@@ -683,12 +772,17 @@ Just content
           const extractDir = args[3]
           const packageDir = join(extractDir, 'package')
           mkdirSync(packageDir, { recursive: true })
-          writeFileSync(join(packageDir, 'SKILL.md'), '# slug: s/skill\nname: scoped-version-skill\nContent')
+          writeFileSync(
+            join(packageDir, 'SKILL.md'),
+            '# slug: s/skill\nname: scoped-version-skill\nContent',
+          )
         }
         return { status: 0, stdout: '', stderr: '' }
       })
       await withMockFetch(async () => {
-        const result = await resolverModule.resolveSource('npm:@scope/test-pkg@1.0.0')
+        const result = await resolverModule.resolveSource(
+          'npm:@scope/test-pkg@1.0.0',
+        )
         assert.equal(result.name, 'scoped-version-skill')
         assert.equal(result.sourceType, 'npm')
       })
@@ -698,7 +792,9 @@ Just content
   describe('isGitUrl', () => {
     it('detects GitLab HTTPS URL', async () => {
       await freshImport()
-      resolverModule.setSpawnSync(() => { throw new Error('mock') })
+      resolverModule.setSpawnSync(() => {
+        throw new Error('mock')
+      })
       await assert.rejects(
         () => resolverModule.resolveSource('https://gitlab.com/owner/repo'),
         /Failed to clone/,
@@ -707,7 +803,9 @@ Just content
 
     it('detects Bitbucket HTTPS URL', async () => {
       await freshImport()
-      resolverModule.setSpawnSync(() => { throw new Error('mock') })
+      resolverModule.setSpawnSync(() => {
+        throw new Error('mock')
+      })
       await assert.rejects(
         () => resolverModule.resolveSource('https://bitbucket.com/owner/repo'),
         /Failed to clone/,
@@ -716,7 +814,9 @@ Just content
 
     it('detects SSH git URL', async () => {
       await freshImport()
-      resolverModule.setSpawnSync(() => { throw new Error('mock') })
+      resolverModule.setSpawnSync(() => {
+        throw new Error('mock')
+      })
       await assert.rejects(
         () => resolverModule.resolveSource('git@github.com:owner/repo.git'),
         /Failed to clone/,
@@ -725,9 +825,12 @@ Just content
 
     it('detects generic HTTPS git URL', async () => {
       await freshImport()
-      resolverModule.setSpawnSync(() => { throw new Error('mock') })
+      resolverModule.setSpawnSync(() => {
+        throw new Error('mock')
+      })
       await assert.rejects(
-        () => resolverModule.resolveSource('https://example.com/owner/repo.git'),
+        () =>
+          resolverModule.resolveSource('https://example.com/owner/repo.git'),
         /Failed to clone/,
       )
     })

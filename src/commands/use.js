@@ -20,7 +20,8 @@ export async function useCommand(source, options = {}) {
     console.log(`\n📦 Skill: ${resolved.name}`)
     console.log(`   Slug:     ${resolved.slug}`)
     console.log(`   Owner:    ${resolved.owner}`)
-    if (resolved.description) console.log(`   Desc:     ${resolved.description}`)
+    if (resolved.description)
+      console.log(`   Desc:     ${resolved.description}`)
     console.log(`   Files:    ${resolved.files.join(', ')}\n`)
 
     for (const file of resolved.files) {

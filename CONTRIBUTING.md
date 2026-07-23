@@ -7,11 +7,24 @@ Thanks for your interest in contributing! Here's how you can help.
 ```bash
 git clone https://github.com/rolecraft-sh/rolecraft.git
 cd rolecraft
-npm link                  # now `rolecraft` runs from your local checkout
-npm test                  # 730+ tests should pass
+npm install              # also installs the pre-commit hook automatically
+npm link                 # now `rolecraft` runs from your local checkout
+npm test                 # 828+ tests should pass
 ```
 
-**Requirements:** Node.js >= 20, no other dependencies.
+**Requirements:** Node.js >= 20. Dev dependencies (Biome, VitePress) install locally but never ship to users — the runtime stays zero-dependency.
+
+## Git Hooks
+
+A `pre-commit` hook runs `npm run lint` before every commit and rejects the commit on lint errors. It is set up **automatically** by `npm install` via the `postinstall` script — no manual `setup-hooks` step is required.
+
+To reinstall or repair the hook manually:
+
+```bash
+npm run setup-hooks
+```
+
+To bypass the hook once (e.g. for a work-in-progress commit), use `git commit --no-verify` — but CI will still fail the PR if lint errors remain.
 
 ## Find Something to Work On
 
@@ -22,10 +35,11 @@ Don't see anything you like? Open a [feature request](https://github.com/rolecra
 ## Make Changes
 
 - Keep changes focused on a single concern
-- Follow existing code style (no semicolons, ES modules, zero-dependency)
+- Follow existing code style (no semicolons, ES modules, zero-dependency runtime)
 - **Business logic** goes in `src/api/`, **CLI output** goes in `src/commands/`
 - Add or update tests for any new functionality
-- Run `npm test` before submitting — all tests must pass
+- Run `npm run lint` and `npm test` before submitting — both must pass
+- To auto-fix formatting and unused imports, run `npm run lint:fix`
 
 ## Commit
 

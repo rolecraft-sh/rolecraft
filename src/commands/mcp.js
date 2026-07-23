@@ -1,7 +1,12 @@
 import { stdin as input, stdout as output } from 'node:process'
 import { createInterface } from 'node:readline'
 import {
-  apiMcpInstall, apiMcpList, apiMcpUpdate, apiMcpRemove, apiMcpCheck, apiMcpSearch,
+  apiMcpInstall,
+  apiMcpList,
+  apiMcpUpdate,
+  apiMcpRemove,
+  apiMcpCheck,
+  apiMcpSearch,
 } from '../api/mcp.js'
 import { classifyMcpSource, getSupportedMcpAgents } from '../utils/mcp.js'
 
@@ -17,15 +22,15 @@ const showCursor = `${CSI}?25h`
 const clearScreen = `${CSI}2J${CSI}H`
 
 const text = (code, s) => `${code}${s}${sgr(0)}`
-const cyan = s => text(sgr(36), s)
-const yellow = s => text(sgr(33), s)
-const dim = s => text(sgr(2), s)
-const bold = s => text(sgr(1), s)
+const cyan = (s) => text(sgr(36), s)
+const yellow = (s) => text(sgr(33), s)
+const dim = (s) => text(sgr(2), s)
+const bold = (s) => text(sgr(1), s)
 
 function askConfirmation(query) {
   const rl = createInterface({ input, output })
-  return new Promise(resolve => {
-    rl.question(query, answer => {
+  return new Promise((resolve) => {
+    rl.question(query, (answer) => {
       rl.close()
       resolve(answer.trim().toLowerCase())
     })
@@ -40,7 +45,9 @@ function requiresConfirmation(source) {
 export async function mcpInstallCommand(source, options) {
   if (requiresConfirmation(source) && !options.yes) {
     console.log(`\n⚠️  Installing MCP server from GitHub repository: ${source}`)
-    console.log('   This will download and execute code from an external source.')
+    console.log(
+      '   This will download and execute code from an external source.',
+    )
     console.log('   Only proceed if you trust the repository.\n')
     const answer = await askConfirmation('Continue with installation? [y/N] ')
     if (answer !== 'y' && answer !== 'yes') {
@@ -51,7 +58,8 @@ export async function mcpInstallCommand(source, options) {
 
   if (options.dryRun) {
     const resolved = (await import('../utils/mcp.js')).resolveMcpSource(source)
-    const targets = options.agents?.length > 0 ? options.agents : getSupportedMcpAgents()
+    const targets =
+      options.agents?.length > 0 ? options.agents : getSupportedMcpAgents()
     console.log(`\n📋 [dry-run] Would install MCP server from: ${source}`)
     console.log(`   Command: ${resolved.command} ${resolved.args.join(' ')}`)
     console.log(`   Targets: ${targets.join(', ')}`)
@@ -68,8 +76,10 @@ export async function mcpInstallCommand(source, options) {
     }
   }
 
-  const succeeded = result.results.filter(r => r.success).length
-  console.log(`\n✅ Installed MCP server "${result.name}" to ${succeeded}/${result.results.length} agents`)
+  const succeeded = result.results.filter((r) => r.success).length
+  console.log(
+    `\n✅ Installed MCP server "${result.name}" to ${succeeded}/${result.results.length} agents`,
+  )
   return result.results
 }
 
@@ -98,7 +108,9 @@ export async function mcpListCommand(options) {
 export async function mcpUpdateCommand(source, options) {
   if (requiresConfirmation(source) && !options.yes) {
     console.log(`\n⚠️  Updating MCP server from GitHub repository: ${source}`)
-    console.log('   This will download and execute code from an external source.')
+    console.log(
+      '   This will download and execute code from an external source.',
+    )
     console.log('   Only proceed if you trust the repository.\n')
     const answer = await askConfirmation('Continue with update? [y/N] ')
     if (answer !== 'y' && answer !== 'yes') {
@@ -109,7 +121,8 @@ export async function mcpUpdateCommand(source, options) {
 
   if (options.dryRun) {
     const resolved = (await import('../utils/mcp.js')).resolveMcpSource(source)
-    const targets = options.agents?.length > 0 ? options.agents : getSupportedMcpAgents()
+    const targets =
+      options.agents?.length > 0 ? options.agents : getSupportedMcpAgents()
     console.log(`\n📋 [dry-run] Would update MCP server from: ${source}`)
     console.log(`   Command: ${resolved.command} ${resolved.args.join(' ')}`)
     console.log(`   Targets: ${targets.join(', ')}`)
@@ -126,8 +139,10 @@ export async function mcpUpdateCommand(source, options) {
     }
   }
 
-  const succeeded = result.results.filter(r => r.success).length
-  console.log(`\n✅ Updated MCP server "${result.name}" on ${succeeded}/${result.results.length} agents`)
+  const succeeded = result.results.filter((r) => r.success).length
+  console.log(
+    `\n✅ Updated MCP server "${result.name}" on ${succeeded}/${result.results.length} agents`,
+  )
   return result.results
 }
 
@@ -142,11 +157,13 @@ export async function mcpRemoveCommand(name, options) {
     }
   }
 
-  const succeeded = result.results.filter(r => r.success).length
+  const succeeded = result.results.filter((r) => r.success).length
   if (succeeded === 0) {
     console.log(`No MCP server "${name}" found to remove.`)
   } else {
-    console.log(`\n✅ Removed MCP server "${name}" from ${succeeded}/${result.results.length} agents`)
+    console.log(
+      `\n✅ Removed MCP server "${name}" from ${succeeded}/${result.results.length} agents`,
+    )
   }
   return result.results
 }
@@ -159,35 +176,48 @@ export async function mcpCheckCommand() {
     return
   }
 
-  console.log(`\nChecking ${result.servers.length} MCP server(s) for updates...\n`)
+  console.log(
+    `\nChecking ${result.servers.length} MCP server(s) for updates...\n`,
+  )
 
   for (const s of result.servers) {
     if (s.status === 'skipped') {
       console.log(`   ⏭️  ${s.name.padEnd(30)} ${s.reason}`)
     } else if (s.status === 'update_available') {
-      console.log(`   🔄 ${s.name.padEnd(30)} ${s.installedVersion} → ${s.latestVersion} (${s.agents})`)
+      console.log(
+        `   🔄 ${s.name.padEnd(30)} ${s.installedVersion} → ${s.latestVersion} (${s.agents})`,
+      )
     } else if (s.status === 'up_to_date') {
-      const versionInfo = s.versionPinned === false ? `latest: ${s.version} (no version pinned)` : `${s.version} is latest`
+      const versionInfo =
+        s.versionPinned === false
+          ? `latest: ${s.version} (no version pinned)`
+          : `${s.version} is latest`
       console.log(`   ✅ ${s.name.padEnd(30)} ${versionInfo} (${s.agents})`)
     } else if (s.status === 'error') {
       console.log(`   ❌ ${s.name.padEnd(30)} ${s.reason}`)
     }
   }
 
-  console.log(`\n${result.updatesAvailable > 0 ? `⚠️  ${result.updatesAvailable} MCP server(s) have updates available.` : '✅ All MCP servers are up to date.'}\n`)
+  console.log(
+    `\n${result.updatesAvailable > 0 ? `⚠️  ${result.updatesAvailable} MCP server(s) have updates available.` : '✅ All MCP servers are up to date.'}\n`,
+  )
 }
 
 function formatMcpRepo(r) {
   const desc = r.description || 'No description'
   const stars = r.stargazers_count || 0
   const lang = r.language || 'N/A'
-  const topics = r.topics && r.topics.length > 0 ? r.topics.slice(0, 3).join(', ') : ''
+  const topics =
+    r.topics && r.topics.length > 0 ? r.topics.slice(0, 3).join(', ') : ''
   return `${bold(r.name)}\n  ${dim(desc)}  ${yellow(`⭐ ${stars}`)}  ${cyan(lang)}${topics ? `  ${dim(topics)}` : ''}`
 }
 
 function formatMcpNpmItem(pkg) {
   const desc = pkg.description || 'No description'
-  const keywords = pkg.keywords && pkg.keywords.length > 0 ? pkg.keywords.slice(0, 3).join(', ') : ''
+  const keywords =
+    pkg.keywords && pkg.keywords.length > 0
+      ? pkg.keywords.slice(0, 3).join(', ')
+      : ''
   return `${bold(pkg.name)}\n  ${dim(desc)}${keywords ? `  ${dim(keywords)}` : ''}`
 }
 
@@ -197,14 +227,11 @@ function mcpTuiFormat(item, selected, sourceType) {
   const sel = selected ? `${sgr(7)} > ${sgr(0)}` : '   '
   const name = selected ? bold(item.name) : dim(item.name)
   const desc = item.description || 'No description'
-  const installCmd = sourceType === 'npm'
-    ? `rolecraft mcp install npm:${item.name}`
-    : `rolecraft mcp install gh:${item.name}`
-  return [
-    `${sel}${name}`,
-    `   ├─ ${desc}`,
-    `   └─ ${installCmd}`,
-  ]
+  const installCmd =
+    sourceType === 'npm'
+      ? `rolecraft mcp install npm:${item.name}`
+      : `rolecraft mcp install gh:${item.name}`
+  return [`${sel}${name}`, `   ├─ ${desc}`, `   └─ ${installCmd}`]
 }
 
 async function mcpRunTUI(items, sourceType) {
@@ -217,7 +244,10 @@ async function mcpRunTUI(items, sourceType) {
   const termRows = output.rows || 24
   const reservedRows = 2
   const availRows = termRows - reservedRows
-  const visibleCount = Math.min(Math.max(1, Math.floor(availRows / MCP_ITEM_LINES)), items.length)
+  const visibleCount = Math.min(
+    Math.max(1, Math.floor(availRows / MCP_ITEM_LINES)),
+    items.length,
+  )
   const statusRow = termRows
 
   function render() {
@@ -226,9 +256,14 @@ async function mcpRunTUI(items, sourceType) {
     const end = Math.min(scrollOffset + visibleCount, items.length)
     for (let i = scrollOffset; i < end; i++) {
       const lines = mcpTuiFormat(items[i], i === selectedIndex, sourceType)
-      for (const line of lines) out += line + '\n'
+      for (const line of lines) out += `${line}\n`
     }
-    out += cursorTo(statusRow, 1) + eraseLine + sgr(7) + '  ↑/↓ move · Enter select · q quit  ' + sgr(0)
+    out +=
+      cursorTo(statusRow, 1) +
+      eraseLine +
+      sgr(7) +
+      '  ↑/↓ move · Enter select · q quit  ' +
+      sgr(0)
     output.write(out)
   }
 
@@ -285,7 +320,10 @@ async function mcpRunTUI(items, sourceType) {
 async function mcpPromptSelect(items, sourceType) {
   console.log()
   for (let i = 0; i < items.length; i++) {
-    const line = sourceType === 'npm' ? formatMcpNpmItem(items[i]).split('\n') : formatMcpRepo(items[i]).split('\n')
+    const line =
+      sourceType === 'npm'
+        ? formatMcpNpmItem(items[i]).split('\n')
+        : formatMcpRepo(items[i]).split('\n')
     console.log(`  ${bold(cyan(String(i + 1).padStart(2, ' ')))} ${line[0]}`)
     console.log(`     ${line[1]}`)
     console.log()
@@ -293,16 +331,19 @@ async function mcpPromptSelect(items, sourceType) {
 
   const { createInterface } = await import('node:readline')
   const rl = createInterface({ input, output })
-  const answer = await new Promise(resolve => {
-    rl.question(`Which MCP server to install? [1-${items.length}, q to quit]: `, a => {
-      rl.close()
-      resolve(a.trim().toLowerCase())
-    })
+  const answer = await new Promise((resolve) => {
+    rl.question(
+      `Which MCP server to install? [1-${items.length}, q to quit]: `,
+      (a) => {
+        rl.close()
+        resolve(a.trim().toLowerCase())
+      },
+    )
   })
 
   if (answer === 'q') return -1
   const index = parseInt(answer, 10)
-  if (isNaN(index) || index < 1 || index > items.length) {
+  if (Number.isNaN(index) || index < 1 || index > items.length) {
     console.log(`Invalid choice. Enter a number between 1 and ${items.length}.`)
     return -2
   }
@@ -348,13 +389,17 @@ export async function mcpSearchCommand(query, options = {}) {
     if (err.message?.includes('API error')) {
       throw err
     }
-    throw new Error(`Failed to search ${sourceType === 'npm' ? 'npm registry' : 'GitHub'}. Check your internet connection.`)
+    throw new Error(
+      `Failed to search ${sourceType === 'npm' ? 'npm registry' : 'GitHub'}. Check your internet connection.`,
+    )
   }
 
   const items = data.results
 
   if (items.length === 0) {
-    console.log(`\nNo MCP ${sourceType === 'npm' ? 'packages' : 'servers'} found for "${query}".`)
+    console.log(
+      `\nNo MCP ${sourceType === 'npm' ? 'packages' : 'servers'} found for "${query}".`,
+    )
     return
   }
 
@@ -363,12 +408,19 @@ export async function mcpSearchCommand(query, options = {}) {
     return
   }
 
-  console.log(`\n🔍 ${sourceType === 'npm' ? 'npm MCP packages' : 'MCP server search results'} for "${query}":\n`)
+  console.log(
+    `\n🔍 ${sourceType === 'npm' ? 'npm MCP packages' : 'MCP server search results'} for "${query}":\n`,
+  )
   for (const item of items) {
-    const line = sourceType === 'npm' ? formatMcpNpmItem(item).split('\n') : formatMcpRepo(item).split('\n')
+    const line =
+      sourceType === 'npm'
+        ? formatMcpNpmItem(item).split('\n')
+        : formatMcpRepo(item).split('\n')
     console.log(`   ${line[0]}`)
     console.log(`   ├─ ${line[1]}`)
-    console.log(`   └─ rolecraft mcp install ${sourceType === 'npm' ? `npm:${item.name}` : `gh:${item.name}`}`)
+    console.log(
+      `   └─ rolecraft mcp install ${sourceType === 'npm' ? `npm:${item.name}` : `gh:${item.name}`}`,
+    )
     console.log()
   }
   console.log(`${items.length} result(s) found.`)
@@ -378,8 +430,10 @@ export async function mcpCommand(args) {
   const subcommand = args[0]
   const rest = args.slice(1)
 
-  const agentFlags = ['--agents', ...agents.map(a => `--${a.flag}`), '--all']
-  const agentMap = Object.fromEntries(agents.map(a => [`--${a.flag}`, a.flag]))
+  const agentFlags = ['--agents', ...agents.map((a) => `--${a.flag}`), '--all']
+  const agentMap = Object.fromEntries(
+    agents.map((a) => [`--${a.flag}`, a.flag]),
+  )
 
   const options = {
     dryRun: rest.includes('--dry-run'),
@@ -393,7 +447,7 @@ export async function mcpCommand(args) {
     options.name = rest[nameIdx + 1]
   }
 
-  const hasScopeFlag = rest.some(f => agentFlags.includes(f))
+  const hasScopeFlag = rest.some((f) => agentFlags.includes(f))
   if (hasScopeFlag) {
     for (const [flag, agent] of Object.entries(agentMap)) {
       if (rest.includes(flag) || rest.includes('--all')) {
@@ -404,9 +458,11 @@ export async function mcpCommand(args) {
 
   switch (subcommand) {
     case 'install': {
-      const source = rest.find(a => !a.startsWith('--'))
+      const source = rest.find((a) => !a.startsWith('--'))
       if (!source) {
-        console.error('Usage: rolecraft mcp install <source> [--name <name>] [--cursor --claude ...]')
+        console.error(
+          'Usage: rolecraft mcp install <source> [--name <name>] [--cursor --claude ...]',
+        )
         console.error('Source: npm:package, gh:owner/repo, or local path')
         throw new Error('Missing source argument.')
       }
@@ -415,18 +471,22 @@ export async function mcpCommand(args) {
     case 'list':
       return mcpListCommand(options)
     case 'update': {
-      const source = rest.find(a => !a.startsWith('--'))
+      const source = rest.find((a) => !a.startsWith('--'))
       if (!source) {
-        console.error('Usage: rolecraft mcp update <source> [--name <name>] [--cursor --claude ...]')
+        console.error(
+          'Usage: rolecraft mcp update <source> [--name <name>] [--cursor --claude ...]',
+        )
         console.error('Source: npm:package, gh:owner/repo, or local path')
         throw new Error('Missing source argument.')
       }
       return mcpUpdateCommand(source, options)
     }
     case 'remove': {
-      const name = rest.find(a => !a.startsWith('--'))
+      const name = rest.find((a) => !a.startsWith('--'))
       if (!name) {
-        console.error('Usage: rolecraft mcp remove <name> [--cursor --claude ...]')
+        console.error(
+          'Usage: rolecraft mcp remove <name> [--cursor --claude ...]',
+        )
         throw new Error('Missing name argument.')
       }
       return mcpRemoveCommand(name, options)
@@ -434,9 +494,11 @@ export async function mcpCommand(args) {
     case 'check':
       return mcpCheckCommand()
     case 'search': {
-      const query = rest.find(a => !a.startsWith('--'))
+      const query = rest.find((a) => !a.startsWith('--'))
       if (!query) {
-        console.error('Usage: rolecraft mcp search <query> [--interactive] [--npm]')
+        console.error(
+          'Usage: rolecraft mcp search <query> [--interactive] [--npm]',
+        )
         throw new Error('Missing query argument.')
       }
       return mcpSearchCommand(query, {

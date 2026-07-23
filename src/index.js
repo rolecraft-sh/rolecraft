@@ -1,4 +1,7 @@
-export { apiInstallSkills as install, apiResolveSkills as resolveSkills } from './install.js'
+export {
+  apiInstallSkills as install,
+  apiResolveSkills as resolveSkills,
+} from './install.js'
 export { apiList as list } from './list.js'
 export { apiRemove as remove } from './remove.js'
 export { apiUpdate as update } from './update.js'
@@ -7,7 +10,22 @@ export { apiVerify as verify } from './verify.js'
 export { apiCi as ci } from './ci.js'
 export { apiDoctor as doctor } from './doctor.js'
 export { apiSearch as search, apiResolve as resolve } from './search.js'
-export { apiMcpInstall as mcpInstall, apiMcpList as mcpList, apiMcpUpdate as mcpUpdate, apiMcpRemove as mcpRemove, apiMcpCheck as mcpCheck, apiMcpSearch as mcpSearch } from './mcp.js'
+export {
+  apiMcpInstall as mcpInstall,
+  apiMcpList as mcpList,
+  apiMcpUpdate as mcpUpdate,
+  apiMcpRemove as mcpRemove,
+  apiMcpCheck as mcpCheck,
+  apiMcpSearch as mcpSearch,
+} from './mcp.js'
 export { apiUse as use } from './use.js'
-export { apiProfileSave as profileSave, apiProfileApply as profileApply, apiProfileDiff as profileDiff, apiProfileList as profileList, apiProfileShow as profileShow, apiProfileDelete as profileDelete, apiProfileImport as profileImport } from './profile.js'
+export {
+  apiProfileSave as profileSave,
+  apiProfileApply as profileApply,
+  apiProfileDiff as profileDiff,
+  apiProfileList as profileList,
+  apiProfileShow as profileShow,
+  apiProfileDelete as profileDelete,
+  apiProfileImport as profileImport,
+} from './profile.js'
 export { apiTest as test } from './api/test.js'

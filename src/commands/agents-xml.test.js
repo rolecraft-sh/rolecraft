@@ -10,8 +10,15 @@ let tempDir, originalCwd, originalHome, xmlModule
 function capture() {
   const logs = []
   const origLog = console.log
-  console.log = (...args) => { if (args.length) logs.push(String(args[0])) }
-  return { logs, restore: () => { console.log = origLog } }
+  console.log = (...args) => {
+    if (args.length) logs.push(String(args[0]))
+  }
+  return {
+    logs,
+    restore: () => {
+      console.log = origLog
+    },
+  }
 }
 
 before(async () => {
@@ -22,9 +29,15 @@ before(async () => {
   process.chdir(tempDir)
 
   await mkdir(join(tempDir, '.agents'), { recursive: true })
-  await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-    version: 3, skills: {}, dismissed: {}, lastSelectedAgents: [],
-  }))
+  await writeFile(
+    join(tempDir, '.agents', '.skill-lock.json'),
+    JSON.stringify({
+      version: 3,
+      skills: {},
+      dismissed: {},
+      lastSelectedAgents: [],
+    }),
+  )
 
   xmlModule = await import('./agents-xml.js')
 })
@@ -43,15 +56,25 @@ describe('agents-xml command', () => {
     } finally {
       restore()
     }
-    assert.ok(logs.some(l => l.includes('No skills found')))
+    assert.ok(logs.some((l) => l.includes('No skills found')))
   })
 
   it('outputs XML when skills are in lockfile', async () => {
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3, skills: {
-        'test/my-skill': { slug: 'test/my-skill', source: '', contentSha: 'abc' },
-      }, dismissed: {}, lastSelectedAgents: [],
-    }))
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'test/my-skill': {
+            slug: 'test/my-skill',
+            source: '',
+            contentSha: 'abc',
+          },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
 
     const { logs, restore } = capture()
     try {
@@ -66,23 +89,38 @@ describe('agents-xml command', () => {
   })
 
   it('includes description from SKILL.md when available', async () => {
-    await mkdir(join(tempDir, '.agents', 'skills', 'test-my-skill'), { recursive: true })
-    writeFileSync(join(tempDir, '.agents', 'skills', 'test-my-skill', 'SKILL.md'), `---
+    await mkdir(join(tempDir, '.agents', 'skills', 'test-my-skill'), {
+      recursive: true,
+    })
+    writeFileSync(
+      join(tempDir, '.agents', 'skills', 'test-my-skill', 'SKILL.md'),
+      `---
 name: My Custom Skill
 description: A detailed description
 slug: test/my-skill
 ---
 
 Content here
-`)
+`,
+    )
 
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3, skills: {
-        'test/my-skill': { slug: 'test/my-skill', source: tempDir, sourceType: 'local', contentSha: 'abc',
-          agents: ['opencode'],
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'test/my-skill': {
+            slug: 'test/my-skill',
+            source: tempDir,
+            sourceType: 'local',
+            contentSha: 'abc',
+            agents: ['opencode'],
+          },
         },
-      }, dismissed: {}, lastSelectedAgents: [],
-    }))
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
 
     const { logs, restore } = capture()
     try {
@@ -96,13 +134,22 @@ Content here
   })
 
   it('includes global location for non-project skills', async () => {
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3, skills: {
-        'test/global-skill': { slug: 'test/global-skill', source: '', contentSha: 'abc',
-          agents: ['opencode'],
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'test/global-skill': {
+            slug: 'test/global-skill',
+            source: '',
+            contentSha: 'abc',
+            agents: ['opencode'],
+          },
         },
-      }, dismissed: {}, lastSelectedAgents: [],
-    }))
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
 
     const { logs, restore } = capture()
     try {
@@ -116,19 +163,34 @@ Content here
 
   it('includes project location for project-scoped skills', async () => {
     await mkdir(join(tempDir, '.agents', 'skills'), { recursive: true })
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3, skills: {}, dismissed: {}, lastSelectedAgents: [],
-    }))
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {},
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
 
     const projectDir = join(tempDir, 'my-project')
     await mkdir(join(projectDir, '.agents'), { recursive: true })
-    await writeFile(join(projectDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3, skills: {
-        'test/proj-skill': { slug: 'test/proj-skill', source: '', contentSha: 'abc',
-          agents: ['project', 'claude-code'],
+    await writeFile(
+      join(projectDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'test/proj-skill': {
+            slug: 'test/proj-skill',
+            source: '',
+            contentSha: 'abc',
+            agents: ['project', 'claude-code'],
+          },
         },
-      }, dismissed: {}, lastSelectedAgents: [],
-    }))
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
 
     const origCwd = process.cwd()
     process.chdir(projectDir)
@@ -144,21 +206,36 @@ Content here
   })
 
   it('escapes XML special characters', async () => {
-    await mkdir(join(tempDir, '.agents', 'skills', 'test-special'), { recursive: true })
-    writeFileSync(join(tempDir, '.agents', 'skills', 'test-special', 'SKILL.md'), `---
+    await mkdir(join(tempDir, '.agents', 'skills', 'test-special'), {
+      recursive: true,
+    })
+    writeFileSync(
+      join(tempDir, '.agents', 'skills', 'test-special', 'SKILL.md'),
+      `---
 name: Skill & Co <test>
 description: Description with "quotes" & <tags>
 slug: test/special
 ---
-`)
+`,
+    )
 
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3, skills: {
-        'test/special': { slug: 'test/special', source: tempDir, sourceType: 'local', contentSha: 'abc',
-          agents: ['opencode'],
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'test/special': {
+            slug: 'test/special',
+            source: tempDir,
+            sourceType: 'local',
+            contentSha: 'abc',
+            agents: ['opencode'],
+          },
         },
-      }, dismissed: {}, lastSelectedAgents: [],
-    }))
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
 
     const { logs, restore } = capture()
     try {
@@ -173,13 +250,22 @@ slug: test/special
   })
 
   it('--write writes to AGENTS.md', async () => {
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3, skills: {
-        'test/write-test': { slug: 'test/write-test', source: '', contentSha: 'abc',
-          agents: ['opencode'],
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'test/write-test': {
+            slug: 'test/write-test',
+            source: '',
+            contentSha: 'abc',
+            agents: ['opencode'],
+          },
         },
-      }, dismissed: {}, lastSelectedAgents: [],
-    }))
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
 
     const { logs, restore } = capture()
     try {
@@ -187,14 +273,16 @@ slug: test/special
     } finally {
       restore()
     }
-    assert.ok(logs.some(l => l.includes('AGENTS.md')))
+    assert.ok(logs.some((l) => l.includes('AGENTS.md')))
     const content = readFileSync(join(tempDir, 'AGENTS.md'), 'utf-8')
     assert.ok(content.includes('<skills_system>'))
     assert.ok(content.includes('test/write-test'))
   })
 
   it('--write replaces existing skills_system section', async () => {
-    writeFileSync(join(tempDir, 'AGENTS.md'), `# Project
+    writeFileSync(
+      join(tempDir, 'AGENTS.md'),
+      `# Project
 
 Some content.
 
@@ -207,15 +295,25 @@ Some content.
 </skills_system>
 
 More content.
-`)
+`,
+    )
 
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3, skills: {
-        'test/new-skill': { slug: 'test/new-skill', source: '', contentSha: 'abc',
-          agents: ['opencode'],
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'test/new-skill': {
+            slug: 'test/new-skill',
+            source: '',
+            contentSha: 'abc',
+            agents: ['opencode'],
+          },
         },
-      }, dismissed: {}, lastSelectedAgents: [],
-    }))
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
 
     const { restore } = capture()
     try {
@@ -231,15 +329,27 @@ More content.
   })
 
   it('handles parseNameAndDescription when SKILL.md is missing', async () => {
-    await mkdir(join(tempDir, '.agents', 'skills', 'test-no-file'), { recursive: true })
+    await mkdir(join(tempDir, '.agents', 'skills', 'test-no-file'), {
+      recursive: true,
+    })
 
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3, skills: {
-        'test/no-file': { slug: 'test/no-file', source: tempDir, sourceType: 'local', contentSha: 'abc',
-          agents: ['opencode'],
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'test/no-file': {
+            slug: 'test/no-file',
+            source: tempDir,
+            sourceType: 'local',
+            contentSha: 'abc',
+            agents: ['opencode'],
+          },
         },
-      }, dismissed: {}, lastSelectedAgents: [],
-    }))
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
 
     const { logs, restore } = capture()
     try {
@@ -252,16 +362,31 @@ More content.
   })
 
   it('handles parseNameAndDescription with invalid SKILL.md', async () => {
-    await mkdir(join(tempDir, '.agents', 'skills', 'test-bad-md'), { recursive: true })
-    writeFileSync(join(tempDir, '.agents', 'skills', 'test-bad-md', 'SKILL.md'), 'No frontmatter here')
+    await mkdir(join(tempDir, '.agents', 'skills', 'test-bad-md'), {
+      recursive: true,
+    })
+    writeFileSync(
+      join(tempDir, '.agents', 'skills', 'test-bad-md', 'SKILL.md'),
+      'No frontmatter here',
+    )
 
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3, skills: {
-        'test/bad-md': { slug: 'test/bad-md', source: tempDir, sourceType: 'local', contentSha: 'abc',
-          agents: ['opencode'],
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'test/bad-md': {
+            slug: 'test/bad-md',
+            source: tempDir,
+            sourceType: 'local',
+            contentSha: 'abc',
+            agents: ['opencode'],
+          },
         },
-      }, dismissed: {}, lastSelectedAgents: [],
-    }))
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
 
     const { logs, restore } = capture()
     try {

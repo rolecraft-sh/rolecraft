@@ -3,10 +3,93 @@ import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { createInterface as defaultCreateInterface } from 'node:readline'
 import { stdin as input, stdout as output } from 'node:process'
-import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotProjectDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, getCommandCodeDir, getCortexDir, getMistralVibeDir, getQwenCodeDir, getOpenClawDir, getCodeBuddyDir, getMuxDir, getPiDir, getAutohandCodeDir, getRovoDevDir, getFirebenderDir, getBobDir, getAiderDeskDir, getCodeArtsDoerDir, getCodeMakerDir, getCodeStudioDir, getCrushDir, getEveDir, getForgeDir, getInferenceShDir, getJazzDir, getIFlowDir, getKiloCodeDir, getKodeDir, getLingmaDir, getMcpJamDir, getMoxbyDir, getOnaDir, getQoderDir, getReasonixDir, getTerraMindDir, getTinyCloudDir, getZencoderDir, getZapDir, getCodeepDir, getKimiCodeDir, getZCodeDir, getAstrbotDir, getQoderCnDir, getTraeCnDir, getZenflowDir, getNeovateDir, getPochiDir, getAdalDir, getDroidDir, getChatgptDir, getCodeartsAgentDir, getUniversalDir } from '../utils/lockfile.js'
+import {
+  getAgentsDir,
+  getClaudeDir,
+  getCursorDir,
+  getWindsurfDir,
+  getCodexDir,
+  getCopilotProjectDir,
+  getAiderDir,
+  getClineDir,
+  getDevinDir,
+  getGeminiDir,
+  getCodyDir,
+  getContinueDir,
+  getWarpDir,
+  getCodeiumDir,
+  getFabricDir,
+  getGooseDir,
+  getTabnineDir,
+  getSupermavenDir,
+  getPrPilotDir,
+  getLoomDir,
+  getRooDir,
+  getTraeDir,
+  getHermesDir,
+  getKiroDir,
+  getAugmentDir,
+  getKiloDir,
+  getOpenHandsDir,
+  getJunieDir,
+  getFactoryDir,
+  getCommandCodeDir,
+  getCortexDir,
+  getMistralVibeDir,
+  getQwenCodeDir,
+  getOpenClawDir,
+  getCodeBuddyDir,
+  getMuxDir,
+  getPiDir,
+  getAutohandCodeDir,
+  getRovoDevDir,
+  getFirebenderDir,
+  getBobDir,
+  getAiderDeskDir,
+  getCodeArtsDoerDir,
+  getCodeMakerDir,
+  getCodeStudioDir,
+  getCrushDir,
+  getEveDir,
+  getForgeDir,
+  getInferenceShDir,
+  getJazzDir,
+  getIFlowDir,
+  getKiloCodeDir,
+  getKodeDir,
+  getLingmaDir,
+  getMcpJamDir,
+  getMoxbyDir,
+  getOnaDir,
+  getQoderDir,
+  getReasonixDir,
+  getTerraMindDir,
+  getTinyCloudDir,
+  getZencoderDir,
+  getZapDir,
+  getCodeepDir,
+  getKimiCodeDir,
+  getZCodeDir,
+  getAstrbotDir,
+  getQoderCnDir,
+  getTraeCnDir,
+  getZenflowDir,
+  getNeovateDir,
+  getPochiDir,
+  getAdalDir,
+  getDroidDir,
+  getChatgptDir,
+  getCodeartsAgentDir,
+  getUniversalDir,
+} from '../utils/lockfile.js'
 import { resolveSkills } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
-import { parseMcpServersFromSkill, resolveMcpSource, addMcpServer, getSupportedMcpAgents } from '../utils/mcp.js'
+import {
+  parseMcpServersFromSkill,
+  resolveMcpSource,
+  addMcpServer,
+  getSupportedMcpAgents,
+} from '../utils/mcp.js'
 import { createSpinner } from '../utils/spinner.js'
 
 let createInterface = defaultCreateInterface
@@ -124,8 +207,8 @@ function globalAgentsDir() {
 
 function askQuestion(query) {
   const rl = createInterface({ input, output })
-  return new Promise(resolve => {
-    rl.question(query, answer => {
+  return new Promise((resolve) => {
+    rl.question(query, (answer) => {
       rl.close()
       resolve(answer.trim().toLowerCase())
     })
@@ -144,7 +227,9 @@ function selectSkillsInteractive(skills) {
   return (async () => {
     while (true) {
       console.log()
-      const answer = await askQuestion('Enter numbers (space-separated) to select, "all" for all, or press Enter to confirm selection: ')
+      const answer = await askQuestion(
+        'Enter numbers (space-separated) to select, "all" for all, or press Enter to confirm selection: ',
+      )
 
       if (answer === '' || answer === null || answer === undefined) {
         console.log('  No skills selected. Nothing to install.')
@@ -156,10 +241,10 @@ function selectSkillsInteractive(skills) {
         return skills
       }
 
-      const parts = answer.split(/\s+/).map(p => parseInt(p, 10))
+      const parts = answer.split(/\s+/).map((p) => parseInt(p, 10))
       const selected = []
       for (const p of parts) {
-        if (!isNaN(p) && p >= 1 && p <= skills.length) {
+        if (!Number.isNaN(p) && p >= 1 && p <= skills.length) {
           selected.push(skills[p - 1])
           console.log(`  ${skills[p - 1].name} selected`)
         }
@@ -182,11 +267,21 @@ export async function setupCommand(source, options = {}) {
     console.log('   No supported agents detected.\n')
     console.log('   rolecraft installs skills into agent skill directories.')
     console.log('   Install an AI coding agent (opencode, claude-code, cursor,')
-    console.log('   windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody,')
-    console.log('   continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot,')
-    console.log('   loom, roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory, command-code, cortex, mistral-vibe, qwen-code, openclaw, codebuddy, mux, pi, autohand-code, rovo-dev, firebender, ibm-bob, aider-desk, code-arts-doer, code-maker, code-studio,')
-    console.log('   crush, eve, forge, inference-sh, jazz, iflow, kilo-code, kode, lingma, mcp-jam, moxby, ona, qoder, reasonix, terra-mind, tiny-cloud, zencoder,')
-    console.log('   amp, antigravity, antigravity-cli, deepagents, dexto, loaf, replit, zed, promptscript, astrbot, qoder-cn, trae-cn, zenflow, neovate, pochi, adal, droid, chatgpt, codearts-agent, universal) first.')
+    console.log(
+      '   windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody,',
+    )
+    console.log(
+      '   continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot,',
+    )
+    console.log(
+      '   loom, roo, trae, hermes, kiro, augment, kilo, openhands, junie, factory, command-code, cortex, mistral-vibe, qwen-code, openclaw, codebuddy, mux, pi, autohand-code, rovo-dev, firebender, ibm-bob, aider-desk, code-arts-doer, code-maker, code-studio,',
+    )
+    console.log(
+      '   crush, eve, forge, inference-sh, jazz, iflow, kilo-code, kode, lingma, mcp-jam, moxby, ona, qoder, reasonix, terra-mind, tiny-cloud, zencoder,',
+    )
+    console.log(
+      '   amp, antigravity, antigravity-cli, deepagents, dexto, loaf, replit, zed, promptscript, astrbot, qoder-cn, trae-cn, zenflow, neovate, pochi, adal, droid, chatgpt, codearts-agent, universal) first.',
+    )
     return
   }
 
@@ -200,7 +295,9 @@ export async function setupCommand(source, options = {}) {
   console.log(`\n   Global (~/.agents/skills/):   ${globalCount} skill(s)`)
   const projectSkillCount = countSkills(projectDir)
   if (projectSkillCount > 0) {
-    console.log(`   Project (./.agents/skills/):  ${projectSkillCount} skill(s)`)
+    console.log(
+      `   Project (./.agents/skills/):  ${projectSkillCount} skill(s)`,
+    )
   }
 
   console.log()
@@ -230,12 +327,16 @@ export async function setupCommand(source, options = {}) {
 
     let selectedSkills
     if (options.skill && options.skill.length > 0) {
-      const skillNames = options.skill.map(n => n.toLowerCase())
-      selectedSkills = allSkills.filter(s =>
-        skillNames.includes(s.name.toLowerCase()) || skillNames.includes(s.slug.toLowerCase())
+      const skillNames = options.skill.map((n) => n.toLowerCase())
+      selectedSkills = allSkills.filter(
+        (s) =>
+          skillNames.includes(s.name.toLowerCase()) ||
+          skillNames.includes(s.slug.toLowerCase()),
       )
       if (selectedSkills.length === 0) {
-        throw new Error(`No matching skills found for: ${options.skill.join(', ')}. Available: ${allSkills.map(s => s.name).join(', ')}`)
+        throw new Error(
+          `No matching skills found for: ${options.skill.join(', ')}. Available: ${allSkills.map((s) => s.name).join(', ')}`,
+        )
       }
     } else if (allSkills.length === 1) {
       selectedSkills = allSkills
@@ -251,11 +352,13 @@ export async function setupCommand(source, options = {}) {
       selectedSkills = result
     }
 
-    const targets = agents.map(a => a.flag)
+    const targets = agents.map((a) => a.flag)
     targets.push('project')
 
     if (options.dryRun) {
-      console.log(`\n📋 [dry-run] Would install ${selectedSkills.length} skill(s):\n`)
+      console.log(
+        `\n📋 [dry-run] Would install ${selectedSkills.length} skill(s):\n`,
+      )
       for (const skill of selectedSkills) {
         console.log(`   Skill:     ${skill.name} (${skill.slug})`)
         console.log(`   Source:    ${source}`)
@@ -296,9 +399,13 @@ export async function setupCommand(source, options = {}) {
       if (resolved.content) {
         const mcpServers = parseMcpServersFromSkill(resolved.content)
         if (mcpServers.length > 0) {
-          console.log(`\n   Skill includes ${mcpServers.length} MCP server(s). Installing...`)
+          console.log(
+            `\n   Skill includes ${mcpServers.length} MCP server(s). Installing...`,
+          )
           const supported = getSupportedMcpAgents()
-          const mcpTargets = agents.filter(a => supported.includes(a.flag)).map(a => a.flag)
+          const mcpTargets = agents
+            .filter((a) => supported.includes(a.flag))
+            .map((a) => a.flag)
           for (const server of mcpServers) {
             const resolvedMcp = resolveMcpSource(server.source)
             let installedCount = 0
@@ -306,7 +413,9 @@ export async function setupCommand(source, options = {}) {
               const ok = await addMcpServer(agent, server.name, resolvedMcp)
               if (ok) installedCount++
             }
-            console.log(`     ${installedCount}/${mcpTargets.length} agents: MCP server "${server.name}" installed`)
+            console.log(
+              `     ${installedCount}/${mcpTargets.length} agents: MCP server "${server.name}" installed`,
+            )
           }
         }
       }
@@ -318,8 +427,12 @@ export async function setupCommand(source, options = {}) {
     console.log('  rolecraft setup ./my-skill')
     console.log('  rolecraft setup sametcelikbicak/task-decomposer')
     console.log('\nOptions:')
-    console.log('  --list        List available skills from a source without installing')
-    console.log('  --skill <n>   Install specific skills by name (comma-separated)')
+    console.log(
+      '  --list        List available skills from a source without installing',
+    )
+    console.log(
+      '  --skill <n>   Install specific skills by name (comma-separated)',
+    )
     console.log('  --yes, -y     Install all skills without prompt')
     console.log('  --dry-run     Preview without installing')
   }
@@ -327,9 +440,9 @@ export async function setupCommand(source, options = {}) {
 
 function countSkills(dir) {
   try {
-    return readdirSync(dir, { withFileTypes: true })
-      .filter(e => e.isDirectory() && !e.name.startsWith('.'))
-      .length
+    return readdirSync(dir, { withFileTypes: true }).filter(
+      (e) => e.isDirectory() && !e.name.startsWith('.'),
+    ).length
   } catch {
     return 0
   }
