@@ -13,8 +13,7 @@ fi
 # Run lint (syntax + biome). Skip if biome not installed.
 if [ -x node_modules/.bin/biome ]; then
   echo "→ pre-commit: running npm run lint"
-  npm run --silent lint
-  if [ $? -ne 0 ]; then
+  if ! npm run --silent lint; then
     echo "pre-commit: lint failed. Run 'npx biome check --write' to auto-fix." >&2
     exit 1
   fi
