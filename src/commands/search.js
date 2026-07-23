@@ -64,23 +64,43 @@ async function runTUI(items) {
 
   let selectedIndex = 0
   let scrollOffset = 0
-  const termRows = output.rows || 24
+  let firstRender = true
+  let termRows = output.rows || 24
   const reservedRows = 2
-  const availRows = termRows - reservedRows
-  const visibleCount = Math.min(
+  let availRows = termRows - reservedRows
+  let visibleCount = Math.min(
     Math.max(1, Math.floor(availRows / ITEM_LINES)),
     items.length,
   )
-  const statusRow = termRows
+  let statusRow = termRows
+  const firstLine = 2
+
+  function updateLayout() {
+    termRows = output.rows || 24
+    availRows = termRows - reservedRows
+    visibleCount = Math.min(
+      Math.max(1, Math.floor(availRows / ITEM_LINES)),
+      items.length,
+    )
+    statusRow = termRows
+    if (scrollOffset + visibleCount > items.length)
+      scrollOffset = Math.max(0, items.length - visibleCount)
+    if (selectedIndex >= items.length) selectedIndex = items.length - 1
+  }
 
   function render() {
-    let out = clearScreen + hideCursor
-    out += '\n'
+    let out = firstRender ? clearScreen + hideCursor : hideCursor
+    firstRender = false
+    out += cursorTo(firstLine, 1)
     const end = Math.min(scrollOffset + visibleCount, items.length)
+    const usedLines = (end - scrollOffset) * ITEM_LINES
     for (let i = scrollOffset; i < end; i++) {
       const lines = tuiFormat(items[i], i === selectedIndex)
-      for (const line of lines) out += `${line}\n`
+      out += cursorTo(firstLine + (i - scrollOffset) * ITEM_LINES, 1)
+      for (const line of lines) out += `${eraseLine}${line}\n`
     }
+    for (let i = usedLines + firstLine; i < statusRow; i++)
+      out += cursorTo(i, 1) + eraseLine + '\n'
     out +=
       cursorTo(statusRow, 1) +
       eraseLine +
@@ -129,14 +149,21 @@ async function runTUI(items) {
       }
     }
 
+    function onResize() {
+      updateLayout()
+      render()
+    }
+
     function cleanup() {
       input.removeListener('data', onData)
+      output.removeListener('resize', onResize)
       input.pause()
       input.setRawMode(wasRaw)
-      output.write(showCursor)
+      output.write(clearScreen + showCursor)
     }
 
     input.on('data', onData)
+    output.on('resize', onResize)
   })
 }
 

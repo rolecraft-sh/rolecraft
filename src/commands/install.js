@@ -2,7 +2,7 @@ import { createInterface as defaultCreateInterface } from 'node:readline'
 import { stdin as input, stdout as output } from 'node:process'
 import { apiInstallSkills } from '../api/install.js'
 import agents from '../agents.js'
-import { createSpinner } from '../utils/spinner.js'
+import { createProgressBar } from '../utils/spinner.js'
 
 let createInterface = defaultCreateInterface
 let askQuestion = defaultAskQuestion
@@ -106,11 +106,11 @@ export async function installCommand(source, options) {
       : await askScope()
 
   if (options.list) {
-    const spinner = createSpinner('Resolving skills...')
-    spinner.start()
+    const bar = createProgressBar('Resolving skills...')
+    bar.start()
     const { resolveSkills } = await import('../utils/resolver.js')
     const skills = await resolveSkills(source)
-    spinner.succeed(`Found ${skills.length} skill(s)`)
+    bar.succeed(`Found ${skills.length} skill(s)`)
     console.log()
     for (const s of skills) {
       console.log(`  ${s.name}`)
@@ -135,11 +135,11 @@ export async function installCommand(source, options) {
   }
 
   if (!options.yes && !options.skill && !options.dryRun) {
-    const spinner = createSpinner('Resolving skills...')
-    spinner.start()
+    const bar = createProgressBar('Resolving skills...')
+    bar.start()
     const { resolveSkills } = await import('../utils/resolver.js')
     const allSkills = await resolveSkills(source)
-    spinner.succeed(`Found ${allSkills.length} skill(s)`)
+    bar.succeed(`Found ${allSkills.length} skill(s)`)
 
     if (allSkills.length > 1) {
       const result = await selectSkillsInteractive(allSkills)

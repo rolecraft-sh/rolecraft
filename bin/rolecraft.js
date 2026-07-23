@@ -49,12 +49,13 @@ Usage:
   rolecraft bundle <source> [...]   Install skills from a file or inline sources
   rolecraft bundle create [<name>]  Create a new bundle file
   rolecraft use <source>            Preview a skill without installing
-  rolecraft list                    List installed skills
+  rolecraft list                    List installed skills (--json)
   rolecraft remove <slug>           Remove a skill
   rolecraft update <slug>           Re-install a skill (update to latest)
   rolecraft setup [<source>]        Detect agents and optionally install a skill
   rolecraft init [<name>]           Scaffold a new SKILL.md
-  rolecraft search <query>          Search for skills on GitHub --skills-sh  Search skills.sh (experimental)
+  rolecraft search <query>          Search for skills on GitHub
+  rolecraft search <query> --skills-sh  Search skills.sh (experimental)
   rolecraft check                   Check for available skill updates
   rolecraft verify                  Verify installed skill integrity
   rolecraft ci                      Install all skills from lockfile
@@ -62,28 +63,58 @@ Usage:
   rolecraft doctor                  Run system health check (--json, --network, --deep)
   rolecraft watch [<slug>]          Watch skills for changes and auto-sync
   rolecraft profile                 Manage agent configuration profiles
-   rolecraft mcp install <source>    Install an MCP server (npm:, gh:, or local path, e.g. npm:pkg@1.0.0 or gh:owner/repo@branch)
-   rolecraft mcp list                List configured MCP servers
-   rolecraft mcp search <query>      Search for MCP servers (--npm for npm search)
-   rolecraft mcp check               Check for MCP server updates
-   rolecraft mcp remove <name>       Remove an MCP server
+  rolecraft mcp install <source>    Install an MCP server (npm:, gh:, or local path)
+  rolecraft mcp list                List configured MCP servers
+  rolecraft mcp search <query>      Search for MCP servers (--npm, --interactive)
+  rolecraft mcp check               Check for MCP server updates
+  rolecraft mcp update <name>       Update an MCP server
+  rolecraft mcp remove <name>       Remove an MCP server
   rolecraft agents-xml              Generate skills XML for AGENTS.md
   rolecraft agents-xml --write      Write skills XML to AGENTS.md
   rolecraft upgrade                 Upgrade rolecraft to the latest version
   rolecraft convert <source>        Convert a skill between SKILL.md and .mdc formats
-  rolecraft diff <skill-a> <skill-b>  Compare two skills section-by-section (--json, --brief, --no-color)
-  rolecraft compose <a> <b> [...]     Compose multiple skills (--chain, --output, --name, --dry-run, --force)
-  rolecraft test <skill-path>       Test a skill quality (--all, --json, --verbose)
+  rolecraft diff <skill-a> <skill-b>  Compare two skills section-by-section
+  rolecraft compose <a> <b> [...]     Compose multiple skills
+  rolecraft test <skill-path>       Test a skill quality
   rolecraft help                    Show this help
 
 Options:
   --yes, -y      Non-interactive: accept all defaults (install, setup, mcp, profile)
   --dry-run      Preview without making changes (install, setup, bundle, upgrade, profile, mcp, update, remove, watch)
   --no-mcp       Skip MCP server installation from skills (install, bundle)
+  --version, -v  Show rolecraft version
+
+Options for diff:
+  --json         Output structured JSON
+  --brief        Show only summary of changes
+  --context <n>  Show N lines of context around each change
+  --no-color     Disable colored output
+
+Options for compose:
+  --chain        Override mode (last skill wins), default: merge
+  --output, -o   Write to file instead of stdout
+  --name <name>  Set output skill name
+  --dry-run      Preview merge result without writing
+  --force        Overwrite existing output file
+  --json         Output structured JSON
+  --no-color     Disable colored output
+
+Options for test:
+  --all          Test all installed skills
+  --json         Output structured JSON
+  --verbose      Show detailed results
+  --no-color     Disable colored output
+  --no-emoji     Use ASCII fallback for emojis
+  --min-score <n> Fail if score is below threshold
+  --only <names> Run specific checks (comma-separated)
 
 Options for use:
   --list         List available skills from a source without previewing
   --skill <names> Preview specific skills by name (comma-separated)
+
+Options for search:
+  --interactive  Interactive TUI picker
+  --skills-sh    Search skills.sh instead of GitHub
 
 Options for setup:
   --list         List available skills from a source without installing

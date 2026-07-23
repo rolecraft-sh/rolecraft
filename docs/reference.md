@@ -54,7 +54,7 @@ These flags work across multiple commands:
 | `--copy` | install, setup | Force copy (default) |
 | `--frozen-lockfile` | install | Fail if skill is already installed |
 | `--no-mcp` | install, setup | Skip MCP server installation |
-| `--interactive` | search | Open TUI for browsing and selecting results |
+| `--interactive` | search, mcp search | Open TUI for browsing and selecting results |
 
 ---
 
@@ -218,9 +218,10 @@ Verifies SHA256 content hashes of all installed skills.
 rolecraft doctor                # standard health check
 rolecraft doctor --json         # JSON output for scripting
 rolecraft doctor --network      # include GitHub connectivity test
+rolecraft doctor --deep         # skill conflict detection
 ```
 
-Runs comprehensive system health checks: Node.js version, platform info, Git/npm availability, agent directories, lockfile schema validation, disk usage, orphaned directory detection, skill integrity (hash + symlink), MCP server configuration, and optional network connectivity (`--network`).
+Runs comprehensive system health checks: Node.js version, platform info, Git/npm availability, agent directories, lockfile schema validation, disk usage, orphaned directory detection, skill integrity (hash + symlink), MCP server configuration, optional network connectivity (`--network`), and conflict detection (`--deep`).
 
 ### `rolecraft watch [<slug>]`
 
@@ -262,6 +263,8 @@ profile link [name]           # link to project
 mcp install <source> [flags]    # install MCP server
 mcp list                        # list all MCP servers
 mcp search <query> [flags]      # search MCP servers (--npm, --interactive)
+mcp check                       # check for MCP server updates
+mcp update <name> [flags]       # update an MCP server
 mcp remove <name> [flags]       # remove MCP server
 ```
 
@@ -287,6 +290,9 @@ rolecraft test --all                     # test all installed skills
 rolecraft test --all --json              # JSON output for CI
 rolecraft test ./skill --min-score 80    # fail if below 80
 rolecraft test ./skill --only name,slug  # run specific assertions
+rolecraft test ./skill --verbose          # detailed results
+rolecraft test ./skill --no-color         # disable ANSI colors
+rolecraft test ./skill --no-emoji         # ASCII fallback for emojis
 ```
 
 ### `rolecraft diff <skill-a> <skill-b>`
@@ -298,6 +304,7 @@ rolecraft diff ./a.SKILL.md ./b.SKILL.md           # full diff
 rolecraft diff ./a.SKILL.md ./b.SKILL.md --brief    # summary only
 rolecraft diff ./a.SKILL.md ./b.SKILL.md --json     # JSON output
 rolecraft diff ./a.SKILL.md ./b.SKILL.md --no-color # no ANSI
+rolecraft diff ./a.SKILL.md ./b.SKILL.md --context 3 # show 3 lines context
 ```
 
 Output includes frontmatter changes, section-level diffs, and a summary of changed/added/removed sections.
@@ -312,6 +319,8 @@ rolecraft compose ./a.SKILL.md ./b.SKILL.md -o combined.md       # write to file
 rolecraft compose ./a.SKILL.md ./b.SKILL.md --chain --name Final # chain mode
 rolecraft compose ./a.SKILL.md ./b.SKILL.md --dry-run            # preview only
 rolecraft compose ./a.SKILL.md ./b.SKILL.md --force              # overwrite output
+rolecraft compose ./a.SKILL.md ./b.SKILL.md --json               # JSON output
+rolecraft compose ./a.SKILL.md ./b.SKILL.md --no-color           # disable ANSI colors
 ```
 
 **Modes:**
