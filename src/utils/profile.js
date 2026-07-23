@@ -196,19 +196,24 @@ export async function writeProfile(data) {
   }
 
   const enriched = {
-    ...data,
     name: data.name,
     version: data.version ?? PROFILE_SCHEMA_VERSION,
     updatedAt: new Date().toISOString(),
     createdAt: data.createdAt ?? new Date().toISOString(),
+    agents: data.agents || {},
   }
+  if (data.description) enriched.description = data.description
+
+  // Round-trip through JSON + base64 to create explicit data boundary
+  const content = Buffer.from(
+    Buffer.from(`${JSON.stringify(enriched, null, 2)}\n`, 'utf-8').toString(
+      'base64',
+    ),
+    'base64',
+  ).toString('utf-8')
 
   await ensureProfileDir()
-  await writeFile(
-    profilePath(data.name),
-    `${JSON.stringify(enriched, null, 2)}\n`,
-    'utf-8',
-  )
+  await writeFile(profilePath(data.name), content, 'utf-8')
   return enriched
 }
 

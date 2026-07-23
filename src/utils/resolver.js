@@ -380,13 +380,11 @@ function parseNpmRef(source) {
 
 function fetchJson(url) {
   const parsed = new URL(url)
-  if (
-    !parsed.hostname.endsWith('.npmjs.org') &&
-    parsed.hostname !== 'npmjs.org'
-  ) {
-    throw new Error(`Fetch not allowed from ${parsed.hostname}`)
+  const hostname = String(parsed.hostname)
+  if (!hostname.endsWith('.npmjs.org') && hostname !== 'npmjs.org') {
+    throw new Error(`Fetch not allowed from ${hostname}`)
   }
-  const safeUrl = `${parsed.protocol}//${parsed.host}${parsed.pathname}${parsed.search}`
+  const safeUrl = `https://${hostname}${String(parsed.pathname)}${String(parsed.search)}`
   return new Promise((resolve, reject) => {
     const req = runHttpsGet(
       safeUrl,
@@ -420,11 +418,13 @@ function fetchJson(url) {
 
 async function downloadFile(url, dest) {
   const parsed = new URL(url)
-  if (parsed.hostname !== 'registry.npmjs.org') {
-    throw new Error(`Download not allowed from ${parsed.hostname}`)
+  const dlHost = String(parsed.hostname)
+  if (dlHost !== 'registry.npmjs.org') {
+    throw new Error(`Download not allowed from ${dlHost}`)
   }
+  const dlUrl = `https://${dlHost}${String(parsed.pathname)}${String(parsed.search)}`
 
-  const response = await fetch(url)
+  const response = await fetch(dlUrl)
   if (!response.ok) {
     throw new Error(`Failed to download: HTTP ${response.status}`)
   }
@@ -436,7 +436,7 @@ async function downloadFile(url, dest) {
 
 async function resolveNpmInternal(source) {
   const { pkgName, version } = parseNpmRef(source)
-  const encodedName = pkgName.replace(/\//g, '%2F')
+  const encodedName = encodeURIComponent(pkgName)
 
   let metadata
   try {
