@@ -1,5 +1,5 @@
 import { apiCompose } from '../api/compose.js'
-import { writeFileSync, existsSync } from 'node:fs'
+import { writeFileSync } from 'node:fs'
 
 function useColor(options) {
   if (options.noColor) return false
@@ -86,12 +86,19 @@ export async function composeCommand(sources, options = {}) {
   }
 
   if (options.output) {
-    if (existsSync(options.output) && !options.force) {
-      throw new Error(
-        `Output file already exists: ${options.output}. Use --force to overwrite.`,
-      )
+    try {
+      writeFileSync(options.output, data.content, {
+        encoding: 'utf-8',
+        flag: options.force ? 'w' : 'wx',
+      })
+    } catch (err) {
+      if (err.code === 'EEXIST') {
+        throw new Error(
+          `Output file already exists: ${options.output}. Use --force to overwrite.`,
+        )
+      }
+      throw err
     }
-    writeFileSync(options.output, data.content, 'utf-8')
     console.log(`\n✓ Written to ${options.output}`)
   } else {
     console.log(data.content)
