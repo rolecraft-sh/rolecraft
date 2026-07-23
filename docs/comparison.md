@@ -33,7 +33,7 @@
 | Shell completions (bash/zsh/fish)        | ✅               | ❌                | ❌                  |
 | In-agent `/learn` command                | ❌               | ❌                | ✅                  |
 | Skill rating / feedback                  | ❌               | ❌                | ✅                  |
-| Skill diff / compose                     | ❌               | ❌                | ❌                  |
+| Skill diff / compose                     | ✅               | ❌                | ❌                  |
 | System health check (`doctor`)           | ✅               | ❌                | ❌                  |
 | Watch mode (auto-sync)                   | ✅               | ❌                | ❌                  |
 | AGENTS.md XML generation                 | ✅               | ❌                | ❌                  |
