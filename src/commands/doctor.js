@@ -49,6 +49,18 @@ export async function doctorCommand(options = {}) {
     }
   }
 
+  if (result.conflicts?.length > 0) {
+    console.log('\n🔍 Skill Conflict Analysis\n')
+    for (const c of result.conflicts) {
+      console.log(`   ${icon('warn')} "${c.a}" ve "${c.b}" arasında çelişki:`)
+      for (const sec of c.sections) {
+        const quoteA = sec.a[0] || ''
+        const quoteB = sec.b[0] || ''
+        console.log(`       - ${sec.heading}: "${quoteA}" vs "${quoteB}"`)
+      }
+    }
+  }
+
   const { passed, warnings, errors, total } = result.summary
   console.log(
     `\n📋 Summary: ${passed}/${total} passed, ${warnings} warnings, ${errors} errors\n`,

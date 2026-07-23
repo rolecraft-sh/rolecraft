@@ -8,6 +8,7 @@ Run a system health check to diagnose common issues.
 rolecraft doctor
 rolecraft doctor --json          # JSON output
 rolecraft doctor --network       # include network connectivity check
+rolecraft doctor --deep          # skill conflict detection
 ```
 
 ## Description
@@ -26,6 +27,7 @@ Scans your system and reports on:
 - **Skill integrity** — verifies skill directories exist, content hashes match, and checks for broken symlinks
 - **MCP servers** — counts configured MCP servers across detected agents
 - **Network** (with `--network`) — tests connectivity to GitHub
+- **Conflict detection** (with `--deep`) — compares all installed skills section-by-section and reports conflicting instructions (e.g., same `##` heading with differing content)
 
 ## Flags
 
@@ -33,6 +35,7 @@ Scans your system and reports on:
 |------|-------------|
 | `--json` | Output results as structured JSON |
 | `--network` | Include a network connectivity check (GitHub) |
+| `--deep` | Run conflict detection across all installed skills |
 
 ## Example output
 
@@ -88,4 +91,21 @@ $ rolecraft doctor --network
    ✅ Network (GitHub)                       reachable
 
 📋 Summary: 15/15 passed, 0 warnings, 0 errors
+```
+
+```bash
+$ rolecraft doctor --deep
+
+🔬 rolecraft doctor — System Health Check
+
+   ✅ ...
+   ⚠️  Conflict detection                      1 conflict(s) found among 4 skill(s)
+
+🔍 Skill Conflict Analysis
+
+   ⚠️ "react-rules" ve "frontend-rules" arasında çelişki:
+       - Code Style: "use tabs" vs "use spaces"
+       - Naming: "camelCase" vs "snake_case"
+
+📋 Summary: 14/15 passed, 1 warnings, 0 errors
 ```

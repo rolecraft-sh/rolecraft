@@ -112,8 +112,11 @@ Run system health check.
 |--------|------|---------|-------------|
 | `json` | `boolean` | `false` | Return structured data |
 | `network` | `boolean` | `false` | Include GitHub connectivity test |
+| `deep` | `boolean` | `false` | Run conflict detection across all installed skills |
 
-Returns `{ status, checks: [...], summary: { passed, warnings, errors, total }, agents, mcp, skills }`.
+Returns `{ status, checks: [...], summary: { passed, warnings, errors, total }, agents, mcp, skills, conflicts }`.
+
+When `deep: true`, the `conflicts` array contains objects shaped as `{ a, b, sections: [{ heading, a, b }] }` where `a` and `b` are conflicting skill slugs and each section lists up to 3 differing lines from each skill.
 
 ### `use(source, options?)`
 

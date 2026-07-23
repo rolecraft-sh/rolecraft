@@ -16,6 +16,7 @@ import {
   computeContentHash,
 } from '../utils/lockfile.js'
 import { detectAgents } from '../commands/setup.js'
+import { parseFrontmatter } from '../utils/converter.js'
 import agents from '../agents.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -252,6 +253,95 @@ function countAgentSkills(dir) {
   }
 }
 
+function splitSections(body) {
+  const lines = body.split('\n')
+  const sections = []
+  let current = null
+  for (const line of lines) {
+    const headingMatch = line.match(/^##\s+(.+)/)
+    if (headingMatch) {
+      if (current) sections.push(current)
+      current = { heading: headingMatch[1].trim(), lines: [] }
+    } else if (current) {
+      current.lines.push(line)
+    }
+  }
+  if (current) sections.push(current)
+  return sections
+}
+
+function parseSkillContent(skillDir) {
+  const skillPath = join(skillDir, 'SKILL.md')
+  try {
+    const raw = readFileSync(skillPath, 'utf-8')
+    const { attrs, body } = parseFrontmatter(raw)
+    const sections = splitSections(body)
+    return { attrs, sections }
+  } catch {
+    return null
+  }
+}
+
+function detectSkillConflicts(allSkills, agentsDir, cwd) {
+  const skills = {}
+  for (const slug of Object.keys(allSkills)) {
+    const normSlug = slug.replace(/\//g, '-')
+    const searchDirs = [
+      join(agentsDir, normSlug),
+      join(cwd, '.agents', 'skills', normSlug),
+    ]
+    const existingDir = searchDirs.find((d) => {
+      try {
+        accessSync(d, constants.F_OK)
+        return true
+      } catch {
+        return false
+      }
+    })
+    if (!existingDir) continue
+    const parsed = parseSkillContent(existingDir)
+    if (parsed) skills[slug] = parsed
+  }
+
+  const conflicts = []
+  const slugs = Object.keys(skills)
+  if (slugs.length < 2) return conflicts
+
+  for (let i = 0; i < slugs.length; i++) {
+    for (let j = i + 1; j < slugs.length; j++) {
+      const a = slugs[i]
+      const b = slugs[j]
+      const skillA = skills[a]
+      const skillB = skills[b]
+      const sectionsA = new Map(skillA.sections.map((s) => [s.heading, s]))
+      const sectionsB = new Map(skillB.sections.map((s) => [s.heading, s]))
+
+      const pairConflicts = []
+
+      for (const [heading, secA] of sectionsA) {
+        if (!sectionsB.has(heading)) continue
+        const secB = sectionsB.get(heading)
+        const setA = new Set(secA.lines.filter((l) => l.trim()))
+        const setB = new Set(secB.lines.filter((l) => l.trim()))
+        const diffA = [...setA].filter((l) => !setB.has(l))
+        const diffB = [...setB].filter((l) => !setA.has(l))
+        if (diffA.length === 0 && diffB.length === 0) continue
+        pairConflicts.push({
+          heading,
+          a: diffA.slice(0, 3),
+          b: diffB.slice(0, 3),
+        })
+      }
+
+      if (pairConflicts.length > 0) {
+        conflicts.push({ a, b, sections: pairConflicts })
+      }
+    }
+  }
+
+  return conflicts
+}
+
 export async function apiDoctor(cwd = process.cwd(), options = {}) {
   const checks = []
   let passed = 0
@@ -482,6 +572,28 @@ export async function apiDoctor(cwd = process.cwd(), options = {}) {
     }
   }
 
+  let skillConflicts = []
+  if (options.deep) {
+    const allSkills = { ...globalLock.skills }
+    if (projectLock)
+      for (const [slug, entry] of Object.entries(projectLock.skills))
+        allSkills[slug] = entry
+
+    skillConflicts = detectSkillConflicts(allSkills, getAgentsDir(), cwd)
+    if (skillConflicts.length > 0)
+      checked(
+        'Conflict detection',
+        'warn',
+        `${skillConflicts.length} conflict(s) found among ${Object.keys(allSkills).length} skill(s)`,
+      )
+    else
+      checked(
+        'Conflict detection',
+        'pass',
+        `${Object.keys(allSkills).length} skill(s) checked, no conflicts`,
+      )
+  }
+
   const status =
     errors > 0 ? 'unhealthy' : warnings > 0 ? 'degraded' : 'healthy'
   const total = passed + warnings + errors
@@ -501,5 +613,6 @@ export async function apiDoctor(cwd = process.cwd(), options = {}) {
       verified: verifiedSkills,
       brokenSymlinks,
     },
+    conflicts: skillConflicts,
   }
 }
