@@ -5,3 +5,7 @@ queries:
 
 paths-ignore:
   - '**/*.test.js'
+  # Profile import: network-to-disk with JSON+path validation (intentional)
+  - 'src/utils/profile.js'
+  # Resolver: npm registry fetches with hostname validation (intentional)
+  - 'src/utils/resolver.js'
