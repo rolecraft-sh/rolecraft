@@ -31,6 +31,8 @@ Complete reference for all rolecraft commands, flags, and options.
 | `agents-xml [--write]` | Generate skills XML for AGENTS.md |
 | `completions bash\|zsh\|fish` | Generate shell completion scripts |
 | `test <skill-path>` | Test a skill quality with built-in assertions |
+| `diff <a> <b>` | Compare two skills section-by-section |
+| `compose <a> <b> [<c>...]` | Compose multiple skills into one |
 | `upgrade` | Upgrade rolecraft to latest version |
 | `--help`, `-h` | Show usage |
 | `--version`, `-v` | Show version |
@@ -286,6 +288,35 @@ rolecraft test --all --json              # JSON output for CI
 rolecraft test ./skill --min-score 80    # fail if below 80
 rolecraft test ./skill --only name,slug  # run specific assertions
 ```
+
+### `rolecraft diff <skill-a> <skill-b>`
+
+Compare two SKILL.md files section-by-section. Parses frontmatter and body independently.
+
+```bash
+rolecraft diff ./a.SKILL.md ./b.SKILL.md           # full diff
+rolecraft diff ./a.SKILL.md ./b.SKILL.md --brief    # summary only
+rolecraft diff ./a.SKILL.md ./b.SKILL.md --json     # JSON output
+rolecraft diff ./a.SKILL.md ./b.SKILL.md --no-color # no ANSI
+```
+
+Output includes frontmatter changes, section-level diffs, and a summary of changed/added/removed sections.
+
+### `rolecraft compose <skill-a> <skill-b> [<skill-c> ...]`
+
+Combine multiple SKILL.md files into a single composed skill.
+
+```bash
+rolecraft compose ./a.SKILL.md ./b.SKILL.md                     # stdout (merge mode)
+rolecraft compose ./a.SKILL.md ./b.SKILL.md -o combined.md       # write to file
+rolecraft compose ./a.SKILL.md ./b.SKILL.md --chain --name Final # chain mode
+rolecraft compose ./a.SKILL.md ./b.SKILL.md --dry-run            # preview only
+rolecraft compose ./a.SKILL.md ./b.SKILL.md --force              # overwrite output
+```
+
+**Modes:**
+- `merge` (default): same-named sections are combined, lines deduplicated
+- `chain`: later skills override same sections
 
 ### `rolecraft upgrade`
 

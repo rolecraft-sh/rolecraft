@@ -24,6 +24,8 @@ import { watchCommand } from '../src/commands/watch.js'
 import { convertCommand } from '../src/commands/convert.js'
 import { profileCommand } from '../src/commands/profile.js'
 import { testCommand } from '../src/commands/test.js'
+import { diffCommand } from '../src/commands/diff.js'
+import { composeCommand } from '../src/commands/compose.js'
 import agents from '../src/agents.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -69,6 +71,8 @@ Usage:
   rolecraft agents-xml --write      Write skills XML to AGENTS.md
   rolecraft upgrade                 Upgrade rolecraft to the latest version
   rolecraft convert <source>        Convert a skill between SKILL.md and .mdc formats
+  rolecraft diff <skill-a> <skill-b>  Compare two skills section-by-section (--json, --brief, --no-color)
+  rolecraft compose <a> <b> [...]     Compose multiple skills (--chain, --output, --name, --dry-run, --force)
   rolecraft test <skill-path>       Test a skill quality (--all, --json, --verbose)
   rolecraft help                    Show this help
 
@@ -410,6 +414,67 @@ export async function main() {
       await convertCommand(source, {
         dryRun: convertFlags.includes('--dry-run'),
       })
+      break
+    }
+
+    case 'diff': {
+      if (args.includes('--help') || args.includes('-h')) {
+        usage()
+        return
+      }
+      const diffFlags = args.filter((a) => a.startsWith('-'))
+      const diffPos = args.filter((a) => !a.startsWith('-'))
+      const diffOptions = {
+        json: diffFlags.includes('--json'),
+        brief: diffFlags.includes('--brief'),
+        noColor: diffFlags.includes('--no-color'),
+      }
+      const contextIndex = diffFlags.indexOf('--context')
+      if (
+        contextIndex !== -1 &&
+        diffFlags[contextIndex + 1] &&
+        !diffFlags[contextIndex + 1].startsWith('-')
+      ) {
+        diffOptions.context = parseInt(diffFlags[contextIndex + 1], 10)
+      }
+      await diffCommand(diffPos[0], diffPos[1], diffOptions)
+      break
+    }
+
+    case 'compose': {
+      if (args.includes('--help') || args.includes('-h')) {
+        usage()
+        return
+      }
+      const composeFlags = args.filter((a) => a.startsWith('-'))
+      const composePos = args.filter((a) => !a.startsWith('-'))
+      const composeOptions = {
+        mode: composeFlags.includes('--chain') ? 'chain' : 'merge',
+        dryRun: composeFlags.includes('--dry-run'),
+        force: composeFlags.includes('--force'),
+        json: composeFlags.includes('--json'),
+        noColor: composeFlags.includes('--no-color'),
+      }
+      const nameIndex = composeFlags.indexOf('--name')
+      if (
+        nameIndex !== -1 &&
+        composeFlags[nameIndex + 1] &&
+        !composeFlags[nameIndex + 1].startsWith('-')
+      ) {
+        composeOptions.name = composeFlags[nameIndex + 1]
+      }
+      const outputIndex =
+        composeFlags.indexOf('--output') !== -1
+          ? composeFlags.indexOf('--output')
+          : composeFlags.indexOf('-o')
+      if (
+        outputIndex !== -1 &&
+        composeFlags[outputIndex + 1] &&
+        !composeFlags[outputIndex + 1].startsWith('-')
+      ) {
+        composeOptions.output = composeFlags[outputIndex + 1]
+      }
+      await composeCommand(composePos, composeOptions)
       break
     }
 

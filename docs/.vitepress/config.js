@@ -60,6 +60,8 @@ export default defineConfig({
             { text: 'check', link: '/commands/check' },
             { text: 'ci', link: '/commands/ci' },
             { text: 'completions', link: '/commands/completions' },
+            { text: 'compose', link: '/commands/compose' },
+            { text: 'diff', link: '/commands/diff' },
             { text: 'doctor', link: '/commands/doctor' },
             { text: 'init', link: '/commands/init' },
             { text: 'install', link: '/commands/install' },

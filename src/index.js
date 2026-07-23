@@ -29,3 +29,5 @@ export {
   apiProfileImport as profileImport,
 } from './profile.js'
 export { apiTest as test } from './api/test.js'
+export { apiDiff as diff } from './api/diff.js'
+export { apiCompose as compose } from './api/compose.js'
