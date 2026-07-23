@@ -59,7 +59,7 @@ Usage:
   rolecraft verify                  Verify installed skill integrity
   rolecraft ci                      Install all skills from lockfile
   rolecraft completions <shell>     Generate shell completions (bash|zsh|fish)
-  rolecraft doctor                  Run system health check (--json, --network)
+  rolecraft doctor                  Run system health check (--json, --network, --deep)
   rolecraft watch [<slug>]          Watch skills for changes and auto-sync
   rolecraft profile                 Manage agent configuration profiles
    rolecraft mcp install <source>    Install an MCP server (npm:, gh:, or local path, e.g. npm:pkg@1.0.0 or gh:owner/repo@branch)
@@ -360,6 +360,7 @@ export async function main() {
       await doctorCommand({
         json: doctorFlags.includes('--json'),
         network: doctorFlags.includes('--network'),
+        deep: doctorFlags.includes('--deep'),
       })
       break
     }
