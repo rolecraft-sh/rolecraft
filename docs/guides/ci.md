@@ -6,6 +6,8 @@ Use rolecraft in your CI pipeline to verify and install skills automatically.
 
 The [rolecraft-action](https://github.com/marketplace/actions/rolecraft-action) wraps the CLI for easy CI integration:
 
+[![Marketplace](https://img.shields.io/badge/Get%20it%20on%20GitHub%20Marketplace-rolecraft--action-blue?logo=github)](https://github.com/marketplace/actions/rolecraft-action)
+
 ```yaml
 name: Verify skills
 on: [push]
