@@ -80,6 +80,8 @@ rolecraft install <your-slug>
 
 To publish, you need **your own** GitHub personal access token (PAT) with `repo` scope. This token is used by the CLI to fork the registry and open a PR on your behalf — it does NOT give rolecraft access to your account.
 
+### Option A: GitHub.com personal access token
+
 ```bash
 # 1. Create a token at: https://github.com/settings/tokens (scope: repo)
 # 2. Set it as an environment variable:
@@ -89,7 +91,20 @@ export GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
 GITHUB_TOKEN=ghp_xxxxx rolecraft publish ./my-skill
 ```
 
+### Option B: Use `gh` CLI token (recommended if you already use GitHub CLI)
+
+If you already use `gh auth login`, you can reuse that token:
+
+```bash
+export GITHUB_TOKEN=$(gh auth token)
+rolecraft publish ./my-skill --yes
+```
+
 > **Note:** If `GITHUB_TOKEN` is missing, the CLI will show a clear error with the setup link.
+
+### Option C: Manual PR (no token needed)
+
+Skip the CLI entirely and edit `index.json` directly — see [the registry README](https://github.com/rolecraft-sh/registry#how-to-add-a-skill-manual-pr).
 
 ## Flags
 

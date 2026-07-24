@@ -21,7 +21,10 @@ function getToken() {
 }
 
 function authHeaders(token) {
-  const h = { Accept: 'application/vnd.github.v3+json' }
+  const h = {
+    Accept: 'application/vnd.github.v3+json',
+    'Content-Type': 'application/json',
+  }
   const t = token || getToken()
   if (t) h.Authorization = `Bearer ${t}`
   return h
@@ -115,6 +118,14 @@ export async function createPublishPR(
   if (!getRes.ok) throw new Error('Failed to fetch current registry index')
   const fileData = await getRes.json()
   const currentSha = fileData.sha
+
+  const refRes = await runFetch(
+    `https://api.github.com/repos/${REGISTRY_OWNER}/${REGISTRY_REPO}/git/refs/heads/${REGISTRY_BRANCH}`,
+    { headers },
+  )
+  if (!refRes.ok) throw new Error('Failed to fetch upstream branch ref')
+  const refData = await refRes.json()
+  const upstreamSha = refData.object.sha
   const currentContent = Buffer.from(fileData.content, 'base64').toString(
     'utf-8',
   )
@@ -150,7 +161,10 @@ export async function createPublishPR(
     { method: 'POST', headers },
   )
   if (!forkRes.ok && forkRes.status !== 202) {
-    throw new Error(`Failed to fork registry: ${forkRes.status}`)
+    const errBody = await forkRes.text().catch(() => '')
+    throw new Error(
+      `Failed to fork registry: ${forkRes.status}${errBody ? ` — ${errBody}` : ''}`,
+    )
   }
 
   const branchRes = await runFetch(
@@ -160,12 +174,15 @@ export async function createPublishPR(
       headers,
       body: JSON.stringify({
         ref: `refs/heads/${branchName}`,
-        sha: currentSha,
+        sha: upstreamSha,
       }),
     },
   )
   if (!branchRes.ok) {
-    throw new Error(`Failed to create branch: ${branchRes.status}`)
+    const errBody = await branchRes.text().catch(() => '')
+    throw new Error(
+      `Failed to create branch: ${branchRes.status}${errBody ? ` — ${errBody}` : ''}`,
+    )
   }
 
   const putRes = await runFetch(

@@ -222,6 +222,11 @@ describe('registry-client', () => {
             },
           },
           {
+            // GET /git/refs/heads/main
+            status: 200,
+            body: { object: { sha: 'commit-sha-123' } },
+          },
+          {
             // POST /forks
             status: 202,
             body: {},
@@ -279,6 +284,7 @@ describe('registry-client', () => {
               sha: 'abc123',
             },
           },
+          { status: 200, body: { object: { sha: 'commit-sha-123' } } },
           { status: 202, body: {} },
           { status: 201, body: {} },
           { status: 200, body: {} },
