@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.0.1] - 2026-07-24
+
+### Fixed
+- use upstream commit SHA for branch creation, add error bodies, document gh auth token
+
+### Changed
+- bump version to 2.0.1 (registry publish fix + npm pack hygiene)
+- bump github/codeql-action/analyze from 4.37.1 to 4.37.3 (#178)
+- bump github/codeql-action/init from 4.37.1 to 4.37.3 (#177)
+- release v2.0.0
+
+### Documentation
+- update publish success message to reflect maintainer review
+- add marketplace badge to CI guide
+- add Marketplace badge to CI section, fix agent count, add registry source link
+- complete v2.0.0 docs audit (api diff/compose/test, comparison, CHANGELOG dup fix)
 ## [v2.0.0] - 2026-07-24
 
 ### Added
