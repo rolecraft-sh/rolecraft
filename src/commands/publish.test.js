@@ -13,7 +13,7 @@ before(async () => {
 
 after(() => {
   publishModule.setAskQuestion(undefined)
-  publishModule.setExecSync(undefined)
+  publishModule.setSpawnSync(undefined)
 })
 
 let testDir
@@ -51,7 +51,7 @@ function createTestSkill(dir, overrides = {}) {
 describe('publish command', () => {
   afterEach(async () => {
     publishModule.setAskQuestion(undefined)
-    publishModule.setExecSync(undefined)
+    publishModule.setSpawnSync(undefined)
     if (testDir) {
       await rm(testDir, { recursive: true, force: true })
       testDir = null
@@ -134,7 +134,11 @@ describe('publish command', () => {
     testDir = mkdtempSync(join(tmpdir(), 'publish-git-'))
     createTestSkill(testDir)
 
-    publishModule.setExecSync(() => 'git@github.com:user/test-skill.git')
+    publishModule.setSpawnSync(() => ({
+      stdout: Buffer.from('git@github.com:user/test-skill.git\n'),
+      status: 0,
+      error: null,
+    }))
 
     const { logs, restore } = capture('log')
     await publishModule.publishCommand(testDir, {

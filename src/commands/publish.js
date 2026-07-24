@@ -1,9 +1,9 @@
-import { execSync as defaultExecSync } from 'node:child_process'
+import { spawnSync } from 'node:child_process'
 import { resolveSource } from '../utils/resolver.js'
 import { createPublishPR } from '../utils/registry-client.js'
 
 let askQuestion = defaultAskQuestion
-let runExecSync = defaultExecSync
+let runSpawn = spawnSync
 
 async function defaultAskQuestion(query) {
   const { createInterface } = await import('node:readline')
@@ -21,17 +21,22 @@ export function setAskQuestion(fn) {
   askQuestion = fn || defaultAskQuestion
 }
 
-export function setExecSync(fn) {
-  runExecSync = fn || defaultExecSync
+export function setSpawnSync(fn) {
+  runSpawn = fn || spawnSync
 }
 
 function detectGitRemote(skillDir) {
   try {
-    const output = runExecSync(`git -C "${skillDir}" remote get-url origin`, {
-      encoding: 'utf-8',
-      timeout: 5000,
-    })
-    const url = (output || '').trim()
+    const result = runSpawn(
+      'git',
+      ['-C', skillDir, 'remote', 'get-url', 'origin'],
+      {
+        stdio: 'pipe',
+        timeout: 5000,
+      },
+    )
+    if (result.error || result.status !== 0) return null
+    const url = (result.stdout || '').toString().trim()
     if (!url) return null
 
     const match = url.match(
