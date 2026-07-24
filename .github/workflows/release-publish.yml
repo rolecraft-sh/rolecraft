@@ -42,6 +42,12 @@ jobs:
     permissions:
       actions: write
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@94833eef5c7881b56dc23d1d25f2c4e35dba8e34 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+
       - name: Trigger docs deployment
         run: gh workflow run "Deploy docs" --ref main
         env:
