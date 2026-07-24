@@ -30,7 +30,7 @@
 </p>
 
 <p align="center">
-  Works with <b>82+ AI agents</b>: opencode · claude-code · cursor · windsurf · devin · codex · copilot · aider · cline · gemini-cli · cody · continue · warp · codeium · fabric · goose · tabnine · supermaven · pr-pilot · loom · roo · trae · hermes · kiro · augment · kilo · openhands · junie · factory · command-code · cortex · mistral-vibe · qwen-code · openclaw · codebuddy · mux · pi · autohand-code · rovo · firebender · bob · aider-desk · and more
+  Works with <b>86+ AI agents</b>: opencode · claude-code · cursor · windsurf · devin · codex · copilot · aider · cline · gemini-cli · cody · continue · warp · codeium · fabric · goose · tabnine · supermaven · pr-pilot · loom · roo · trae · hermes · kiro · augment · kilo · openhands · junie · factory · command-code · cortex · mistral-vibe · qwen-code · openclaw · codebuddy · mux · pi · autohand-code · rovo · firebender · bob · aider-desk · and more
 </p>
 
 <p align="center">
@@ -105,7 +105,7 @@ rolecraft convert --help
 
 ## Registry (optional community marketplace)
 
-Discover and install skills by short names from the [rolecraft Registry](https://github.com/rolecraft-sh/registry) — a GitHub-powered, zero-backend index of published skills:
+Discover and install skills by short names from the [rolecraft Registry](https://github.com/rolecraft-sh/registry) ([source](https://github.com/rolecraft-sh/registry)) — a GitHub-powered, zero-backend index of published skills:
 
 ```bash
 # Search the registry
@@ -167,7 +167,9 @@ No other CLI combines both. npx skills has no MCP support. ags has a separate MC
 
 ## CI/CD Integration
 
-Use the [rolecraft GitHub Action](https://github.com/marketplace/actions/rolecraft-action) to verify and install skills in your CI pipeline:
+Use the [rolecraft GitHub Action](https://github.com/marketplace/actions/rolecraft-action) ([source](https://github.com/rolecraft-sh/rolecraft-action)) to verify and install skills in your CI pipeline:
+<br><br>
+<a href="https://github.com/marketplace/actions/rolecraft-action"><img src="https://img.shields.io/badge/Get%20it%20on%20GitHub%20Marketplace-rolecraft--action-blue?logo=github&style=for-the-badge" alt="Get it on Marketplace"></a>
 
 ```yaml
 # .github/workflows/skills.yml
