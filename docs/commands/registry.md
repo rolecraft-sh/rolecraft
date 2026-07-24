@@ -120,7 +120,7 @@ See [`schema.json`](https://github.com/rolecraft-sh/registry/blob/main/schema.js
 | `description` | string        | no       | Short description                            |
 | `repo`        | string        | yes      | GitHub repo (owner/repo)                     |
 | `author`      | string        | yes      | GitHub username                              |
-| `versions`    | array<string> | yes      | Published semver versions                    |
+| `versions`    | `array<string>` | yes      | Published semver versions                    |
 | `latest`      | string        | yes      | Latest version                               |
 | `installs`    | number        | no       | Install count (best-effort)                  |
 | `stars`       | number        | no       | GitHub stars                                 |
