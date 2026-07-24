@@ -1,6 +1,6 @@
 {
   "name": "rolecraft",
-  "version": "1.6.0",
+  "version": "2.0.0",
   "description": "Install AI agent skills as roles & behaviors directly from any source — zero-dependency CLI for opencode, claude-code, cursor, and more",
   "type": "module",
   "bin": {
