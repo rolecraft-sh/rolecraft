@@ -9,6 +9,8 @@ benchmark/
 .agignore
 .editorconfig
 .nvmrc
+biome.json
+hooks/
 opencode.json
 RELEASE.md
 SKILL.md
