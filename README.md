@@ -103,6 +103,25 @@ rolecraft convert --help
 
 ---
 
+## Registry (optional community marketplace)
+
+Discover and install skills by short names from the [rolecraft Registry](https://github.com/rolecraft-sh/registry) — a GitHub-powered, zero-backend index of published skills:
+
+```bash
+# Search the registry
+rolecraft search react --registry
+
+# Install by short slug (auto-resolves to underlying repo)
+rolecraft install react-rules
+
+# Publish your skill
+rolecraft publish ./my-skill/ --repo user/my-skill
+```
+
+PRs to the registry are auto-validated and auto-merged — no manual review. The registry is **completely optional**; every other feature works without it.
+
+---
+
 ## Skills + MCP in one command
 
 rolecraft is the **only CLI** that installs both agent skills and MCP servers together.
@@ -133,7 +152,7 @@ No other CLI combines both. npx skills has no MCP support. ags has a separate MC
 - **MCP + Skills in one command** — install skills and their MCP servers together. Unique.
 - **Any source** — local folder, GitHub/GitLab/SSH URL, npm package
 - **86+ agents** — opencode, claude-code, cursor, copilot, aider, devin, gemini-cli, and more
-- **No registry required** — no signup, no marketplace, no vendor lock-in
+- **No registry required** — works fully without a marketplace; community-driven [registry](https://github.com/rolecraft-sh/registry) optional
 - **Security scoring** — static analysis: detects prompt injection, command injection, obfuscated code, credential harvesting. Scores 0–100. Blocks dangerous skills
 - **CI-ready** — lockfile-based re-install (`rolecraft ci`), `--yes` flag, `--dry-run`
 - **Shell completions** — bash, zsh, fish auto-completion
@@ -254,8 +273,8 @@ All API functions return plain objects (no side-effects). Available exports:
 | GitLab / SSH git URL                 | ✅               | ✅              | ❌                  |
 | npm package source                   | ✅               | ✅              | ❌                  |
 | **MCP server management**            | ✅               | ❌              | ❌                  |
-| Agent targets                        | **82**           | 72              | 15+                 |
-| Skills.sh listed                     | ✅               | ✅              | ⚠️ (registry only)  |
+| Agent targets                        | **87**           | 72              | 15+                 |
+| **Registry / marketplace**            | ✅               | ✅ (skills.sh)  | ⚠️ (registry only)  |
 | Bundle install + create              | ✅               | ❌              | ✅ (skillset only)  |
 | Interactive TUI search + install     | ✅               | ✅              | ❌                  |
 | Security scoring (0–100)             | ✅               | ✅ (Snyk)       | ✅ (server + local) |
@@ -270,6 +289,7 @@ All API functions return plain objects (no side-effects). Available exports:
 | Watch mode (auto-sync)               | ✅               | ❌              | ❌                  |
 | AGENTS.md XML generation             | ✅               | ❌              | ❌                  |
 | Self-upgrade command                 | ✅               | ❌              | ❌                  |
+| **Publish to registry**              | ✅               | ❌              | ❌                  |
 | File size                            | ~4 KB            | ~465 KB         | ~84 KB              |
 
 [See full table →](docs/comparison.md)

@@ -1,6 +1,6 @@
 # `rolecraft install`
 
-Install a skill from a local path, GitHub repository, or npm package.
+Install a skill from a local path, GitHub repository, npm package, or registry slug.
 
 Supports **single-skill** and **multi-skill** repositories. If a source contains
 multiple `SKILL.md` files (e.g. under `skills/`), you will be prompted to
@@ -36,6 +36,16 @@ rolecraft install mattpocock/skills
 
 The CLI clones with `--depth 1`, discovers all `SKILL.md` files (including
 those under `skills/`, `.agents/skills/`, etc.), and lets you choose.
+
+### Registry slug
+
+The [rolecraft Registry](https://github.com/rolecraft-sh/registry) provides short, versioned names for published skills:
+
+```bash
+rolecraft install my-skill
+```
+
+If `my-skill` isn't a local path, GitHub ref, git URL, or npm ref, rolecraft looks it up in the registry and resolves it to the underlying repo URL. See [`registry.md`](./registry.md) for details.
 
 ### npm package
 

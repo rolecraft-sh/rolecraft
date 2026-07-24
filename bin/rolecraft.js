@@ -26,6 +26,7 @@ import { profileCommand } from '../src/commands/profile.js'
 import { testCommand } from '../src/commands/test.js'
 import { diffCommand } from '../src/commands/diff.js'
 import { composeCommand } from '../src/commands/compose.js'
+import { publishCommand } from '../src/commands/publish.js'
 import agents from '../src/agents.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -45,7 +46,8 @@ Zero dependencies, no marketplace required.
 Works with ${agents.length} agents: ${agents.map((a) => a.name).join(', ')}, and all spec-compliant agents.
 
 Usage:
-  rolecraft install <source>        Install a skill (local path, owner/repo, or npm:package)
+  rolecraft install <source>        Install a skill (local path, owner/repo, npm:package, or registry slug)
+  rolecraft publish <source>        Publish a skill to the rolecraft Registry
   rolecraft bundle <source> [...]   Install skills from a file or inline sources
   rolecraft bundle create [<name>]  Create a new bundle file
   rolecraft use <source>            Preview a skill without installing
@@ -56,6 +58,7 @@ Usage:
   rolecraft init [<name>]           Scaffold a new SKILL.md
   rolecraft search <query>          Search for skills on GitHub
   rolecraft search <query> --skills-sh  Search skills.sh (experimental)
+  rolecraft search <query> --registry  Search the rolecraft Registry
   rolecraft check                   Check for available skill updates
   rolecraft verify                  Verify installed skill integrity
   rolecraft ci                      Install all skills from lockfile
@@ -115,6 +118,7 @@ Options for use:
 Options for search:
   --interactive  Interactive TUI picker
   --skills-sh    Search skills.sh instead of GitHub
+  --registry     Search the rolecraft Registry
 
 Options for setup:
   --list         List available skills from a source without installing
@@ -135,7 +139,17 @@ ${agentFlags.join('\n')}
   --list             List available skills from a source without installing
   --skill <names>    Install specific skills by name (comma-separated, e.g. "skill1,skill2")
 
+Options for publish:
+  --dry-run      Preview what would be published without creating a PR
+  --yes, -y      Skip confirmation prompt
+  --repo <ref>   GitHub repository (owner/repo) to associate with the skill
+  --slug <slug>  Override the skill slug from SKILL.md frontmatter
+  --name <name>  Override the skill name from SKILL.md frontmatter
+
 Examples:
+  rolecraft publish ./my-skill
+  rolecraft publish ./my-skill --dry-run
+  rolecraft publish ./my-skill --repo owner/repo
   rolecraft install ./my-skill
   rolecraft install sametcelikbicak/task-decomposer
   rolecraft install npm:lodash
@@ -297,12 +311,15 @@ export async function main() {
       const query = args[0]
       const flags = args.slice(1)
       if (!query) {
-        console.error('Usage: rolecraft search <query> [--interactive]')
+        console.error(
+          'Usage: rolecraft search <query> [--interactive] [--registry]',
+        )
         throw new Error('Missing query argument.')
       }
       await searchCommand(query, {
         interactive: flags.includes('--interactive'),
         skillsSh: flags.includes('--skills-sh'),
+        registry: flags.includes('--registry'),
       })
       break
     }
@@ -577,6 +594,46 @@ export async function main() {
       } else {
         await bundleCommand(sources, opts)
       }
+      break
+    }
+
+    case 'publish': {
+      if (args.includes('--help') || args.includes('-h')) {
+        usage()
+        return
+      }
+
+      const publishOpts = {
+        dryRun: false,
+        yes: false,
+        repo: '',
+        slug: '',
+        name: '',
+      }
+      const publishPos = []
+      for (let i = 0; i < args.length; i++) {
+        const a = args[i]
+        if (a === '--dry-run') publishOpts.dryRun = true
+        else if (a === '--yes' || a === '-y') publishOpts.yes = true
+        else if (a === '--repo') {
+          i++
+          publishOpts.repo = args[i] || ''
+        } else if (a === '--slug') {
+          i++
+          publishOpts.slug = args[i] || ''
+        } else if (a === '--name') {
+          i++
+          publishOpts.name = args[i] || ''
+        } else if (!a.startsWith('-')) publishPos.push(a)
+      }
+      const source = publishPos[0]
+      if (!source) {
+        console.error(
+          'Usage: rolecraft publish <source> [--repo owner/repo] [--dry-run]',
+        )
+        throw new Error('Missing source argument.')
+      }
+      await publishCommand(source, publishOpts)
       break
     }
 

@@ -531,8 +531,17 @@ async function resolveAll(source) {
   if (isGitUrl(source)) {
     return await resolveGitUrlInternal(source)
   }
+
+  const { resolveSlug } = await import('./registry-client.js')
+  try {
+    const entry = await resolveSlug(source)
+    if (entry?.repo) {
+      return await resolveGitHubInternal(entry.repo)
+    }
+  } catch {}
+
   throw new Error(
-    `Invalid source: "${source}". Use a local path (./, /, ~), GitHub ref (owner/repo), git URL, or npm package (npm:package)`,
+    `Invalid source: "${source}". Use a local path (./, /, ~), GitHub ref (owner/repo), git URL, npm package (npm:package), or a registered skill slug`,
   )
 }
 
