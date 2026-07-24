@@ -124,7 +124,7 @@ export async function publishCommand(source, options = {}) {
     })
     console.log(`\n✅ Published! PR #${result.number} created:`)
     console.log(`   ${result.url}`)
-    console.log('   Auto-merge will handle the rest once checks pass.')
+    console.log('   A maintainer will review and merge once CI checks pass.')
   } catch (err) {
     console.error(`\n❌ Failed to publish: ${err.message}`)
   }

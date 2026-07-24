@@ -35,4 +35,4 @@ features:
   - title: Any Source
     details: Local folder, GitHub, GitLab, SSH git URL, npm package.
   - title: Registry (optional)
-    details: Discover and publish skills via the rolecraft Registry. GitHub-powered, zero-backend, auto-merged PRs.
+    details: Discover and publish skills via the rolecraft Registry. GitHub-powered, zero-backend, automated validation.

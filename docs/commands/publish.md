@@ -67,7 +67,7 @@ Each PR triggers:
 3. **Duplicate slug** check
 4. **Owner verification** — PR author must match the `author` field
 
-If all pass, the PR is **auto-merged**. No manual review needed.
+If all pass, a maintainer is notified and merges the PR. After merge, your skill becomes available.
 
 After publish, your skill becomes available via:
 

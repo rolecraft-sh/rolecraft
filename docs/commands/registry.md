@@ -1,6 +1,6 @@
 # rolecraft Registry
 
-The rolecraft Registry is a centralised skill index powered by GitHub. Skills are published via PRs, validated, and auto-merged — no manual review needed.
+The rolecraft Registry is a centralised skill index powered by GitHub. Skills are published via PRs, automatically validated, then merged by a maintainer.
 
 **Registry repo:** https://github.com/rolecraft-sh/registry
 
@@ -125,16 +125,16 @@ See [`schema.json`](https://github.com/rolecraft-sh/registry/blob/main/schema.js
 | `installs`    | number        | no       | Install count (best-effort)                  |
 | `stars`       | number        | no       | GitHub stars                                 |
 
-### Validation & auto-merge
+### Validation
 
 Each PR to `index.json` triggers GitHub Actions:
 
 1. **JSON syntax check** — `node -e "JSON.parse(...)"`
-2. **Schema validation** — `ajv-cli` against `schema.json`
+2. **Schema validation** — `ajv` against `schema.json` (with format support)
 3. **Duplicate check** — no two skills with the same slug
 4. **Owner verification** — PR author must own the skill's GitHub repo
 
-If all checks pass, the PR is auto-merged via `gh pr merge --auto --squash`. **No manual review needed.**
+If all checks pass, a maintainer is notified on the PR and merges it. If any check fails, see the Action logs.
 
 ### Local caching
 
