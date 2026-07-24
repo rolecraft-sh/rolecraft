@@ -120,6 +120,8 @@ rolecraft publish ./my-skill/ --repo user/my-skill
 
 PRs to the registry are auto-validated and auto-merged — no manual review. The registry is **completely optional**; every other feature works without it.
 
+All registry operations are also available via the [Node.js API](docs/api.md#searchregistryquery) — `searchRegistry`, `registryResolve`, `registryPublish`, `registryCheckUpdates`, `registryInfo`, `registryList`, `registryClearCache`.
+
 ---
 
 ## Skills + MCP in one command

@@ -5,7 +5,7 @@ rolecraft exposes a programmatic API for use in your own Node.js scripts, tools,
 ## Usage
 
 ```js
-import { install, list, search, doctor } from 'rolecraft'
+import { install, list, search, doctor, searchRegistry } from 'rolecraft'
 
 // install a skill
 const result = await install('./my-skill', { global: true })
@@ -15,6 +15,9 @@ const skills = await list()
 
 // search GitHub for skills
 const results = await search('code-review')
+
+// search the registry for skills
+const registryResults = await searchRegistry('react')
 
 // run health check
 const health = await doctor()
@@ -128,6 +131,47 @@ Returns `{ name, slug, files: [...], targets: [...] }`.
 
 Resolve a source string to its metadata. Returns `{ slug, name, files, contentSha, ... }`.
 
+### `diff(skillA, skillB, options?)`
+
+Section-aware comparison of two SKILL.md files.
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `json` | `boolean` | `false` | Return structured JSON |
+| `brief` | `boolean` | `false` | Show only summary of changes |
+| `noColor` | `boolean` | `false` | Disable colored output |
+
+Returns `{ a, b, frontmatter, sections: [{ heading, status, added, removed }], stats }`.
+
+### `compose(sources, options?)`
+
+Merge or chain multiple SKILL.md files into one.
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `mode` | `string` | `'merge'` | `'merge'` (dedup lines) or `'chain'` (override) |
+| `name` | `string` | — | Output skill name |
+| `json` | `boolean` | `false` | Return structured JSON |
+| `noColor` | `boolean` | `false` | Disable colored output |
+
+Returns `{ content, stats: { sources, totalInputSections, totalOutputSections, mergedSections, frontmatterFields } }`.
+
+### `test(skillPath, options?)`
+
+Run quality assertions against a SKILL.md file.
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `all` | `boolean` | `false` | Test all installed skills |
+| `json` | `boolean` | `false` | Return structured JSON |
+| `verbose` | `boolean` | `false` | Show detailed results |
+| `noColor` | `boolean` | `false` | Disable colored output |
+| `noEmoji` | `boolean` | `false` | Use ASCII fallback for emojis |
+| `minScore` | `number` | `0` | Fail if score is below threshold |
+| `only` | `string\|string[]` | — | Run specific checks by name |
+
+Returns `{ skill, score, grade, label, assertions: [...], suggestions: [...] }`. With `--all`, returns `{ results: [...], summary: { total, passed, failed, skipped } }`.
+
 ### `mcpInstall(source, options?)`
 
 Install an MCP server.
@@ -190,3 +234,62 @@ Delete a saved profile. Returns `{ deleted: true }`.
 ### `profileImport(source)`
 
 Import a profile from file or URL. Returns `{ name, agents: number }`.
+
+### `searchRegistry(query)`
+
+Search the registry index by slug, name, or description.
+
+| Param | Type | Description |
+|-------|------|-------------|
+| `query` | `string` | Search term |
+
+Returns `[{ slug, name, description, repo, author, versions, latest }]`.
+
+### `registryResolve(slug)`
+
+Resolve a registry slug to its full skill metadata.
+
+| Param | Type | Description |
+|-------|------|-------------|
+| `slug` | `string` | Registry slug (e.g. `"react-rules"`) |
+
+Returns `{ slug, name, description, repo, author, versions, latest }`. Throws if not found.
+
+### `registryPublish(entry, token?)`
+
+Fork the registry repo, update index.json, and open a PR.
+
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| `entry` | `object` | — | `{ slug, name, repo, description?, version? }` |
+| `token` | `string` | `GITHUB_TOKEN` env | GitHub personal access token |
+
+Returns `{ url, number }` (PR URL and number).
+
+### `registryCheckUpdates(skills)`
+
+Compare installed skills against registry and detect newer versions.
+
+| Param | Type | Description |
+|-------|------|-------------|
+| `skills` | `array` | `[{ slug, name, version }]` |
+
+Returns `[{ slug, name, current, latest }]`.
+
+### `registryInfo(slug)`
+
+Get detailed info about a single registry skill.
+
+| Param | Type | Description |
+|-------|------|-------------|
+| `slug` | `string` | Registry slug |
+
+Returns the full skill entry. Throws if not found.
+
+### `registryList()`
+
+List all skills in the registry. Returns `[{ slug, name, description, repo, author, versions, latest }]`.
+
+### `registryClearCache()`
+
+Clear the in-memory registry index cache. Next registry call will re-fetch from GitHub.

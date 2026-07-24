@@ -9,7 +9,7 @@
 | GitHub repo install                      | ✅               | ✅                | ❌                  |
 | GitLab / SSH git URL                     | ✅               | ✅                | ❌                  |
 | npm package source                       | ✅               | ✅                | ❌                  |
-| Agent targets                            | **82**           | **72**            | 15+                 |
+| Agent targets                            | **86**           | **72**            | 15+                 |
 | SKILL.md scaffolding (`init`)            | ✅               | ✅                | ❌                  |
 | Skill preview (`use`)                    | ✅               | ✅                | ❌                  |
 | Agent auto-detect + install (`setup`)    | ✅               | ❌                | ✅                  |
@@ -38,6 +38,11 @@
 | Watch mode (auto-sync)                   | ✅               | ❌                | ❌                  |
 | AGENTS.md XML generation                 | ✅               | ❌                | ❌                  |
 | **MCP server management**                | ✅               | ❌                | ❌                  |
+| Skill quality test                       | ✅               | ❌                | ❌                  |
+| Skill diff / compose                     | ✅               | ❌                | ❌                  |
+| Skill conflict detection (`doctor --deep`)| ✅               | ❌                | ❌                  |
+| **Node.js API**                          | ✅               | ❌                | ❌                  |
+| **Publish to registry**                  | ✅               | ❌                | ❌                  |
 | Security scanning (0–100)                | ✅               | ✅ (Snyk)         | ✅                  |
 | Telemetry / leaderboard                  | ❌               | ✅                | ❌                  |
 | File size                                | ~4 KB            | ~465 KB           | ~84 KB              |
