@@ -183,83 +183,93 @@ See the [CI guide](docs/guides/ci.md) for more examples.
 rolecraft exposes a programmatic API for use in your own Node.js scripts and tools:
 
 ```js
-import { install, list, search, check, doctor, verify, ci, mcpInstall, profileSave } from 'rolecraft'
+import {
+  install,
+  list,
+  search,
+  check,
+  doctor,
+  verify,
+  ci,
+  mcpInstall,
+  profileSave,
+} from "rolecraft";
 
 // install a skill
-const result = await install('./my-skill', { global: true })
-console.log(result)
+const result = await install("./my-skill", { global: true });
+console.log(result);
 
 // search GitHub for skills
-const results = await search('code-review')
-console.log(results.results)
+const results = await search("code-review");
+console.log(results.results);
 
 // system health check
-const health = await doctor()
-console.log(health.summary)
+const health = await doctor();
+console.log(health.summary);
 
 // full API reference → [docs/reference.md](docs/reference.md)
 ```
 
 All API functions return plain objects (no side-effects). Available exports:
 
-| Function | Description |
-|----------|-------------|
-| `install` | Install a skill with security scan |
-| `list` | List installed skills |
-| `search` | Search GitHub or skills.sh |
-| `resolve` | Resolve a source string |
-| `remove` | Uninstall a skill |
-| `update` | Re-install a skill |
-| `check` | Check for updates |
-| `verify` | Verify skill integrity |
-| `ci` | Re-install from lockfile |
-| `doctor` | System health check |
-| `use` | Preview a skill |
-| `mcpInstall` | Install an MCP server |
-| `mcpList` | List MCP servers |
-| `mcpUpdate` | Update an MCP server |
-| `mcpRemove` | Remove an MCP server |
-| `mcpCheck` | Check MCP server status |
-| `mcpSearch` | Search MCP servers |
-| `profileSave` | Save current config |
-| `profileApply` | Apply a saved profile |
-| `profileDiff` | Diff current vs saved |
-| `profileList` | List profiles |
-| `profileShow` | Show profile details |
-| `profileDelete` | Delete a profile |
-| `profileImport` | Import a profile |
-| `test` | Test a skill quality with assertions |
+| Function        | Description                          |
+| --------------- | ------------------------------------ |
+| `install`       | Install a skill with security scan   |
+| `list`          | List installed skills                |
+| `search`        | Search GitHub or skills.sh           |
+| `resolve`       | Resolve a source string              |
+| `remove`        | Uninstall a skill                    |
+| `update`        | Re-install a skill                   |
+| `check`         | Check for updates                    |
+| `verify`        | Verify skill integrity               |
+| `ci`            | Re-install from lockfile             |
+| `doctor`        | System health check                  |
+| `use`           | Preview a skill                      |
+| `mcpInstall`    | Install an MCP server                |
+| `mcpList`       | List MCP servers                     |
+| `mcpUpdate`     | Update an MCP server                 |
+| `mcpRemove`     | Remove an MCP server                 |
+| `mcpCheck`      | Check MCP server status              |
+| `mcpSearch`     | Search MCP servers                   |
+| `profileSave`   | Save current config                  |
+| `profileApply`  | Apply a saved profile                |
+| `profileDiff`   | Diff current vs saved                |
+| `profileList`   | List profiles                        |
+| `profileShow`   | Show profile details                 |
+| `profileDelete` | Delete a profile                     |
+| `profileImport` | Import a profile                     |
+| `test`          | Test a skill quality with assertions |
 
 ---
 
 ## Commands overview
 
-| Command                                 | Description                                                                 | Details                              |
-| --------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------ |
-| `rolecraft init [<name>]`               | Scaffold a new `SKILL.md`                                                   | [docs](docs/commands/init.md)        |
-| `rolecraft install <source>`            | Install a skill with security scan (local path, GitHub/GitLab/SSH URL, npm) | [docs](docs/commands/install.md)     |
-| `rolecraft bundle <sources>`            | Install multiple skills from inline sources or file                         | [docs](docs/commands/bundle.md)      |
-| `rolecraft bundle create`               | Create a new bundle file                                                    | [docs](docs/commands/bundle.md)      |
-| `rolecraft search <query>`              | Search for skills on GitHub (TUI with `--interactive`)                      | [docs](docs/commands/search.md)      |
-| `rolecraft check`                       | Check installed skills for available updates                                | [docs](docs/commands/check.md)       |
-| `rolecraft use <source>`                | Preview a skill's files without installing                                  | [docs](docs/commands/use.md)         |
-| `rolecraft completions bash\|zsh\|fish` | Generate shell completion scripts                                           | [docs](docs/commands/completions.md) |
-| `rolecraft setup [<source>]`            | Detect agents, optionally install a skill to all                            | [docs](docs/commands/setup.md)       |
-| `rolecraft list`                        | Show all installed skills                                                   | [docs](docs/commands/list.md)        |
-| `rolecraft doctor`                      | Run system health check                                                     | [docs](docs/commands/doctor.md)      |
-| `rolecraft agents-xml [--write]`        | Generate skills XML for AGENTS.md                                           | [docs](docs/commands/agents-xml.md)  |
-| `rolecraft mcp install/remove/list/search` | Install, remove, list, or search MCP servers for AI agents              | [docs](docs/commands/mcp.md)         |
-| `rolecraft profile save/apply/list`     | Save, apply, and share multi-agent configuration profiles                   | [docs](docs/commands/profile.md)     |
-| `rolecraft verify`                      | Check installed skill integrity via content hash                            | [docs](docs/commands/verify.md)      |
-| `rolecraft watch [<slug>]`              | Watch skills for changes and auto-sync                                      | [docs](docs/commands/watch.md)       |
-| `rolecraft ci`                          | Re-install all skills from lockfile (CI mode)                               | [docs](docs/commands/ci.md)          |
-| `rolecraft convert <source>`            | Convert between SKILL.md and .mdc formats                                   | [docs](docs/commands/convert.md)     |
-| `rolecraft upgrade`                     | Upgrade rolecraft to the latest version                                     | [docs](docs/commands/upgrade.md)     |
-| `rolecraft test <skill-path>`           | Test a skill quality with built-in assertions                               | [docs](docs/commands/test.md)       |
-| `rolecraft remove <slug>`               | Uninstall a skill                                                           | [docs](docs/commands/remove.md)      |
-| `rolecraft update <slug>`               | Re-install a skill to latest                                                | [docs](docs/commands/update.md)      |
-| `rolecraft --version`                   | Show version                                                                |                                      |
-| `rolecraft --help`                      | Show full command reference                                                 | [CLI Reference](docs/reference.md)   |
+| Command                                    | Description                                                                 | Details                              |
+| ------------------------------------------ | --------------------------------------------------------------------------- | ------------------------------------ |
+| `rolecraft init [<name>]`                  | Scaffold a new `SKILL.md`                                                   | [docs](docs/commands/init.md)        |
+| `rolecraft install <source>`               | Install a skill with security scan (local path, GitHub/GitLab/SSH URL, npm) | [docs](docs/commands/install.md)     |
+| `rolecraft bundle <sources>`               | Install multiple skills from inline sources or file                         | [docs](docs/commands/bundle.md)      |
+| `rolecraft bundle create`                  | Create a new bundle file                                                    | [docs](docs/commands/bundle.md)      |
+| `rolecraft search <query>`                 | Search for skills on GitHub (TUI with `--interactive`)                      | [docs](docs/commands/search.md)      |
+| `rolecraft check`                          | Check installed skills for available updates                                | [docs](docs/commands/check.md)       |
+| `rolecraft use <source>`                   | Preview a skill's files without installing                                  | [docs](docs/commands/use.md)         |
+| `rolecraft completions bash\|zsh\|fish`    | Generate shell completion scripts                                           | [docs](docs/commands/completions.md) |
+| `rolecraft setup [<source>]`               | Detect agents, optionally install a skill to all                            | [docs](docs/commands/setup.md)       |
+| `rolecraft list`                           | Show all installed skills                                                   | [docs](docs/commands/list.md)        |
+| `rolecraft doctor`                         | Run system health check                                                     | [docs](docs/commands/doctor.md)      |
+| `rolecraft agents-xml [--write]`           | Generate skills XML for AGENTS.md                                           | [docs](docs/commands/agents-xml.md)  |
+| `rolecraft mcp install/remove/list/search` | Install, remove, list, or search MCP servers for AI agents                  | [docs](docs/commands/mcp.md)         |
+| `rolecraft profile save/apply/list`        | Save, apply, and share multi-agent configuration profiles                   | [docs](docs/commands/profile.md)     |
+| `rolecraft verify`                         | Check installed skill integrity via content hash                            | [docs](docs/commands/verify.md)      |
+| `rolecraft watch [<slug>]`                 | Watch skills for changes and auto-sync                                      | [docs](docs/commands/watch.md)       |
+| `rolecraft ci`                             | Re-install all skills from lockfile (CI mode)                               | [docs](docs/commands/ci.md)          |
+| `rolecraft convert <source>`               | Convert between SKILL.md and .mdc formats                                   | [docs](docs/commands/convert.md)     |
+| `rolecraft upgrade`                        | Upgrade rolecraft to the latest version                                     | [docs](docs/commands/upgrade.md)     |
+| `rolecraft test <skill-path>`              | Test a skill quality with built-in assertions                               | [docs](docs/commands/test.md)        |
+| `rolecraft remove <slug>`                  | Uninstall a skill                                                           | [docs](docs/commands/remove.md)      |
+| `rolecraft update <slug>`                  | Re-install a skill to latest                                                | [docs](docs/commands/update.md)      |
+| `rolecraft --version`                      | Show version                                                                |                                      |
+| `rolecraft --help`                         | Show full command reference                                                 | [CLI Reference](docs/reference.md)   |
 
 ---
 
@@ -274,7 +284,7 @@ All API functions return plain objects (no side-effects). Available exports:
 | npm package source                   | ✅               | ✅              | ❌                  |
 | **MCP server management**            | ✅               | ❌              | ❌                  |
 | Agent targets                        | **87**           | 72              | 15+                 |
-| **Registry / marketplace**            | ✅               | ✅ (skills.sh)  | ⚠️ (registry only)  |
+| **Registry / marketplace**           | ✅               | ✅ (skills.sh)  | ⚠️ (registry only)  |
 | Bundle install + create              | ✅               | ❌              | ✅ (skillset only)  |
 | Interactive TUI search + install     | ✅               | ✅              | ❌                  |
 | Security scoring (0–100)             | ✅               | ✅ (Snyk)       | ✅ (server + local) |
@@ -406,6 +416,9 @@ Thanks to everyone who has contributed to RoleCraft:
     <td align="center"><a href="https://github.com/gaoharimran29-glitch"><img src="https://github.com/gaoharimran29-glitch.png" width="60" height="60" alt="gaoharimran29-glitch"><br><b>Gaohar Imran</b></a><br><sub><a href="https://github.com/sametcelikbicak/rolecraft/pull/113">Contributor</a></sub></td>
     <td align="center"><a href="https://github.com/ajaynomics"><img src="https://github.com/ajaynomics.png" width="60" height="60" alt="ajaynomics"><br><b>Ajay Krishnan</b></a><br><sub><a href="https://github.com/sametcelikbicak/rolecraft/pull/114">Contributor</a></sub></td>
     <td align="center"><a href="https://github.com/BenjaminAyivoh1"><img src="https://github.com/BenjaminAyivoh1.png" width="60" height="60" alt="BenjaminAyivoh1"><br><b>Benjamin Ayivoh</b></a><br><sub><a href="https://github.com/sametcelikbicak/rolecraft/pull/120">Contributor</a></sub></td>
+  </tr>
+  <tr>
+      <td align="center"><a href="https://github.com/mgalore"><img src="https://github.com/mgalore.png" width="60" height="60" alt="mgalore"><br><b>Jonathan</b></a><br><sub><a href="https://github.com/rolecraft-sh/rolecraft/pull/171">Contributor</a></sub></td>
   </tr>
 </table>
 
