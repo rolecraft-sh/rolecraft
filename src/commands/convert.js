@@ -75,6 +75,9 @@ export async function convertCommand(source, options = {}) {
 
 async function convertSingleFile(inputPath, format, outDir, options) {
   const content = await readFile(inputPath, 'utf-8')
+  if (!content.trim()) {
+    throw new Error(`Source is empty: ${inputPath}`)
+  }
 
   if (options.dryRun) {
     console.log(`  Would convert: ${inputPath}`)
