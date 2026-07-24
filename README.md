@@ -406,6 +406,7 @@ Thanks to everyone who has contributed to RoleCraft:
     <td align="center"><a href="https://github.com/gaoharimran29-glitch"><img src="https://github.com/gaoharimran29-glitch.png" width="60" height="60" alt="gaoharimran29-glitch"><br><b>Gaohar Imran</b></a><br><sub><a href="https://github.com/sametcelikbicak/rolecraft/pull/113">Contributor</a></sub></td>
     <td align="center"><a href="https://github.com/ajaynomics"><img src="https://github.com/ajaynomics.png" width="60" height="60" alt="ajaynomics"><br><b>Ajay Krishnan</b></a><br><sub><a href="https://github.com/sametcelikbicak/rolecraft/pull/114">Contributor</a></sub></td>
     <td align="center"><a href="https://github.com/BenjaminAyivoh1"><img src="https://github.com/BenjaminAyivoh1.png" width="60" height="60" alt="BenjaminAyivoh1"><br><b>Benjamin Ayivoh</b></a><br><sub><a href="https://github.com/sametcelikbicak/rolecraft/pull/120">Contributor</a></sub></td>
+    <td align="center"><a href="https://github.com/mgalore"><img src="https://github.com/mgalore.png" width="60" height="60" alt="mgalore"><br><b>Jonathan</b></a><br><sub><a href="https://github.com/rolecraft-sh/rolecraft/pull/171">Contributor</a></sub></td>
   </tr>
 </table>
 
