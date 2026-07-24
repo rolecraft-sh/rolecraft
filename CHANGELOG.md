@@ -2,6 +2,56 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.0.0] - 2026-07-24
+
+### Added
+- add GitHub Registry MVP — search, publish, install by slug, version check, API exports (#172)
+- progress bar, TUI flicker/resize fix, CLI help update (#170)
+- add doctor --deep conflict detection (#169)
+- add rolecraft diff and compose commands (#168)
+- add rolecraft test command with assertion engine (#164)
+- add Node.js API layer with src/api/ modules (#159)
+- add rolecraft mcp check command for npm update checks
+- add MCP config validation to rolecraft doctor (P2)
+- add MCP security scan for gh: and npm: sources (P2)
+- add version pinning for npm (@version) and gh (@branch/@tag) MCP sources (P1)
+- add rolecraft mcp search command for GitHub and npm (P1) (#18)
+- add MCP lockfile for ci restore (P0) (#151)
+- add uvx:, pipx:, go:, deno:, cargo: MCP source types (#149)
+- enhance doctor command with comprehensive health checks (#147)
+- add multi-skill support to use and setup commands (#146)
+- multi-skill install with interactive selection, --list, and --skill flags (#145)
+
+### Fixed
+- readme table formatting and move mgalore to new row
+- reject empty convert sources (#171)
+- execSync→spawnSync for CodeQL alert, fix doc build (unclosed array<string> tag), add publish/registry to sidebar and nav (#173)
+- resolve CodeQL alerts 88 and 89 (#166)
+- resolve CodeQL alerts in test command (#165)
+- remove unused imports flagged by CodeQL (#82, #83) (#162)
+- remove unused imports flagged by CodeQL (#160)
+- validate MCP agent support — only 7 of 86+ agents have MCP (#150)
+- remove unused report function in doctor.js (CodeQL #73)
+
+### Changed
+- replace string concat with template literals
+- add Biome lint/format with pre-commit hook and fix CodeQL alerts
+- trigger CodeQL re-analysis
+- exclude test files and dev artifacts from npm bundle
+- bump actions/checkout from 7.0.0 to 7.0.1 (#148)
+- update repo references from sametcelikbicak to rolecraft-sh
+- release v1.6.0
+
+### Documentation
+- add mgalore to contributors (#175)
+- fix badge logo visibility with logoColor=white
+- collapse nav to 3 items with dropdowns for small screens
+- update AGENTS.md with interaction rules and branch strategy
+- add mcp update/check docs, add mcp to shell completions
+- add GitHub Action badge, CI guide, and docs page
+
+### Other
+- Update paths
 ## [v1.6.0] - 2026-07-20
 
 ### Added
