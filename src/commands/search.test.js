@@ -524,4 +524,92 @@ describe('search command', () => {
       )
     })
   })
+
+  describe('registry integration', () => {
+    afterEach(() => {
+      searchModule.setRegistryFetch(globalThis.fetch)
+    })
+
+    function mockRegistryFetch(body) {
+      const encoded = Buffer.from(JSON.stringify(body)).toString('base64')
+      searchModule.setRegistryFetch(() =>
+        Promise.resolve({
+          status: 200,
+          ok: true,
+          json: () => Promise.resolve({ type: 'file', content: encoded }),
+        }),
+      )
+    }
+
+    it('formats a registry item', () => {
+      const result = searchModule.formatRegistryItem({
+        slug: 'react-rules',
+        name: 'React Rules',
+        description: 'React best practices',
+        author: 'acme',
+        latest: 'v1.0.0',
+        installs: 100,
+        stars: 50,
+      })
+      assert.ok(result.includes('react-rules'))
+      assert.ok(result.includes('v1.0.0'))
+      assert.ok(result.includes('@acme'))
+    })
+
+    it('formats registry item with missing fields', () => {
+      const result = searchModule.formatRegistryItem({
+        slug: 'minimal',
+      })
+      assert.ok(result.includes('minimal'))
+      assert.ok(result.includes('No description'))
+    })
+
+    it('shows results from registry', async () => {
+      mockRegistryFetch({
+        updated: '2026-07-23T15:00:00.000Z',
+        skills: [
+          {
+            slug: 'skill-one',
+            name: 'Skill One',
+            description: 'First skill',
+            repo: 'user1/skill-one',
+            author: 'user1',
+            versions: ['v1.0.0'],
+            latest: 'v1.0.0',
+          },
+          {
+            slug: 'skill-two',
+            name: 'Skill Two',
+            description: 'Second skill',
+            repo: 'user2/skill-two',
+            author: 'user2',
+            versions: ['v1.0.0'],
+            latest: 'v1.0.0',
+          },
+        ],
+      })
+
+      const { logs, restore } = capture('log')
+      await searchModule.searchCommand('skill', { registry: true })
+      restore()
+
+      assert.ok(logs.some((l) => l.includes('Registry results')))
+      assert.ok(logs.some((l) => l.includes('skill-one')))
+      assert.ok(logs.some((l) => l.includes('skill-two')))
+      assert.ok(logs.some((l) => l.includes('2 result(s) found')))
+    })
+
+    it('shows no results message when registry empty', async () => {
+      mockRegistryFetch({
+        updated: '2026-07-23T15:00:00.000Z',
+        skills: [],
+      })
+
+      const { logs, restore } = capture('log')
+      await searchModule.searchCommand('nonexistent', { registry: true })
+      restore()
+
+      assert.ok(logs.some((l) => l.includes('No skills found')))
+    })
+  })
 })

@@ -137,6 +137,7 @@ rolecraft install owner/repo                         # GitHub shorthand
 rolecraft install https://gitlab.com/org/project     # Git URL
 rolecraft install git@github.com:owner/repo.git      # SSH URL
 rolecraft install npm:package                        # npm package
+rolecraft install my-skill                           # registry slug
 ```
 
 Accepts: `--yes`, `--dry-run`, `--global`, `--project`, `--all`, `--symlink`, `--frozen-lockfile`, `--no-mcp`, agent flags.
@@ -198,7 +199,21 @@ rolecraft setup owner/repo --yes
 rolecraft search code-review                  # GitHub search
 rolecraft search code-review --interactive     # TUI picker
 rolecraft search react --skills-sh             # skills.sh (experimental)
+rolecraft search react --registry              # rolecraft Registry
 ```
+
+### `rolecraft publish <source>`
+
+Publish a skill to the rolecraft Registry:
+
+```bash
+rolecraft publish ./my-skill                          # auto-detect git remote
+rolecraft publish ./my-skill --repo user/my-skill     # explicit repo
+rolecraft publish ./my-skill --dry-run                # preview without PR
+rolecraft publish ./my-skill --yes                    # non-interactive
+```
+
+Requires `GITHUB_TOKEN` environment variable (with `repo` scope). See [`publish.md`](./commands/publish.md) for full details.
 
 ### `rolecraft check`
 

@@ -15,7 +15,13 @@ export async function checkCommand() {
     if (s.status === 'skipped') {
       console.log(`   ⏭️  ${s.slug.padEnd(30)} ${s.reason}`)
     } else if (s.status === 'update_available') {
-      console.log(`   🔄 ${s.slug.padEnd(30)} update available`)
+      if (s.fromRegistry) {
+        console.log(
+          `   🔄 ${s.slug.padEnd(30)} ${s.current} → ${s.latest} (registry)`,
+        )
+      } else {
+        console.log(`   🔄 ${s.slug.padEnd(30)} update available`)
+      }
     } else if (s.status === 'up_to_date') {
       console.log(`   ✅ ${s.slug.padEnd(30)} up to date`)
     } else if (s.status === 'error') {
