@@ -102,7 +102,7 @@ async function runTUI(items) {
       for (const line of lines) out += `${eraseLine}${line}\n`
     }
     for (let i = usedLines + firstLine; i < statusRow; i++)
-      out += cursorTo(i, 1) + eraseLine + '\n'
+      out += `${cursorTo(i, 1) + eraseLine}\n`
     out +=
       cursorTo(statusRow, 1) +
       eraseLine +
@@ -232,7 +232,7 @@ export function formatRegistryItem(skill) {
   const installs = skill.installs || 0
   const version = skill.latest || 'v1.0.0'
   const author = skill.author || ''
-  return `${bold(skill.slug)}  ${yellow(`v${version.replace(/^v/, '')}`)}\n  ${dim(desc)}  ${author ? `@${author}` : ''}  ${dim('📦 ' + installs)}  ${dim(`⭐ ${stars}`)}`
+  return `${bold(skill.slug)}  ${yellow(`v${version.replace(/^v/, '')}`)}\n  ${dim(desc)}  ${author ? `@${author}` : ''}  ${dim(`📦 ${installs}`)}  ${dim(`⭐ ${stars}`)}`
 }
 
 export async function searchCommand(query, options = {}) {

@@ -277,7 +277,7 @@ async function mcpRunTUI(items, sourceType) {
       for (const line of lines) out += `${eraseLine}${line}\n`
     }
     for (let i = usedLines + firstLine; i < statusRow; i++)
-      out += cursorTo(i, 1) + eraseLine + '\n'
+      out += `${cursorTo(i, 1) + eraseLine}\n`
     out +=
       cursorTo(statusRow, 1) +
       eraseLine +
