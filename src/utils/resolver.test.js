@@ -345,6 +345,42 @@ Just content
       assert.equal(r.owner, 'local')
       assert.equal(r.description, undefined)
     })
+
+    it('parses metadata.category from YAML frontmatter', async () => {
+      const d = join(tempDir, 'meta6')
+      mkdirSync(d, { recursive: true })
+      writeFileSync(
+        join(d, 'SKILL.md'),
+        `---
+name: cat-skill
+slug: cat-skill
+metadata:
+  category: development
+---
+
+Content
+`,
+      )
+      const r = await resolverModule.resolveSource(d)
+      assert.equal(r.category, 'development')
+    })
+
+    it('returns undefined category when not in frontmatter', async () => {
+      const d = join(tempDir, 'meta7')
+      mkdirSync(d, { recursive: true })
+      writeFileSync(
+        join(d, 'SKILL.md'),
+        `---
+name: no-cat
+slug: no-cat
+---
+
+Content
+`,
+      )
+      const r = await resolverModule.resolveSource(d)
+      assert.equal(r.category, undefined)
+    })
   })
 
   describe('resolveSkills', () => {

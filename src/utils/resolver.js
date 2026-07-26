@@ -65,7 +65,7 @@ function isLocalPath(source) {
 }
 
 function parseMetadata(content) {
-  let name, slug, owner, description
+  let name, slug, owner, description, category
 
   const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/)
   if (frontmatterMatch) {
@@ -74,12 +74,14 @@ function parseMetadata(content) {
     const slugMatch = yaml.match(/^slug:\s*(\S+)$/m)
     const ownerMatch = yaml.match(/^owner:\s*(\S+)$/m)
     const descMatch = yaml.match(/^description:\s*(.+)$/m)
+    const catMatch = yaml.match(/^metadata:\n\s+category:\s*(\S+)$/m)
 
     name = nameMatch?.[1]?.trim() || 'unknown'
     slug = slugMatch?.[1] || name
     owner = ownerMatch?.[1] || 'local'
     description =
       descMatch?.[1]?.trim().replace(/^["'](.*)["']$/, '$1') || undefined
+    category = catMatch?.[1] || undefined
   }
 
   if (!slug) {
@@ -92,7 +94,7 @@ function parseMetadata(content) {
     owner = oldOwnerMatch?.[1] || 'local'
   }
 
-  return { name, slug, owner, description }
+  return { name, slug, owner, description, category }
 }
 
 async function readFileContents(skillDir) {

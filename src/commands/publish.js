@@ -61,6 +61,7 @@ export async function publishCommand(source, options = {}) {
   const slug = options.slug || skill.slug
   const name = options.name || skill.name
   const description = options.description || skill.description || ''
+  const category = options.category || skill.category
 
   let repo = options.repo || ''
   if (!repo) {
@@ -94,6 +95,7 @@ export async function publishCommand(source, options = {}) {
   console.log(`  Skill:      ${name}`)
   console.log(`  Slug:       ${slug}`)
   console.log(`  Repo:       ${repo}`)
+  if (category) console.log(`  Category:   ${category}`)
   if (description) console.log(`  Description: ${description}`)
   console.log()
 
@@ -121,6 +123,7 @@ export async function publishCommand(source, options = {}) {
       name,
       repo,
       description,
+      category,
     })
     console.log(`\n✅ Published! PR #${result.number} created:`)
     console.log(`   ${result.url}`)

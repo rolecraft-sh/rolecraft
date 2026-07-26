@@ -90,7 +90,7 @@ export async function resolveSlug(slug) {
 }
 
 export async function createPublishPR(
-  { slug, name, repo, description, version },
+  { slug, name, repo, description, version, category },
   token,
 ) {
   const t = token || getToken()
@@ -141,6 +141,7 @@ export async function createPublishPR(
     versions: [ver],
     latest: ver,
   }
+  if (category) entry.category = category
 
   if (existing >= 0) {
     const old = index.skills[existing]
