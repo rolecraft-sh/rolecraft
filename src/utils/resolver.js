@@ -78,7 +78,8 @@ function parseMetadata(content) {
     name = nameMatch?.[1]?.trim() || 'unknown'
     slug = slugMatch?.[1] || name
     owner = ownerMatch?.[1] || 'local'
-    description = descMatch?.[1]?.trim() || undefined
+    description =
+      descMatch?.[1]?.trim().replace(/^["'](.*)["']$/, '$1') || undefined
   }
 
   if (!slug) {
