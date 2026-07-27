@@ -207,13 +207,8 @@ describe('registry-client', () => {
 
       try {
         const responses = [
+          { status: 200, body: { login: 'testuser' } },
           {
-            // GET /user
-            status: 200,
-            body: { login: 'testuser' },
-          },
-          {
-            // GET index.json
             status: 200,
             body: {
               type: 'file',
@@ -221,28 +216,10 @@ describe('registry-client', () => {
               sha: 'abc123',
             },
           },
+          { status: 200, body: { object: { sha: 'commit-sha-123' } } },
+          { status: 201, body: { ref: 'refs/heads/publish/my-skill-1.0.0' } },
+          { status: 200, body: { content: {} } },
           {
-            // GET /git/refs/heads/main
-            status: 200,
-            body: { object: { sha: 'commit-sha-123' } },
-          },
-          {
-            // POST /forks
-            status: 202,
-            body: {},
-          },
-          {
-            // POST /git/refs (create branch)
-            status: 201,
-            body: { ref: 'refs/heads/publish/my-skill-1.0.0' },
-          },
-          {
-            // PUT /contents/index.json
-            status: 200,
-            body: { content: {} },
-          },
-          {
-            // POST /pulls
             status: 201,
             body: {
               html_url: 'https://github.com/rolecraft-sh/registry/pull/1',
@@ -285,7 +262,6 @@ describe('registry-client', () => {
             },
           },
           { status: 200, body: { object: { sha: 'commit-sha-123' } } },
-          { status: 202, body: {} },
           { status: 201, body: {} },
           { status: 200, body: {} },
           {

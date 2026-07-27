@@ -111,26 +111,28 @@ export async function createPublishPR(
   const user = await userRes.json()
   const username = user.login
 
-  const getRes = await runFetch(
+  const branchName = `publish/${slug}-${ver.replace(/^v/, '')}`
+
+  const indexRes = await runFetch(
     `https://api.github.com/repos/${REGISTRY_OWNER}/${REGISTRY_REPO}/contents/index.json?ref=${REGISTRY_BRANCH}`,
     { headers },
   )
-  if (!getRes.ok) throw new Error('Failed to fetch current registry index')
-  const fileData = await getRes.json()
+  if (!indexRes.ok) throw new Error('Failed to fetch current registry index')
+  const fileData = await indexRes.json()
   const currentSha = fileData.sha
 
   const refRes = await runFetch(
     `https://api.github.com/repos/${REGISTRY_OWNER}/${REGISTRY_REPO}/git/refs/heads/${REGISTRY_BRANCH}`,
     { headers },
   )
-  if (!refRes.ok) throw new Error('Failed to fetch upstream branch ref')
+  if (!refRes.ok) throw new Error('Failed to fetch upstream ref')
   const refData = await refRes.json()
   const upstreamSha = refData.object.sha
+
   const currentContent = Buffer.from(fileData.content, 'base64').toString(
     'utf-8',
   )
   const index = JSON.parse(currentContent)
-
   const existing = index.skills.findIndex((s) => s.slug === slug)
   const entry = {
     slug,
@@ -155,31 +157,81 @@ export async function createPublishPR(
 
   index.updated = new Date().toISOString()
   const newContent = `${JSON.stringify(index, null, 2)}\n`
-  const branchName = `publish/${slug}-${ver.replace(/^v/, '')}`
 
-  const forkRes = await runFetch(
-    `https://api.github.com/repos/${REGISTRY_OWNER}/${REGISTRY_REPO}/forks`,
-    { method: 'POST', headers },
-  )
-  if (!forkRes.ok && forkRes.status !== 202) {
-    const errBody = await forkRes.text().catch(() => '')
-    throw new Error(
-      `Failed to fork registry: ${forkRes.status}${errBody ? ` — ${errBody}` : ''}`,
-    )
-  }
+  let repoOwner = REGISTRY_OWNER
+  let branchSha = upstreamSha
+  let contentSha = currentSha
 
   const branchRes = await runFetch(
-    `https://api.github.com/repos/${username}/${REGISTRY_REPO}/git/refs`,
+    `https://api.github.com/repos/${repoOwner}/${REGISTRY_REPO}/git/refs`,
     {
       method: 'POST',
       headers,
       body: JSON.stringify({
         ref: `refs/heads/${branchName}`,
-        sha: upstreamSha,
+        sha: branchSha,
       }),
     },
   )
-  if (!branchRes.ok) {
+
+  if (branchRes.status === 403) {
+    const forkRes = await runFetch(
+      `https://api.github.com/repos/${REGISTRY_OWNER}/${REGISTRY_REPO}/forks`,
+      { method: 'POST', headers },
+    )
+    if (!forkRes.ok && forkRes.status !== 202) {
+      const errBody = await forkRes.text().catch(() => '')
+      throw new Error(
+        `Failed to fork registry: ${forkRes.status}${errBody ? ` — ${errBody}` : ''}`,
+      )
+    }
+
+    repoOwner = username
+
+    const forkRefRes = await runFetch(
+      `https://api.github.com/repos/${repoOwner}/${REGISTRY_REPO}/git/refs/heads/${REGISTRY_BRANCH}`,
+      { headers },
+    )
+    if (!forkRefRes.ok) {
+      const errBody = await forkRefRes.text().catch(() => '')
+      throw new Error(
+        `Failed to fetch fork ref: ${forkRefRes.status}${errBody ? ` — ${errBody}` : ''}`,
+      )
+    }
+    const forkRefData = await forkRefRes.json()
+    branchSha = forkRefData.object.sha
+
+    const forkContentRes = await runFetch(
+      `https://api.github.com/repos/${repoOwner}/${REGISTRY_REPO}/contents/index.json?ref=${REGISTRY_BRANCH}`,
+      { headers },
+    )
+    if (!forkContentRes.ok) {
+      const errBody = await forkContentRes.text().catch(() => '')
+      throw new Error(
+        `Failed to fetch fork index.json: ${forkContentRes.status}${errBody ? ` — ${errBody}` : ''}`,
+      )
+    }
+    const forkFileData = await forkContentRes.json()
+    contentSha = forkFileData.sha
+
+    const forkBranchRes = await runFetch(
+      `https://api.github.com/repos/${repoOwner}/${REGISTRY_REPO}/git/refs`,
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          ref: `refs/heads/${branchName}`,
+          sha: branchSha,
+        }),
+      },
+    )
+    if (!forkBranchRes.ok) {
+      const errBody = await forkBranchRes.text().catch(() => '')
+      throw new Error(
+        `Failed to create branch in fork: ${forkBranchRes.status}${errBody ? ` — ${errBody}` : ''}`,
+      )
+    }
+  } else if (!branchRes.ok) {
     const errBody = await branchRes.text().catch(() => '')
     throw new Error(
       `Failed to create branch: ${branchRes.status}${errBody ? ` — ${errBody}` : ''}`,
@@ -187,14 +239,14 @@ export async function createPublishPR(
   }
 
   const putRes = await runFetch(
-    `https://api.github.com/repos/${username}/${REGISTRY_REPO}/contents/index.json`,
+    `https://api.github.com/repos/${repoOwner}/${REGISTRY_REPO}/contents/index.json`,
     {
       method: 'PUT',
       headers,
       body: JSON.stringify({
         message: `publish: ${slug} ${ver}`,
         content: Buffer.from(newContent).toString('base64'),
-        sha: currentSha,
+        sha: contentSha,
         branch: branchName,
       }),
     },
@@ -206,6 +258,9 @@ export async function createPublishPR(
     )
   }
 
+  const prHead =
+    repoOwner === REGISTRY_OWNER ? branchName : `${username}:${branchName}`
+
   const prRes = await runFetch(
     `https://api.github.com/repos/${REGISTRY_OWNER}/${REGISTRY_REPO}/pulls`,
     {
@@ -214,7 +269,7 @@ export async function createPublishPR(
       body: JSON.stringify({
         title: `publish: ${name} (${slug})`,
         body: `Publishes **${name}** (\`${slug}\`) ${ver}\n\nRepo: \`${repo}\`\nAuthor: @${username}`,
-        head: `${username}:${branchName}`,
+        head: prHead,
         base: REGISTRY_BRANCH,
       }),
     },
