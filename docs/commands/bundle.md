@@ -68,3 +68,19 @@ Generated file:
 ```
 
 Then edit the `skills` array and install with `rolecraft bundle my-collection.json`.
+
+## Options
+
+| Flag | Description |
+|------|-------------|
+| `--dry-run` | Preview without installing |
+| `--no-mcp` | Skip MCP server installation from skills |
+
+## Node.js API
+
+This command is also available as a programmatic function. See the [Node.js API documentation](../api.md) for detailed usage.
+
+```js
+import { bundle } from 'rolecraft'
+const result = await bundle(['./my-skill', 'owner/other-skill'])
+```

@@ -210,3 +210,12 @@ rolecraft install mattpocock/skills --skill diagnose-bugs
 # Non-interactive: install all skills with --yes
 rolecraft install mattpocock/skills --yes --global
 ```
+
+## Node.js API
+
+This command is also available as a programmatic function. See the [Node.js API documentation](../api.md) for detailed usage.
+
+```js
+import { install } from 'rolecraft'
+const result = await install('./my-skill', { global: true })
+```

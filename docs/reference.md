@@ -45,16 +45,21 @@ These flags work across multiple commands:
 
 | Flag | Affects | Description |
 |------|---------|-------------|
-| `--yes` / `-y` | install, setup, bundle, ci | Non-interactive: accept all defaults, bypass security prompts |
-| `--dry-run` | install, setup, bundle, remove, update, profile | Preview without making changes |
+| `--yes` / `-y` | install, setup, bundle, ci, mcp, profile, publish | Non-interactive: accept all defaults, bypass security prompts |
+| `--dry-run` | install, setup, bundle, remove, update, profile, mcp, upgrade, watch, convert | Preview without making changes |
 | `--global` | install, use, setup | Install to `~/.agents/skills/` (user-wide) |
 | `--project` | install, use, setup | Install to `./.agents/skills/` (repo-scoped, default) |
-| `--all` | install, setup, profile | Install to every supported agent |
+| `--all` | install, setup, profile, mcp | Install to every supported agent |
 | `--symlink` | install, setup | Symlink instead of copy |
 | `--copy` | install, setup | Force copy (default) |
 | `--frozen-lockfile` | install | Fail if skill is already installed |
-| `--no-mcp` | install, setup | Skip MCP server installation |
+| `--no-mcp` | install, setup, bundle | Skip MCP server installation |
 | `--interactive` | search, mcp search | Open TUI for browsing and selecting results |
+| `--list` | install, use, setup | List available skills from a source without installing |
+| `--skill <names>` | install, use, setup | Install/preview specific skills by name (comma-separated) |
+| `--json` | list, doctor, test, compose, diff | Output structured JSON |
+| `--no-color` | diff, compose, test | Disable colored output |
+| `--no-emoji` | test | Use ASCII fallback for emojis |
 
 ---
 
@@ -106,7 +111,52 @@ Pass any of these to `install`, `setup`, or `profile` to target specific agents:
 | `--firebender` | firebender | `~/.firebender/skills/` |
 | `--bob` | ibm-bob | `~/.bob/skills/` |
 | `--aider-desk` | aider-desk | `~/.aider-desk/skills/` |
-| *(and 44+ more — see [full list](agents))* | | |
+| `--zap` | zap | `~/.zap/skills/` |
+| `--codeep` | codeep | `~/.codeep/skills/` |
+| `--kimi-code` | kimi-code | `~/.kimi-code/skills/` |
+| `--zcode` | zcode | `~/.zcode/skills/` |
+| `--astrbot` | astrbot | `~/.astrbot/data/skills/` |
+| `--qoder-cn` | qoder-cn | `~/.qoder-cn/skills/` |
+| `--trae-cn` | trae-cn | `~/.trae-cn/skills/` |
+| `--zenflow` | zenflow | `~/.zencoder/skills/` |
+| `--neovate` | neovate | `~/.neovate/skills/` |
+| `--pochi` | pochi | `~/.pochi/skills/` |
+| `--adal` | adal | `~/.adal/skills/` |
+| `--droid` | droid | `~/.factory/skills/` |
+| `--chatgpt` | chatgpt | `~/.chatgpt/skills/` |
+| `--codearts-agent` | codearts-agent | `~/.codeartsdoer/skills/` |
+| `--universal` | universal | `~/.config/agents/skills/` |
+| `--amp` | amp | `~/.agents/skills/` |
+| `--antigravity` | antigravity | `~/.agents/skills/` |
+| `--antigravity-cli` | antigravity-cli | `~/.agents/skills/` |
+| `--deepagents` | deep-agents | `~/.agents/skills/` |
+| `--dexto` | dexto | `~/.agents/skills/` |
+| `--loaf` | loaf | `~/.agents/skills/` |
+| `--replit` | replit | `~/.agents/skills/` |
+| `--zed` | zed | `~/.agents/skills/` |
+| `--promptscript` | promptscript | `./agent/skills/` |
+| `--code-arts-doer` | code-arts-doer | `~/.codeartsdoer/skills/` |
+| `--code-maker` | code-maker | `~/.codemaker/skills/` |
+| `--code-studio` | code-studio | `~/.codestudio/skills/` |
+| `--crush` | crush | `~/.crush/skills/` |
+| `--eve` | eve | `./agent/skills/` |
+| `--forge` | forge | `~/.forge/skills/` |
+| `--inference-sh` | inference-sh | `~/.inferencesh/skills/` |
+| `--jazz` | jazz | `~/.jazz/skills/` |
+| `--iflow` | iflow | `~/.iflow/skills/` |
+| `--kilo-code` | kilo-code | `~/.kilocode/skills/` |
+| `--kode` | kode | `~/.kode/skills/` |
+| `--lingma` | lingma | `~/.lingma/skills/` |
+| `--mcp-jam` | mcp-jam | `~/.mcpjam/skills/` |
+| `--moxby` | moxby | `~/.moxby/skills/` |
+| `--ona` | ona | `~/.ona/skills/` |
+| `--qoder` | qoder | `~/.qoder/skills/` |
+| `--reasonix` | reasonix | `~/.reasonix/skills/` |
+| `--terra-mind` | terra-mind | `~/.terramind/skills/` |
+| `--tiny-cloud` | tiny-cloud | `~/.tinycloud/skills/` |
+| `--zencoder` | zencoder | `~/.zencoder/skills/` |
+| `--codebuddy` | codebuddy | `~/.codebuddy/skills/` |
+| *(see [full list](agents) for all 87+ agents)* | | |
 
 Combine multiple flags in one command:
 
@@ -140,7 +190,7 @@ rolecraft install npm:package                        # npm package
 rolecraft install my-skill                           # registry slug
 ```
 
-Accepts: `--yes`, `--dry-run`, `--global`, `--project`, `--all`, `--symlink`, `--frozen-lockfile`, `--no-mcp`, agent flags.
+Accepts: `--yes`, `-y`, `--dry-run`, `--global`, `--project`, `--all`, `--symlink`, `--frozen-lockfile`, `--no-mcp`, `--list`, `--skill`, agent flags.
 
 ### `rolecraft bundle <sources...>`
 
@@ -150,6 +200,13 @@ rolecraft bundle bundle.json
 rolecraft bundle bundle.txt
 rolecraft bundle create [name]
 ```
+
+**Flags:**
+
+| Flag | Description |
+|------|-------------|
+| `--dry-run` | Preview without installing |
+| `--no-mcp` | Skip MCP server installation from skills |
 
 ### `rolecraft use <source>`
 
@@ -161,13 +218,18 @@ rolecraft use owner/repo         # from GitHub
 rolecraft use ./my-skill | head -50  # pipe to pager
 ```
 
+**Flags:**
+
+| Flag | Description |
+|------|-------------|
+| `--list` | List available skills from a source without previewing |
+| `--skill <names>` | Preview specific skills by name (comma-separated) |
+
 ### `rolecraft list`
 
 ```bash
 rolecraft list                  # all installed skills
 rolecraft list --json            # machine-readable JSON output
-rolecraft list --project         # project-level only
-rolecraft list --global          # global only
 ```
 
 ### `rolecraft remove <slug>`
@@ -193,6 +255,15 @@ rolecraft setup ./my-skill       # detect + install
 rolecraft setup owner/repo --yes
 ```
 
+**Flags:**
+
+| Flag | Description |
+|------|-------------|
+| `--yes`, `-y` | Install all skills without prompt |
+| `--dry-run` | Preview without installing |
+| `--list` | List available skills from a source without installing |
+| `--skill <names>` | Install specific skills by name (comma-separated) |
+
 ### `rolecraft search <query>`
 
 ```bash
@@ -212,6 +283,16 @@ rolecraft publish ./my-skill --repo user/my-skill     # explicit repo
 rolecraft publish ./my-skill --dry-run                # preview without PR
 rolecraft publish ./my-skill --yes                    # non-interactive
 ```
+
+**Flags:**
+
+| Flag | Description |
+|------|-------------|
+| `--dry-run` | Preview without publishing |
+| `--yes`, `-y` | Skip confirmation prompt |
+| `--repo <ref>` | GitHub repository (owner/repo) |
+| `--slug <slug>` | Override skill slug |
+| `--name <name>` | Override skill name |
 
 Requires `GITHUB_TOKEN` environment variable (with `repo` scope). See [`publish.md`](./commands/publish.md) for full details.
 
@@ -243,6 +324,7 @@ Runs comprehensive system health checks: Node.js version, platform info, Git/npm
 ```bash
 rolecraft watch                 # watch all skills
 rolecraft watch my-skill        # watch specific skill
+rolecraft watch --dry-run       # preview what would be watched
 ```
 
 ### `rolecraft convert <source>`
@@ -256,6 +338,13 @@ rolecraft convert ./dir/                # directory, auto-detects format
 rolecraft convert ./dir/ --output ./out
 rolecraft convert ./skill --dry-run
 ```
+
+**Flags:**
+
+| Flag | Description |
+|------|-------------|
+| `--dry-run` | Preview without converting |
+| `--output <dir>` | Output directory (default: current dir) |
 
 ### `rolecraft profile`
 
@@ -272,6 +361,8 @@ profile import <path>         # import from file/URL
 profile link [name]           # link to project
 ```
 
+Common flags: `--yes`/`-y`, `--dry-run`, `--all`, agent flags (`--cursor`, `--claude`, etc.)
+
 ### `rolecraft mcp`
 
 ```bash
@@ -282,6 +373,8 @@ mcp check                       # check for MCP server updates
 mcp update <name> [flags]       # update an MCP server
 mcp remove <name> [flags]       # remove MCP server
 ```
+
+**Flags:** `--yes`/`-y`, `--dry-run`, `--name <name>`, `--all`, agent flags (`--cursor`, `--claude`, etc.), `--npm`, `--interactive` (for search).
 
 ### `rolecraft agents-xml [--write]`
 

@@ -40,3 +40,11 @@ export {
   checkUpdates as registryCheckUpdates,
   clearCache as registryClearCache,
 } from './api/registry.js'
+export { setupApi as setup } from './api/setup.js'
+export { bundleApi as bundle } from './api/bundle.js'
+export { watchApi as watch } from './api/watch.js'
+export { convertApi as convert } from './api/convert.js'
+export { initApi as init } from './api/init.js'
+export { upgradeApi as upgrade, compareVersions } from './api/upgrade.js'
+export { completionApi as completions } from './api/completions.js'
+export { agentsXmlApi as agentsXml } from './api/agents-xml.js'

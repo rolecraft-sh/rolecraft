@@ -26,3 +26,12 @@ rolecraft init code-reviewer
 rolecraft init myorg/ts-helper
 # Creates ./myorg-ts-helper/SKILL.md
 ```
+
+## Node.js API
+
+This command is also available as a programmatic function. See the [Node.js API documentation](../api.md) for detailed usage.
+
+```js
+import { init } from 'rolecraft'
+const result = await init('my-custom-tool')
+```

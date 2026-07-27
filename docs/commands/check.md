@@ -26,3 +26,12 @@ Run `rolecraft update <slug>` to apply the update.
 ```bash
 rolecraft check
 ```
+
+## Node.js API
+
+This command is also available as a programmatic function. See the [Node.js API documentation](../api.md) for detailed usage.
+
+```js
+import { check } from 'rolecraft'
+const updates = await check()
+```

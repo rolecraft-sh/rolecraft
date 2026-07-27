@@ -460,9 +460,18 @@ export async function main() {
         throw new Error('Missing source argument.')
       }
       const convertFlags = args.filter((a) => a.startsWith('-'))
-      await convertCommand(source, {
+      const convertOptions = {
         dryRun: convertFlags.includes('--dry-run'),
-      })
+      }
+      const outputIndex = convertFlags.indexOf('--output')
+      if (
+        outputIndex !== -1 &&
+        convertFlags[outputIndex + 1] &&
+        !convertFlags[outputIndex + 1].startsWith('-')
+      ) {
+        convertOptions.output = convertFlags[outputIndex + 1]
+      }
+      await convertCommand(source, convertOptions)
       break
     }
 

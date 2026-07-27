@@ -52,3 +52,12 @@ rolecraft search react --skills-sh
 # Search the rolecraft Registry
 rolecraft search code-review --registry
 ```
+
+## Node.js API
+
+This command is also available as a programmatic function. See the [Node.js API documentation](../api.md) for detailed usage.
+
+```js
+import { search } from 'rolecraft'
+const results = await search('code-review')
+```

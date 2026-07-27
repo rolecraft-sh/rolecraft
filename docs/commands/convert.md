@@ -72,3 +72,12 @@ rolecraft convert ./skill --dry-run
 
 - [install](./install) — Install skills to any agent
 - [`docs/agents.md`](/agents) — List of supported agent paths
+
+## Node.js API
+
+This command is also available as a programmatic function. See the [Node.js API documentation](../api.md) for detailed usage.
+
+```js
+import { convert } from 'rolecraft'
+const results = await convert('./my-skill/SKILL.md')
+```

@@ -164,3 +164,12 @@ The full schema is at: https://github.com/rolecraft-sh/registry/blob/main/schema
 ## Cache
 
 The registry index is cached in-memory for 5 minutes. Use `clearCache()` from the API (`src/utils/registry-client.js`) or restart your CLI session to force a refresh.
+
+## Node.js API
+
+This command is also available as a programmatic function. See the [Node.js API documentation](../api.md) for detailed usage.
+
+```js
+import { registryPublish } from 'rolecraft'
+const pr = await registryPublish({ slug: 'my-skill', name: 'My Skill', repo: 'user/repo' })
+```

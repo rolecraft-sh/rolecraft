@@ -108,4 +108,13 @@ $ rolecraft doctor --deep
        - Naming: "camelCase" vs "snake_case"
 
 📋 Summary: 14/15 passed, 1 warnings, 0 errors
+
+## Node.js API
+
+This command is also available as a programmatic function. See the [Node.js API documentation](../api.md) for detailed usage.
+
+```js
+import { doctor } from 'rolecraft'
+const health = await doctor({ json: true, deep: true })
+```
 ```

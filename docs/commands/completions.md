@@ -48,3 +48,12 @@ source <(rolecraft completions bash)
 #   rolecraft install --<Tab>  →  lists all flags
 #   rolecraft completions <Tab>  →  bash zsh fish
 ```
+
+## Node.js API
+
+This command is also available as a programmatic function. See the [Node.js API documentation](../api.md) for detailed usage.
+
+```js
+import { completions } from 'rolecraft'
+const script = completions('bash')
+```

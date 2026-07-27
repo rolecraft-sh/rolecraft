@@ -41,3 +41,12 @@ rolecraft use mattpocock/skills --skill "typescript-rules"
 # Pipe content
 rolecraft use ./my-skill | head -50
 ```
+
+## Node.js API
+
+This command is also available as a programmatic function. See the [Node.js API documentation](../api.md) for detailed usage.
+
+```js
+import { use } from 'rolecraft'
+const preview = await use('./my-skill')
+```

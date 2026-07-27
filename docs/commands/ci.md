@@ -20,3 +20,12 @@ Designed for CI pipelines and team onboarding — run this after cloning a repos
 # In CI or after git clone — restores skills + MCP servers
 rolecraft ci
 ```
+
+## Node.js API
+
+This command is also available as a programmatic function. See the [Node.js API documentation](../api.md) for detailed usage.
+
+```js
+import { ci } from 'rolecraft'
+const result = await ci()
+```

@@ -47,7 +47,6 @@ Apply a profile's settings to your agents.
 ```bash
 rolecraft profile apply frontend-dev
 rolecraft profile apply frontend-dev --dry-run
-rolecraft profile apply frontend-dev --cursor-only
 rolecraft profile apply frontend-dev --skip-mcp
 rolecraft profile apply frontend-dev --skip-skills
 ```
@@ -55,6 +54,7 @@ rolecraft profile apply frontend-dev --skip-skills
 **Options:**
 - `--agents`, `--cursor`, `--claude`, etc. — Apply to specific agents only
 - `--dry-run` — Preview changes without applying
+- `--yes`, `-y` — Skip confirmation prompts
 - `--skip-mcp` — Skip MCP server configuration
 - `--skip-skills` — Skip skill installation
 
@@ -173,4 +173,14 @@ rolecraft profile export full-setup --file ./team-profile.json --relative
 
 # Import a shared profile
 rolecraft profile import ./team-profile.json
+```
+
+## Node.js API
+
+This command is also available as programmatic functions. See the [Node.js API documentation](../api.md) for detailed usage.
+
+```js
+import { profileSave, profileApply, profileList } from 'rolecraft'
+await profileSave('frontend-dev')
+const profiles = await profileList()
 ```
