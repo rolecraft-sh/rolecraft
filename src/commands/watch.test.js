@@ -88,13 +88,14 @@ describe('watch command', () => {
       if (args.length) logs.push(String(args[0]))
     }
 
-    const { watchers } = await watchModule.watchCommand(undefined, tempDir, {
+    const result = await watchModule.watchCommand(undefined, tempDir, {
       dryRun: true,
     })
+    result.close() // no-op for dry-run
 
     assert.ok(logs.some((l) => l.includes('[dry-run]')))
     assert.ok(logs.some((l) => l.includes('local-skill')))
-    assert.equal(watchers.length, 0)
+    assert.equal(result.watchers.length, 0)
     console.log = origLog
   })
 
@@ -110,8 +111,8 @@ describe('watch command', () => {
     }
 
     try {
-      const { watchers } = await watchModule.watchCommand(undefined, emptyDir)
-      for (const w of watchers) w.close()
+      const result = await watchModule.watchCommand(undefined, emptyDir)
+      result.close()
       assert.ok(logs.some((l) => l.includes('No skills installed')))
     } finally {
       console.log = origLog
@@ -132,8 +133,8 @@ describe('watch command', () => {
       if (args.length) errors.push(String(args[0]))
     }
 
-    const { watchers } = await watchModule.watchCommand('nonexistent', tempDir)
-    for (const w of watchers) w.close()
+    const result = await watchModule.watchCommand('nonexistent', tempDir)
+    result.close()
 
     assert.ok(
       logs.some((l) => l.includes('not found')) ||
@@ -180,11 +181,8 @@ describe('watch command', () => {
       }
 
       try {
-        const { watchers } = await watchModule.watchCommand(
-          undefined,
-          remoteOnlyDir,
-        )
-        for (const w of watchers) w.close()
+        const result = await watchModule.watchCommand(undefined, remoteOnlyDir)
+        result.close()
         assert.ok(logs.some((l) => l.includes('No local skills')))
       } finally {
         console.log = origLog
@@ -202,8 +200,8 @@ describe('watch command', () => {
       if (args.length) logs.push(String(args[0]))
     }
 
-    const { watchers } = await watchModule.watchCommand(undefined, tempDir)
-    for (const w of watchers) w.close()
+    const result = await watchModule.watchCommand(undefined, tempDir)
+    result.close()
 
     assert.ok(logs.some((l) => l.includes('local-skill')))
     assert.ok(logs.some((l) => l.includes('watching')))
@@ -217,8 +215,8 @@ describe('watch command', () => {
       if (args.length) logs.push(String(args[0]))
     }
 
-    const { watchers } = await watchModule.watchCommand('local-skill', tempDir)
-    for (const w of watchers) w.close()
+    const result = await watchModule.watchCommand('local-skill', tempDir)
+    result.close()
 
     assert.ok(logs.some((l) => l.includes('local-skill')))
     assert.ok(logs.some((l) => l.includes('watching')))
@@ -232,8 +230,8 @@ describe('watch command', () => {
       if (args.length) logs.push(String(args[0]))
     }
 
-    const { watchers } = await watchModule.watchCommand('remote-skill', tempDir)
-    for (const w of watchers) w.close()
+    const result = await watchModule.watchCommand('remote-skill', tempDir)
+    result.close()
 
     assert.ok(logs.some((l) => l.includes('Skipping')))
     assert.ok(logs.some((l) => l.includes('remote')))
@@ -271,8 +269,8 @@ describe('watch command', () => {
         }),
       )
 
-      const { watchers } = await watchModule.watchCommand(undefined, badDir)
-      for (const w of watchers) w.close()
+      const result = await watchModule.watchCommand(undefined, badDir)
+      result.close()
 
       // fs.watch behavior on non-existent paths varies across platforms:
       // macOS throws synchronously, Linux emits error async.
@@ -296,10 +294,7 @@ describe('watch command', () => {
     }
 
     try {
-      const { watchers } = await watchModule.watchCommand(
-        'local-skill',
-        tempDir,
-      )
+      const result = await watchModule.watchCommand('local-skill', tempDir)
 
       // Trigger a file change in the watched source directory
       await writeFile(join(tempDir, 'source-local', 'TEST.md'), 'change 1')
@@ -308,7 +303,7 @@ describe('watch command', () => {
       // Wait for debounce (300ms) plus buffer
       await new Promise((r) => setTimeout(r, 600))
 
-      for (const w of watchers) w.close()
+      result.close()
 
       // Give pending async operations time to settle before cleanup
       await new Promise((r) => setTimeout(r, 100))
@@ -360,7 +355,7 @@ describe('watch command', () => {
         }),
       )
 
-      const { watchers } = await watchModule.watchCommand('fail-skill', dir)
+      const result = await watchModule.watchCommand('fail-skill', dir)
 
       // Delete SKILL.md so reinstallSkill's resolveSource throws
       await rm(join(dir, 'broken-source', 'SKILL.md'), { force: true })
@@ -368,8 +363,7 @@ describe('watch command', () => {
 
       await new Promise((r) => setTimeout(r, 600))
 
-      for (const w of watchers) w.close()
-      await new Promise((r) => setTimeout(r, 100))
+      result.close()
 
       assert.ok(logs.some((l) => l.includes('syncing')))
       assert.ok(

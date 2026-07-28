@@ -34,9 +34,11 @@ export async function watchCommand(slug, cwd = process.cwd(), options = {}) {
   const mergedSkills = { ...globalLock.skills, ...projectLock.skills }
   const skills = Object.entries(mergedSkills)
 
+  function noopClose() {}
+
   if (skills.length === 0) {
     console.log('No skills installed. Nothing to watch.')
-    return { watchers: [], skills: [] }
+    return { watchers: [], skills: [], close: noopClose }
   }
 
   const watchSlugs = slug
@@ -45,12 +47,12 @@ export async function watchCommand(slug, cwd = process.cwd(), options = {}) {
 
   if (slug && !mergedSkills[slug]) {
     console.error(`Skill "${slug}" not found.`)
-    return { watchers: [], skills: [] }
+    return { watchers: [], skills: [], close: noopClose }
   }
 
   if (watchSlugs.length === 0) {
     if (!slug) console.log('No local skills to watch.')
-    return { watchers: [], skills: watchSlugs }
+    return { watchers: [], skills: watchSlugs, close: noopClose }
   }
 
   if (options.dryRun) {
@@ -61,13 +63,31 @@ export async function watchCommand(slug, cwd = process.cwd(), options = {}) {
       console.log(`   • ${s} → ${sourcePath}`)
     }
     console.log()
-    return { watchers: [], skills: watchSlugs }
+    return { watchers: [], skills: watchSlugs, close: noopClose }
   }
 
   console.log(`\n👀 Watching ${watchSlugs.length} skill(s) for changes...\n`)
 
   const debounceTimers = {}
   const watchers = []
+  let closed = false
+
+  function close() {
+    if (closed) return
+    closed = true
+    for (const key of Object.keys(debounceTimers)) {
+      clearTimeout(debounceTimers[key])
+      delete debounceTimers[key]
+    }
+    for (const w of watchers) {
+      try {
+        w.close()
+      } catch {
+        /* ignore */
+      }
+    }
+    watchers.length = 0
+  }
 
   for (const s of watchSlugs) {
     const entry = mergedSkills[s]
@@ -85,9 +105,11 @@ export async function watchCommand(slug, cwd = process.cwd(), options = {}) {
       if (debounceTimers[key]) clearTimeout(debounceTimers[key])
 
       debounceTimers[key] = setTimeout(async () => {
+        if (closed) return
         const timestamp = new Date().toLocaleTimeString()
         console.log(`  [${timestamp}] ${s}: ${filename} changed, syncing...`)
         const ok = await reinstallSkill(s, mergedSkills, cwd)
+        if (closed) return
         console.log(
           `  [${timestamp}] ${s}: ${ok ? 'synced successfully' : 'sync failed'}`,
         )
@@ -103,5 +125,5 @@ export async function watchCommand(slug, cwd = process.cwd(), options = {}) {
     }
   }
 
-  return { watchers, skills: watchSlugs }
+  return { watchers, skills: watchSlugs, close }
 }
