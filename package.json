@@ -89,6 +89,7 @@
     "setup-hooks": "node scripts/setup-hooks.mjs",
     "postinstall": "node scripts/setup-hooks.mjs || true",
     "generate:agents-docs": "node scripts/generate-agents-docs.js",
+    "generate:readme": "node scripts/generate-readme.js",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"

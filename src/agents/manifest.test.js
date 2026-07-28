@@ -12,6 +12,11 @@ import {
   SUPPORT_LEVELS,
 } from './manifest.js'
 import { generateAgentsDocs } from '../../scripts/generate-agents-docs.js'
+import {
+  generateReadme,
+  generateComparison,
+  generateBenchmark,
+} from '../../scripts/generate-readme.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -112,6 +117,39 @@ describe('agent manifest', () => {
           break
         }
       }
+    }
+    assert.equal(current, generated)
+  })
+
+  it('README.md matches generated content from manifest tokens', () => {
+    const filePath = join(__dirname, '..', '..', 'README.md')
+    const current = readFileSync(filePath, 'utf-8')
+    const generated = generateReadme()
+    if (current !== generated) {
+      console.error('README.md is out of sync with manifest data.')
+      console.error('Run: node scripts/generate-readme.js')
+    }
+    assert.equal(current, generated)
+  })
+
+  it('docs/comparison.md matches generated content from manifest tokens', () => {
+    const filePath = join(__dirname, '..', '..', 'docs', 'comparison.md')
+    const current = readFileSync(filePath, 'utf-8')
+    const generated = generateComparison()
+    if (current !== generated) {
+      console.error('docs/comparison.md is out of sync with manifest data.')
+      console.error('Run: node scripts/generate-readme.js')
+    }
+    assert.equal(current, generated)
+  })
+
+  it('benchmark/RESULTS.md matches generated content from manifest tokens', () => {
+    const filePath = join(__dirname, '..', '..', 'benchmark', 'RESULTS.md')
+    const current = readFileSync(filePath, 'utf-8')
+    const generated = generateBenchmark()
+    if (current !== generated) {
+      console.error('benchmark/RESULTS.md is out of sync with manifest data.')
+      console.error('Run: node scripts/generate-readme.js')
     }
     assert.equal(current, generated)
   })

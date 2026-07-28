@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>Install AI agent skills as roles & behaviors — from any source.</b><br>
-  Zero-dependency CLI · <b>MCP + Skills in one command</b> · 86+ agents · No signup
+  Zero-dependency CLI · <b>MCP + Skills in one command</b> · 86 agents · No signup
 </p>
 
 <p align="center">
@@ -30,7 +30,7 @@
 </p>
 
 <p align="center">
-  Works with <b>86+ AI agents</b>: opencode · claude-code · cursor · windsurf · devin · codex · copilot · aider · cline · gemini-cli · cody · continue · warp · codeium · fabric · goose · tabnine · supermaven · pr-pilot · loom · roo · trae · hermes · kiro · augment · kilo · openhands · junie · factory · command-code · cortex · mistral-vibe · qwen-code · openclaw · codebuddy · mux · pi · autohand-code · rovo · firebender · bob · aider-desk · and more
+  Works with <b>86 AI agents</b>. See the <a href="docs/agents.md">full agent table →</a>
 </p>
 
 <p align="center">
@@ -50,11 +50,11 @@
 ---
 
 <p align="center">
-  <b>⚡ Zero dependencies</b> · <b>📦 4 KB</b> · <b>🤖 86+ agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 No telemetry</b> · <b>🌐 Offline-first</b> · <b>🔧 Any source</b>
+  <b>⚡ Zero dependencies</b> · <b>📦 ~87.3 kB</b> · <b>🤖 86 agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 No telemetry</b> · <b>🌐 Offline-first</b> · <b>🔧 Any source</b>
 </p>
 
 <p align="center">
-  <a href="benchmark/RESULTS.md"><img src="benchmark/comparison.svg" alt="Benchmark: 434x faster than Vercel" width="600"></a>
+  <a href="benchmark/RESULTS.md"><img src="benchmark/comparison.svg" alt="Benchmark: significantly faster than Vercel" width="600"></a>
   <br>
   <a href="benchmark/RESULTS.md"><b>Full benchmark results →</b></a>
     
@@ -97,7 +97,7 @@ rolecraft convert ./my-skill
 rolecraft convert --help
 ```
 
-**Requirements:** Node.js >= 20 · 4 KB · zero dependencies · 86+ agents · [Getting Started →](docs/guides/getting-started.md) · [Full install guide →](docs/install.md)
+**Requirements:** Node.js >= 20 · ~87.3 kB · zero dependencies · 86 agents · [Getting Started →](docs/guides/getting-started.md) · [Full install guide →](docs/install.md)
 
 > **Why zero dependencies?** Every dependency is a supply-chain risk. rolecraft uses only Node.js built-ins (`fs`, `path`, `crypto`, `https`) — no `node_modules` surprises.
 
@@ -126,7 +126,7 @@ All registry operations are also available via the [Node.js API](docs/api.md#sea
 
 ## Skills + MCP in one command
 
-rolecraft is the **only CLI** that installs both agent skills and MCP servers together.
+rolecraft installs both agent skills and MCP servers in a single command.
 
 A single SKILL.md can declare both a skill and its required MCP servers:
 
@@ -150,12 +150,12 @@ No other CLI combines both. npx skills has no MCP support. ags has a separate MC
 
 ## Features
 
-- **Zero dependencies** — ~4 KB, only Node.js built-ins
-- **MCP + Skills in one command** — install skills and their MCP servers together. Unique.
+- **Zero dependencies** — ~87.3 kB, only Node.js built-ins
+- **MCP + Skills in one command** — install skills and their MCP servers together
 - **Any source** — local folder, GitHub/GitLab/SSH URL, npm package
-- **86+ agents** — opencode, claude-code, cursor, copilot, aider, devin, gemini-cli, and more
+- **86 agents** — opencode, claude-code, cursor, copilot, aider, and more
 - **No registry required** — works fully without a marketplace; community-driven [registry](https://github.com/rolecraft-sh/registry) optional
-- **Security scoring** — static analysis: detects prompt injection, command injection, obfuscated code, credential harvesting. Scores 0–100. Blocks dangerous skills
+- **Security scoring** — static analysis: detects prompt injection, command injection, obfuscated code, credential harvesting. Scores 0–100. Blocks dangerous skills (use `--yes` to override)
 - **CI-ready** — lockfile-based re-install (`rolecraft ci`), `--yes` flag, `--dry-run`
 - **Shell completions** — bash, zsh, fish auto-completion
 - **TUI search** — interactive arrow-key skill browser with preview
@@ -304,7 +304,7 @@ All API functions return plain objects (no side-effects). Available exports:
 | AGENTS.md XML generation             | ✅               | ❌              | ❌                  |
 | Self-upgrade command                 | ✅               | ❌              | ❌                  |
 | **Publish to registry**              | ✅               | ❌              | ❌                  |
-| File size                            | ~4 KB            | ~465 KB         | ~84 KB              |
+| File size                            | ~87.3 kB | ~465 KB         | ~84 KB              |
 
 [See full table →](docs/comparison.md)
 
@@ -366,7 +366,7 @@ rolecraft install ./my-skill --cursor --devin --copilot --gemini --cody
 A: No. No account, no API key, no marketplace. Point rolecraft at any folder or repo and it works.
 
 **Q: Can I use rolecraft with multiple AI agents?**
-A: Yes. 86+ agents supported. Use `--cursor`, `--claude`, `--devin` flags or `--all` for every agent.
+A: Yes. 86 agents supported. Use `--cursor`, `--claude`, `--devin` flags or `--all` for every agent.
 
 **Q: Does rolecraft send telemetry?**
 A: No. Zero data leaves your machine. The security scan runs locally. No phone home.
