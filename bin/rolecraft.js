@@ -18,6 +18,7 @@ import { bundleCommand, bundleCreateCommand } from '../src/commands/bundle.js'
 import { completionsCommand } from '../src/commands/completions.js'
 import { upgradeCommand } from '../src/commands/upgrade.js'
 import { doctorCommand } from '../src/commands/doctor.js'
+import { agentsCommand } from '../src/commands/agents.js'
 import { agentsXmlCommand } from '../src/commands/agents-xml.js'
 import { mcpCommand } from '../src/commands/mcp.js'
 import { watchCommand } from '../src/commands/watch.js'
@@ -72,6 +73,8 @@ Usage:
   rolecraft mcp check               Check for MCP server updates
   rolecraft mcp update <name>       Update an MCP server
   rolecraft mcp remove <name>       Remove an MCP server
+  rolecraft agents                  Show agent capability manifest
+  rolecraft agents --json            Output manifest as JSON
   rolecraft agents-xml              Generate skills XML for AGENTS.md
   rolecraft agents-xml --write      Write skills XML to AGENTS.md
   rolecraft upgrade                 Upgrade rolecraft to the latest version
@@ -434,6 +437,14 @@ export async function main() {
       await new Promise(() => {})
       break
     }
+
+    case 'agents':
+      if (args.includes('--help') || args.includes('-h')) {
+        usage()
+        return
+      }
+      await agentsCommand({ json: args.includes('--json') })
+      break
 
     case 'agents-xml':
       if (args.includes('--help') || args.includes('-h')) {

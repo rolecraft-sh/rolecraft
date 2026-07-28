@@ -28,7 +28,7 @@ export default defineConfig({
       ]},
       { text: 'Install', link: '/install' },
       { text: 'Docs', items: [
-        { text: 'Commands', link: '/commands/install' },
+        { text: 'Commands', link: '/commands/agents' },
         { text: 'API', link: '/api' },
         { text: 'Reference', link: '/reference' },
         { text: 'Registry', link: '/commands/registry' },
@@ -55,6 +55,7 @@ export default defineConfig({
         {
           text: 'Commands',
           items: [
+            { text: 'agents', link: '/commands/agents' },
             { text: 'agents-xml', link: '/commands/agents-xml' },
             { text: 'bundle', link: '/commands/bundle' },
             { text: 'convert', link: '/commands/convert' },

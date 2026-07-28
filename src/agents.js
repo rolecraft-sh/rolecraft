@@ -564,8 +564,31 @@ for (const a of AGENTS_DATA) {
   }
 }
 
+import {
+  getAgentManifest,
+  getAgentManifestByFlag,
+  getAgentsBySupportLevel,
+  getAgentsWithMcp,
+  validateManifest,
+  SUPPORT_LEVELS,
+  INSTRUCTION_FORMATS,
+  MCP_CONFIG_FORMATS,
+} from './agents/manifest.js'
+
 export function getAgentByFlag(flag) {
   return AGENTS_DATA.find((a) => a.flag === flag)
+}
+
+// Re-export manifest functions
+export {
+  getAgentManifest,
+  getAgentManifestByFlag,
+  getAgentsBySupportLevel,
+  getAgentsWithMcp,
+  validateManifest,
+  SUPPORT_LEVELS,
+  INSTRUCTION_FORMATS,
+  MCP_CONFIG_FORMATS,
 }
 
 export default AGENTS_DATA

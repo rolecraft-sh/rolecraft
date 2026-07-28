@@ -2,96 +2,106 @@
 
 rolecraft knows where each AI agent looks for skills. When you use a flag like `--claude` or `--cursor`, it installs to the correct directory for that agent.
 
-| Agent       | Directory                                      |
-| ----------- | ---------------------------------------------- |
-| opencode    | `~/.agents/skills/` or `./.agents/skills/`     |
-| claude-code | `~/.claude/skills/` or `./.claude/skills/`     |
-| cursor      | `~/.cursor/skills/` or `./.cursor/skills/`     |
-| windsurf ⚠️ | `~/.windsurf/skills/` or `./.windsurf/skills/` |
-| devin       | `~/.devin/skills/` or `./.devin/skills/`       |
-| codex       | `~/.codex/skills/` or `./.codex/skills/`       |
-| copilot     | `./.github/copilot/skills/` or `~/.copilot/skills/` |
-| aider       | `~/.aider/skills/` or `./.aider/skills/`       |
-| cline       | `~/.cline/skills/` or `./.cline/skills/`       |
-| gemini-cli  | `~/.gemini/skills/`                            |
-| cody        | `~/.cody/skills/`                              |
-| continue    | `~/.continue/skills/`                          |
-| warp        | `~/.warp/skills/`                              |
-| codeium     | `~/.codeium/skills/`                           |
-| fabric      | `~/.fabric/skills/`                            |
-| goose       | `~/.goose/skills/`                             |
-| tabnine     | `~/.tabnine/skills/`                           |
-| supermaven  | `~/.supermaven/skills/`                        |
-| pr-pilot    | `~/.pr-pilot/skills/`                          |
-| loom        | `~/.loom/skills/`                              |
-| roo         | `~/.roo/skills/`                               |
-| trae        | `~/.trae/skills/`                              |
-| hermes      | `~/.hermes/skills/`                            |
-| kiro        | `~/.kiro/skills/`                              |
-| augment     | `~/.augment/skills/`                           |
-| kilo        | `~/.kilo/skills/`                              |
-| openhands   | `~/.openhands/skills/`                         |
-| junie       | `~/.junie/skills/`                             |
-| factory     | `~/.factory/skills/`                             |
-| command-code | `~/.commandcode/skills/`                        |
-| cortex      | `~/.snowflake/cortex/skills/`                   |
-| mistral-vibe | `~/.vibe/skills/`                              |
-| qwen-code   | `~/.qwen/skills/`                               |
-| openclaw    | `~/.openclaw/skills/`                           |
-| codebuddy   | `~/.codebuddy/skills/`                          |
-| mux         | `~/.mux/skills/`                                |
-| pi          | `~/.pi/agent/skills/`                           |
-| autohand-code | `~/.autohand/skills/`                         |
-| rovo        | `~/.rovodev/skills/`                            |
-| firebender  | `~/.firebender/skills/`                         |
-| bob         | `~/.bob/skills/`                                |
-| aider-desk  | `~/.aider-desk/skills/`                         |
-| zap             | `~/.zap/skills/`                                  |
-| codeep          | `~/.codeep/skills/`                               |
-| kimi-code       | `~/.kimi-code/skills/`                            |
-| zcode           | `~/.zcode/skills/`                                |
-| code-arts-doer  | `~/.codeartsdoer/skills/`                         |
-| code-maker      | `~/.codemaker/skills/`                            |
-| code-studio     | `~/.codestudio/skills/`                           |
-| crush           | `~/.crush/skills/`                                |
-| eve             | `./agent/skills/`                                 |
-| forge           | `~/.forge/skills/`                                |
-| inference-sh    | `~/.inferencesh/skills/`                          |
-| jazz            | `~/.jazz/skills/`                                 |
-| iflow           | `~/.iflow/skills/`                                |
-| kilo-code       | `~/.kilocode/skills/`                             |
-| kode            | `~/.kode/skills/`                                 |
-| lingma          | `~/.lingma/skills/`                               |
-| mcp-jam         | `~/.mcpjam/skills/`                               |
-| moxby           | `~/.moxby/skills/`                                |
-| ona             | `~/.ona/skills/`                                  |
-| qoder           | `~/.qoder/skills/`                                |
-| reasonix        | `~/.reasonix/skills/`                             |
-| terra-mind      | `~/.terramind/skills/`                            |
-| tiny-cloud      | `~/.tinycloud/skills/`                            |
-| zencoder        | `~/.zencoder/skills/`                             |
-| amp             | `~/.agents/skills/`                               |
-| antigravity     | `~/.agents/skills/`                               |
-| antigravity-cli | `~/.agents/skills/`                               |
-| deep-agents     | `~/.agents/skills/`                               |
-| dexto           | `~/.agents/skills/`                               |
-| loaf            | `~/.agents/skills/`                               |
-| replit          | `~/.agents/skills/`                               |
-| zed             | `~/.agents/skills/`                               |
-| promptscript    | `./agent/skills/`                                 |
-| astrbot         | `~/.astrbot/data/skills/`                         |
-| qoder-cn        | `~/.qoder-cn/skills/`                             |
-| trae-cn         | `~/.trae-cn/skills/`                              |
-| zenflow         | `~/.zencoder/skills/`                             |
-| neovate         | `~/.neovate/skills/`                              |
-| pochi           | `~/.pochi/skills/`                                |
-| adal            | `~/.adal/skills/`                                 |
-| droid           | `~/.factory/skills/`                              |
-| chatgpt         | `~/.chatgpt/skills/`                              |
-| codearts-agent  | `~/.codeartsdoer/skills/`                         |
-| universal       | `~/.config/agents/skills/`                        |
+| Agent | Directory | Support | MCP |
+| ----- | --------- | ------- | --- |
+| opencode | `~/.agents/skills/ or ./.agents/skills/` | verified | - |
+| claude-code | `~/.claude/skills/ or ./.claude/skills/` | verified | mcpServers |
+| cursor | `~/.cursor/skills/ or ./.cursor/skills/` | verified | mcpServers |
+| windsurf | `~/.windsurf/skills/ or ./.windsurf/skills/` | community | mcpServers |
+| devin | `~/.devin/skills/ or ./.devin/skills/` | experimental | - |
+| codex | `~/.codex/skills/ or ./.codex/skills/` | community | - |
+| copilot | `./.github/copilot/skills/ or ~/.copilot/skills/` | legacy | - |
+| aider | `~/.aider/skills/ or ./.aider/skills/` | experimental | - |
+| cline | `~/.cline/skills/ or ./.cline/skills/` | experimental | - |
+| gemini-cli | `~/.gemini/skills/` | experimental | - |
+| cody | `~/.cody/skills/ or ./.cody/skills/` | experimental | - |
+| continue | `~/.continue/skills/ or ./.continue/skills/` | community | experimental.mcpServers |
+| warp | `~/.warp/skills/` | experimental | - |
+| codeium | `~/.codeium/skills/` | experimental | - |
+| fabric | `~/.fabric/skills/` | experimental | - |
+| goose | `~/.goose/skills/` | experimental | - |
+| tabnine | `~/.tabnine/skills/` | experimental | - |
+| supermaven | `~/.supermaven/skills/` | experimental | - |
+| pr-pilot | `~/.pr-pilot/skills/` | experimental | - |
+| loom | `~/.loom/skills/` | experimental | - |
+| roo | `~/.roo/skills/` | experimental | - |
+| trae | `~/.trae/skills/` | experimental | - |
+| hermes | `~/.hermes/skills/` | experimental | - |
+| kiro | `~/.kiro/skills/` | experimental | - |
+| augment | `~/.augment/skills/` | experimental | - |
+| kilo | `~/.kilo/skills/` | experimental | - |
+| openhands | `~/.openhands/skills/` | experimental | - |
+| junie | `~/.junie/skills/` | experimental | - |
+| factory | `~/.factory/skills/` | experimental | - |
+| command-code | `~/.commandcode/skills/` | experimental | - |
+| cortex | `~/.snowflake/cortex/skills/` | experimental | - |
+| mistral-vibe | `~/.vibe/skills/` | experimental | - |
+| qwen-code | `~/.qwen/skills/` | experimental | - |
+| openclaw | `~/.openclaw/skills/` | experimental | - |
+| codebuddy | `~/.codebuddy/skills/` | experimental | - |
+| mux | `~/.mux/skills/` | experimental | - |
+| pi | `~/.pi/agent/skills/` | experimental | - |
+| autohand-code | `~/.autohand/skills/` | experimental | - |
+| rovo-dev | `~/.rovodev/skills/` | experimental | - |
+| firebender | `~/.firebender/skills/` | experimental | - |
+| ibm-bob | `~/.bob/skills/` | experimental | - |
+| aider-desk | `~/.aider-desk/skills/` | experimental | - |
+| code-arts-doer | `~/.codeartsdoer/skills/` | experimental | - |
+| code-maker | `~/.codemaker/skills/` | experimental | - |
+| code-studio | `~/.codestudio/skills/` | experimental | - |
+| crush | `~/.crush/skills/` | experimental | - |
+| eve | `./agent/skills/` | experimental | - |
+| forge | `~/.forge/skills/` | experimental | - |
+| inference-sh | `~/.inferencesh/skills/` | experimental | - |
+| jazz | `~/.jazz/skills/` | experimental | - |
+| iflow | `~/.iflow/skills/` | experimental | - |
+| kilo-code | `~/.kilocode/skills/` | experimental | - |
+| kode | `~/.kode/skills/` | experimental | - |
+| lingma | `~/.lingma/skills/` | experimental | - |
+| mcp-jam | `~/.mcpjam/skills/` | experimental | - |
+| moxby | `~/.moxby/skills/` | experimental | - |
+| ona | `~/.ona/skills/` | experimental | - |
+| qoder | `~/.qoder/skills/` | experimental | - |
+| reasonix | `~/.reasonix/skills/` | experimental | - |
+| terra-mind | `~/.terramind/skills/` | experimental | - |
+| tiny-cloud | `~/.tinycloud/skills/` | experimental | - |
+| zencoder | `~/.zencoder/skills/` | experimental | - |
+| zap | `~/.zap/skills/` | experimental | - |
+| codeep | `~/.codeep/skills/` | experimental | - |
+| kimi-code | `~/.kimi-code/skills/` | experimental | - |
+| zcode | `~/.zcode/skills/` | experimental | - |
+| astrbot | `~/.astrbot/data/skills/` | experimental | - |
+| qoder-cn | `~/.qoder-cn/skills/` | experimental | - |
+| trae-cn | `~/.trae-cn/skills/` | experimental | - |
+| zenflow | `~/.zencoder/skills/` | experimental | - |
+| neovate | `~/.neovate/skills/` | experimental | - |
+| pochi | `~/.pochi/skills/` | experimental | - |
+| adal | `~/.adal/skills/` | experimental | - |
+| droid | `~/.factory/skills/` | experimental | - |
+| chatgpt | `~/.chatgpt/skills/` | experimental | - |
+| codearts-agent | `~/.codeartsdoer/skills/` | experimental | - |
+| universal | `~/.config/agents/skills/` | experimental | - |
+| amp | `~/.agents/skills/` | experimental | - |
+| antigravity | `~/.agents/skills/` | experimental | - |
+| antigravity-cli | `~/.agents/skills/` | experimental | - |
+| deep-agents | `~/.agents/skills/` | experimental | - |
+| dexto | `~/.agents/skills/` | experimental | - |
+| loaf | `~/.agents/skills/` | experimental | - |
+| replit | `~/.agents/skills/` | experimental | - |
+| zed | `~/.agents/skills/` | experimental | - |
+| promptscript | `./agent/skills/` | experimental | - |
 
-> ⚠️ Windsurf has been rebranded to **Devin Desktop**. The `--windsurf` flag and `~/.windsurf/skills/` path still work for backward compatibility, but new deployments should use `--devin` / `~/.devin/skills/`.
+> **Support levels:** `verified` — actively tested and maintained; `community` — community-contributed, maintained on best-effort; `legacy` — previous generation, no active development; `experimental` — known to exist, not formally tested.
+
+> **MCP support:** 4 agent(s) support MCP server configuration. Format: `mcpServers`, `experimental.mcpServers`
+
+> **Agent count:** 86 total — 3 verified, 3 community, 1 legacy, 79 experimental.
+
+## Notes
+
+- **windsurf:** Rebranded to Devin Desktop; use --devin flag for new deployments
+- **devin:** Desktop agent with limited MCP support
+- **copilot:** MCP support planned but not yet implemented
 
 ## Install to multiple agents
 

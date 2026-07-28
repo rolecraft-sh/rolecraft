@@ -88,6 +88,7 @@
     "test:coverage": "node --experimental-test-coverage --test --test-coverage-exclude=\"**/*.test.js\" --test-coverage-include=\"src/**\" --test-coverage-include=\"bin/**\"",
     "setup-hooks": "node scripts/setup-hooks.mjs",
     "postinstall": "node scripts/setup-hooks.mjs || true",
+    "generate:agents-docs": "node scripts/generate-agents-docs.js",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"
