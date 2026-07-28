@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.1.0] - 2026-07-28
+
+### Added
+- auto-generate benchmark SVG from results data (#191)
+- replace hardcoded claims with manifest tokens, update benchmark with current data (#190)
+- add agents capability manifest command and generated agent docs (#186)
+- add API modules for CLI-only commands and Node.js API cross-references (#183)
+- update publish message for auto-merge workflow (#182)
+- add category to publish flow; fix YAML quote stripping
+
+### Fixed
+- use full URL for SVG in RESULTS.md to fix VitePress build
+- close watchers and debounce timers deterministically in watch tests (#189)
+- update public claims — agent count and package size from manifest, soften absolute language (#188)
+- publish directly to upstream registry, fall back to fork on 403
+- remove check-updates from completions, add -d descriptions and -o/-s y flags to fish
+- complete missing commands and flags
+- add checkout step in deploy-docs job for gh workflow run
+
+### Changed
+- bump postcss from 8.5.16 to 8.5.23 (#187)
+- update repo references from sametcelikbicak to rolecraft-sh in docs and examples
+- update changelog and version for v2.0.1 (#179)
+
+### Documentation
+- update comparison.md with garden-skills and fix duplicate row
+- add MFA-G to contributors list
+- fix auto-merge references to reflect maintainer merge workflow
 ## [v2.0.1] - 2026-07-24
 
 ### Fixed
