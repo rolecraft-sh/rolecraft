@@ -50,7 +50,7 @@
 ---
 
 <p align="center">
-  <b>⚡ Zero dependencies</b> · <b>📦 ~87.3 kB</b> · <b>🤖 86 agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 No telemetry</b> · <b>🌐 Offline-first</b> · <b>🔧 Any source</b>
+  <b>⚡ Zero dependencies</b> · <b>📦 87.4 kB</b> · <b>🤖 86 agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 No telemetry</b> · <b>🌐 Offline-first</b> · <b>🔧 Any source</b>
 </p>
 
 <p align="center">
@@ -97,7 +97,7 @@ rolecraft convert ./my-skill
 rolecraft convert --help
 ```
 
-**Requirements:** Node.js >= 20 · ~87.3 kB · zero dependencies · 86 agents · [Getting Started →](docs/guides/getting-started.md) · [Full install guide →](docs/install.md)
+**Requirements:** Node.js >= 20 · 87.4 kB · zero dependencies · 86 agents · [Getting Started →](docs/guides/getting-started.md) · [Full install guide →](docs/install.md)
 
 > **Why zero dependencies?** Every dependency is a supply-chain risk. rolecraft uses only Node.js built-ins (`fs`, `path`, `crypto`, `https`) — no `node_modules` surprises.
 
@@ -150,7 +150,7 @@ No other CLI combines both. npx skills has no MCP support. ags has a separate MC
 
 ## Features
 
-- **Zero dependencies** — ~87.3 kB, only Node.js built-ins
+- **Zero dependencies** — 87.4 kB, only Node.js built-ins
 - **MCP + Skills in one command** — install skills and their MCP servers together
 - **Any source** — local folder, GitHub/GitLab/SSH URL, npm package
 - **86 agents** — opencode, claude-code, cursor, copilot, aider, and more
@@ -304,7 +304,7 @@ All API functions return plain objects (no side-effects). Available exports:
 | AGENTS.md XML generation             | ✅               | ❌              | ❌                  |
 | Self-upgrade command                 | ✅               | ❌              | ❌                  |
 | **Publish to registry**              | ✅               | ❌              | ❌                  |
-| File size                            | ~87.3 kB | ~465 KB         | ~84 KB              |
+| File size                            | 87.4 kB | ~465 KB         | ~84 KB              |
 
 [See full table →](docs/comparison.md)
 
