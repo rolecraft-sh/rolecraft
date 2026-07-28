@@ -1,7 +1,11 @@
-import { writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync, existsSync } from 'node:fs'
+import { resolve, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const W = 800
-const H = 820
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const ROOT = resolve(__dirname, '..')
+const DATA_PATH = resolve(ROOT, 'benchmark/results.json')
+
 const COLORS = {
   rolecraft: '#15803d',
   rolecraftLight: '#22c55e',
@@ -16,10 +20,6 @@ const COLORS = {
   highlight: '#f0fdf4',
 }
 
-function sectionTitle(y, text) {
-  return `<text x="40" y="${y}" font-family="system-ui,sans-serif" font-size="16" fill="${COLORS.text}" font-weight="700">${esc(text)}</text>`
-}
-
 function esc(s) {
   return String(s)
     .replace(/&/g, '&amp;')
@@ -27,59 +27,122 @@ function esc(s) {
     .replace(/>/g, '&gt;')
 }
 
-const MAX_LOCAL = 4300
-const MAX_GITHUB = 11000
+const DEFAULT = {
+  node: 'v24.18.0',
+  os: 'macOS (darwin, arm64)',
+  iterations: 10,
+  date: '2026-07-28',
+  local: {
+    rolecraft: { avg: 15.34, min: 4.33, max: 57.0, p50: 12.83 },
+    vercel: { avg: 4622.61, min: 4036.72, max: 7761.7, p50: 4303.5 },
+    agentskill: null,
+    localRatio: 301.4,
+  },
+  github: {
+    rolecraft: { avg: 1366.86, min: 1301.34, max: 1506.12, p50: 1357.13 },
+    vercel: { avg: 13327.47, min: 11773.34, max: 17290.04, p50: 12524.37 },
+    agentskill: null,
+    githubRatio: 9.75,
+  },
+  packageSize: {
+    rolecraft: '87.4 kB',
+    vercel: '~465 KB',
+    agentskill: '~84 KB',
+  },
+  deps: { rolecraft: 0, vercel: 1, agentskill: 2 },
+  agents: { rolecraft: 86, vercel: 72, agentskill: '15+' },
+}
+
+const data = existsSync(DATA_PATH)
+  ? JSON.parse(readFileSync(DATA_PATH, 'utf-8'))
+  : DEFAULT
+
+const fmt = (n) => Number(n).toLocaleString('en-US')
+
+const BAR_X = 185
+const BAR_W = 500
+const SIZE_BAR_W = 280
+
+const W = 800
+const H = 820
+const MAX_LOCAL = 4500
+const MAX_GITHUB = 14000
 const MAX_SIZE = 470
+
+const barW = (val, max) => Math.max((val / max) * BAR_W, 4)
+
+const lRc = data.local.rolecraft.avg
+const lVc = data.local.vercel.avg
+const gRc = data.github.rolecraft.avg
+const gVc = data.github.vercel.avg
+
+const lRatio = data.local.localRatio || (lVc / lRc).toFixed(1)
+const _gRatio = data.github.githubRatio || (gVc / gRc).toFixed(1)
+
+const ghRcLabel =
+  gRc >= 1000 ? `${(gRc / 1000).toFixed(2)} s` : `${gRc.toFixed(0)} ms`
+const ghVcLabel =
+  gVc >= 1000 ? `${(gVc / 1000).toFixed(2)} s` : `${gVc.toFixed(0)} ms`
 
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <rect width="${W}" height="${H}" fill="${COLORS.bg}" rx="12"/>
   <rect x="0" y="0" width="${W}" height="80" fill="#f8fafc" rx="12"/>
   <text x="40" y="34" font-family="system-ui,sans-serif" font-size="20" fill="${COLORS.text}" font-weight="800">⚡ Benchmark Comparison</text>
-  <text x="40" y="60" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.muted}">rolecraft vs Vercel skills vs @agentskill.sh/cli · Node.js v22 · 10 iterations</text>
+  <text x="40" y="60" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.muted}">rolecraft vs Vercel skills vs @agentskill.sh/cli · Node.js ${esc(data.node)} · ${data.iterations} iterations</text>
 
-  ${sectionTitle(110, '📁 Local Path Install — Speed')}
+  <text x="40" y="110" font-family="system-ui,sans-serif" font-size="16" fill="${COLORS.text}" font-weight="700">📁 Local Path Install — Speed</text>
   <rect x="40" y="125" width="580" height="50" rx="8" fill="${COLORS.highlight}" stroke="${COLORS.rolecraftLight}" stroke-width="1.5" stroke-dasharray="6,3"/>
-  <text x="48" y="147" font-family="system-ui,sans-serif" font-size="14" fill="${COLORS.rolecraft}" font-weight="700">🏆 rolecraft is 434x faster than Vercel skills</text>
+  <text x="48" y="147" font-family="system-ui,sans-serif" font-size="14" fill="${COLORS.rolecraft}" font-weight="700">🏆 rolecraft is ${lRatio}x faster than Vercel skills</text>
   <text x="48" y="165" font-family="system-ui,sans-serif" font-size="11" fill="${COLORS.muted}">@agentskill.sh/cli: not supported for local paths (marketplace-only)</text>
 
-  <rect x="40" y="195" width="${(9.83 / MAX_LOCAL) * 500}" height="28" rx="4" fill="${COLORS.rolecraft}" opacity="0.9"/><text x="48" y="214" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.rolecraft}" font-weight="600">rolecraft</text><text x="198" y="214" font-family="system-ui,sans-serif" font-size="12" fill="${COLORS.muted}">9.83 ms</text>
-  <rect x="40" y="233" width="${(4263 / MAX_LOCAL) * 500}" height="28" rx="4" fill="${COLORS.vercel}" opacity="0.9"/><text x="48" y="252" font-family="system-ui,sans-serif" font-size="13" fill="#fff" font-weight="600">Vercel skills</text><text x="${40 + (4263 / MAX_LOCAL) * 500 - 8}" y="252" font-family="system-ui,sans-serif" font-size="13" fill="#fff" text-anchor="end">4,263 ms</text>
+  <text x="40" y="214" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.rolecraft}" font-weight="600">rolecraft</text>
+  <rect x="${BAR_X}" y="201" width="${barW(lRc, MAX_LOCAL)}" height="24" rx="3" fill="${COLORS.rolecraft}" opacity="0.9"/>
+  <text x="${BAR_X + barW(lRc, MAX_LOCAL) + 8}" y="216" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.muted}">${fmt(lRc)} ms</text>
 
-  ${sectionTitle(290, '🌐 GitHub Repo Install — Speed')}
-  <rect x="40" y="320" width="${(4200 / MAX_GITHUB) * 500}" height="28" rx="4" fill="${COLORS.rolecraft}" opacity="0.9"/><text x="48" y="339" font-family="system-ui,sans-serif" font-size="13" fill="#fff" font-weight="600">rolecraft</text><text x="${40 + (4200 / MAX_GITHUB) * 500 - 8}" y="339" font-family="system-ui,sans-serif" font-size="13" fill="#fff" text-anchor="end">4.2 s</text>
-  <rect x="40" y="358" width="${(10024 / MAX_GITHUB) * 500}" height="28" rx="4" fill="${COLORS.vercel}" opacity="0.9"/><text x="48" y="377" font-family="system-ui,sans-serif" font-size="13" fill="#fff" font-weight="600">Vercel skills</text><text x="${40 + (10024 / MAX_GITHUB) * 500 - 8}" y="377" font-family="system-ui,sans-serif" font-size="13" fill="#fff" text-anchor="end">10.0 s</text>
+  <text x="40" y="248" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.vercel}" font-weight="600">Vercel skills</text>
+  <rect x="${BAR_X}" y="235" width="${barW(lVc, MAX_LOCAL)}" height="24" rx="3" fill="${COLORS.vercel}" opacity="0.9"/>
+  <text x="${BAR_X + barW(lVc, MAX_LOCAL) + 8}" y="250" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.muted}" font-weight="600">${fmt(lVc.toFixed(0))} ms</text>
 
-  <text x="40" y="415" font-family="system-ui,sans-serif" font-size="12" fill="${COLORS.muted}">@agentskill.sh/cli: failed — Error: Unknown agent: antigravity-cli</text>
+  <text x="40" y="290" font-family="system-ui,sans-serif" font-size="16" fill="${COLORS.text}" font-weight="700">🌐 GitHub Repo Install — Speed</text>
+  <text x="40" y="336" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.rolecraft}" font-weight="600">rolecraft</text>
+  <rect x="${BAR_X}" y="323" width="${barW(gRc, MAX_GITHUB)}" height="24" rx="3" fill="${COLORS.rolecraft}" opacity="0.9"/>
+  <text x="${BAR_X + barW(gRc, MAX_GITHUB) + 8}" y="338" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.muted}">${ghRcLabel}</text>
 
-  ${sectionTitle(450, '📦 Package Size')}
+  <text x="40" y="370" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.vercel}" font-weight="600">Vercel skills</text>
+  <rect x="${BAR_X}" y="357" width="${barW(gVc, MAX_GITHUB)}" height="24" rx="3" fill="${COLORS.vercel}" opacity="0.9"/>
+  <text x="${BAR_X + barW(gVc, MAX_GITHUB) + 8}" y="372" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.muted}" font-weight="600">${ghVcLabel}</text>
+
+  <text x="40" y="415" font-family="system-ui,sans-serif" font-size="12" fill="${COLORS.muted}">@agentskill.sh/cli: failed — install does not complete successfully</text>
+
+  <text x="40" y="450" font-family="system-ui,sans-serif" font-size="16" fill="${COLORS.text}" font-weight="700">📦 Package Size</text>
   <text x="40" y="497" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.rolecraft}" font-weight="600">rolecraft</text>
-  <rect x="185" y="484" width="14" height="24" rx="3" fill="${COLORS.rolecraft}" opacity="0.9"/>
-  <text x="205" y="500" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.muted}">~4 KB</text>
+  <rect x="${BAR_X}" y="484" width="${Math.max((parseFloat(data.packageSize.rolecraft) / MAX_SIZE) * SIZE_BAR_W, 14)}" height="24" rx="3" fill="${COLORS.rolecraft}" opacity="0.9"/>
+  <text x="${BAR_X + Math.max((parseFloat(data.packageSize.rolecraft) / MAX_SIZE) * SIZE_BAR_W, 14) + 8}" y="500" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.muted}">${esc(data.packageSize.rolecraft)}</text>
 
   <text x="40" y="535" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.vercel}" font-weight="600">Vercel skills</text>
-  <rect x="185" y="522" width="${(465 / MAX_SIZE) * 280}" height="24" rx="3" fill="${COLORS.vercel}" opacity="0.9"/>
-  <text x="${185 + (465 / MAX_SIZE) * 280 + 8}" y="538" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.muted}" font-weight="600">~465 KB</text>
+  <rect x="${BAR_X}" y="522" width="${(parseFloat(data.packageSize.vercel.replace(/[~]/g, '')) / MAX_SIZE) * SIZE_BAR_W}" height="24" rx="3" fill="${COLORS.vercel}" opacity="0.9"/>
+  <text x="${BAR_X + (parseFloat(data.packageSize.vercel.replace(/[~]/g, '')) / MAX_SIZE) * SIZE_BAR_W + 8}" y="538" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.muted}" font-weight="600">${esc(data.packageSize.vercel)}</text>
 
   <text x="40" y="573" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.agentskill}" font-weight="600">@agentskill.sh/cli</text>
-  <rect x="185" y="560" width="${Math.max((84 / MAX_SIZE) * 280, 14)}" height="24" rx="3" fill="${COLORS.agentskill}" opacity="0.9"/>
-  <text x="${185 + Math.max((84 / MAX_SIZE) * 280, 14) + 8}" y="576" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.muted}" font-weight="600">~84 KB</text>
+  <rect x="${BAR_X}" y="560" width="${Math.max((parseFloat(data.packageSize.agentskill.replace(/[~]/g, '')) / MAX_SIZE) * SIZE_BAR_W, 14)}" height="24" rx="3" fill="${COLORS.agentskill}" opacity="0.9"/>
+  <text x="${BAR_X + Math.max((parseFloat(data.packageSize.agentskill.replace(/[~]/g, '')) / MAX_SIZE) * SIZE_BAR_W, 14) + 8}" y="576" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.muted}" font-weight="600">${esc(data.packageSize.agentskill)}</text>
 
-  <text x="40" y="620" font-family="system-ui,sans-serif" font-size="12" fill="${COLORS.muted}">Dependencies: rolecraft 0 · Vercel 1 · @agentskill.sh/cli 2</text>
+  <text x="40" y="620" font-family="system-ui,sans-serif" font-size="12" fill="${COLORS.muted}">Dependencies: rolecraft ${data.deps.rolecraft} · Vercel ${data.deps.vercel} · @agentskill.sh/cli ${data.deps.agentskill}</text>
 
   <line x1="40" y1="660" x2="760" y2="660" stroke="${COLORS.border}" stroke-width="1"/>
 
   <text x="40" y="685" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.text}" font-weight="600">Agent Support</text>
   <rect x="40" y="700" width="200" height="24" rx="4" fill="${COLORS.rolecraft}"/>
-  <text x="50" y="716" font-family="system-ui,sans-serif" font-size="12" fill="#fff" font-weight="600">rolecraft: 82+ agents</text>
+  <text x="50" y="716" font-family="system-ui,sans-serif" font-size="12" fill="#fff" font-weight="600">rolecraft: ${data.agents.rolecraft}+ agents</text>
   <rect x="260" y="700" width="200" height="24" rx="4" fill="${COLORS.vercel}"/>
-  <text x="270" y="716" font-family="system-ui,sans-serif" font-size="12" fill="#fff" font-weight="600">Vercel skills: 72 agents</text>
+  <text x="270" y="716" font-family="system-ui,sans-serif" font-size="12" fill="#fff" font-weight="600">Vercel skills: ${data.agents.vercel} agents</text>
   <rect x="480" y="700" width="200" height="24" rx="4" fill="${COLORS.agentskill}"/>
-  <text x="490" y="716" font-family="system-ui,sans-serif" font-size="12" fill="#fff" font-weight="600">@agentskill.sh/cli: 15+</text>
+  <text x="490" y="716" font-family="system-ui,sans-serif" font-size="12" fill="#fff" font-weight="600">@agentskill.sh/cli: ${esc(String(data.agents.agentskill))}</text>
 
   <text x="40" y="755" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.text}" font-weight="600">Unique Features</text>
-  <text x="40" y="778" font-family="system-ui,sans-serif" font-size="12" fill="${COLORS.text}">✅ MCP server management    ✅ bundle + create    ✅ watch mode (auto-sync)</text>
-  <text x="40" y="798" font-family="system-ui,sans-serif" font-size="12" fill="${COLORS.text}">✅ shell completions        ✅ doctor            ✅ agents-xml</text>
+  <text x="40" y="778" font-family="system-ui,sans-serif" font-size="12" fill="${COLORS.text}">✅ publish to registry   ✅ MCP server mgmt     ✅ bundle + create     ✅ watch (auto-sync)</text>
+  <text x="40" y="798" font-family="system-ui,sans-serif" font-size="12" fill="${COLORS.text}">✅ profile              ✅ compose             ✅ test                ✅ doctor</text>
 </svg>`
 
-writeFileSync('benchmark/comparison.svg', svg)
+writeFileSync(resolve(ROOT, 'benchmark/comparison.svg'), svg)
 console.log('✅ benchmark/comparison.svg created')

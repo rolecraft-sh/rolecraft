@@ -1,9 +1,15 @@
 import { mkdtempSync, rmSync, mkdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { join, dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { execSync } from 'node:child_process'
 import { resolveSource } from '../src/utils/resolver.js'
 import { installSkill } from '../src/utils/installer.js'
+import { getAgentManifest } from '../src/agents.js'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const ROOT = resolve(__dirname, '..')
+const DATA_PATH = resolve(ROOT, 'benchmark/results.json')
 
 const ITERATIONS = 10
 const GITHUB_SOURCE = 'rolecraft-sh/skills'
@@ -50,12 +56,15 @@ async function bench(label, fn, baselineAvg) {
   }
   const sorted = [...times].sort((a, b) => a - b)
   const avg = sorted.reduce((a, b) => a + b, 0) / sorted.length
+  const min = sorted[0]
+  const max = sorted[sorted.length - 1]
+  const p50 = sorted[Math.floor(sorted.length * 0.5)]
   const ratio = baselineAvg ? avg / baselineAvg : 1
   console.log(
-    `  ${label.padEnd(25)} avg ${formatMs(avg).padStart(9)}  min ${formatMs(sorted[0]).padStart(9)}  ` +
-      `max ${formatMs(sorted[sorted.length - 1]).padStart(9)}  p50 ${formatMs(sorted[Math.floor(sorted.length * 0.5)]).padStart(9)}  ${ratio.toFixed(2)}x`,
+    `  ${label.padEnd(25)} avg ${formatMs(avg).padStart(9)}  min ${formatMs(min).padStart(9)}  ` +
+      `max ${formatMs(max).padStart(9)}  p50 ${formatMs(p50).padStart(9)}  ${ratio.toFixed(2)}x`,
   )
-  return avg
+  return { avg, min, max, p50, ratio }
 }
 
 function header(label) {
@@ -82,12 +91,12 @@ async function main() {
   // ── local install ──
   header('Local path install')
 
-  const rcLocalAvg = await bench('rolecraft', async () => {
+  const rcLocal = await bench('rolecraft', async () => {
     const resolved = await resolveSource(fixtureDir)
     await installSkill(resolved, ['project'], 'copy')
   })
 
-  await bench(
+  const vercelLocal = await bench(
     'skills (Vercel)',
     async () => {
       execSync(`npx --yes skills add ${fixtureDir} --yes --copy 2>/dev/null`, {
@@ -96,7 +105,7 @@ async function main() {
         cwd: '/tmp',
       })
     },
-    rcLocalAvg,
+    rcLocal.avg,
   )
 
   console.log(
@@ -107,12 +116,12 @@ async function main() {
   // ── GitHub install ──
   header(`GitHub install (${GITHUB_SOURCE})`)
 
-  const rcGhAvg = await bench('rolecraft', async () => {
+  const rcGh = await bench('rolecraft', async () => {
     const resolved = await resolveSource(GITHUB_SOURCE)
     await installSkill(resolved, ['project'], 'copy')
   })
 
-  await bench(
+  const vercelGh = await bench(
     'skills (Vercel)',
     async () => {
       execSync(
@@ -120,7 +129,7 @@ async function main() {
         { stdio: 'pipe', timeout: 60000, cwd: '/tmp' },
       )
     },
-    rcGhAvg,
+    rcGh.avg,
   )
 
   await bench(
@@ -131,10 +140,40 @@ async function main() {
         { stdio: 'pipe', timeout: 120000, cwd: '/tmp' },
       )
     },
-    rcGhAvg,
+    rcGh.avg,
   )
 
   console.log()
+
+  // Write results.json
+  const manifest = getAgentManifest()
+  const agentCount = manifest.length
+
+  const results = {
+    date: new Date().toISOString().slice(0, 10),
+    node: process.version,
+    os: `${process.platform} (${process.arch})`,
+    iterations: ITERATIONS,
+    local: {
+      rolecraft: rcLocal,
+      vercel: vercelLocal,
+      agentskill: null,
+      localRatio: Number.parseFloat(vercelLocal.ratio.toFixed(2)),
+    },
+    github: {
+      rolecraft: rcGh,
+      vercel: vercelGh,
+      agentskill: null,
+      githubRatio: Number.parseFloat(vercelGh.ratio.toFixed(2)),
+    },
+    agents: {
+      rolecraft: agentCount,
+    },
+  }
+
+  writeFileSync(DATA_PATH, `${JSON.stringify(results, null, 2)}\n`)
+  console.log(`  📊 benchmark/results.json written`)
+
   rmSync(fixtureDir, { recursive: true, force: true })
 }
 

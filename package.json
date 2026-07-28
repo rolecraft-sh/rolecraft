@@ -88,6 +88,8 @@
     "test:coverage": "node --experimental-test-coverage --test --test-coverage-exclude=\"**/*.test.js\" --test-coverage-include=\"src/**\" --test-coverage-include=\"bin/**\"",
     "setup-hooks": "node scripts/setup-hooks.mjs",
     "postinstall": "node scripts/setup-hooks.mjs || true",
+    "benchmark": "node benchmark/install-speed.js && node scripts/benchmark-visual.js",
+    "benchmark:visual": "node scripts/benchmark-visual.js",
     "generate:agents-docs": "node scripts/generate-agents-docs.js",
     "generate:readme": "node scripts/generate-readme.js",
     "docs:dev": "vitepress dev docs",
