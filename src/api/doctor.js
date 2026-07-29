@@ -16,7 +16,7 @@ import {
   computeContentHash,
 } from '../utils/lockfile.js'
 import { detectAgents } from '../commands/setup.js'
-import { parseFrontmatter } from '../utils/converter.js'
+import { parseFrontmatter, splitSections } from '../utils/converter.js'
 import agents from '../agents.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -251,23 +251,6 @@ function countAgentSkills(dir) {
   } catch {
     return 0
   }
-}
-
-function splitSections(body) {
-  const lines = body.split('\n')
-  const sections = []
-  let current = null
-  for (const line of lines) {
-    const headingMatch = line.match(/^##\s+(.+)/)
-    if (headingMatch) {
-      if (current) sections.push(current)
-      current = { heading: headingMatch[1].trim(), lines: [] }
-    } else if (current) {
-      current.lines.push(line)
-    }
-  }
-  if (current) sections.push(current)
-  return sections
 }
 
 function parseSkillContent(skillDir) {

@@ -152,3 +152,26 @@ export function detectFormat(filePath) {
   if (filePath.endsWith('SKILL.md')) return 'skill'
   return null
 }
+
+/**
+ * Split a markdown body into sections by ## headings.
+ * Shared utility used by compose, diff, and doctor modules.
+ */
+export function splitSections(body) {
+  const lines = body.split('\n')
+  const sections = []
+  let current = null
+
+  for (const line of lines) {
+    const headingMatch = line.match(/^##\s+(.+)/)
+    if (headingMatch) {
+      if (current) sections.push(current)
+      current = { heading: headingMatch[1].trim(), lines: [] }
+    } else if (current) {
+      current.lines.push(line)
+    }
+  }
+  if (current) sections.push(current)
+
+  return sections
+}

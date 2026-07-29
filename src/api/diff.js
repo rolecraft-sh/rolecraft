@@ -1,24 +1,5 @@
-import { readFileSync, existsSync } from 'node:fs'
-import { parseFrontmatter } from '../utils/converter.js'
-
-function splitSections(body) {
-  const lines = body.split('\n')
-  const sections = []
-  let current = null
-
-  for (const line of lines) {
-    const headingMatch = line.match(/^##\s+(.+)/)
-    if (headingMatch) {
-      if (current) sections.push(current)
-      current = { heading: headingMatch[1].trim(), lines: [] }
-    } else if (current) {
-      current.lines.push(line)
-    }
-  }
-  if (current) sections.push(current)
-
-  return sections
-}
+import { readFile, stat } from 'node:fs/promises'
+import { parseFrontmatter, splitSections } from '../utils/converter.js'
 
 function diffLines(aLines, bLines) {
   const added = []
@@ -52,11 +33,21 @@ function diffFrontmatter(attrsA, attrsB) {
 }
 
 export async function apiDiff(skillA, skillB, _options = {}) {
-  if (!existsSync(skillA)) throw new Error(`Skill file not found: ${skillA}`)
-  if (!existsSync(skillB)) throw new Error(`Skill file not found: ${skillB}`)
+  try {
+    await stat(skillA)
+  } catch {
+    throw new Error(`Skill file not found: ${skillA}`)
+  }
+  try {
+    await stat(skillB)
+  } catch {
+    throw new Error(`Skill file not found: ${skillB}`)
+  }
 
-  const rawA = readFileSync(skillA, 'utf-8')
-  const rawB = readFileSync(skillB, 'utf-8')
+  const [rawA, rawB] = await Promise.all([
+    readFile(skillA, 'utf-8'),
+    readFile(skillB, 'utf-8'),
+  ])
 
   const { attrs: attrsA, body: bodyA } = parseFrontmatter(rawA)
   const { attrs: attrsB, body: bodyB } = parseFrontmatter(rawB)

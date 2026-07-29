@@ -24,7 +24,7 @@ async function fetchNpmLatestVersion(packageName) {
 }
 
 export async function apiMcpInstall(source, options = {}) {
-  const resolved = resolveMcpSource(source)
+  const resolved = await resolveMcpSource(source)
   const scanResult = scanMcpServer(resolved)
 
   if (scanResult.issues.length > 0) {
@@ -84,7 +84,7 @@ export async function apiMcpList(options = {}) {
 }
 
 export async function apiMcpUpdate(source, options = {}) {
-  const resolved = resolveMcpSource(source)
+  const resolved = await resolveMcpSource(source)
   const targets =
     options.agents && options.agents.length > 0
       ? options.agents

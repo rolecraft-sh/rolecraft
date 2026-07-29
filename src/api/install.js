@@ -143,7 +143,7 @@ export async function apiInstallSkills(source, options = {}) {
           (t) => t !== 'project' && supportedAgents.includes(t),
         )
         for (const server of mcpServers) {
-          const resolvedMcp = resolveMcpSource(server.source)
+          const resolvedMcp = await resolveMcpSource(server.source)
           const installed = []
           for (const agent of mcpTargets) {
             const ok = await addMcpServer(agent, server.name, resolvedMcp)

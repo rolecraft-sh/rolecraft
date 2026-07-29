@@ -1,12 +1,17 @@
-import { readFile, writeFile, mkdir } from 'node:fs/promises'
-import { join, dirname } from 'node:path'
-import { homedir } from 'node:os'
+import {
+  readFile,
+  writeFile,
+  mkdir,
+  rm,
+  mkdtemp,
+  readdir,
+} from 'node:fs/promises'
+import { join, dirname, relative } from 'node:path'
+import { homedir, tmpdir } from 'node:os'
 import {
   execSync as defaultExecSync,
   spawnSync as defaultSpawnSync,
 } from 'node:child_process'
-import { tmpdir } from 'node:os'
-import { mkdtempSync, readFileSync, readdirSync } from 'node:fs'
 import agents from '../agents.js'
 import { addServerToMcpLock, removeServerFromMcpLock } from './mcp-lock.js'
 
@@ -222,7 +227,7 @@ export function classifyMcpSource(source) {
   return { label: 'local path', type: 'local' }
 }
 
-export function resolveMcpSource(source) {
+export async function resolveMcpSource(source) {
   if (source.startsWith('npm:')) {
     let pkg = source.slice(4)
     let version = null
@@ -248,9 +253,8 @@ export function resolveMcpSource(source) {
       ref = repo.slice(atIdx + 1)
       repo = repo.slice(0, atIdx)
     }
-    const tmpDir = mkdtempSync(join(tmpdir(), 'rolecraft-mcp-'))
+    const tmpDir = await mkdtemp(join(tmpdir(), 'rolecraft-mcp-'))
     const cloneDir = join(tmpDir, 'repo')
-    let fileContents
     try {
       const cloneArgs = [
         'clone',
@@ -271,7 +275,7 @@ export function resolveMcpSource(source) {
           `Failed to clone ${repo}: ${result.stderr?.toString() || result.status}`,
         )
       const pkgJson = JSON.parse(
-        readFileSync(join(cloneDir, 'package.json'), 'utf-8'),
+        await readFile(join(cloneDir, 'package.json'), 'utf-8'),
       )
       const main = pkgJson.main || 'index.js'
       const bin = pkgJson.bin
@@ -280,40 +284,37 @@ export function resolveMcpSource(source) {
           : Object.values(pkgJson.bin)[0]
         : null
       const command = bin ? join(cloneDir, bin) : join(cloneDir, main)
-      const args = []
 
-      fileContents = {}
-      function readFilesRecursive(dir, baseDir) {
-        for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      // Read all files asynchronously for security scanning
+      const fileContents = {}
+      async function readFilesRecursive(dir, baseDir) {
+        const entries = await readdir(dir, { withFileTypes: true })
+        for (const entry of entries) {
           const fullPath = join(dir, entry.name)
           if (entry.isDirectory()) {
             if (entry.name === '.git' || entry.name === 'node_modules') continue
-            readFilesRecursive(fullPath, baseDir)
+            await readFilesRecursive(fullPath, baseDir)
           } else if (entry.isFile()) {
             try {
               const relPath = relative(baseDir, fullPath)
-              fileContents[relPath] = readFileSync(fullPath, 'utf-8')
+              fileContents[relPath] = await readFile(fullPath, 'utf-8')
             } catch {}
           }
         }
       }
-      readFilesRecursive(cloneDir, cloneDir)
+      await readFilesRecursive(cloneDir, cloneDir)
 
-      try {
-        runSpawnSync('rm', ['-rf', tmpDir], { stdio: 'pipe' })
-      } catch {}
+      await rm(tmpDir, { recursive: true, force: true }).catch(() => {})
       return {
         command: 'node',
-        args: [command, ...args],
+        args: [command],
         sourceType: 'github',
         repo,
         ref,
         fileContents,
       }
     } catch (err) {
-      try {
-        runSpawnSync('rm', ['-rf', tmpDir], { stdio: 'pipe' })
-      } catch {}
+      await rm(tmpDir, { recursive: true, force: true }).catch(() => {})
       throw err
     }
   }
@@ -408,7 +409,7 @@ export async function installMcpServersFromSkill(skillContent, targets) {
   if (servers.length === 0) return []
   const results = []
   for (const server of servers) {
-    const resolved = resolveMcpSource(server.source)
+    const resolved = await resolveMcpSource(server.source)
     for (const agent of targets) {
       const success = await addMcpServer(
         agent,

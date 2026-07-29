@@ -46,7 +46,7 @@ export async function apiCi(cwd = process.cwd()) {
       continue
     }
     try {
-      const resolved = resolveMcpSource(entry.source)
+      const resolved = await resolveMcpSource(entry.source)
       for (const agent of entry.agents) {
         await addMcpServer(agent, name, resolved, entry.source)
       }

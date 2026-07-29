@@ -57,7 +57,8 @@ export async function mcpInstallCommand(source, options) {
   }
 
   if (options.dryRun) {
-    const resolved = (await import('../utils/mcp.js')).resolveMcpSource(source)
+    const { resolveMcpSource: mcpResolve } = await import('../utils/mcp.js')
+    const resolved = await mcpResolve(source)
     const targets =
       options.agents?.length > 0 ? options.agents : getSupportedMcpAgents()
     console.log(`\n📋 [dry-run] Would install MCP server from: ${source}`)
@@ -120,7 +121,8 @@ export async function mcpUpdateCommand(source, options) {
   }
 
   if (options.dryRun) {
-    const resolved = (await import('../utils/mcp.js')).resolveMcpSource(source)
+    const { resolveMcpSource: mcpResolve } = await import('../utils/mcp.js')
+    const resolved = await mcpResolve(source)
     const targets =
       options.agents?.length > 0 ? options.agents : getSupportedMcpAgents()
     console.log(`\n📋 [dry-run] Would update MCP server from: ${source}`)

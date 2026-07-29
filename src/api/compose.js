@@ -1,24 +1,9 @@
-import { readFileSync, existsSync } from 'node:fs'
-import { parseFrontmatter, serializeFrontmatter } from '../utils/converter.js'
-
-function splitSections(body) {
-  const lines = body.split('\n')
-  const sections = []
-  let current = null
-
-  for (const line of lines) {
-    const headingMatch = line.match(/^##\s+(.+)/)
-    if (headingMatch) {
-      if (current) sections.push(current)
-      current = { heading: headingMatch[1].trim(), lines: [] }
-    } else if (current) {
-      current.lines.push(line)
-    }
-  }
-  if (current) sections.push(current)
-
-  return sections
-}
+import { readFile, stat } from 'node:fs/promises'
+import {
+  parseFrontmatter,
+  serializeFrontmatter,
+  splitSections,
+} from '../utils/converter.js'
 
 function mergeSectionLines(existingLines, newLines) {
   const seen = new Set(existingLines)
@@ -53,16 +38,17 @@ export async function apiCompose(sources, options = {}) {
     throw new Error('At least 2 skill files are required for compose.')
   }
 
-  for (const src of sources) {
-    if (!existsSync(src)) throw new Error(`Skill file not found: ${src}`)
-  }
-
   const mode = options.mode || 'merge'
   const allAttrs = []
   const allSections = []
 
   for (const src of sources) {
-    const raw = readFileSync(src, 'utf-8')
+    try {
+      await stat(src)
+    } catch {
+      throw new Error(`Skill file not found: ${src}`)
+    }
+    const raw = await readFile(src, 'utf-8')
     const { attrs, body } = parseFrontmatter(raw)
     allAttrs.push(attrs)
     allSections.push(splitSections(body))
@@ -103,11 +89,17 @@ export async function apiCompose(sources, options = {}) {
   if (options.name) mergedAttrs.name = options.name
 
   if (!mergedAttrs.description) {
-    const names = sources.map((s) => {
-      const raw = readFileSync(s, 'utf-8')
-      const { attrs } = parseFrontmatter(raw)
-      return attrs.name || s
-    })
+    const names = await Promise.all(
+      sources.map(async (s) => {
+        try {
+          const raw = await readFile(s, 'utf-8')
+          const { attrs } = parseFrontmatter(raw)
+          return attrs.name || s
+        } catch {
+          return s
+        }
+      }),
+    )
     mergedAttrs.description = `Composed from: ${names.join(', ')}`
   }
 

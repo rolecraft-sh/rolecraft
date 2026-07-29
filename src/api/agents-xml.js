@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from 'node:fs'
+import { readFile, readdir, stat } from 'node:fs/promises'
 import { join } from 'node:path'
 import {
   readLock,
@@ -9,14 +9,14 @@ import {
 const SKILLS_SYSTEM_HEADER = `Only use skills listed in <available_skills> below.
 Do not invoke a skill that is already loaded in your context.`
 
-function parseNameAndDescription(slug, dir) {
+async function parseNameAndDescription(slug, dir) {
   try {
-    const files = readdirSync(dir)
+    const files = await readdir(dir)
     const skillFile = files.find(
       (f) => f === 'SKILL.md' || f.toLowerCase() === 'skill.md',
     )
     if (!skillFile) return { name: slug, description: '' }
-    const content = readFileSync(join(dir, skillFile), 'utf-8')
+    const content = await readFile(join(dir, skillFile), 'utf-8')
     const fm = content.match(/^---\n([\s\S]*?)\n---/)
     if (!fm) return { name: slug, description: '' }
     const yaml = fm[1]
@@ -25,6 +25,15 @@ function parseNameAndDescription(slug, dir) {
     return { name, description }
   } catch {
     return { name: slug, description: '' }
+  }
+}
+
+async function dirExists(d) {
+  try {
+    await stat(d)
+    return true
+  } catch {
+    return false
   }
 }
 
@@ -37,27 +46,28 @@ function escapeXml(str) {
     .replace(/'/g, '&apos;')
 }
 
-function generateXml(allSkills) {
+async function generateXml(allSkills) {
   const entries = Object.entries(allSkills)
   if (entries.length === 0) return ''
 
-  const skillsXml = entries
-    .map(([, entry]) => {
+  const skillsXml = await Promise.all(
+    entries.map(async ([, entry]) => {
       const normSlug = entry.slug.replace(/\//g, '-')
       const searchDirs = [
         join(getAgentsDir(), normSlug),
         join(process.cwd(), '.agents', 'skills', normSlug),
       ]
-      const existingDir = searchDirs.find((d) => {
-        try {
-          readdirSync(d)
-          return true
-        } catch {
-          return false
+
+      let existingDir = null
+      for (const d of searchDirs) {
+        if (await dirExists(d)) {
+          existingDir = d
+          break
         }
-      })
+      }
+
       const { name, description } = existingDir
-        ? parseNameAndDescription(entry.slug, existingDir)
+        ? await parseNameAndDescription(entry.slug, existingDir)
         : { name: entry.slug, description: '' }
 
       const agentList = entry.agents || []
@@ -68,14 +78,14 @@ function generateXml(allSkills) {
     <description>${escapeXml(description)}</description>
     <location>${location}</location>
   </skill>`
-    })
-    .join('\n')
+    }),
+  )
 
   return `<skills_system>
 ${SKILLS_SYSTEM_HEADER}
 
 <available_skills>
-${skillsXml}
+${skillsXml.join('\n')}
 </available_skills>
 </skills_system>\n`
 }
@@ -91,7 +101,7 @@ export async function agentsXmlApi(writeToFile = false) {
     if (!allSkills[slug]) allSkills[slug] = entry
   }
 
-  const xml = generateXml(allSkills)
+  const xml = await generateXml(allSkills)
 
   if (!xml) {
     return { xml: '' }
@@ -101,7 +111,7 @@ export async function agentsXmlApi(writeToFile = false) {
     const agentsMdPath = join(process.cwd(), 'AGENTS.md')
     let existing = ''
     try {
-      existing = readFileSync(agentsMdPath, 'utf-8')
+      existing = await readFile(agentsMdPath, 'utf-8')
     } catch {}
 
     const sectionStart = existing.indexOf('<skills_system>')

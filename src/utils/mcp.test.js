@@ -529,8 +529,8 @@ Just content
   })
 
   describe('resolveMcpSource', () => {
-    it('resolves npm: source', () => {
-      const resolved = mcpModule.resolveMcpSource(
+    it('resolves npm: source', async () => {
+      const resolved = await mcpModule.resolveMcpSource(
         'npm:@modelcontextprotocol/github',
       )
       assert.equal(resolved.command, 'npx')
@@ -539,8 +539,8 @@ Just content
       assert.equal(resolved.packageVersion, null)
     })
 
-    it('resolves npm: source with @version (scoped)', () => {
-      const resolved = mcpModule.resolveMcpSource(
+    it('resolves npm: source with @version (scoped)', async () => {
+      const resolved = await mcpModule.resolveMcpSource(
         'npm:@modelcontextprotocol/github@1.2.3',
       )
       assert.equal(resolved.command, 'npx')
@@ -553,38 +553,40 @@ Just content
       assert.equal(resolved.packageVersion, '1.2.3')
     })
 
-    it('resolves npm: source with @version (unscoped)', () => {
-      const resolved = mcpModule.resolveMcpSource('npm:lodash@4.17.21')
+    it('resolves npm: source with @version (unscoped)', async () => {
+      const resolved = await mcpModule.resolveMcpSource('npm:lodash@4.17.21')
       assert.equal(resolved.command, 'npx')
       assert.deepEqual(resolved.args, ['-y', 'lodash@4.17.21'])
       assert.equal(resolved.packageName, 'lodash')
       assert.equal(resolved.packageVersion, '4.17.21')
     })
 
-    it('resolves npm: source with tag as version', () => {
-      const resolved = mcpModule.resolveMcpSource('npm:@scope/pkg@latest')
+    it('resolves npm: source with tag as version', async () => {
+      const resolved = await mcpModule.resolveMcpSource('npm:@scope/pkg@latest')
       assert.equal(resolved.command, 'npx')
       assert.deepEqual(resolved.args, ['-y', '@scope/pkg@latest'])
       assert.equal(resolved.packageName, '@scope/pkg')
       assert.equal(resolved.packageVersion, 'latest')
     })
 
-    it('resolves uvx: source', () => {
-      const resolved = mcpModule.resolveMcpSource('uvx:@anthropic/postgres-mcp')
+    it('resolves uvx: source', async () => {
+      const resolved = await mcpModule.resolveMcpSource(
+        'uvx:@anthropic/postgres-mcp',
+      )
       assert.equal(resolved.command, 'uvx')
       assert.deepEqual(resolved.args, ['@anthropic/postgres-mcp'])
       assert.equal(resolved.sourceType, 'uvx')
     })
 
-    it('resolves pipx: source', () => {
-      const resolved = mcpModule.resolveMcpSource('pipx:postgres-mcp')
+    it('resolves pipx: source', async () => {
+      const resolved = await mcpModule.resolveMcpSource('pipx:postgres-mcp')
       assert.equal(resolved.command, 'pipx')
       assert.deepEqual(resolved.args, ['run', 'postgres-mcp'])
       assert.equal(resolved.sourceType, 'pipx')
     })
 
-    it('resolves go: source', () => {
-      const resolved = mcpModule.resolveMcpSource(
+    it('resolves go: source', async () => {
+      const resolved = await mcpModule.resolveMcpSource(
         'go:github.com/org/mcp-server',
       )
       assert.equal(resolved.command, 'go')
@@ -592,49 +594,51 @@ Just content
       assert.equal(resolved.sourceType, 'go')
     })
 
-    it('resolves deno: source', () => {
-      const resolved = mcpModule.resolveMcpSource('deno:jsr:@org/mcp-server')
+    it('resolves deno: source', async () => {
+      const resolved = await mcpModule.resolveMcpSource(
+        'deno:jsr:@org/mcp-server',
+      )
       assert.equal(resolved.command, 'deno')
       assert.deepEqual(resolved.args, ['run', 'jsr:@org/mcp-server'])
       assert.equal(resolved.sourceType, 'deno')
     })
 
-    it('resolves cargo: source', () => {
-      const resolved = mcpModule.resolveMcpSource('cargo:my-mcp-server')
+    it('resolves cargo: source', async () => {
+      const resolved = await mcpModule.resolveMcpSource('cargo:my-mcp-server')
       assert.equal(resolved.command, 'cargo')
       assert.deepEqual(resolved.args, ['run', 'my-mcp-server'])
       assert.equal(resolved.sourceType, 'cargo')
     })
 
-    it('resolves local path source', () => {
-      const resolved = mcpModule.resolveMcpSource('/path/to/server.js')
+    it('resolves local path source', async () => {
+      const resolved = await mcpModule.resolveMcpSource('/path/to/server.js')
       assert.equal(resolved.command, 'node')
       assert.deepEqual(resolved.args, ['/path/to/server.js'])
       assert.equal(resolved.sourceType, 'local')
     })
 
-    it('resolves relative path source', () => {
-      const resolved = mcpModule.resolveMcpSource('./my-server.js')
+    it('resolves relative path source', async () => {
+      const resolved = await mcpModule.resolveMcpSource('./my-server.js')
       assert.equal(resolved.command, 'node')
       assert.equal(resolved.sourceType, 'local')
     })
 
-    it('resolves ~ path source', () => {
-      const resolved = mcpModule.resolveMcpSource('~/dev/my-server.js')
+    it('resolves ~ path source', async () => {
+      const resolved = await mcpModule.resolveMcpSource('~/dev/my-server.js')
       assert.equal(resolved.command, 'node')
       assert.equal(resolved.sourceType, 'local')
     })
 
-    it('throws for unknown source format', () => {
-      assert.throws(
+    it('throws for unknown source format', async () => {
+      await assert.rejects(
         () => mcpModule.resolveMcpSource('invalid-source'),
         /Unknown MCP source format/,
       )
     })
 
-    it('throws when gh: source clone fails', () => {
+    it('throws when gh: source clone fails', async () => {
       mcpModule.setSpawnSync(() => ({ status: 1, stderr: 'mock failure' }))
-      assert.throws(
+      await assert.rejects(
         () => mcpModule.resolveMcpSource('gh:test/repo'),
         /Failed to clone/,
       )
@@ -657,7 +661,7 @@ Just content
           if (cmd === 'rm') return { status: 0 }
           return { status: 0 }
         })
-        const resolved = mcpModule.resolveMcpSource('gh:test/mcp-server')
+        const resolved = await mcpModule.resolveMcpSource('gh:test/mcp-server')
         assert.equal(resolved.command, 'node')
         assert.equal(resolved.sourceType, 'github')
         assert.equal(resolved.repo, 'test/mcp-server')
@@ -666,7 +670,7 @@ Just content
       }),
     )
 
-    it('gh: source with @branch ref uses --branch flag', () => {
+    it('gh: source with @branch ref uses --branch flag', async () => {
       const capturedArgs = []
       mcpModule.setSpawnSync((cmd, args) => {
         if (cmd === 'git') {
@@ -682,7 +686,9 @@ Just content
         if (cmd === 'rm') return { status: 0 }
         return { status: 0 }
       })
-      const resolved = mcpModule.resolveMcpSource('gh:test/mcp-server@main')
+      const resolved = await mcpModule.resolveMcpSource(
+        'gh:test/mcp-server@main',
+      )
       assert.equal(resolved.repo, 'test/mcp-server')
       assert.equal(resolved.ref, 'main')
       assert.ok(capturedArgs.includes('--branch'))
@@ -690,7 +696,7 @@ Just content
       mcpModule.setSpawnSync(undefined)
     })
 
-    it('gh: source with @tag ref', () => {
+    it('gh: source with @tag ref', async () => {
       const capturedArgs = []
       mcpModule.setSpawnSync((cmd, args) => {
         if (cmd === 'git') {
@@ -706,7 +712,7 @@ Just content
         if (cmd === 'rm') return { status: 0 }
         return { status: 0 }
       })
-      const resolved = mcpModule.resolveMcpSource('gh:owner/repo@v1.0.0')
+      const resolved = await mcpModule.resolveMcpSource('gh:owner/repo@v1.0.0')
       assert.equal(resolved.repo, 'owner/repo')
       assert.equal(resolved.ref, 'v1.0.0')
       assert.ok(capturedArgs.includes('--branch'))

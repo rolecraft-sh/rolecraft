@@ -246,7 +246,7 @@ export async function setupCommand(source, options = {}) {
             .filter((a) => supported.includes(a.flag))
             .map((a) => a.flag)
           for (const server of mcpServers) {
-            const resolvedMcp = resolveMcpSource(server.source)
+            const resolvedMcp = await resolveMcpSource(server.source)
             let installedCount = 0
             for (const agent of mcpTargets) {
               const ok = await addMcpServer(agent, server.name, resolvedMcp)
