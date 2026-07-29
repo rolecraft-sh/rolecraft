@@ -1,4 +1,4 @@
-import { readFile, stat } from 'node:fs/promises'
+import { readFile } from 'node:fs/promises'
 import { parseFrontmatter, splitSections } from '../utils/converter.js'
 
 function diffLines(aLines, bLines) {
@@ -33,20 +33,13 @@ function diffFrontmatter(attrsA, attrsB) {
 }
 
 export async function apiDiff(skillA, skillB, _options = {}) {
-  try {
-    await stat(skillA)
-  } catch {
-    throw new Error(`Skill file not found: ${skillA}`)
-  }
-  try {
-    await stat(skillB)
-  } catch {
-    throw new Error(`Skill file not found: ${skillB}`)
-  }
-
   const [rawA, rawB] = await Promise.all([
-    readFile(skillA, 'utf-8'),
-    readFile(skillB, 'utf-8'),
+    readFile(skillA, 'utf-8').catch(() => {
+      throw new Error(`Skill file not found: ${skillA}`)
+    }),
+    readFile(skillB, 'utf-8').catch(() => {
+      throw new Error(`Skill file not found: ${skillB}`)
+    }),
   ])
 
   const { attrs: attrsA, body: bodyA } = parseFrontmatter(rawA)

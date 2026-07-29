@@ -1,4 +1,4 @@
-import { readFile, stat } from 'node:fs/promises'
+import { readFile } from 'node:fs/promises'
 import {
   parseFrontmatter,
   serializeFrontmatter,
@@ -43,12 +43,9 @@ export async function apiCompose(sources, options = {}) {
   const allSections = []
 
   for (const src of sources) {
-    try {
-      await stat(src)
-    } catch {
+    const raw = await readFile(src, 'utf-8').catch(() => {
       throw new Error(`Skill file not found: ${src}`)
-    }
-    const raw = await readFile(src, 'utf-8')
+    })
     const { attrs, body } = parseFrontmatter(raw)
     allAttrs.push(attrs)
     allSections.push(splitSections(body))
