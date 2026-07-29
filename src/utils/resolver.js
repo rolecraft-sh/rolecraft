@@ -7,6 +7,7 @@ import { execSync as defaultExecSync, spawnSync } from 'node:child_process'
 import { mkdtempSync } from 'node:fs'
 import { get as defaultHttpsGet } from 'node:https'
 import { computeContentHash } from './lockfile.js'
+import { parseFrontmatter } from './converter.js'
 
 // Convert through character codes to break CodeQL taint tracking.
 // Numeric values are not tracked as tainted, so the returned string is clean.
@@ -65,23 +66,26 @@ function isLocalPath(source) {
 }
 
 function parseMetadata(content) {
-  let name, slug, owner, description, category
+  let name, slug, owner, description, category, mcpServers
 
-  const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/)
-  if (frontmatterMatch) {
-    const yaml = frontmatterMatch[1]
-    const nameMatch = yaml.match(/^name:\s*(.+)$/m)
-    const slugMatch = yaml.match(/^slug:\s*(\S+)$/m)
-    const ownerMatch = yaml.match(/^owner:\s*(\S+)$/m)
-    const descMatch = yaml.match(/^description:\s*(.+)$/m)
-    const catMatch = yaml.match(/^metadata:\n\s+category:\s*(\S+)$/m)
-
-    name = nameMatch?.[1]?.trim() || 'unknown'
-    slug = slugMatch?.[1] || name
-    owner = ownerMatch?.[1] || 'local'
-    description =
-      descMatch?.[1]?.trim().replace(/^["'](.*)["']$/, '$1') || undefined
-    category = catMatch?.[1] || undefined
+  const { attrs } = parseFrontmatter(content)
+  if (attrs && Object.keys(attrs).length > 0) {
+    name = attrs.name ? String(attrs.name).trim() : 'unknown'
+    slug = attrs.slug ? String(attrs.slug).trim() : name
+    owner = attrs.owner ? String(attrs.owner).trim() : 'local'
+    description = attrs.description
+      ? String(attrs.description)
+          .trim()
+          .replace(/^["'](.*)["']$/, '$1')
+      : undefined
+    category = attrs.category
+      ? String(attrs.category).trim()
+      : attrs.metadata?.category
+        ? String(attrs.metadata.category).trim()
+        : undefined
+    mcpServers = Array.isArray(attrs.mcp_servers)
+      ? attrs.mcp_servers
+      : undefined
   }
 
   if (!slug) {
@@ -94,7 +98,7 @@ function parseMetadata(content) {
     owner = oldOwnerMatch?.[1] || 'local'
   }
 
-  return { name, slug, owner, description, category }
+  return { name, slug, owner, description, category, mcpServers }
 }
 
 async function readFileContents(skillDir) {
@@ -122,6 +126,8 @@ async function enrichSkill(found) {
     slug: found.slug,
     owner: found.owner,
     description: found.description,
+    category: found.category,
+    mcpServers: found.mcpServers,
     content: found.content,
     files,
     fileContents,

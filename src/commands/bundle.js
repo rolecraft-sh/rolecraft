@@ -2,7 +2,7 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { createInterface } from 'node:readline'
 import { stdin as input, stdout as output } from 'node:process'
-import { installCommand } from './install.js'
+import { apiInstallSkills } from '../api/install.js'
 
 function askQuestion(query) {
   const rl = createInterface({ input, output })
@@ -93,11 +93,10 @@ async function installSources(sources, label, options, noMcp = false) {
     console.log('   [%s/%s] %s', i + 1, sources.length, source)
 
     try {
-      await installCommand(source, {
-        global: true,
-        project: true,
+      await apiInstallSkills(source, {
+        scope: { global: true, project: true },
+        yes: true,
         noMcp: noMcp,
-        dryRun: options.dryRun,
       })
       successCount++
     } catch (err) {

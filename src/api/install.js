@@ -26,8 +26,20 @@ function resolveTargets(scope) {
   const targets = []
   if (scope.global) targets.push('agents')
   if (scope.project) targets.push('project')
+
+  // Deduplicate agent targets by directory — skip alias agents
+  // that point to the same skill directory as a previously-added agent.
+  // This prevents redundant installs when --all is used (e.g. 8+ agents
+  // all sharing ~/.agents/skills).
+  const seenDirs = new Set()
   for (const agent of agents) {
-    if (scope[agent.flag]) targets.push(agent.flag)
+    if (scope[agent.flag]) {
+      const dir = agent.getDir()
+      if (!seenDirs.has(dir)) {
+        seenDirs.add(dir)
+        targets.push(agent.flag)
+      }
+    }
   }
   return targets
 }

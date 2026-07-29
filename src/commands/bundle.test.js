@@ -241,8 +241,8 @@ describe('bundle command', () => {
     const copyPath = join(tempDir, 'bundle-interactive.mjs')
     let modSrc = readFileSync(join(__dirname, 'bundle.js'), 'utf-8')
     modSrc = modSrc.replace(
-      `import { installCommand } from './install.js'`,
-      `import { installCommand } from '${join(__dirname, 'install.js')}'`,
+      `import { apiInstallSkills } from '../api/install.js'`,
+      `import { apiInstallSkills } from '${join(__dirname, '../api/install.js')}'`,
     )
     modSrc = modSrc.replace(
       `import { createInterface } from 'node:readline'`,
@@ -275,8 +275,8 @@ describe('bundle command', () => {
     const copyPath = join(tempDir, 'bundle-overwrite.mjs')
     let modSrc = readFileSync(join(__dirname, 'bundle.js'), 'utf-8')
     modSrc = modSrc.replace(
-      `import { installCommand } from './install.js'`,
-      `import { installCommand } from '${join(__dirname, 'install.js')}'`,
+      `import { apiInstallSkills } from '../api/install.js'`,
+      `import { apiInstallSkills } from '${join(__dirname, '../api/install.js')}'`,
     )
     modSrc = modSrc.replace(
       `import { createInterface } from 'node:readline'`,

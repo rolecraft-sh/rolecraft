@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { installCommand } from '../commands/install.js'
+import { apiInstallSkills } from './install.js'
 
 function parseSources(raw, filePath) {
   if (filePath.endsWith('.json')) {
@@ -76,28 +76,31 @@ export async function bundleApi(sources, options = {}) {
     return { installed: 0, failed: 0, results: [] }
   }
 
+  const dryRun = options.dryRun || false
+
+  if (dryRun) {
+    return { dryRun: true, skills: skillSources }
+  }
+
   const results = []
   let successCount = 0
   let failCount = 0
 
+  const installOpts = {
+    scope: { global: true, project: true },
+    yes: true,
+    noMcp: options.noMcp || false,
+  }
+
   for (const source of skillSources) {
     try {
-      await installCommand(source, {
-        global: true,
-        project: true,
-        noMcp: options.noMcp || false,
-        dryRun: options.dryRun || false,
-      })
+      const result = await apiInstallSkills(source, installOpts)
       successCount++
-      results.push({ source, status: 'ok' })
+      results.push({ source, status: 'ok', details: result })
     } catch (err) {
       failCount++
       results.push({ source, status: 'failed', error: err.message })
     }
-  }
-
-  if (options.dryRun) {
-    return { dryRun: true, skills: skillSources }
   }
 
   return { installed: successCount, failed: failCount, results }

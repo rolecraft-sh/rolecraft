@@ -53,6 +53,26 @@ export function parseFrontmatter(content) {
         const sub = line.trim().match(/^(\w+):\s*(.*)$/)
         if (sub) last[sub[1]] = parseYamlValue(sub[2])
       }
+    } else if (
+      currentKey &&
+      typeof attrs[currentKey] === 'string' &&
+      attrs[currentKey] === '' &&
+      /^\s{2,}\w+:/.test(line)
+    ) {
+      const sub = line.trim().match(/^(\w+):\s*(.*)$/)
+      if (sub) {
+        attrs[currentKey] = { [sub[1]]: parseYamlValue(sub[2]) }
+      }
+    } else if (
+      currentKey &&
+      typeof attrs[currentKey] === 'object' &&
+      !Array.isArray(attrs[currentKey]) &&
+      /^\s{2,}\w+:/.test(line)
+    ) {
+      const sub = line.trim().match(/^(\w+):\s*(.*)$/)
+      if (sub) {
+        attrs[currentKey][sub[1]] = parseYamlValue(sub[2])
+      }
     }
   }
 
