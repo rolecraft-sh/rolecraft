@@ -54,7 +54,7 @@ npx rolecraft convert ./my-skill
 | Command | Purpose |
 |---------|---------|
 | `rolecraft install <source>` | Install a skill (local, GitHub, GitLab, SSH) |
-| `rolecraft init [name]` | Scaffold a new `SKILL.md` |
+| `rolecraft init [name]` | Scaffold a new `SKILL.md` (`--template`, `--list`) |
 | `rolecraft list` | Show installed skills |
 | `rolecraft check` | Check for available updates |
 | `rolecraft remove <slug>` | Uninstall a skill |

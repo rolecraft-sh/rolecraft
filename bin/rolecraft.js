@@ -125,7 +125,7 @@ Usage:
   rolecraft update <slug>           Re-install a skill (update to latest)
   rolecraft rollback <slug>         Restore a skill to previous version
   rolecraft setup [<source>]        Detect agents and optionally install a skill
-  rolecraft init [<name>]           Scaffold a new SKILL.md
+  rolecraft init [<name>]           Scaffold a new SKILL.md (--template, --list)
   rolecraft search <query>          Search for skills on GitHub
   rolecraft search <query> --skills-sh  Search skills.sh (experimental)
   rolecraft search <query> --registry  Search the rolecraft Registry
@@ -191,6 +191,10 @@ Options for search:
   --interactive  Interactive TUI picker
   --skills-sh    Search skills.sh instead of GitHub
   --registry     Search the rolecraft Registry
+
+Options for init:
+  --list              List available templates
+  --template <name>   Scaffold from a named template (basic, standard, mcp, rules, empty)
 
 Options for setup:
   --list         List available skills from a source without installing

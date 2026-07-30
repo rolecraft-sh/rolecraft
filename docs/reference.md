@@ -10,7 +10,7 @@ Complete reference for all rolecraft commands, flags, and options.
 
 | Command | Description |
 |---------|-------------|
-| `init [name]` | Scaffold a new `SKILL.md` in `./<name>/` |
+| `init [name]` | Scaffold a new `SKILL.md` (`--template`, `--list`) |
 | `install <source>` | Install a skill with security scan |
 | `bundle <sources...>` | Install multiple skills from inline sources |
 | `bundle create [name]` | Create a new bundle JSON file |
@@ -174,9 +174,20 @@ rolecraft install ./my-skill --cursor --claude --devin --copilot
 Scaffold a new skill:
 
 ```bash
-rolecraft init my-skill     # creates ./my-skill/SKILL.md
-rolecraft init              # creates ./SKILL.md
+rolecraft init my-skill                # creates ./my-skill/SKILL.md
+rolecraft init                         # creates ./SKILL.md
+rolecraft init --list                  # list available templates
+rolecraft init my-skill --template mcp # scaffold from a specific template
 ```
+
+**Options:**
+
+| Option | Description |
+|--------|-------------|
+| `--list` | List available templates with descriptions |
+| `--template <name>` | Scaffold from a named template (`basic`, `standard`, `mcp`, `rules`, `empty`) |
+
+See the [init command docs](./commands/init.md) for available templates and full examples.
 
 ### `rolecraft install <source>`
 

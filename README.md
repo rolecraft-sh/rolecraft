@@ -250,7 +250,7 @@ All API functions return plain objects (no side-effects). Available exports:
 
 | Command                                    | Description                                                                 | Details                              |
 | ------------------------------------------ | --------------------------------------------------------------------------- | ------------------------------------ |
-| `rolecraft init [<name>]`                  | Scaffold a new `SKILL.md`                                                   | [docs](docs/commands/init.md)        |
+| `rolecraft init [<name>]` | Scaffold a new `SKILL.md` (`--template`, `--list`) | [docs](docs/commands/init.md)        |
 | `rolecraft install <source>`               | Install a skill with security scan (local path, GitHub/GitLab/SSH URL, npm) | [docs](docs/commands/install.md)     |
 | `rolecraft bundle <sources>`               | Install multiple skills from inline sources or file                         | [docs](docs/commands/bundle.md)      |
 | `rolecraft bundle create`                  | Create a new bundle file                                                    | [docs](docs/commands/bundle.md)      |
