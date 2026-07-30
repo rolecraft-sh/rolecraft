@@ -5,8 +5,9 @@
 <h1 align="center">RoleCraft</h1>
 
 <p align="center">
-  <b>Install AI agent skills as roles & behaviors — from any source.</b><br>
-  Zero-dependency CLI · <b>MCP + Skills in one command</b> · 86 agents · No signup
+  <b>The Package Manager for AI Agents</b><br>
+  Install · Test · Publish · Manage Skills & MCP Servers across 86+ Agents<br>
+  Zero-dependency CLI · No signup · Offline-first
 </p>
 
 <p align="center">
@@ -50,7 +51,7 @@
 ---
 
 <p align="center">
-  <b>⚡ Zero dependencies</b> · <b>📦 87.4 kB</b> · <b>🤖 86 agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 No telemetry</b> · <b>🌐 Offline-first</b> · <b>🔧 Any source</b>
+  <b>⚡ Zero dependencies</b> · <b>📦 87.4 kB</b> · <b>🤖 86+ agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 Security scoring</b> · <b>📝 Skill testing</b> · <b>🔧 Init templates</b> · <b>🌐 Offline-first</b>
 </p>
 
 <p align="center">
