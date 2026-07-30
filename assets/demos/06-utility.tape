@@ -1,4 +1,4 @@
-Output assets/rolecraft-demo.gif
+Output assets/demos/06-utility.gif
 
 Set FontSize 15
 Set Width 820
@@ -7,12 +7,7 @@ Set Theme "Dracula"
 Set Padding 20
 Set Framerate 12
 
-Type "rolecraft install rolecraft-sh/skills --skill task-decomposer --global"
-Sleep 200ms
-Enter
-Sleep 7000ms
-
-Type "rolecraft list"
+Type "rolecraft agents"
 Sleep 200ms
 Enter
 Sleep 5000ms
@@ -25,4 +20,4 @@ Sleep 1000ms
 Type "rolecraft --help"
 Sleep 200ms
 Enter
-Sleep 8000ms
+Sleep 10000ms

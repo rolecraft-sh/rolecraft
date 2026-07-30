@@ -338,7 +338,13 @@ const COMMANDS = {
       return
     }
     const pos = parsePositionals(args)
-    return initCommand(pos[0])
+    const flags = parseFlags(args)
+    return initCommand(pos[0], {
+      list: flags.includes('--list'),
+      template: parseFlagValue(args, '--template'),
+      description: parseFlagValue(args, '--description'),
+      agents: parseFlagValue(args, '--agents'),
+    })
   },
 
   async search(args) {
