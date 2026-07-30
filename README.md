@@ -272,6 +272,7 @@ All API functions return plain objects (no side-effects). Available exports:
 | `rolecraft test <skill-path>`              | Test a skill quality with built-in assertions                               | [docs](docs/commands/test.md)        |
 | `rolecraft remove <slug>`                  | Uninstall a skill                                                           | [docs](docs/commands/remove.md)      |
 | `rolecraft update <slug>`                  | Re-install a skill to latest                                                | [docs](docs/commands/update.md)      |
+| `rolecraft rollback <slug>`                | Restore a skill to previous version from backup history                     | [docs](docs/commands/rollback.md)    |
 | `rolecraft --version`                      | Show version                                                                |                                      |
 | `rolecraft --help`                         | Show full command reference                                                 | [CLI Reference](docs/reference.md)   |
 

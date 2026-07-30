@@ -479,6 +479,29 @@ Just content
       )
       assert.deepEqual(servers, [])
     })
+
+    it('handles block scalar and non-standard field order', () => {
+      const content = `---
+name: advanced-skill
+description: Skill with block scalar
+mcp_servers:
+  - source: gh:org/mcp-server
+    name: org-server
+    env:
+      KEY: value
+  - name: simple
+    source: npm:@test/pkg
+---
+
+Content
+`
+      const servers = mcpModule.parseMcpServersFromSkill(content)
+      assert.equal(servers.length, 2)
+      assert.equal(servers[0].name, 'org-server')
+      assert.equal(servers[0].source, 'gh:org/mcp-server')
+      assert.equal(servers[1].name, 'simple')
+      assert.equal(servers[1].source, 'npm:@test/pkg')
+    })
   })
 
   describe('classifyMcpSource', () => {

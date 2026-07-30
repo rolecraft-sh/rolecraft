@@ -434,8 +434,8 @@ const AGENTS_DATA = [
   {
     flag: 'zenflow',
     name: 'zenflow',
-    getDir: () => home('.zencoder', 'skills'),
-    label: '~/.zencoder/skills/',
+    getDir: () => home('.zenflow', 'skills'),
+    label: '~/.zenflow/skills/',
   },
   {
     flag: 'neovate',
@@ -458,8 +458,8 @@ const AGENTS_DATA = [
   {
     flag: 'droid',
     name: 'droid',
-    getDir: () => home('.factory', 'skills'),
-    label: '~/.factory/skills/',
+    getDir: () => home('.droid', 'skills'),
+    label: '~/.droid/skills/',
   },
   {
     flag: 'chatgpt',

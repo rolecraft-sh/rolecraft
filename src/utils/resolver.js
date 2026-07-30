@@ -8,6 +8,7 @@ import { mkdtempSync } from 'node:fs'
 import { get as defaultHttpsGet } from 'node:https'
 import { computeContentHash } from './lockfile.js'
 import { parseFrontmatter } from './converter.js'
+import { UserError } from './errors.js'
 
 // Convert through character codes to break CodeQL taint tracking.
 // Numeric values are not tracked as tainted, so the returned string is clean.
@@ -236,7 +237,11 @@ async function resolveLocalInternal(source) {
     }
   } catch (e) {
     if (e.message?.startsWith('Source must be')) throw e
-    throw new Error(`Source not found: ${expanded}`)
+    throw new UserError(`Source not found: "${expanded}"`, {
+      suggestion:
+        'Check that the path exists. You can use a local path (./ or /), GitHub ref (owner/repo), or npm package (npm:package).',
+      code: 'SOURCE_NOT_FOUND',
+    })
   }
 
   const directPath = join(skillDir, 'SKILL.md')
@@ -265,7 +270,11 @@ async function resolveLocalInternal(source) {
 
   const found = await scanForSkill(skillDir)
   if (found.length === 0) {
-    throw new Error(`No SKILL.md found in ${skillDir}`)
+    throw new UserError(`No SKILL.md found in "${skillDir}"`, {
+      suggestion:
+        'Create a SKILL.md file in that directory, or point to a different source.',
+      code: 'NO_SKILL_LOCAL',
+    })
   }
 
   const enriched = await Promise.all(found.map(enrichSkill))
@@ -280,14 +289,22 @@ async function resolveGitHubInternal(source) {
     runGit(['clone', '--depth', '1', url, tmpDir])
   } catch {
     await rm(tmpDir, { recursive: true, force: true }).catch(() => {})
-    throw new Error(`Failed to clone GitHub repo ${source}`)
+    throw new UserError(`Could not download "${source}" from GitHub.`, {
+      suggestion:
+        'Check that the repository exists and is public. If it requires a token, set GITHUB_TOKEN.',
+      code: 'GITHUB_CLONE_FAILED',
+    })
   }
 
   try {
     const found = await scanForSkill(tmpDir)
 
     if (found.length === 0) {
-      throw new Error(`No SKILL.md found in GitHub repo ${source}`)
+      throw new UserError(`No SKILL.md found in GitHub repo "${source}".`, {
+        suggestion:
+          'Make sure the repository contains a SKILL.md file in its root or a subdirectory.',
+        code: 'NO_SKILL_FOUND',
+      })
     }
 
     const owner = source.split('/')[0]
@@ -459,19 +476,34 @@ async function resolveNpmInternal(source) {
   try {
     metadata = await fetchJson(`https://registry.npmjs.org/${encodedName}`)
   } catch (e) {
-    throw new Error(`Failed to fetch npm package "${pkgName}": ${e.message}`)
+    throw new UserError(`Could not fetch npm package "${pkgName}".`, {
+      suggestion:
+        'Check that the package name is correct and your internet is working.',
+      detail: e.message,
+      code: 'NPM_FETCH_FAILED',
+    })
   }
 
   const ver = version === 'latest' ? metadata['dist-tags']?.latest : version
   if (!ver)
-    throw new Error(`No "latest" tag found for npm package "${pkgName}"`)
+    throw new UserError(`No "latest" tag found for npm package "${pkgName}".`, {
+      suggestion: 'Specify a version explicitly (e.g. npm:package@1.0.0).',
+      code: 'NPM_NO_LATEST',
+    })
 
   const pkgVersionData = metadata.versions?.[ver]
   if (!pkgVersionData)
     throw new Error(`Version "${ver}" not found for npm package "${pkgName}"`)
 
   const tarballUrl = pkgVersionData.dist?.tarball
-  if (!tarballUrl) throw new Error(`No tarball URL found for ${pkgName}@${ver}`)
+  if (!tarballUrl)
+    throw new UserError(
+      `No download URL found for npm package "${pkgName}@${ver}".`,
+      {
+        suggestion: 'The package may have been unpublished or removed.',
+        code: 'NPM_NO_TARBALL',
+      },
+    )
 
   const tmpDir = mkdtempSync(join(tmpdir(), 'rolecraft-npm-'))
   const tarballPath = join(tmpDir, 'package.tgz')
@@ -487,9 +519,12 @@ async function resolveNpmInternal(source) {
       throw new Error(`tar extraction failed with code ${tarResult.status}`)
   } catch (e) {
     await rm(tmpDir, { recursive: true, force: true }).catch(() => {})
-    throw new Error(
-      `Failed to download/extract npm package "${pkgName}@${ver}": ${e.message}`,
-    )
+    throw new UserError(`Could not process npm package "${pkgName}@${ver}".`, {
+      suggestion:
+        'The package may be corrupted. Try again or use a different version.',
+      detail: e.message,
+      code: 'NPM_DOWNLOAD_FAILED',
+    })
   }
 
   let packageDir
@@ -498,7 +533,14 @@ async function resolveNpmInternal(source) {
     const found = await scanForSkill(packageDir)
 
     if (found.length === 0) {
-      throw new Error(`No SKILL.md found in npm package ${pkgName}@${ver}`)
+      throw new UserError(
+        `No SKILL.md found in npm package "${pkgName}@${ver}".`,
+        {
+          suggestion:
+            'This npm package does not contain a SKILL.md file. Check the package contents on npmjs.com.',
+          code: 'NPM_NO_SKILL',
+        },
+      )
     }
 
     const enriched = await Promise.all(
@@ -522,7 +564,11 @@ async function resolveNpmInternal(source) {
 
 function pickFirst({ skills, sourcePath, sourceType }) {
   if (skills.length === 0) {
-    throw new Error('No skills found')
+    throw new UserError('No skills found in the given source.', {
+      suggestion:
+        'Make sure the source contains at least one SKILL.md file with valid frontmatter.',
+      code: 'NO_SKILLS',
+    })
   }
   return { ...skills[0], sourcePath, sourceType }
 }
@@ -549,9 +595,11 @@ async function resolveAll(source) {
     }
   } catch {}
 
-  throw new Error(
-    `Invalid source: "${source}". Use a local path (./, /, ~), GitHub ref (owner/repo), git URL, npm package (npm:package), or a registered skill slug`,
-  )
+  throw new UserError(`Invalid source: "${source}"`, {
+    suggestion:
+      'Use a local path (./my-skill), GitHub ref (owner/repo), git URL, or npm package (npm:package).',
+    code: 'INVALID_SOURCE',
+  })
 }
 
 export async function resolveSource(source) {

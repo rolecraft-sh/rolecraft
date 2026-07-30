@@ -59,6 +59,7 @@ npx rolecraft convert ./my-skill
 | `rolecraft check` | Check for available updates |
 | `rolecraft remove <slug>` | Uninstall a skill |
 | `rolecraft update <slug>` | Re-install to latest version |
+| `rolecraft rollback <slug>` | Restore to previous version from backup |
 | `rolecraft bundle <sources>` | Install multiple skills from file or inline |
 | `rolecraft ci` | Re-install from lockfile (CI mode) |
 | `rolecraft verify` | Check skill integrity via content hash |

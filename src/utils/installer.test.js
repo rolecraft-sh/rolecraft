@@ -9,7 +9,7 @@ import {
   readlinkSync,
   lstatSync,
 } from 'node:fs'
-import { mkdir, rm } from 'node:fs/promises'
+import { mkdir, rm, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
@@ -1221,5 +1221,64 @@ describe('installer', () => {
     const skillDir = join(tempDir, 'agent', 'skills', 'test-my-skill')
     assert.ok(existsSync(join(skillDir, 'SKILL.md')))
     process.cwd = origCwd
+  })
+
+  describe('backup and restore', () => {
+    const backupSlug = 'backup/test-skill'
+    const testFiles = { 'SKILL.md': 'content', 'rules.json': '{}' }
+
+    it('backupSkill creates a backup file', async () => {
+      const ts = await installerModule.backupSkill(backupSlug, testFiles)
+      assert.ok(ts)
+
+      const backupDir = installerModule.getBackupDir(backupSlug)
+      assert.ok(existsSync(backupDir))
+
+      const entries = await readdir(backupDir)
+      assert.equal(entries.length, 1)
+      assert.ok(entries[0].endsWith('.json'))
+    })
+
+    it('listBackups returns backups newest-first', async () => {
+      await installerModule.backupSkill(backupSlug, { 'file1.md': 'v1' })
+      // Small delay to ensure distinct timestamps
+      await new Promise((r) => setTimeout(r, 10))
+      await installerModule.backupSkill(backupSlug, { 'file2.md': 'v2' })
+      await new Promise((r) => setTimeout(r, 10))
+      await installerModule.backupSkill(backupSlug, { 'file3.md': 'v3' })
+
+      const backups = await installerModule.listBackups(backupSlug)
+      assert.ok(backups.length >= 4) // at least 3 new + 1 from previous test
+      // Newest first
+      assert.ok(backups[0].timestamp >= backups[1].timestamp)
+      assert.ok(backups[2].path.endsWith('.json'))
+    })
+
+    it('restoreSkill returns content from most recent backup', async () => {
+      const restored = await installerModule.restoreSkill(backupSlug)
+      assert.ok(restored)
+      assert.deepEqual(restored, { 'file3.md': 'v3' })
+    })
+
+    it('removeLatestBackup removes the newest backup', async () => {
+      const before = await installerModule.listBackups(backupSlug)
+      const countBefore = before.length
+      assert.ok(countBefore > 0)
+
+      await installerModule.removeLatestBackup(backupSlug)
+
+      const after = await installerModule.listBackups(backupSlug)
+      assert.equal(after.length, countBefore - 1)
+    })
+
+    it('restoreSkill returns null when no backups exist', async () => {
+      const result = await installerModule.restoreSkill('nonexistent-slug')
+      assert.equal(result, null)
+    })
+
+    it('listBackups returns empty for unknown slug', async () => {
+      const backups = await installerModule.listBackups('unknown-slug')
+      assert.deepEqual(backups, [])
+    })
   })
 })

@@ -5,3 +5,4 @@ opencode.json
 .opencode/
 docs/.vitepress/dist
 docs/.vitepress/cache
+docs/.vitepress/.temp

@@ -18,6 +18,7 @@ Complete reference for all rolecraft commands, flags, and options.
 | `list` | Show all installed skills |
 | `remove <slug>` | Uninstall a skill |
 | `update <slug>` | Re-install a skill to latest version |
+| `rollback <slug>` | Restore a skill to previous version (from backup history) |
 | `setup [source]` | Detect agents and optionally install a skill |
 | `search <query>` | Search GitHub for skills (`--skills-sh` for skills.sh) |
 | `check` | Check for available updates |

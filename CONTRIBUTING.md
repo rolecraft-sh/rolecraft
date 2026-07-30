@@ -41,6 +41,35 @@ Don't see anything you like? Open a [feature request](https://github.com/rolecra
 - Run `npm run lint` and `npm test` before submitting — both must pass
 - To auto-fix formatting and unused imports, run `npm run lint:fix`
 
+## Error Handling
+
+Use `UserError` (from `src/utils/errors.js`) for user-facing errors. It automatically provides helpful suggestions alongside the error message:
+
+```js
+import { UserError } from '../utils/errors.js'
+
+// Instead of:
+//   throw new Error('Failed to fetch npm package')
+
+// Do:
+//   throw new UserError('Could not fetch npm package "foo"', {
+//     suggestion: 'Check the package name and your internet connection.',
+//     detail: error.message, // shown with --verbose
+//     code: 'NPM_FETCH_FAILED',
+//   })
+```
+
+| Field | Required | Shown | Purpose |
+|-------|----------|-------|---------|
+| `message` | yes | always | What went wrong, user-friendly |
+| `suggestion` | no | always | What the user should do next |
+| `detail` | no | `--verbose` | Technical details for debugging |
+| `code` | no | `--verbose` | Machine-readable error code |
+
+Reserve plain `throw new Error(...)` for programming errors (bugs, invariants) that should never reach the user. All user-facing error paths should use `UserError`.
+
+> **Tip:** When adding a new command, always use `UserError` for argument validation errors (missing slug, invalid source, etc.).
+
 ## Commit
 
 Use [conventional commits](https://www.conventionalcommits.org/):

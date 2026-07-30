@@ -72,6 +72,7 @@ export default defineConfig({
             { text: 'publish', link: '/commands/publish' },
             { text: 'registry', link: '/commands/registry' },
             { text: 'remove', link: '/commands/remove' },
+            { text: 'rollback', link: '/commands/rollback' },
             { text: 'search', link: '/commands/search' },
             { text: 'setup', link: '/commands/setup' },
             { text: 'test', link: '/commands/test' },

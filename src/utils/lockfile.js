@@ -48,6 +48,37 @@ export async function writeLock(data, lockPath = getGlobalLockPath()) {
   await writeFile(lockPath, `${JSON.stringify(data, null, 2)}\n`, 'utf-8')
 }
 
+/**
+ * Maximum number of historical versions to retain per skill.
+ */
+const MAX_HISTORY = 5
+
+/**
+ * Push the current entry into the skill's history before overwriting it.
+ * Only pushes when the contentSha differs (i.e. a real update, not a re-install).
+ * Oldest entries are trimmed to MAX_HISTORY.
+ */
+function pushHistory(lock, slug, newEntry) {
+  const existing = lock.skills[slug]
+  if (!existing?.contentSha) return // nothing to save
+  if (existing.contentSha === newEntry.contentSha) return // no change
+
+  if (!lock.skills[slug].history) lock.skills[slug].history = []
+
+  lock.skills[slug].history.push({
+    contentSha: existing.contentSha,
+    fileHashes: existing.fileHashes || {},
+    installedAt: existing.installedAt,
+    source: existing.source,
+    sourceType: existing.sourceType,
+  })
+
+  // Keep only the most recent MAX_HISTORY entries
+  if (lock.skills[slug].history.length > MAX_HISTORY) {
+    lock.skills[slug].history = lock.skills[slug].history.slice(-MAX_HISTORY)
+  }
+}
+
 export async function addSkillToLock(
   slug,
   entry,
@@ -58,13 +89,52 @@ export async function addSkillToLock(
   const mergedAgents = existing?.agents
     ? [...new Set([...existing.agents, ...(entry.agents || [])])]
     : entry.agents || []
+
+  pushHistory(lock, slug, entry)
+
+  // Capture history before overwriting the entry (pushHistory modifies it in-place)
+  const history = lock.skills[slug]?.history || []
+
   lock.skills[slug] = {
     ...entry,
     agents: mergedAgents,
     installedAt: new Date().toISOString(),
+    history,
   }
   await writeLock(lock, lockPath)
   return lock
+}
+
+/**
+ * Get the rollback history for a specific skill.
+ * Returns an array of historical entries (newest first).
+ */
+export async function getSkillHistory(slug, lockPath = getGlobalLockPath()) {
+  const lock = await readLock(lockPath)
+  const entry = lock.skills[slug]
+  if (!entry?.history || entry.history.length === 0) return []
+  return [...entry.history].reverse()
+}
+
+/**
+ * Rollback a skill to the latest historical version.
+ * Removes the most recent history entry and restores its metadata.
+ * Returns the restored entry data, or null if no history exists.
+ */
+export async function popHistory(slug, lockPath = getGlobalLockPath()) {
+  const lock = await readLock(lockPath)
+  const entry = lock.skills[slug]
+  if (!entry?.history || entry.history.length === 0) return null
+
+  const prev = entry.history.pop()
+  // Restore the previous version's metadata into the current entry
+  lock.skills[slug].contentSha = prev.contentSha
+  lock.skills[slug].fileHashes = prev.fileHashes
+  lock.skills[slug].installedAt = prev.installedAt
+  lock.skills[slug].source = prev.source
+  lock.skills[slug].sourceType = prev.sourceType
+  await writeLock(lock, lockPath)
+  return prev
 }
 
 export async function removeSkillFromLock(

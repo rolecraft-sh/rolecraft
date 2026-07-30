@@ -28,7 +28,9 @@ import { testCommand } from '../src/commands/test.js'
 import { diffCommand } from '../src/commands/diff.js'
 import { composeCommand } from '../src/commands/compose.js'
 import { publishCommand } from '../src/commands/publish.js'
+import { rollbackCommand } from '../src/commands/rollback.js'
 import agents from '../src/agents.js'
+import { showError, UserError } from '../src/utils/errors.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const pkg = JSON.parse(
@@ -121,6 +123,7 @@ Usage:
   rolecraft list                    List installed skills (--json)
   rolecraft remove <slug>           Remove a skill
   rolecraft update <slug>           Re-install a skill (update to latest)
+  rolecraft rollback <slug>         Restore a skill to previous version
   rolecraft setup [<source>]        Detect agents and optionally install a skill
   rolecraft init [<name>]           Scaffold a new SKILL.md
   rolecraft search <query>          Search for skills on GitHub
@@ -248,7 +251,11 @@ const COMMANDS = {
       console.error(
         'Source can be a local path (./, /, ~), GitHub ref (owner/repo), or npm package (npm:package)',
       )
-      throw new Error('Missing source argument.')
+      throw new UserError('Missing source argument.', {
+        suggestion:
+          'rolecraft install ./my-skill, rolecraft install owner/repo, or rolecraft install npm:package',
+        code: 'MISSING_SOURCE',
+      })
     }
     const flags = parseFlags(args)
     const scope = buildInstallScope(flags, agents)
@@ -593,6 +600,11 @@ const COMMANDS = {
     return mcpCommand(args)
   },
 
+  async rollback(args) {
+    // rollback handles --help itself with focused help text
+    return rollbackCommand(args)
+  },
+
   async version() {
     console.log(pkg.version)
   },
@@ -631,7 +643,7 @@ export async function run() {
   try {
     await main()
   } catch (err) {
-    console.error('\n❌ %s', String(err?.message || err))
+    showError(err)
     process.exit(1)
   }
 }

@@ -42,6 +42,19 @@ Install a skill with security scan.
 
 Returns `{ results: [{ name, slug, owner, security, install }], mcpResults?: [...] }`.
 
+### `rollback(slug, options?)`
+
+Restore a skill to its previous version from backup history. History is created automatically on `update` or re-install.
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `list` | `boolean` | `false` | Show history without restoring |
+| `dryRun` | `boolean` | `false` | Preview without restoring |
+
+Returns `{ slug, files, targets, prevContentSha }`.
+
+Or with `list: true`: `{ slug, currentVersion, history: [{ version, contentSha, installedAt }] }`.
+
 ### `list(cwd?, options?)`
 
 List installed skills.

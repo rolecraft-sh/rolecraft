@@ -1,3 +1,5 @@
+import { UserError } from './errors.js'
+
 const REGISTRY_OWNER = 'rolecraft-sh'
 const REGISTRY_REPO = 'registry'
 const REGISTRY_BRANCH = 'main'
@@ -42,22 +44,35 @@ export async function fetchIndex(token) {
     if (res.status === 403) {
       const body = await res.json().catch(() => ({}))
       if (body.message?.includes('rate limit')) {
-        throw new Error(
-          'GitHub API rate limit reached. Set GITHUB_TOKEN to increase limit.',
+        throw new UserError(
+          'GitHub API rate limit reached while accessing the registry.',
+          {
+            suggestion:
+              'Set GITHUB_TOKEN to increase your rate limit. Create a token at: https://github.com/settings/tokens',
+            code: 'REGISTRY_RATE_LIMIT',
+          },
         )
       }
       if (body.message?.includes('Not Found')) {
-        throw new Error(
-          `Registry not found: ${REGISTRY_OWNER}/${REGISTRY_REPO}`,
-        )
+        throw new UserError('Registry not found.', {
+          suggestion:
+            'The registry repository may not be initialized yet. Check https://github.com/rolecraft-sh/registry',
+          code: 'REGISTRY_NOT_FOUND',
+        })
       }
     }
-    throw new Error(`Registry API error: ${res.status} — ${res.statusText}`)
+    throw new UserError('Could not reach the skill registry.', {
+      suggestion: 'Check your internet connection and try again.',
+      detail: `Registry API returned HTTP ${res.status}`,
+      code: 'REGISTRY_API_ERROR',
+    })
   }
 
   const data = await res.json()
   if (data.type !== 'file' || !data.content) {
-    throw new Error('Registry index.json is not a valid file')
+    throw new UserError('Registry index.json is corrupted.', {
+      code: 'REGISTRY_CORRUPT',
+    })
   }
 
   const content = Buffer.from(data.content, 'base64').toString('utf-8')
@@ -95,11 +110,11 @@ export async function createPublishPR(
 ) {
   const t = token || getToken()
   if (!t) {
-    throw new Error(
-      'GITHUB_TOKEN or GH_TOKEN environment variable is required to publish.\n' +
-        '  Create a token at: https://github.com/settings/tokens (scope: repo)\n' +
-        '  Then set: export GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx',
-    )
+    throw new UserError('GitHub token required to publish to the registry.', {
+      suggestion:
+        'Create a token at https://github.com/settings/tokens (scope: repo), then set: export GITHUB_TOKEN=ghp_xxx',
+      code: 'PUBLISH_NO_TOKEN',
+    })
   }
 
   const headers = authHeaders(t)
@@ -107,7 +122,10 @@ export async function createPublishPR(
 
   const userRes = await runFetch('https://api.github.com/user', { headers })
   if (!userRes.ok)
-    throw new Error('GitHub authentication failed. Check your GITHUB_TOKEN.')
+    throw new UserError(
+      'GitHub authentication failed. Check your GITHUB_TOKEN.',
+      { code: 'PUBLISH_AUTH_FAILED' },
+    )
   const user = await userRes.json()
   const username = user.login
 

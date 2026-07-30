@@ -8,6 +8,7 @@ import {
   getSupportedMcpAgents,
 } from '../utils/mcp.js'
 import agents from '../agents.js'
+import { UserError } from '../utils/errors.js'
 
 function selectSkills(allSkills, skillNames, yes) {
   if (skillNames && skillNames.length > 0) {
@@ -111,14 +112,40 @@ export async function apiInstallSkills(source, options = {}) {
       security.score >= 90 ? 'safe' : security.score >= 70 ? 'review' : 'danger'
 
     if (level === 'danger' && !options.yes) {
-      throw new Error(
-        `Install of "${resolved.name}" blocked by security scan (score: ${security.score}). Use yes:true to force.`,
+      const issues = security.issues
+        .filter((i) => i.severity === 'critical' || i.severity === 'high')
+        .map(
+          (i) =>
+            `  🔴 [${i.severity}] ${i.description}${i.file ? ` (${i.file})` : ''}`,
+        )
+        .join('\n')
+      throw new UserError(
+        `"${resolved.name}" blocked by security scan (score: ${security.score}/100).`,
+        {
+          suggestion:
+            'Review the flagged issues, fix them, or use --yes to force install (not recommended for untrusted skills).',
+          detail: `Flagged issues:\n${issues}`,
+          code: 'SECURITY_DANGER',
+        },
       )
     }
 
     if (level === 'review' && !options.yes) {
-      throw new Error(
-        `"${resolved.name}" requires security review (score: ${security.score}). Use yes:true to skip.`,
+      const issues = security.issues
+        .filter((i) => i.severity !== 'low')
+        .map(
+          (i) =>
+            `  🟡 [${i.severity}] ${i.description}${i.file ? ` (${i.file})` : ''}`,
+        )
+        .join('\n')
+      throw new UserError(
+        `"${resolved.name}" needs security review (score: ${security.score}/100).`,
+        {
+          suggestion:
+            'Review the flagged issues, or use --yes to skip the review.',
+          detail: `Flagged issues:\n${issues}`,
+          code: 'SECURITY_REVIEW',
+        },
       )
     }
 

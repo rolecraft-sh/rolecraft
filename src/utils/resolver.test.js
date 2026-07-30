@@ -472,7 +472,7 @@ Content
       await assert.rejects(
         () =>
           resolverModule.resolveSource('nonexistent-owner/nonexistent-repo'),
-        /Failed to clone/,
+        /Could not download/,
       )
     })
 
@@ -481,7 +481,6 @@ Content
       resolverModule.setSpawnSync((cmd, args) => {
         if (cmd === 'git' && args[0] === 'clone') {
           const d = args[4]
-          mkdirSync(d, { recursive: true })
           writeFileSync(
             join(d, 'SKILL.md'),
             '# slug: test/skill\nname: test-skill\nContent',
@@ -721,7 +720,7 @@ Content
       })
       await assert.rejects(
         () => resolverModule.resolveSource('npm:test-pkg'),
-        /Failed to fetch npm package/,
+        /Could not fetch npm package/,
       )
     })
 
@@ -735,7 +734,7 @@ Content
       })
       await assert.rejects(
         () => resolverModule.resolveSource('npm:test-pkg'),
-        /Failed to download/,
+        /Could not process npm package/,
       )
       restoreFetch()
     })

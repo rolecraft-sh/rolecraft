@@ -29,6 +29,7 @@ export {
   apiProfileImport as profileImport,
 } from './api/profile.js'
 export { apiTest as test } from './api/test.js'
+export { apiRollback as rollback } from './api/rollback.js'
 export { apiDiff as diff } from './api/diff.js'
 export { apiCompose as compose } from './api/compose.js'
 export {

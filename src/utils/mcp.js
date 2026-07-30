@@ -14,6 +14,8 @@ import {
 } from 'node:child_process'
 import agents from '../agents.js'
 import { addServerToMcpLock, removeServerFromMcpLock } from './mcp-lock.js'
+import { parseFrontmatter } from './converter.js'
+import { UserError } from './errors.js'
 
 let _runExec = defaultExecSync
 let runSpawnSync = defaultSpawnSync
@@ -179,35 +181,11 @@ export async function listMcpServers(agent) {
 }
 
 export function parseMcpServersFromSkill(content) {
-  const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/)
-  if (!frontmatterMatch) return []
-  const yaml = frontmatterMatch[1]
-
-  const mcpLine = yaml.split('\n').findIndex((l) => l.trim() === 'mcp_servers:')
-  if (mcpLine === -1) return []
-
-  const yamlLines = yaml.split('\n')
-  const blockLines = []
-  for (let i = mcpLine + 1; i < yamlLines.length; i++) {
-    const line = yamlLines[i]
-    if (line.trim() === '' || (line.length > 0 && !line.startsWith(' '))) break
-    blockLines.push(line.trim())
-  }
-
-  const servers = []
-  let current = null
-  for (const line of blockLines) {
-    const nameMatch = line.match(/^-\s+name:\s*["']?(.+?)["']?\s*$/)
-    const sourceMatch = line.match(/^source:\s*["']?(.+?)["']?\s*$/)
-    if (nameMatch) {
-      if (current) servers.push(current)
-      current = { name: nameMatch[1] }
-    } else if (sourceMatch && current) {
-      current.source = sourceMatch[1]
-    }
-  }
-  if (current) servers.push(current)
-  return servers
+  const { attrs } = parseFrontmatter(content)
+  if (!Array.isArray(attrs.mcp_servers)) return []
+  return attrs.mcp_servers
+    .filter((s) => s && (s.name || s.source))
+    .map((s) => ({ name: s.name || '', source: s.source || '' }))
 }
 
 const MCP_SOURCE_PATTERNS = [
@@ -378,9 +356,11 @@ export async function resolveMcpSource(source) {
       path: resolvedPath,
     }
   }
-  throw new Error(
-    `Unknown MCP source format: ${source}. Use npm:package, gh:owner/repo, uvx:package, pipx:package, go:package, deno:module, cargo:crate, or a local path.`,
-  )
+  throw new UserError(`Unknown MCP source format: "${source}"`, {
+    suggestion:
+      'Use npm:package, gh:owner/repo, uvx:package, pipx:package, go:package, deno:module, cargo:crate, or a local path.',
+    code: 'MCP_INVALID_SOURCE',
+  })
 }
 
 function reconstructMcpSource(serverConfig, name) {

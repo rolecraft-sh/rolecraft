@@ -73,11 +73,11 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | astrbot | `~/.astrbot/data/skills/` | experimental | - |
 | qoder-cn | `~/.qoder-cn/skills/` | experimental | - |
 | trae-cn | `~/.trae-cn/skills/` | experimental | - |
-| zenflow | `~/.zencoder/skills/` | experimental | - |
+| zenflow | `~/.zenflow/skills/` | experimental | - |
 | neovate | `~/.neovate/skills/` | experimental | - |
 | pochi | `~/.pochi/skills/` | experimental | - |
 | adal | `~/.adal/skills/` | experimental | - |
-| droid | `~/.factory/skills/` | experimental | - |
+| droid | `~/.droid/skills/` | experimental | - |
 | chatgpt | `~/.chatgpt/skills/` | experimental | - |
 | codearts-agent | `~/.codeartsdoer/skills/` | experimental | - |
 | universal | `~/.config/agents/skills/` | experimental | - |

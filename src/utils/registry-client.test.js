@@ -94,7 +94,7 @@ describe('registry-client', () => {
     it('throws on non-ok response', async () => {
       mockFetch(404, { message: 'Not Found' })
 
-      await assert.rejects(() => client.fetchIndex(), /Registry API error/)
+      await assert.rejects(() => client.fetchIndex(), /Could not reach/)
     })
 
     it('throws on rate limit', async () => {
@@ -109,7 +109,7 @@ describe('registry-client', () => {
         content: base64Encode(sampleIndex),
       })
 
-      await assert.rejects(() => client.fetchIndex(), /not a valid file/)
+      await assert.rejects(() => client.fetchIndex(), /corrupted/)
     })
   })
 
@@ -195,7 +195,7 @@ describe('registry-client', () => {
             name: 'My Skill',
             repo: 'user/my-skill',
           }),
-        /GITHUB_TOKEN/,
+        /GitHub token required/,
       )
 
       if (origToken) process.env.GITHUB_TOKEN = origToken
