@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: "RoleCraft"
-  text: "Install AI agent skills as roles & behaviors"
-  tagline: One command. All agents. Skills + MCP servers. Zero configuration.
+  text: "The Package Manager for AI Agents"
+  tagline: Install · Test · Publish · Manage Skills & MCP Servers across 86+ Agents
   image:
     src: /rolecraft-demo.gif
     alt: RoleCraft Demo
@@ -26,13 +26,13 @@ features:
     details: 87.4 kB, no bloat. Only Node.js built-ins.
   - title: MCP + Skills in One Command
     details: Install skills and their MCP servers together. No other CLI tool combines both.
-  - title: 86 Agents
-    details: opencode, claude-code, cursor, copilot, aider, devin, gemini-cli, and more.
+  - title: Rollback
+    details: Revert any skill or MCP change instantly with a single command. --list shows every snapshot.
   - title: Security Scoring
     details: Static analysis on install — detects prompt injection, command injection, obfuscated code.
   - title: CI-Ready
     details: Lockfile-based re-install, --yes flag, dry-run mode for pipelines.
-  - title: Any Source
-    details: Local folder, GitHub, GitLab, SSH git URL, npm package.
-  - title: Registry (optional)
-    details: Discover and publish skills via the rolecraft Registry. GitHub-powered, zero-backend, automated validation.
+  - title: Init Templates
+    details: "rolecraft init --template scaffolds production-ready skills from pre-built templates. Start fast, ship faster."
+  - title: Parallel Install
+    details: Install skills and MCP servers across all 86+ agents simultaneously. Blazing fast, built for scale.
