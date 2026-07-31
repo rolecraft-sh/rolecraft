@@ -50,3 +50,12 @@ On file change:
   [2:30:15 PM] my-skill: SKILL.md changed, syncing...
   [2:30:15 PM] my-skill: synced successfully
 ```
+
+## Node.js API
+
+This command is also available as a programmatic function. See the [Node.js API documentation](../api.md) for detailed usage.
+
+```js
+import { watch } from 'rolecraft'
+const { watchers, skills } = await watch('my-skill', process.cwd())
+```

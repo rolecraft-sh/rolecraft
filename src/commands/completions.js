@@ -1,33 +1,136 @@
 const COMMANDS = [
-  'install', 'bundle', 'use', 'list', 'remove', 'update',
-  'setup', 'init', 'search', 'verify', 'ci', 'completions',
-  'agents-xml', 'doctor', 'upgrade', 'help', 'version',
+  'install',
+  'bundle',
+  'use',
+  'list',
+  'remove',
+  'update',
+  'setup',
+  'init',
+  'search',
+  'verify',
+  'ci',
+  'completions',
+  'agents-xml',
+  'doctor',
+  'upgrade',
+  'check',
+  'watch',
+  'convert',
+  'diff',
+  'compose',
+  'test',
+  'publish',
+  'profile',
+  'help',
+  'version',
   'mcp',
 ]
 
 const MCP_SUBCOMMANDS = 'install list search check update remove'
 
 const SCOPE_FLAGS = [
-  '--global', '--project', '--claude', '--cursor', '--windsurf',
-  '--devin', '--codex', '--copilot', '--aider', '--cline',
-  '--gemini', '--cody', '--continue', '--warp', '--codeium',
-  '--fabric', '--goose', '--tabnine', '--supermaven', '--pr-pilot',
-  '--loom', '--roo', '--trae', '--hermes', '--kiro', '--augment',
-  '--kilo', '--openhands', '--junie', '--factory',
-  '--command-code', '--cortex', '--mistral-vibe', '--qwen-code', '--openclaw',
-  '--codebuddy', '--mux', '--pi', '--autohand-code', '--rovo', '--firebender',
-  '--bob', '--aider-desk',
-  '--zap', '--codeep', '--kimi-code', '--zcode',
-  '--amp', '--antigravity', '--antigravity-cli', '--deepagents', '--dexto',
-  '--loaf', '--replit', '--zed', '--promptscript',
-  '--astrbot', '--qoder-cn', '--trae-cn', '--zenflow', '--neovate', '--pochi', '--adal',
-  '--droid', '--chatgpt', '--codearts-agent', '--universal',
+  '--global',
+  '--project',
+  '--claude',
+  '--cursor',
+  '--windsurf',
+  '--devin',
+  '--codex',
+  '--copilot',
+  '--aider',
+  '--cline',
+  '--gemini',
+  '--cody',
+  '--continue',
+  '--warp',
+  '--codeium',
+  '--fabric',
+  '--goose',
+  '--tabnine',
+  '--supermaven',
+  '--pr-pilot',
+  '--loom',
+  '--roo',
+  '--trae',
+  '--hermes',
+  '--kiro',
+  '--augment',
+  '--kilo',
+  '--openhands',
+  '--junie',
+  '--factory',
+  '--command-code',
+  '--cortex',
+  '--mistral-vibe',
+  '--qwen-code',
+  '--openclaw',
+  '--codebuddy',
+  '--mux',
+  '--pi',
+  '--autohand-code',
+  '--rovo',
+  '--firebender',
+  '--bob',
+  '--aider-desk',
+  '--zap',
+  '--codeep',
+  '--kimi-code',
+  '--zcode',
+  '--amp',
+  '--antigravity',
+  '--antigravity-cli',
+  '--deepagents',
+  '--dexto',
+  '--loaf',
+  '--replit',
+  '--zed',
+  '--promptscript',
+  '--astrbot',
+  '--qoder-cn',
+  '--trae-cn',
+  '--zenflow',
+  '--neovate',
+  '--pochi',
+  '--adal',
+  '--droid',
+  '--chatgpt',
+  '--codearts-agent',
+  '--universal',
   '--all',
 ]
 
 const OPTION_FLAGS = [
-  '--dry-run', '--frozen-lockfile', '--symlink', '--copy',
+  '--dry-run',
+  '--frozen-lockfile',
+  '--symlink',
+  '--copy',
   '--interactive',
+  '--yes',
+  '-y',
+  '--no-mcp',
+  '--list',
+  '--skill',
+  '--json',
+  '--skills-sh',
+  '--registry',
+  '--network',
+  '--deep',
+  '--write',
+  '--brief',
+  '--no-color',
+  '--context',
+  '--chain',
+  '--force',
+  '--name',
+  '--output',
+  '-o',
+  '--verbose',
+  '--no-emoji',
+  '--min-score',
+  '--only',
+  '--repo',
+  '--slug',
 ]
 
 function bashScript() {
@@ -52,9 +155,19 @@ _rolecraft() {
   fi
 
   case "\${COMP_WORDS[1]}" in
-    install|bundle|use|setup|upgrade)
+    install|bundle|use|setup|upgrade|check)
       COMPREPLY=($(compgen -W "$scope_flags $option_flags" -- "$cur"))
       ;;
+    list) COMPREPLY=($(compgen -W "--json" -- "$cur")) ;;
+    remove|update|watch|convert) COMPREPLY=($(compgen -W "--dry-run" -- "$cur")) ;;
+    init|verify|ci|help|version) COMPREPLY=() ;;
+    agents-xml) COMPREPLY=($(compgen -W "--write" -- "$cur")) ;;
+    doctor) COMPREPLY=($(compgen -W "--json --network --deep" -- "$cur")) ;;
+    diff) COMPREPLY=($(compgen -W "--json --brief --context --no-color" -- "$cur")) ;;
+    compose) COMPREPLY=($(compgen -W "--chain --output -o --name --dry-run --force --json --no-color" -- "$cur")) ;;
+    test) COMPREPLY=($(compgen -W "--all --json --verbose --no-color --no-emoji --min-score --only" -- "$cur")) ;;
+    publish) COMPREPLY=($(compgen -W "--dry-run --yes -y --repo --slug --name" -- "$cur")) ;;
+    profile) COMPREPLY=($(compgen -W "--yes -y --dry-run" -- "$cur")) ;;
     mcp)
       if [[ $COMP_CWORD -eq 2 ]]; then
         COMPREPLY=($(compgen -W "${MCP_SUBCOMMANDS}" -- "$cur"))
@@ -63,7 +176,7 @@ _rolecraft() {
       fi
       ;;
     search)
-      COMPREPLY=($(compgen -W "--interactive" -- "$cur"))
+      COMPREPLY=($(compgen -W "--interactive --skills-sh --registry" -- "$cur"))
       ;;
     completions)
       COMPREPLY=($(compgen -W "bash zsh fish" -- "$cur"))
@@ -98,6 +211,17 @@ _rolecraft() {
     'ci:Install all skills from lockfile'
     'completions:Generate shell completion scripts'
     'upgrade:Upgrade rolecraft to latest version'
+    'check:Check for available skill updates'
+    'watch:Watch skills and auto-sync changes'
+    'convert:Convert another skill format to SKILL.md'
+    'diff:Compare two skills'
+    'compose:Compose multiple skills'
+    'test:Test skill quality'
+    'publish:Publish a skill to the registry'
+    'profile:Manage installation profiles'
+    'agents-xml:Generate skills XML for AGENTS.md'
+    'doctor:Run system health checks'
+    'mcp:Manage MCP servers'
     'help:Show help'
     'version:Show version'
   )
@@ -115,7 +239,7 @@ _rolecraft() {
         mcp)
           _arguments '1:subcommand:(install list search check update remove)'
           ;;
-        install|bundle|use|setup|upgrade)
+        install|bundle|use|setup|upgrade|check)
           _arguments \\
             '--global[Install to ~/.agents/skills/]' \\
             '--project[Install to ./.agents/skills/]' \\
@@ -172,15 +296,29 @@ _rolecraft() {
             '--dry-run[Preview without copying]' \\
             '--frozen-lockfile[Fail if already installed]' \\
             '--symlink[Install as symlink]' \\
-            '--copy[Install as copy]'
+            '--copy[Install as copy]' \\
+            '--yes[Skip confirmation]' \\
+            '-y[Skip confirmation]' \\
+            '--no-mcp[Skip MCP installation]' \\
+            '--list[List available skills]' \\
+            '--skill[Select skills by name]:names:'
           ;;
+        list) _arguments '--json[Output structured JSON]' ;;
+        remove|update|watch|convert) _arguments '--dry-run[Preview without changes]' ;;
+        agents-xml) _arguments '--write[Write skills XML to AGENTS.md]' ;;
+        doctor) _arguments '--json[Output structured JSON]' '--network[Run network checks]' '--deep[Run deep checks]' ;;
+        diff) _arguments '--json[Output structured JSON]' '--brief[Show only a summary]' '--context[Context lines]:lines:' '--no-color[Disable colors]' ;;
+        compose) _arguments '--chain[Use override mode]' '--output[Write to file]:file:_files' '-o[Write to file]:file:_files' '--name[Set output skill name]:name:' '--dry-run[Preview result]' '--force[Overwrite output]' '--json[Output structured JSON]' '--no-color[Disable colors]' ;;
+        test) _arguments '--all[Test all installed skills]' '--json[Output structured JSON]' '--verbose[Show details]' '--no-color[Disable colors]' '--no-emoji[Use ASCII fallbacks]' '--min-score[Minimum score]:score:' '--only[Checks to run]:checks:' ;;
+        publish) _arguments '--dry-run[Preview without publishing]' '--yes[Skip confirmation]' '-y[Skip confirmation]' '--repo[Associated repository]:repository:' '--slug[Override slug]:slug:' '--name[Override name]:name:' ;;
+        profile) _arguments '--yes[Skip confirmation]' '-y[Skip confirmation]' '--dry-run[Preview without changes]' ;;
         search)
-          _arguments '--interactive[Choose and install from results]'
+          _arguments '--interactive[Choose and install from results]' '--skills-sh[Search skills.sh]' '--registry[Search the rolecraft registry]'
           ;;
         completions)
           _arguments '::shell:(bash zsh fish)'
           ;;
-        remove|update|mcp)
+        mcp)
           _arguments '*:slug:'
           ;;
         bundle)
@@ -236,11 +374,22 @@ complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a verify    -d 'Ve
 complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a ci        -d 'CI mode install'
 complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a completions -d 'Generate completions'
 complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a upgrade    -d 'Upgrade to latest version'
+complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a check      -d 'Check for skill updates'
+complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a watch      -d 'Watch skills and auto-sync'
+complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a convert    -d 'Convert a skill format'
+complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a diff       -d 'Compare two skills'
+complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a compose    -d 'Compose multiple skills'
+complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a test       -d 'Test skill quality'
+complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a publish    -d 'Publish a skill'
+complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a profile    -d 'Manage profiles'
+complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a agents-xml -d 'Generate skills XML'
+complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a doctor     -d 'Run health checks'
+complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a mcp        -d 'Manage MCP servers'
 complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a help      -d 'Show help'
 complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a version   -d 'Show version'
 
 # scope flags for install/bundle/use/setup
-for cmd in install bundle use setup upgrade
+for cmd in install bundle use setup upgrade check
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l global         -d 'Install to ~/.agents/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l project        -d 'Install to ./.agents/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l claude         -d 'Install to ~/.claude/skills/'
@@ -297,6 +446,10 @@ for cmd in install bundle use setup upgrade
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l frozen-lockfile -d 'Fail if already installed'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l symlink        -d 'Install as symlink'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l copy           -d 'Install as copy'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l yes -s y       -d 'Skip confirmation'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l no-mcp         -d 'Skip MCP installation'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l list           -d 'List available skills'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l skill -r        -d 'Select skills by name'
 end
 
 # search flags
@@ -317,6 +470,45 @@ for cmd in install list search check update remove
 end
 
 complete -f -c rolecraft -n '__fish_rolecraft_using_command search' -l interactive -d 'Choose and install from results'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command search' -l skills-sh -d 'Search skills.sh'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command search' -l registry -d 'Search the rolecraft registry'
+
+# command-specific flags
+complete -f -c rolecraft -n '__fish_rolecraft_using_command list' -l json -d 'Output structured JSON'
+for cmd in remove update watch convert
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l dry-run -d 'Preview without changes'
+end
+complete -f -c rolecraft -n '__fish_rolecraft_using_command agents-xml' -l write -d 'Write to AGENTS.md'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command doctor' -l json     -d 'Output structured JSON'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command doctor' -l network  -d 'Run network checks'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command doctor' -l deep     -d 'Run deep checks'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command diff' -l json     -d 'Output structured JSON'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command diff' -l brief    -d 'Show only a summary'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command diff' -l context  -d 'Context lines'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command diff' -l no-color -d 'Disable colors'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command compose' -l chain    -d 'Use override mode'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command compose' -l output   -d 'Write to file'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command compose' -s o        -d 'Write to file'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command compose' -l name     -d 'Set output skill name'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command compose' -l dry-run  -d 'Preview result'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command compose' -l force    -d 'Overwrite output'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command compose' -l json     -d 'Output structured JSON'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command compose' -l no-color -d 'Disable colors'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command test' -l all      -d 'Test all installed skills'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command test' -l json     -d 'Output structured JSON'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command test' -l verbose  -d 'Show details'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command test' -l no-color -d 'Disable colors'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command test' -l no-emoji -d 'Use ASCII fallbacks'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command test' -l min-score -d 'Minimum score'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command test' -l only     -d 'Checks to run'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command publish' -l dry-run -d 'Preview without publishing'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command publish' -l yes     -d 'Skip confirmation'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command publish' -s y       -d 'Skip confirmation'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command publish' -l repo    -d 'Associated repository'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command publish' -l slug    -d 'Override slug'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command publish' -l name    -d 'Override name'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command profile' -l yes -s y -d 'Skip confirmation'
+complete -f -c rolecraft -n '__fish_rolecraft_using_command profile' -l dry-run -d 'Preview without changes'
 
 # completions subcommands
 complete -f -c rolecraft -n '__fish_rolecraft_using_command completions' -a bash -d 'Bash completions'
@@ -354,6 +546,8 @@ export async function completionsCommand(shell) {
       console.log(fishScript())
       break
     default:
-      throw new Error(`Unknown shell: ${shell}. Usage: rolecraft completions bash|zsh|fish`)
+      throw new Error(
+        `Unknown shell: ${shell}. Usage: rolecraft completions bash|zsh|fish`,
+      )
   }
 }

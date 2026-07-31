@@ -1,6 +1,6 @@
 # `rolecraft install`
 
-Install a skill from a local path, GitHub repository, or npm package.
+Install a skill from a local path, GitHub repository, npm package, or registry slug.
 
 Supports **single-skill** and **multi-skill** repositories. If a source contains
 multiple `SKILL.md` files (e.g. under `skills/`), you will be prompted to
@@ -29,13 +29,22 @@ rolecraft install /absolute/path/to/skill
 Shorthand `owner/repo`:
 
 ```bash
-rolecraft install sametcelikbicak/task-decomposer
-rolecraft install sametcelikbicak/coverage-guard
+rolecraft install rolecraft-sh/skills
 rolecraft install mattpocock/skills
 ```
 
 The CLI clones with `--depth 1`, discovers all `SKILL.md` files (including
 those under `skills/`, `.agents/skills/`, etc.), and lets you choose.
+
+### Registry slug
+
+The [rolecraft Registry](https://github.com/rolecraft-sh/registry) provides short, versioned names for published skills:
+
+```bash
+rolecraft install my-skill
+```
+
+If `my-skill` isn't a local path, GitHub ref, git URL, or npm ref, rolecraft looks it up in the registry and resolves it to the underlying repo URL. See [`registry.md`](./registry.md) for details.
 
 ### npm package
 
@@ -88,8 +97,8 @@ interactively to select which skills to install.
 # Install from local folder (default: project scope)
 rolecraft install ./my-skill
 
-# Install from GitHub
-rolecraft install sametcelikbicak/task-decomposer
+# Install from GitHub (monorepo)
+rolecraft install rolecraft-sh/skills
 
 # Install from a multi-skill repo (interactive selection)
 rolecraft install mattpocock/skills
@@ -199,4 +208,13 @@ rolecraft install mattpocock/skills --skill diagnose-bugs
 
 # Non-interactive: install all skills with --yes
 rolecraft install mattpocock/skills --yes --global
+```
+
+## Node.js API
+
+This command is also available as a programmatic function. See the [Node.js API documentation](../api.md) for detailed usage.
+
+```js
+import { install } from 'rolecraft'
+const result = await install('./my-skill', { global: true })
 ```

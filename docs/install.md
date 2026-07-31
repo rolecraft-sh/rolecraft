@@ -141,8 +141,8 @@ rolecraft install /absolute/path/to/skill
 Shorthand `owner/repo`:
 
 ```bash
-rolecraft install sametcelikbicak/task-decomposer
-rolecraft install sametcelikbicak/coverage-guard
+rolecraft install rolecraft-sh/skills
+rolecraft install mattpocock/skills
 ```
 
 The CLI clones with `--depth 1`, finds `SKILL.md` recursively, installs it, and cleans up.

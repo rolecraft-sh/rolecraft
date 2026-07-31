@@ -49,7 +49,7 @@ describe('rolecraft CLI', () => {
     const logs = captureLogs()
     process.argv = ['node', 'rolecraft', '--help']
     await main()
-    assert.ok(logs.some(l => l.includes('rolecraft')))
+    assert.ok(logs.some((l) => l.includes('rolecraft')))
   })
 
   it('shows usage for -h', async () => {
@@ -57,7 +57,7 @@ describe('rolecraft CLI', () => {
     const logs = captureLogs()
     process.argv = ['node', 'rolecraft', '-h']
     await main()
-    assert.ok(logs.some(l => l.includes('rolecraft')))
+    assert.ok(logs.some((l) => l.includes('rolecraft')))
   })
 
   it('shows usage for help subcommand', async () => {
@@ -65,7 +65,7 @@ describe('rolecraft CLI', () => {
     const logs = captureLogs()
     process.argv = ['node', 'rolecraft', 'help']
     await main()
-    assert.ok(logs.some(l => l.includes('rolecraft')))
+    assert.ok(logs.some((l) => l.includes('rolecraft')))
   })
 
   it('shows usage for unknown command', async () => {
@@ -73,7 +73,7 @@ describe('rolecraft CLI', () => {
     const logs = captureLogs()
     process.argv = ['node', 'rolecraft', 'nonexistent-command']
     await main()
-    assert.ok(logs.some(l => l.includes('rolecraft')))
+    assert.ok(logs.some((l) => l.includes('rolecraft')))
   })
 
   it('shows version for --version', async () => {
@@ -81,7 +81,7 @@ describe('rolecraft CLI', () => {
     const logs = captureLogs()
     process.argv = ['node', 'rolecraft', '--version']
     await main()
-    assert.ok(logs.some(l => l.match(/\d+\.\d+\.\d+/)))
+    assert.ok(logs.some((l) => l.match(/\d+\.\d+\.\d+/)))
   })
 
   it('shows version for -v', async () => {
@@ -89,7 +89,7 @@ describe('rolecraft CLI', () => {
     const logs = captureLogs()
     process.argv = ['node', 'rolecraft', '-v']
     await main()
-    assert.ok(logs.some(l => l.match(/\d+\.\d+\.\d+/)))
+    assert.ok(logs.some((l) => l.match(/\d+\.\d+\.\d+/)))
   })
 
   it('shows version for version subcommand', async () => {
@@ -97,7 +97,7 @@ describe('rolecraft CLI', () => {
     const logs = captureLogs()
     process.argv = ['node', 'rolecraft', 'version']
     await main()
-    assert.ok(logs.some(l => l.match(/\d+\.\d+\.\d+/)))
+    assert.ok(logs.some((l) => l.match(/\d+\.\d+\.\d+/)))
   })
 
   it('shows usage for install --help', async () => {
@@ -117,7 +117,13 @@ describe('rolecraft CLI', () => {
 
   it('dispatches install with a source that fails resolution', async () => {
     const { main } = await import('./rolecraft.js')
-    process.argv = ['node', 'rolecraft', 'install', '/tmp/nonexistent-rolecraft-test', '--project']
+    process.argv = [
+      'node',
+      'rolecraft',
+      'install',
+      '/tmp/nonexistent-rolecraft-test',
+      '--project',
+    ]
     await assert.rejects(() => main())
   })
 
@@ -126,7 +132,7 @@ describe('rolecraft CLI', () => {
     const logs = captureLogs()
     process.argv = ['node', 'rolecraft', 'remove', '--help']
     await main()
-    assert.ok(logs.some(l => l.includes('rolecraft')))
+    assert.ok(logs.some((l) => l.includes('rolecraft')))
   })
 
   it('throws for remove with no slug', async () => {
@@ -140,7 +146,7 @@ describe('rolecraft CLI', () => {
     const logs = captureLogs()
     process.argv = ['node', 'rolecraft', 'update', '--help']
     await main()
-    assert.ok(logs.some(l => l.includes('rolecraft')))
+    assert.ok(logs.some((l) => l.includes('rolecraft')))
   })
 
   it('throws for update with no slug', async () => {
@@ -154,7 +160,7 @@ describe('rolecraft CLI', () => {
     const logs = captureLogs()
     process.argv = ['node', 'rolecraft', 'use', '--help']
     await main()
-    assert.ok(logs.some(l => l.includes('rolecraft')))
+    assert.ok(logs.some((l) => l.includes('rolecraft')))
   })
 
   it('throws for use with no source', async () => {
@@ -167,6 +173,12 @@ describe('rolecraft CLI', () => {
     const { main } = await import('./rolecraft.js')
     process.argv = ['node', 'rolecraft', 'list']
     await main()
+  })
+
+  it('rejects an agent filter without a name', async () => {
+    const { main } = await import('./rolecraft.js')
+    process.argv = ['node', 'rolecraft', 'list', '--agent']
+    await assert.rejects(() => main(), /Missing agent name/)
   })
 
   it('passes the short agent filter to the list command', async () => {
@@ -182,18 +194,23 @@ describe('rolecraft CLI', () => {
         },
         dismissed: {},
         lastSelectedAgents: [],
-      })
+      }),
     )
     const logs = captureLogs()
     process.argv = ['node', 'rolecraft', 'list', '-a', 'CURSOR']
 
     await main()
 
-    assert.ok(logs.some(l => l.includes('cursor/skill')))
-    assert.ok(logs.every(l => !l.includes('claude/skill')))
+    assert.ok(logs.some((l) => l.includes('cursor/skill')))
+    assert.ok(logs.every((l) => !l.includes('claude/skill')))
     await writeFile(
       join(tempDir, '.agents', '.skill-lock.json'),
-      JSON.stringify({ version: 3, skills: {}, dismissed: {}, lastSelectedAgents: [] })
+      JSON.stringify({
+        version: 3,
+        skills: {},
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
     )
   })
 
@@ -202,7 +219,11 @@ describe('rolecraft CLI', () => {
     const logs = captureLogs()
     process.argv = ['node', 'rolecraft', 'doctor']
     await main()
-    assert.ok(logs.some(l => l.includes('✓') || l.includes('✗') || l.includes('System')))
+    assert.ok(
+      logs.some(
+        (l) => l.includes('✓') || l.includes('✗') || l.includes('System'),
+      ),
+    )
   })
 
   it('dispatches agents-xml command', async () => {
@@ -213,7 +234,9 @@ describe('rolecraft CLI', () => {
 
   it('dispatches agents-xml --write command', async () => {
     const { main } = await import('./rolecraft.js')
-    await mkdir(join(tempDir, 'project', '.agents', 'skills'), { recursive: true })
+    await mkdir(join(tempDir, 'project', '.agents', 'skills'), {
+      recursive: true,
+    })
     process.argv = ['node', 'rolecraft', 'agents-xml', '--write']
     await main()
   })
@@ -223,7 +246,7 @@ describe('rolecraft CLI', () => {
     const logs = captureLogs()
     process.argv = ['node', 'rolecraft', 'profile', '--help']
     await main()
-    assert.ok(logs.some(l => l.includes('rolecraft profile')))
+    assert.ok(logs.some((l) => l.includes('rolecraft profile')))
   })
 
   it('dispatches profile list command', async () => {
@@ -231,7 +254,7 @@ describe('rolecraft CLI', () => {
     const logs = captureLogs()
     process.argv = ['node', 'rolecraft', 'profile', 'list']
     await main()
-    assert.ok(logs.some(l => l.includes('No profiles')))
+    assert.ok(logs.some((l) => l.includes('No profiles')))
   })
 
   it('dispatches completions shell command', async () => {
@@ -239,7 +262,7 @@ describe('rolecraft CLI', () => {
     const logs = captureLogs()
     process.argv = ['node', 'rolecraft', 'completions', 'bash']
     await main()
-    assert.ok(logs.some(l => l.includes('complete')))
+    assert.ok(logs.some((l) => l.includes('complete')))
   })
 
   it('dispatches verify command', async () => {
@@ -253,7 +276,7 @@ describe('rolecraft CLI', () => {
     const logs = captureLogs()
     process.argv = ['node', 'rolecraft', 'verify', '--help']
     await main()
-    assert.ok(logs.some(l => l.includes('rolecraft')))
+    assert.ok(logs.some((l) => l.includes('rolecraft')))
   })
 
   it('dispatches check command', async () => {
@@ -267,7 +290,7 @@ describe('rolecraft CLI', () => {
     const logs = captureLogs()
     process.argv = ['node', 'rolecraft', 'check', '--help']
     await main()
-    assert.ok(logs.some(l => l.includes('rolecraft')))
+    assert.ok(logs.some((l) => l.includes('rolecraft')))
   })
 
   it('dispatches ci command', async () => {
@@ -287,11 +310,11 @@ describe('rolecraft CLI', () => {
     const logs = captureLogs()
     process.argv = ['node', 'rolecraft', 'setup', '--help']
     await main()
-    assert.ok(logs.some(l => l.includes('rolecraft')))
+    assert.ok(logs.some((l) => l.includes('rolecraft')))
   })
 
   it('dispatches init command', async () => {
-    const initDir = join(tempDir, 'init-test-' + Date.now())
+    const initDir = join(tempDir, `init-test-${Date.now()}`)
     await mkdir(initDir, { recursive: true })
     process.cwd = () => initDir
     const { main } = await import('./rolecraft.js')
@@ -305,7 +328,7 @@ describe('rolecraft CLI', () => {
     const logs = captureLogs()
     process.argv = ['node', 'rolecraft', 'upgrade', '--help']
     await main()
-    assert.ok(logs.some(l => l.includes('rolecraft')))
+    assert.ok(logs.some((l) => l.includes('rolecraft')))
   })
 
   it('shows bundle usage when no args provided', async () => {
@@ -319,7 +342,7 @@ describe('rolecraft CLI', () => {
     const logs = captureLogs()
     process.argv = ['node', 'rolecraft', 'bundle', 'create', '--help']
     await main()
-    assert.ok(logs.some(l => l.includes('rolecraft')))
+    assert.ok(logs.some((l) => l.includes('rolecraft')))
   })
 
   it('shows usage for mcp --help', async () => {
@@ -327,7 +350,7 @@ describe('rolecraft CLI', () => {
     const logs = captureLogs()
     process.argv = ['node', 'rolecraft', 'mcp', '--help']
     await main()
-    assert.ok(logs.some(l => l.includes('rolecraft')))
+    assert.ok(logs.some((l) => l.includes('rolecraft')))
   })
 
   it('run catches errors and logs them', async () => {
@@ -343,7 +366,7 @@ describe('rolecraft CLI', () => {
     const logs = captureLogs()
     process.argv = ['node', 'rolecraft', '--version']
     await run()
-    assert.ok(logs.some(l => l.match(/\d+\.\d+\.\d+/)))
+    assert.ok(logs.some((l) => l.match(/\d+\.\d+\.\d+/)))
   })
 
   it('dispatches check-updates alias', async () => {
@@ -357,7 +380,7 @@ describe('rolecraft CLI', () => {
     const logs = captureLogs()
     process.argv = ['node', 'rolecraft', 'search', '--help']
     await main()
-    assert.ok(logs.some(l => l.includes('rolecraft')))
+    assert.ok(logs.some((l) => l.includes('rolecraft')))
   })
 
   it('throws for search with no query', async () => {
@@ -367,7 +390,7 @@ describe('rolecraft CLI', () => {
   })
 
   it('dispatches init command with a name', async () => {
-    const initDir = join(tempDir, 'init-name-test-' + Date.now())
+    const initDir = join(tempDir, `init-name-test-${Date.now()}`)
     await mkdir(initDir, { recursive: true })
     process.cwd = () => initDir
     const { main } = await import('./rolecraft.js')
@@ -381,7 +404,7 @@ describe('rolecraft CLI', () => {
     const logs = captureLogs()
     process.argv = ['node', 'rolecraft', 'init', '--help']
     await main()
-    assert.ok(logs.some(l => l.includes('rolecraft')))
+    assert.ok(logs.some((l) => l.includes('rolecraft')))
   })
 
   it('dispatches watch --help', async () => {
@@ -389,6 +412,6 @@ describe('rolecraft CLI', () => {
     const logs = captureLogs()
     process.argv = ['node', 'rolecraft', 'watch', '--help']
     await main()
-    assert.ok(logs.some(l => l.includes('rolecraft')))
+    assert.ok(logs.some((l) => l.includes('rolecraft')))
   })
 })

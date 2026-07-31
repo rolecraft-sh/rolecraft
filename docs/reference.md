@@ -2,13 +2,15 @@
 
 Complete reference for all rolecraft commands, flags, and options.
 
+> **Node.js API:** rolecraft also exposes a programmatic API. See [`src/index.js`](../src/index.js) or `import { ... } from 'rolecraft'`. All API functions return plain objects with no side-effects.
+
 ---
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `init [name]` | Scaffold a new `SKILL.md` in `./<name>/` |
+| `init [name]` | Scaffold a new `SKILL.md` (`--template`, `--list`) |
 | `install <source>` | Install a skill with security scan |
 | `bundle <sources...>` | Install multiple skills from inline sources |
 | `bundle create [name]` | Create a new bundle JSON file |
@@ -16,6 +18,7 @@ Complete reference for all rolecraft commands, flags, and options.
 | `list` | Show all installed skills |
 | `remove <slug>` | Uninstall a skill |
 | `update <slug>` | Re-install a skill to latest version |
+| `rollback <slug>` | Restore a skill to previous version (from backup history) |
 | `setup [source]` | Detect agents and optionally install a skill |
 | `search <query>` | Search GitHub for skills (`--skills-sh` for skills.sh) |
 | `check` | Check for available updates |
@@ -28,6 +31,9 @@ Complete reference for all rolecraft commands, flags, and options.
 | `mcp install/list/remove` | Install, list, and remove MCP servers |
 | `agents-xml [--write]` | Generate skills XML for AGENTS.md |
 | `completions bash\|zsh\|fish` | Generate shell completion scripts |
+| `test <skill-path>` | Test a skill quality with built-in assertions |
+| `diff <a> <b>` | Compare two skills section-by-section |
+| `compose <a> <b> [<c>...]` | Compose multiple skills into one |
 | `upgrade` | Upgrade rolecraft to latest version |
 | `--help`, `-h` | Show usage |
 | `--version`, `-v` | Show version |
@@ -40,16 +46,21 @@ These flags work across multiple commands:
 
 | Flag | Affects | Description |
 |------|---------|-------------|
-| `--yes` / `-y` | install, setup, bundle, ci | Non-interactive: accept all defaults, bypass security prompts |
-| `--dry-run` | install, setup, bundle, remove, update, profile | Preview without making changes |
+| `--yes` / `-y` | install, setup, bundle, ci, mcp, profile, publish | Non-interactive: accept all defaults, bypass security prompts |
+| `--dry-run` | install, setup, bundle, remove, update, profile, mcp, upgrade, watch, convert | Preview without making changes |
 | `--global` | install, use, setup | Install to `~/.agents/skills/` (user-wide) |
 | `--project` | install, use, setup | Install to `./.agents/skills/` (repo-scoped, default) |
-| `--all` | install, setup, profile | Install to every supported agent |
+| `--all` | install, setup, profile, mcp | Install to every supported agent |
 | `--symlink` | install, setup | Symlink instead of copy |
 | `--copy` | install, setup | Force copy (default) |
 | `--frozen-lockfile` | install | Fail if skill is already installed |
-| `--no-mcp` | install, setup | Skip MCP server installation |
-| `--interactive` | search | Open TUI for browsing and selecting results |
+| `--no-mcp` | install, setup, bundle | Skip MCP server installation |
+| `--interactive` | search, mcp search | Open TUI for browsing and selecting results |
+| `--list` | install, use, setup | List available skills from a source without installing |
+| `--skill <names>` | install, use, setup | Install/preview specific skills by name (comma-separated) |
+| `--json` | list, doctor, test, compose, diff | Output structured JSON |
+| `--no-color` | diff, compose, test | Disable colored output |
+| `--no-emoji` | test | Use ASCII fallback for emojis |
 
 ---
 
@@ -101,7 +112,52 @@ Pass any of these to `install`, `setup`, or `profile` to target specific agents:
 | `--firebender` | firebender | `~/.firebender/skills/` |
 | `--bob` | ibm-bob | `~/.bob/skills/` |
 | `--aider-desk` | aider-desk | `~/.aider-desk/skills/` |
-| *(and 44+ more — see [full list](agents))* | | |
+| `--zap` | zap | `~/.zap/skills/` |
+| `--codeep` | codeep | `~/.codeep/skills/` |
+| `--kimi-code` | kimi-code | `~/.kimi-code/skills/` |
+| `--zcode` | zcode | `~/.zcode/skills/` |
+| `--astrbot` | astrbot | `~/.astrbot/data/skills/` |
+| `--qoder-cn` | qoder-cn | `~/.qoder-cn/skills/` |
+| `--trae-cn` | trae-cn | `~/.trae-cn/skills/` |
+| `--zenflow` | zenflow | `~/.zencoder/skills/` |
+| `--neovate` | neovate | `~/.neovate/skills/` |
+| `--pochi` | pochi | `~/.pochi/skills/` |
+| `--adal` | adal | `~/.adal/skills/` |
+| `--droid` | droid | `~/.factory/skills/` |
+| `--chatgpt` | chatgpt | `~/.chatgpt/skills/` |
+| `--codearts-agent` | codearts-agent | `~/.codeartsdoer/skills/` |
+| `--universal` | universal | `~/.config/agents/skills/` |
+| `--amp` | amp | `~/.agents/skills/` |
+| `--antigravity` | antigravity | `~/.agents/skills/` |
+| `--antigravity-cli` | antigravity-cli | `~/.agents/skills/` |
+| `--deepagents` | deep-agents | `~/.agents/skills/` |
+| `--dexto` | dexto | `~/.agents/skills/` |
+| `--loaf` | loaf | `~/.agents/skills/` |
+| `--replit` | replit | `~/.agents/skills/` |
+| `--zed` | zed | `~/.agents/skills/` |
+| `--promptscript` | promptscript | `./agent/skills/` |
+| `--code-arts-doer` | code-arts-doer | `~/.codeartsdoer/skills/` |
+| `--code-maker` | code-maker | `~/.codemaker/skills/` |
+| `--code-studio` | code-studio | `~/.codestudio/skills/` |
+| `--crush` | crush | `~/.crush/skills/` |
+| `--eve` | eve | `./agent/skills/` |
+| `--forge` | forge | `~/.forge/skills/` |
+| `--inference-sh` | inference-sh | `~/.inferencesh/skills/` |
+| `--jazz` | jazz | `~/.jazz/skills/` |
+| `--iflow` | iflow | `~/.iflow/skills/` |
+| `--kilo-code` | kilo-code | `~/.kilocode/skills/` |
+| `--kode` | kode | `~/.kode/skills/` |
+| `--lingma` | lingma | `~/.lingma/skills/` |
+| `--mcp-jam` | mcp-jam | `~/.mcpjam/skills/` |
+| `--moxby` | moxby | `~/.moxby/skills/` |
+| `--ona` | ona | `~/.ona/skills/` |
+| `--qoder` | qoder | `~/.qoder/skills/` |
+| `--reasonix` | reasonix | `~/.reasonix/skills/` |
+| `--terra-mind` | terra-mind | `~/.terramind/skills/` |
+| `--tiny-cloud` | tiny-cloud | `~/.tinycloud/skills/` |
+| `--zencoder` | zencoder | `~/.zencoder/skills/` |
+| `--codebuddy` | codebuddy | `~/.codebuddy/skills/` |
+| *(see [full list](agents) for all 86 agents)* | | |
 
 Combine multiple flags in one command:
 
@@ -118,9 +174,20 @@ rolecraft install ./my-skill --cursor --claude --devin --copilot
 Scaffold a new skill:
 
 ```bash
-rolecraft init my-skill     # creates ./my-skill/SKILL.md
-rolecraft init              # creates ./SKILL.md
+rolecraft init my-skill                # creates ./my-skill/SKILL.md
+rolecraft init                         # creates ./SKILL.md
+rolecraft init --list                  # list available templates
+rolecraft init my-skill --template mcp # scaffold from a specific template
 ```
+
+**Options:**
+
+| Option | Description |
+|--------|-------------|
+| `--list` | List available templates with descriptions |
+| `--template <name>` | Scaffold from a named template (`basic`, `standard`, `mcp`, `rules`, `empty`) |
+
+See the [init command docs](./commands/init.md) for available templates and full examples.
 
 ### `rolecraft install <source>`
 
@@ -132,9 +199,10 @@ rolecraft install owner/repo                         # GitHub shorthand
 rolecraft install https://gitlab.com/org/project     # Git URL
 rolecraft install git@github.com:owner/repo.git      # SSH URL
 rolecraft install npm:package                        # npm package
+rolecraft install my-skill                           # registry slug
 ```
 
-Accepts: `--yes`, `--dry-run`, `--global`, `--project`, `--all`, `--symlink`, `--frozen-lockfile`, `--no-mcp`, agent flags.
+Accepts: `--yes`, `-y`, `--dry-run`, `--global`, `--project`, `--all`, `--symlink`, `--frozen-lockfile`, `--no-mcp`, `--list`, `--skill`, agent flags.
 
 ### `rolecraft bundle <sources...>`
 
@@ -144,6 +212,13 @@ rolecraft bundle bundle.json
 rolecraft bundle bundle.txt
 rolecraft bundle create [name]
 ```
+
+**Flags:**
+
+| Flag | Description |
+|------|-------------|
+| `--dry-run` | Preview without installing |
+| `--no-mcp` | Skip MCP server installation from skills |
 
 ### `rolecraft use <source>`
 
@@ -155,13 +230,18 @@ rolecraft use owner/repo         # from GitHub
 rolecraft use ./my-skill | head -50  # pipe to pager
 ```
 
+**Flags:**
+
+| Flag | Description |
+|------|-------------|
+| `--list` | List available skills from a source without previewing |
+| `--skill <names>` | Preview specific skills by name (comma-separated) |
+
 ### `rolecraft list`
 
 ```bash
 rolecraft list                  # all installed skills
 rolecraft list --json            # machine-readable JSON output
-rolecraft list --project         # project-level only
-rolecraft list --global          # global only
 ```
 
 ### `rolecraft remove <slug>`
@@ -187,13 +267,46 @@ rolecraft setup ./my-skill       # detect + install
 rolecraft setup owner/repo --yes
 ```
 
+**Flags:**
+
+| Flag | Description |
+|------|-------------|
+| `--yes`, `-y` | Install all skills without prompt |
+| `--dry-run` | Preview without installing |
+| `--list` | List available skills from a source without installing |
+| `--skill <names>` | Install specific skills by name (comma-separated) |
+
 ### `rolecraft search <query>`
 
 ```bash
 rolecraft search code-review                  # GitHub search
 rolecraft search code-review --interactive     # TUI picker
 rolecraft search react --skills-sh             # skills.sh (experimental)
+rolecraft search react --registry              # rolecraft Registry
 ```
+
+### `rolecraft publish <source>`
+
+Publish a skill to the rolecraft Registry:
+
+```bash
+rolecraft publish ./my-skill                          # auto-detect git remote
+rolecraft publish ./my-skill --repo user/my-skill     # explicit repo
+rolecraft publish ./my-skill --dry-run                # preview without PR
+rolecraft publish ./my-skill --yes                    # non-interactive
+```
+
+**Flags:**
+
+| Flag | Description |
+|------|-------------|
+| `--dry-run` | Preview without publishing |
+| `--yes`, `-y` | Skip confirmation prompt |
+| `--repo <ref>` | GitHub repository (owner/repo) |
+| `--slug <slug>` | Override skill slug |
+| `--name <name>` | Override skill name |
+
+Requires `GITHUB_TOKEN` environment variable (with `repo` scope). See [`publish.md`](./commands/publish.md) for full details.
 
 ### `rolecraft check`
 
@@ -213,15 +326,17 @@ Verifies SHA256 content hashes of all installed skills.
 rolecraft doctor                # standard health check
 rolecraft doctor --json         # JSON output for scripting
 rolecraft doctor --network      # include GitHub connectivity test
+rolecraft doctor --deep         # skill conflict detection
 ```
 
-Runs comprehensive system health checks: Node.js version, platform info, Git/npm availability, agent directories, lockfile schema validation, disk usage, orphaned directory detection, skill integrity (hash + symlink), MCP server configuration, and optional network connectivity (`--network`).
+Runs comprehensive system health checks: Node.js version, platform info, Git/npm availability, agent directories, lockfile schema validation, disk usage, orphaned directory detection, skill integrity (hash + symlink), MCP server configuration, optional network connectivity (`--network`), and conflict detection (`--deep`).
 
 ### `rolecraft watch [<slug>]`
 
 ```bash
 rolecraft watch                 # watch all skills
 rolecraft watch my-skill        # watch specific skill
+rolecraft watch --dry-run       # preview what would be watched
 ```
 
 ### `rolecraft convert <source>`
@@ -235,6 +350,13 @@ rolecraft convert ./dir/                # directory, auto-detects format
 rolecraft convert ./dir/ --output ./out
 rolecraft convert ./skill --dry-run
 ```
+
+**Flags:**
+
+| Flag | Description |
+|------|-------------|
+| `--dry-run` | Preview without converting |
+| `--output <dir>` | Output directory (default: current dir) |
 
 ### `rolecraft profile`
 
@@ -251,14 +373,20 @@ profile import <path>         # import from file/URL
 profile link [name]           # link to project
 ```
 
+Common flags: `--yes`/`-y`, `--dry-run`, `--all`, agent flags (`--cursor`, `--claude`, etc.)
+
 ### `rolecraft mcp`
 
 ```bash
 mcp install <source> [flags]    # install MCP server
 mcp list                        # list all MCP servers
 mcp search <query> [flags]      # search MCP servers (--npm, --interactive)
+mcp check                       # check for MCP server updates
+mcp update <name> [flags]       # update an MCP server
 mcp remove <name> [flags]       # remove MCP server
 ```
+
+**Flags:** `--yes`/`-y`, `--dry-run`, `--name <name>`, `--all`, agent flags (`--cursor`, `--claude`, etc.), `--npm`, `--interactive` (for search).
 
 ### `rolecraft agents-xml [--write]`
 
@@ -271,6 +399,53 @@ rolecraft completions bash >> ~/.bashrc
 rolecraft completions zsh >> ~/.zshrc
 rolecraft completions fish >> ~/.config/fish/completions/rolecraft.fish
 ```
+
+### `rolecraft test <skill-path>`
+
+Test a SKILL.md quality with 13 built-in assertions. Supports single skill or batch mode.
+
+```bash
+rolecraft test ./my-skill/SKILL.md       # test a single skill
+rolecraft test --all                     # test all installed skills
+rolecraft test --all --json              # JSON output for CI
+rolecraft test ./skill --min-score 80    # fail if below 80
+rolecraft test ./skill --only name,slug  # run specific assertions
+rolecraft test ./skill --verbose          # detailed results
+rolecraft test ./skill --no-color         # disable ANSI colors
+rolecraft test ./skill --no-emoji         # ASCII fallback for emojis
+```
+
+### `rolecraft diff <skill-a> <skill-b>`
+
+Compare two SKILL.md files section-by-section. Parses frontmatter and body independently.
+
+```bash
+rolecraft diff ./a.SKILL.md ./b.SKILL.md           # full diff
+rolecraft diff ./a.SKILL.md ./b.SKILL.md --brief    # summary only
+rolecraft diff ./a.SKILL.md ./b.SKILL.md --json     # JSON output
+rolecraft diff ./a.SKILL.md ./b.SKILL.md --no-color # no ANSI
+rolecraft diff ./a.SKILL.md ./b.SKILL.md --context 3 # show 3 lines context
+```
+
+Output includes frontmatter changes, section-level diffs, and a summary of changed/added/removed sections.
+
+### `rolecraft compose <skill-a> <skill-b> [<skill-c> ...]`
+
+Combine multiple SKILL.md files into a single composed skill.
+
+```bash
+rolecraft compose ./a.SKILL.md ./b.SKILL.md                     # stdout (merge mode)
+rolecraft compose ./a.SKILL.md ./b.SKILL.md -o combined.md       # write to file
+rolecraft compose ./a.SKILL.md ./b.SKILL.md --chain --name Final # chain mode
+rolecraft compose ./a.SKILL.md ./b.SKILL.md --dry-run            # preview only
+rolecraft compose ./a.SKILL.md ./b.SKILL.md --force              # overwrite output
+rolecraft compose ./a.SKILL.md ./b.SKILL.md --json               # JSON output
+rolecraft compose ./a.SKILL.md ./b.SKILL.md --no-color           # disable ANSI colors
+```
+
+**Modes:**
+- `merge` (default): same-named sections are combined, lines deduplicated
+- `chain`: later skills override same sections
 
 ### `rolecraft upgrade`
 

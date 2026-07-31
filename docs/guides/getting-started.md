@@ -50,19 +50,19 @@ This returns repositories containing `SKILL.md` files — the standard skill for
 Install to your default agent (project scope):
 
 ```bash
-rolecraft install sametcelikbicak/task-decomposer
+rolecraft install rolecraft-sh/skills
 ```
 
 Or install to specific agents:
 
 ```bash
-rolecraft install sametcelikbicak/task-decomposer --cursor --claude
+rolecraft install rolecraft-sh/skills --cursor --claude
 ```
 
 Or install to **every** agent on your machine:
 
 ```bash
-rolecraft install sametcelikbicak/task-decomposer --all
+rolecraft install rolecraft-sh/skills --all
 ```
 
 ### 4. List installed skills

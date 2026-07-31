@@ -47,7 +47,7 @@ Shows which agents are installed and how many skills each has.
 
 ```bash
 rolecraft setup ./my-skill
-rolecraft setup sametcelikbicak/task-decomposer
+rolecraft setup rolecraft-sh/skills
 rolecraft setup npm:@org/agent-rules
 ```
 
@@ -101,3 +101,12 @@ rolecraft setup ./team-defaults    # after cloning the repo
 - [`rolecraft install`](./install.md) — single-agent installation with scope flags
 - [`rolecraft bundle`](./bundle.md) — multi-skill installation
 - [`rolecraft doctor`](./doctor.md) — system health check
+
+## Node.js API
+
+This command is also available as a programmatic function. See the [Node.js API documentation](../api.md) for detailed usage.
+
+```js
+import { setup } from 'rolecraft'
+const result = await setup('./my-skill', { yes: true })
+```

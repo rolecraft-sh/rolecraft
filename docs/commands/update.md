@@ -24,3 +24,12 @@ Fetches the skill source again and re-installs it, updating to the latest availa
 rolecraft update my-skill
 rolecraft update my-skill --dry-run    # preview only
 ```
+
+## Node.js API
+
+This command is also available as a programmatic function. See the [Node.js API documentation](../api.md) for detailed usage.
+
+```js
+import { update } from 'rolecraft'
+const result = await update('my-skill')
+```

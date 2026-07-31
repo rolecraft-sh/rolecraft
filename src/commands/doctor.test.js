@@ -1,7 +1,7 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert/strict'
 import { mkdtempSync } from 'node:fs'
-import { mkdir, rm, writeFile, symlink } from 'node:fs/promises'
+import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
@@ -10,8 +10,15 @@ let tempDir, originalCwd, originalHome, doctorModule
 function capture() {
   const logs = []
   const origLog = console.log
-  console.log = (...args) => { if (args.length) logs.push(String(args[0])) }
-  return { logs, restore: () => { console.log = origLog } }
+  console.log = (...args) => {
+    if (args.length) logs.push(String(args[0]))
+  }
+  return {
+    logs,
+    restore: () => {
+      console.log = origLog
+    },
+  }
 }
 
 before(async () => {
@@ -22,9 +29,15 @@ before(async () => {
   process.chdir(tempDir)
 
   await mkdir(join(tempDir, '.agents'), { recursive: true })
-  await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-    version: 3, skills: {}, dismissed: {}, lastSelectedAgents: [],
-  }))
+  await writeFile(
+    join(tempDir, '.agents', '.skill-lock.json'),
+    JSON.stringify({
+      version: 3,
+      skills: {},
+      dismissed: {},
+      lastSelectedAgents: [],
+    }),
+  )
 
   doctorModule = await import('./doctor.js')
 })
@@ -43,7 +56,7 @@ describe('doctor command', () => {
     } finally {
       restore()
     }
-    assert.ok(logs.some(l => l.includes('System Health Check')))
+    assert.ok(logs.some((l) => l.includes('System Health Check')))
   })
 
   it('reports node.js version', async () => {
@@ -53,8 +66,8 @@ describe('doctor command', () => {
     } finally {
       restore()
     }
-    assert.ok(logs.some(l => l.includes('Node.js version')))
-    assert.ok(logs.some(l => l.includes(`v${process.versions.node}`)))
+    assert.ok(logs.some((l) => l.includes('Node.js version')))
+    assert.ok(logs.some((l) => l.includes(`v${process.versions.node}`)))
   })
 
   it('reports rolecraft version', async () => {
@@ -64,7 +77,7 @@ describe('doctor command', () => {
     } finally {
       restore()
     }
-    assert.ok(logs.some(l => l.includes('rolecraft version')))
+    assert.ok(logs.some((l) => l.includes('rolecraft version')))
   })
 
   it('reports git availability', async () => {
@@ -74,7 +87,7 @@ describe('doctor command', () => {
     } finally {
       restore()
     }
-    assert.ok(logs.some(l => l.includes('Git availability')))
+    assert.ok(logs.some((l) => l.includes('Git availability')))
   })
 
   it('reports npm availability', async () => {
@@ -84,7 +97,7 @@ describe('doctor command', () => {
     } finally {
       restore()
     }
-    assert.ok(logs.some(l => l.includes('npm availability')))
+    assert.ok(logs.some((l) => l.includes('npm availability')))
   })
 
   it('reports home directory', async () => {
@@ -94,7 +107,7 @@ describe('doctor command', () => {
     } finally {
       restore()
     }
-    assert.ok(logs.some(l => l.includes('Home directory')))
+    assert.ok(logs.some((l) => l.includes('Home directory')))
   })
 
   it('reports ~/.agents directory', async () => {
@@ -104,7 +117,7 @@ describe('doctor command', () => {
     } finally {
       restore()
     }
-    assert.ok(logs.some(l => l.includes('.agents directory')))
+    assert.ok(logs.some((l) => l.includes('.agents directory')))
   })
 
   it('shows warning when no agents detected', async () => {
@@ -114,7 +127,7 @@ describe('doctor command', () => {
     } finally {
       restore()
     }
-    assert.ok(logs.some(l => l.includes('no supported agents detected')))
+    assert.ok(logs.some((l) => l.includes('no supported agents detected')))
   })
 
   it('shows warning when no skills in lockfile', async () => {
@@ -124,7 +137,7 @@ describe('doctor command', () => {
     } finally {
       restore()
     }
-    assert.ok(logs.some(l => l.includes('no global skills')))
+    assert.ok(logs.some((l) => l.includes('no global skills')))
   })
 
   it('shows summary at the end', async () => {
@@ -134,7 +147,7 @@ describe('doctor command', () => {
     } finally {
       restore()
     }
-    assert.ok(logs.some(l => l.includes('Summary:')))
+    assert.ok(logs.some((l) => l.includes('Summary:')))
   })
 
   it('detects agent when its skill directory exists', async () => {
@@ -146,12 +159,14 @@ describe('doctor command', () => {
     } finally {
       restore()
     }
-    assert.ok(logs.some(l => l.includes('opencode')))
+    assert.ok(logs.some((l) => l.includes('opencode')))
   })
 
   it('reports skill count for detected agent', async () => {
     await mkdir(join(tempDir, '.agents', 'skills'), { recursive: true })
-    await mkdir(join(tempDir, '.agents', 'skills', 'test-skill'), { recursive: true })
+    await mkdir(join(tempDir, '.agents', 'skills', 'test-skill'), {
+      recursive: true,
+    })
 
     const { logs, restore } = capture()
     try {
@@ -159,15 +174,21 @@ describe('doctor command', () => {
     } finally {
       restore()
     }
-    assert.ok(logs.some(l => l.includes('1 skill(s)')))
+    assert.ok(logs.some((l) => l.includes('1 skill(s)')))
   })
 
   it('reports skills from global lockfile', async () => {
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3, skills: {
-        'test/my-skill': { slug: 'test/my-skill', contentSha: 'abc123' },
-      }, dismissed: {}, lastSelectedAgents: [],
-    }))
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'test/my-skill': { slug: 'test/my-skill', contentSha: 'abc123' },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
 
     const { logs, restore } = capture()
     try {
@@ -175,15 +196,24 @@ describe('doctor command', () => {
     } finally {
       restore()
     }
-    assert.ok(logs.some(l => l.includes('1 skill(s) tracked')))
+    assert.ok(logs.some((l) => l.includes('1 skill(s) tracked')))
   })
 
   it('reports missing skill directories in integrity check', async () => {
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3, skills: {
-        'test/missing-skill': { slug: 'test/missing-skill', contentSha: 'abc123' },
-      }, dismissed: {}, lastSelectedAgents: [],
-    }))
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'test/missing-skill': {
+            slug: 'test/missing-skill',
+            contentSha: 'abc123',
+          },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
 
     const { logs, restore } = capture()
     try {
@@ -191,23 +221,38 @@ describe('doctor command', () => {
     } finally {
       restore()
     }
-    assert.ok(logs.some(l => l.includes('missing director')))
+    assert.ok(logs.some((l) => l.includes('missing director')))
   })
 
   it('reports project lockfile skills', async () => {
     await mkdir(join(tempDir, '.agents'), { recursive: true })
     await mkdir(join(tempDir, '.agents', 'skills'), { recursive: true })
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3, skills: {}, dismissed: {}, lastSelectedAgents: [],
-    }))
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {},
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
 
     const projectDir = join(tempDir, 'my-project')
     await mkdir(join(projectDir, '.agents'), { recursive: true })
-    await writeFile(join(projectDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3, skills: {
-        'project/my-skill': { slug: 'project/my-skill', contentSha: 'def456' },
-      }, dismissed: {}, lastSelectedAgents: [],
-    }))
+    await writeFile(
+      join(projectDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'project/my-skill': {
+            slug: 'project/my-skill',
+            contentSha: 'def456',
+          },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
 
     const origCwd = process.cwd()
     process.chdir(projectDir)
@@ -219,7 +264,7 @@ describe('doctor command', () => {
       restore()
       process.chdir(origCwd)
     }
-    assert.ok(logs.some(l => l.includes('Project lockfile')))
+    assert.ok(logs.some((l) => l.includes('Project lockfile')))
   })
 
   it('warns when .agents directory is missing', async () => {
@@ -229,10 +274,18 @@ describe('doctor command', () => {
     process.env.HOME = altDir
     process.chdir(altDir)
 
-    await writeFile(join(altDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3, skills: {}, dismissed: {}, lastSelectedAgents: [],
-    })).catch(() => {})
-    await rm(join(altDir, '.agents'), { recursive: true, force: true }).catch(() => {})
+    await writeFile(
+      join(altDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {},
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    ).catch(() => {})
+    await rm(join(altDir, '.agents'), { recursive: true, force: true }).catch(
+      () => {},
+    )
 
     const { logs, restore } = capture()
     try {
@@ -243,15 +296,21 @@ describe('doctor command', () => {
       process.chdir(origCwd)
       await rm(altDir, { recursive: true, force: true }).catch(() => {})
     }
-    assert.ok(logs.some(l => l.includes('not yet created')))
+    assert.ok(logs.some((l) => l.includes('not yet created')))
   })
 
   it('reports missing skill directory in integrity check', async () => {
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3, skills: {
-        'test/hash-check': { slug: 'test/hash-check', contentSha: 'abc' },
-      }, dismissed: {}, lastSelectedAgents: [],
-    }))
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'test/hash-check': { slug: 'test/hash-check', contentSha: 'abc' },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
 
     const { logs, restore } = capture()
     try {
@@ -260,21 +319,34 @@ describe('doctor command', () => {
       restore()
     }
 
-    assert.ok(logs.some(l => l.includes('hash mismatch') || l.includes('missing')))
+    assert.ok(
+      logs.some((l) => l.includes('hash mismatch') || l.includes('missing')),
+    )
   })
 
   it('verifies skill integrity when directory exists with matching hash', async () => {
-    await mkdir(join(tempDir, '.agents', 'skills', 'test-hash-ok'), { recursive: true })
+    await mkdir(join(tempDir, '.agents', 'skills', 'test-hash-ok'), {
+      recursive: true,
+    })
     const { writeFileSync } = await import('node:fs')
-    writeFileSync(join(tempDir, '.agents', 'skills', 'test-hash-ok', 'SKILL.md'), '# Test skill\n\nContent')
+    writeFileSync(
+      join(tempDir, '.agents', 'skills', 'test-hash-ok', 'SKILL.md'),
+      '# Test skill\n\nContent',
+    )
     const { computeContentHash } = await import('../utils/lockfile.js')
     const hash = computeContentHash({ 'SKILL.md': '# Test skill\n\nContent' })
 
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3, skills: {
-        'test/hash-ok': { slug: 'test/hash-ok', contentSha: hash },
-      }, dismissed: {}, lastSelectedAgents: [],
-    }))
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'test/hash-ok': { slug: 'test/hash-ok', contentSha: hash },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
 
     const { logs, restore } = capture()
     try {
@@ -283,22 +355,33 @@ describe('doctor command', () => {
       restore()
     }
 
-    assert.ok(logs.some(l => l.includes('checked')))
+    assert.ok(logs.some((l) => l.includes('checked')))
   })
 
   it('reports hash mismatch when content differs', async () => {
-    await mkdir(join(tempDir, '.agents', 'skills', 'test-hash-bad'), { recursive: true })
+    await mkdir(join(tempDir, '.agents', 'skills', 'test-hash-bad'), {
+      recursive: true,
+    })
     const { writeFileSync } = await import('node:fs')
-    writeFileSync(join(tempDir, '.agents', 'skills', 'test-hash-bad', 'SKILL.md'), '# Original content')
+    writeFileSync(
+      join(tempDir, '.agents', 'skills', 'test-hash-bad', 'SKILL.md'),
+      '# Original content',
+    )
     const { computeContentHash } = await import('../utils/lockfile.js')
     const origContent = { 'SKILL.md': '# Different content' }
     const badHash = computeContentHash(origContent)
 
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3, skills: {
-        'test/hash-bad': { slug: 'test/hash-bad', contentSha: badHash },
-      }, dismissed: {}, lastSelectedAgents: [],
-    }))
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'test/hash-bad': { slug: 'test/hash-bad', contentSha: badHash },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
 
     const { logs, restore } = capture()
     try {
@@ -307,7 +390,9 @@ describe('doctor command', () => {
       restore()
     }
 
-    assert.ok(logs.some(l => l.includes('hash mismatch') || l.includes('checked')))
+    assert.ok(
+      logs.some((l) => l.includes('hash mismatch') || l.includes('checked')),
+    )
   })
 
   it('shows platform info', async () => {
@@ -317,7 +402,7 @@ describe('doctor command', () => {
     } finally {
       restore()
     }
-    assert.ok(logs.some(l => l.includes('Platform')))
+    assert.ok(logs.some((l) => l.includes('Platform')))
   })
 
   it('shows node.js location', async () => {
@@ -327,8 +412,8 @@ describe('doctor command', () => {
     } finally {
       restore()
     }
-    assert.ok(logs.some(l => l.includes('Node.js location')))
-    assert.ok(logs.some(l => l.includes(process.execPath)))
+    assert.ok(logs.some((l) => l.includes('Node.js location')))
+    assert.ok(logs.some((l) => l.includes(process.execPath)))
   })
 
   it('validates lockfile schema as valid', async () => {
@@ -338,8 +423,8 @@ describe('doctor command', () => {
     } finally {
       restore()
     }
-    assert.ok(logs.some(l => l.includes('lockfile schema')))
-    assert.ok(logs.some(l => l.includes('valid')))
+    assert.ok(logs.some((l) => l.includes('lockfile schema')))
+    assert.ok(logs.some((l) => l.includes('valid')))
   })
 
   it('reports no orphaned skill dirs when clean', async () => {
@@ -351,10 +436,21 @@ describe('doctor command', () => {
         if (e.isDirectory()) existingDirs.push(e.name)
       }
     } catch {}
-    const allSkills = Object.fromEntries(existingDirs.map(d => [d.replace(/-/g, '/'), { slug: d.replace(/-/g, '/') }]))
-    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({
-      version: 3, skills: allSkills, dismissed: {}, lastSelectedAgents: [],
-    }))
+    const allSkills = Object.fromEntries(
+      existingDirs.map((d) => [
+        d.replace(/-/g, '/'),
+        { slug: d.replace(/-/g, '/') },
+      ]),
+    )
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: allSkills,
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
 
     const { logs, restore } = capture()
     try {
@@ -362,9 +458,9 @@ describe('doctor command', () => {
     } finally {
       restore()
     }
-    const orphanedLine = logs.find(l => l.includes('Orphaned'))
-    assert.ok(orphanedLine, 'Orphaned check not found. Logs: ' + logs.join('|'))
-    assert.ok(orphanedLine.includes('none'), 'Expected none: ' + orphanedLine)
+    const orphanedLine = logs.find((l) => l.includes('Orphaned'))
+    assert.ok(orphanedLine, `Orphaned check not found. Logs: ${logs.join('|')}`)
+    assert.ok(orphanedLine.includes('none'), `Expected none: ${orphanedLine}`)
   })
 
   it('reports mcp servers check', async () => {
@@ -374,7 +470,12 @@ describe('doctor command', () => {
     } finally {
       restore()
     }
-    assert.ok(logs.some(l => l.includes('MCP') && (l.includes('configs') || l.includes('servers'))))
+    assert.ok(
+      logs.some(
+        (l) =>
+          l.includes('MCP') && (l.includes('configs') || l.includes('servers')),
+      ),
+    )
   })
 
   it('outputs json with --json flag', async () => {

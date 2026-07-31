@@ -7,11 +7,24 @@ Thanks for your interest in contributing! Here's how you can help.
 ```bash
 git clone https://github.com/rolecraft-sh/rolecraft.git
 cd rolecraft
-npm link                  # now `rolecraft` runs from your local checkout
-npm test                  # 730+ tests should pass
+npm install              # also installs the pre-commit hook automatically
+npm link                 # now `rolecraft` runs from your local checkout
+npm test                 # 828+ tests should pass
 ```
 
-**Requirements:** Node.js >= 20, no other dependencies.
+**Requirements:** Node.js >= 20. Dev dependencies (Biome, VitePress) install locally but never ship to users — the runtime stays zero-dependency.
+
+## Git Hooks
+
+A `pre-commit` hook runs `npm run lint` before every commit and rejects the commit on lint errors. It is set up **automatically** by `npm install` via the `postinstall` script — no manual `setup-hooks` step is required.
+
+To reinstall or repair the hook manually:
+
+```bash
+npm run setup-hooks
+```
+
+To bypass the hook once (e.g. for a work-in-progress commit), use `git commit --no-verify` — but CI will still fail the PR if lint errors remain.
 
 ## Find Something to Work On
 
@@ -22,9 +35,40 @@ Don't see anything you like? Open a [feature request](https://github.com/rolecra
 ## Make Changes
 
 - Keep changes focused on a single concern
-- Follow existing code style (no semicolons, ES modules, zero-dependency)
+- Follow existing code style (no semicolons, ES modules, zero-dependency runtime)
+- **Business logic** goes in `src/api/`, **CLI output** goes in `src/commands/`
 - Add or update tests for any new functionality
-- Run `npm test` before submitting — all tests must pass
+- Run `npm run lint` and `npm test` before submitting — both must pass
+- To auto-fix formatting and unused imports, run `npm run lint:fix`
+
+## Error Handling
+
+Use `UserError` (from `src/utils/errors.js`) for user-facing errors. It automatically provides helpful suggestions alongside the error message:
+
+```js
+import { UserError } from '../utils/errors.js'
+
+// Instead of:
+//   throw new Error('Failed to fetch npm package')
+
+// Do:
+//   throw new UserError('Could not fetch npm package "foo"', {
+//     suggestion: 'Check the package name and your internet connection.',
+//     detail: error.message, // shown with --verbose
+//     code: 'NPM_FETCH_FAILED',
+//   })
+```
+
+| Field | Required | Shown | Purpose |
+|-------|----------|-------|---------|
+| `message` | yes | always | What went wrong, user-friendly |
+| `suggestion` | no | always | What the user should do next |
+| `detail` | no | `--verbose` | Technical details for debugging |
+| `code` | no | `--verbose` | Machine-readable error code |
+
+Reserve plain `throw new Error(...)` for programming errors (bugs, invariants) that should never reach the user. All user-facing error paths should use `UserError`.
+
+> **Tip:** When adding a new command, always use `UserError` for argument validation errors (missing slug, invalid source, etc.).
 
 ## Commit
 

@@ -8,7 +8,9 @@ import { rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const pkg = JSON.parse(readFileSync(join(__dirname, '..', '..', 'package.json'), 'utf-8'))
+const pkg = JSON.parse(
+  readFileSync(join(__dirname, '..', '..', 'package.json'), 'utf-8'),
+)
 const VERSION = pkg.version
 
 let tempDir, upgradeModule, logs, origLog, origExit, origError
@@ -32,7 +34,9 @@ function restoreLog() {
 
 function mockExit() {
   origExit = process.exit
-  process.exit = (code) => { throw new Error(`exit:${code}`) }
+  process.exit = (code) => {
+    throw new Error(`exit:${code}`)
+  }
 }
 
 function restoreExit() {
@@ -61,8 +65,8 @@ describe('upgrade command', () => {
     restoreLog()
     restoreExit()
 
-    assert.ok(logs.some(l => l.includes(`v${VERSION}`)))
-    assert.ok(logs.some(l => l.includes('Checking for updates')))
+    assert.ok(logs.some((l) => l.includes(`v${VERSION}`)))
+    assert.ok(logs.some((l) => l.includes('Checking for updates')))
   })
 
   it('dry-run shows plan without upgrading', async () => {
@@ -70,8 +74,8 @@ describe('upgrade command', () => {
     await upgradeModule.upgradeCommand({ dryRun: true })
     restoreLog()
 
-    assert.ok(logs.some(l => l.includes('[dry-run]')))
-    assert.ok(logs.some(l => l.includes('Current:')))
+    assert.ok(logs.some((l) => l.includes('[dry-run]')))
+    assert.ok(logs.some((l) => l.includes('Current:')))
   })
 
   it('dry-run shows current version', async () => {
@@ -79,7 +83,7 @@ describe('upgrade command', () => {
     await upgradeModule.upgradeCommand({ dryRun: true })
     restoreLog()
 
-    assert.ok(logs.some(l => l.includes(`v${VERSION}`)))
+    assert.ok(logs.some((l) => l.includes(`v${VERSION}`)))
   })
 
   it('compares versions correctly', () => {
@@ -101,15 +105,16 @@ describe('upgrade command', () => {
 
     globalThis.fetch = origFetch
 
-    assert.ok(logs.some(l => l.includes('could not fetch')))
+    assert.ok(logs.some((l) => l.includes('could not fetch')))
   })
 
   it('dry-run shows would-install when newer version exists', async () => {
     const origFetch = globalThis.fetch
-    globalThis.fetch = () => Promise.resolve({
-      ok: true,
-      json: () => Promise.resolve({ version: '99.99.99' }),
-    })
+    globalThis.fetch = () =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ version: '99.99.99' }),
+      })
 
     captureLog()
     await upgradeModule.upgradeCommand({ dryRun: true })
@@ -117,7 +122,7 @@ describe('upgrade command', () => {
 
     globalThis.fetch = origFetch
 
-    assert.ok(logs.some(l => l.includes('Would install')))
+    assert.ok(logs.some((l) => l.includes('Would install')))
   })
 
   it('shows warning when fetch fails without dry-run', async () => {
@@ -130,15 +135,16 @@ describe('upgrade command', () => {
 
     globalThis.fetch = origFetch
 
-    assert.ok(logs.some(l => l.includes('Could not check')))
+    assert.ok(logs.some((l) => l.includes('Could not check')))
   })
 
   it('executes upgrade when newer version exists on npm', async () => {
     const origFetch = globalThis.fetch
-    globalThis.fetch = () => Promise.resolve({
-      ok: true,
-      json: () => Promise.resolve({ version: '99.99.99' }),
-    })
+    globalThis.fetch = () =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ version: '99.99.99' }),
+      })
 
     captureLog()
     await upgradeModule.upgradeCommand({ execSync: () => {} })
@@ -146,28 +152,32 @@ describe('upgrade command', () => {
 
     globalThis.fetch = origFetch
 
-    assert.ok(logs.some(l => l.includes('Upgraded to')))
-    assert.ok(logs.some(l => l.includes('Restart your terminal')))
+    assert.ok(logs.some((l) => l.includes('Upgraded to')))
+    assert.ok(logs.some((l) => l.includes('Restart your terminal')))
   })
 
   it('shows upgrade failed message when execSync throws', async () => {
     const origFetch = globalThis.fetch
-    globalThis.fetch = () => Promise.resolve({
-      ok: true,
-      json: () => Promise.resolve({ version: '99.99.99' }),
-    })
+    globalThis.fetch = () =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ version: '99.99.99' }),
+      })
 
     captureLog()
     await assert.rejects(
-      () => upgradeModule.upgradeCommand({
-        execSync: () => { throw new Error('install failed') },
-      }),
+      () =>
+        upgradeModule.upgradeCommand({
+          execSync: () => {
+            throw new Error('install failed')
+          },
+        }),
       /Try running manually/,
     )
     restoreLog()
 
     globalThis.fetch = origFetch
 
-    assert.ok(logs.some(l => l.includes('Upgrading to')))
+    assert.ok(logs.some((l) => l.includes('Upgrading to')))
   })
 })

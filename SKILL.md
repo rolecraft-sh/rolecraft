@@ -54,11 +54,12 @@ npx rolecraft convert ./my-skill
 | Command | Purpose |
 |---------|---------|
 | `rolecraft install <source>` | Install a skill (local, GitHub, GitLab, SSH) |
-| `rolecraft init [name]` | Scaffold a new `SKILL.md` |
+| `rolecraft init [name]` | Scaffold a new `SKILL.md` (`--template`, `--list`) |
 | `rolecraft list` | Show installed skills |
 | `rolecraft check` | Check for available updates |
 | `rolecraft remove <slug>` | Uninstall a skill |
 | `rolecraft update <slug>` | Re-install to latest version |
+| `rolecraft rollback <slug>` | Restore to previous version from backup |
 | `rolecraft bundle <sources>` | Install multiple skills from file or inline |
 | `rolecraft ci` | Re-install from lockfile (CI mode) |
 | `rolecraft verify` | Check skill integrity via content hash |
@@ -69,6 +70,7 @@ npx rolecraft convert ./my-skill
 | `rolecraft use <source>` | Preview without installing |
 | `rolecraft completions bash\|zsh\|fish` | Generate shell completions |
 | `rolecraft convert <source>` | Convert between SKILL.md and .mdc formats |
+| `rolecraft test <skill-path>` | Test a skill quality with built-in assertions |
 
 ## Common flags
 

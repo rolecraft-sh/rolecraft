@@ -39,7 +39,7 @@ describe('list command', () => {
 
     await listModule.listCommand()
 
-    assert.ok(logs.some(l => l.includes('No skills installed')))
+    assert.ok(logs.some((l) => l.includes('No skills installed')))
   })
 
   it('outputs JSON when json option is enabled', async () => {
@@ -57,7 +57,7 @@ describe('list command', () => {
         },
         dismissed: {},
         lastSelectedAgents: [],
-      })
+      }),
     )
 
     const logs = captureLogs()
@@ -80,24 +80,24 @@ describe('list command', () => {
       JSON.stringify({
         version: 3,
         skills: {
-          'cursor/skill': { agents: ['cursor'] },
+          'cursor/skill': { agents: ['Cursor'] },
           'shared/skill': { agents: ['Cursor', 'claude-code'] },
           'claude/skill': { agents: ['claude-code'] },
         },
         dismissed: {},
         lastSelectedAgents: [],
-      })
+      }),
     )
 
     const logs = captureLogs()
 
     await listModule.listCommand(undefined, { agent: 'CURSOR' })
 
-    assert.ok(logs.some(l => l.includes('Installed skills for cursor')))
-    assert.ok(logs.some(l => l.includes('cursor/skill')))
-    assert.ok(logs.some(l => l.includes('shared/skill')))
-    assert.ok(logs.every(l => !l.includes('claude/skill')))
-    assert.ok(logs.some(l => l.includes('2 skill(s) total for cursor')))
+    assert.ok(logs.some((l) => l.includes('Installed skills for Cursor')))
+    assert.ok(logs.some((l) => l.includes('cursor/skill')))
+    assert.ok(logs.some((l) => l.includes('shared/skill')))
+    assert.ok(logs.every((l) => !l.includes('claude/skill')))
+    assert.ok(logs.some((l) => l.includes('2 skill(s) total for Cursor')))
   })
 
   it('shows an agent-specific message when no skills match', async () => {
@@ -110,7 +110,7 @@ describe('list command', () => {
         },
         dismissed: {},
         lastSelectedAgents: [],
-      })
+      }),
     )
 
     const logs = captureLogs()
@@ -134,17 +134,17 @@ describe('list command', () => {
         },
         dismissed: {},
         lastSelectedAgents: [],
-      })
+      }),
     )
 
     const logs = captureLogs()
 
     await listModule.listCommand()
 
-    assert.ok(logs.some(l => l.includes('test/skill')))
-    assert.ok(logs.some(l => l.includes('Source: owner/repo')))
-    assert.ok(logs.some(l => l.includes('Type: github')))
-    assert.ok(logs.some(l => l.includes('1 skill(s)')))
+    assert.ok(logs.some((l) => l.includes('test/skill')))
+    assert.ok(logs.some((l) => l.includes('Source: owner/repo')))
+    assert.ok(logs.some((l) => l.includes('Type: github')))
+    assert.ok(logs.some((l) => l.includes('1 skill(s)')))
   })
 
   it('handles skill without optional fields', async () => {
@@ -159,15 +159,15 @@ describe('list command', () => {
         },
         dismissed: {},
         lastSelectedAgents: [],
-      })
+      }),
     )
 
     const logs = captureLogs()
 
     await listModule.listCommand()
 
-    assert.ok(logs.some(l => l.includes('minimal/skill')))
-    assert.ok(logs.some(l => l.includes('1 skill(s)')))
+    assert.ok(logs.some((l) => l.includes('minimal/skill')))
+    assert.ok(logs.some((l) => l.includes('1 skill(s)')))
   })
 
   it('handles skill with unknown installedAt', async () => {
@@ -180,14 +180,14 @@ describe('list command', () => {
         },
         dismissed: {},
         lastSelectedAgents: [],
-      })
+      }),
     )
 
     const logs = captureLogs()
 
     await listModule.listCommand()
 
-    assert.ok(logs.some(l => l.includes('nodate/skill')))
+    assert.ok(logs.some((l) => l.includes('nodate/skill')))
   })
 
   it('merges project-scoped skills when cwd is given', async () => {
@@ -202,7 +202,7 @@ describe('list command', () => {
         },
         dismissed: {},
         lastSelectedAgents: [],
-      })
+      }),
     )
 
     await writeFile(
@@ -216,16 +216,16 @@ describe('list command', () => {
         },
         dismissed: {},
         lastSelectedAgents: [],
-      })
+      }),
     )
 
     const logs = captureLogs()
 
     await listModule.listCommand(projectDir)
 
-    assert.ok(logs.some(l => l.includes('global/only')))
-    assert.ok(logs.some(l => l.includes('project/only')))
-    assert.ok(logs.some(l => l.includes('2 skill(s)')))
+    assert.ok(logs.some((l) => l.includes('global/only')))
+    assert.ok(logs.some((l) => l.includes('project/only')))
+    assert.ok(logs.some((l) => l.includes('2 skill(s)')))
   })
 
   it('shows scope as project for skills only in project lock', async () => {
@@ -236,7 +236,7 @@ describe('list command', () => {
         skills: {},
         dismissed: {},
         lastSelectedAgents: [],
-      })
+      }),
     )
 
     await writeFile(
@@ -250,14 +250,14 @@ describe('list command', () => {
         },
         dismissed: {},
         lastSelectedAgents: [],
-      })
+      }),
     )
 
     const logs = captureLogs()
 
     await listModule.listCommand(projectDir)
 
-    assert.ok(logs.some(l => l.includes('Scope: project')))
+    assert.ok(logs.some((l) => l.includes('Scope: project')))
   })
 
   it('shows scope as global, project when skill exists in both', async () => {
@@ -272,7 +272,7 @@ describe('list command', () => {
         },
         dismissed: {},
         lastSelectedAgents: [],
-      })
+      }),
     )
 
     await writeFile(
@@ -286,13 +286,13 @@ describe('list command', () => {
         },
         dismissed: {},
         lastSelectedAgents: [],
-      })
+      }),
     )
 
     const logs = captureLogs()
 
     await listModule.listCommand(projectDir)
 
-    assert.ok(logs.some(l => l.includes('Scope: global, project')))
+    assert.ok(logs.some((l) => l.includes('Scope: global, project')))
   })
 })

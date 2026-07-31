@@ -7,7 +7,7 @@ Set Theme "Dracula"
 Set Padding 20
 Set Framerate 12
 
-Type "rolecraft install sametcelikbicak/task-decomposer --global"
+Type "rolecraft install rolecraft-sh/skills --skill task-decomposer --global"
 Sleep 200ms
 Enter
 Sleep 7000ms

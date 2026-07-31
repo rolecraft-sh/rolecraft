@@ -30,7 +30,7 @@ For sources with multiple skills (e.g. `mattpocock/skills`), all skills are show
 rolecraft use ./my-skill
 
 # Preview a GitHub skill
-rolecraft use sametcelikbicak/task-decomposer
+rolecraft use rolecraft-sh/skills
 
 # List skills in a multi-skill source
 rolecraft use mattpocock/skills --list
@@ -40,4 +40,13 @@ rolecraft use mattpocock/skills --skill "typescript-rules"
 
 # Pipe content
 rolecraft use ./my-skill | head -50
+```
+
+## Node.js API
+
+This command is also available as a programmatic function. See the [Node.js API documentation](../api.md) for detailed usage.
+
+```js
+import { use } from 'rolecraft'
+const preview = await use('./my-skill')
 ```

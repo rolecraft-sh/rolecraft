@@ -169,3 +169,13 @@ $ rolecraft mcp search github
 ## Sources
 
 See [`docs/mcp.md`](../mcp.md) for source type details.
+
+## Node.js API
+
+These commands are also available as programmatic functions. See the [Node.js API documentation](../api.md) for detailed usage.
+
+```js
+import { mcpInstall, mcpList, mcpCheck } from 'rolecraft'
+await mcpInstall('npm:@modelcontextprotocol/github', { cursor: true })
+const servers = await mcpList()
+```

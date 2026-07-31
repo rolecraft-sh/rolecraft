@@ -41,7 +41,7 @@ npx rolecraft setup owner/repo
 **From GitHub** (public repos with `SKILL.md`):
 
 ```bash
-rolecraft setup sametcelikbicak/task-decomposer
+rolecraft setup rolecraft-sh/skills
 rolecraft setup your-org/team-conventions
 ```
 

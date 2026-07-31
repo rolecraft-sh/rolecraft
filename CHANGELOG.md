@@ -2,6 +2,100 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.1.0] - 2026-07-28
+
+### Added
+- auto-generate benchmark SVG from results data (#191)
+- replace hardcoded claims with manifest tokens, update benchmark with current data (#190)
+- add agents capability manifest command and generated agent docs (#186)
+- add API modules for CLI-only commands and Node.js API cross-references (#183)
+- update publish message for auto-merge workflow (#182)
+- add category to publish flow; fix YAML quote stripping
+
+### Fixed
+- use full URL for SVG in RESULTS.md to fix VitePress build
+- close watchers and debounce timers deterministically in watch tests (#189)
+- update public claims — agent count and package size from manifest, soften absolute language (#188)
+- publish directly to upstream registry, fall back to fork on 403
+- remove check-updates from completions, add -d descriptions and -o/-s y flags to fish
+- complete missing commands and flags
+- add checkout step in deploy-docs job for gh workflow run
+
+### Changed
+- bump postcss from 8.5.16 to 8.5.23 (#187)
+- update repo references from sametcelikbicak to rolecraft-sh in docs and examples
+- update changelog and version for v2.0.1 (#179)
+
+### Documentation
+- update comparison.md with garden-skills and fix duplicate row
+- add MFA-G to contributors list
+- fix auto-merge references to reflect maintainer merge workflow
+## [v2.0.1] - 2026-07-24
+
+### Fixed
+- use upstream commit SHA for branch creation, add error bodies, document gh auth token
+
+### Changed
+- bump version to 2.0.1 (registry publish fix + npm pack hygiene)
+- bump github/codeql-action/analyze from 4.37.1 to 4.37.3 (#178)
+- bump github/codeql-action/init from 4.37.1 to 4.37.3 (#177)
+- release v2.0.0
+
+### Documentation
+- update publish success message to reflect maintainer review
+- add marketplace badge to CI guide
+- add Marketplace badge to CI section, fix agent count, add registry source link
+- complete v2.0.0 docs audit (api diff/compose/test, comparison, CHANGELOG dup fix)
+## [v2.0.0] - 2026-07-24
+
+### Added
+- add GitHub Registry MVP — search, publish, install by slug, version check, API exports (#172)
+- progress bar, TUI flicker/resize fix, CLI help update (#170)
+- add doctor --deep conflict detection (#169)
+- add rolecraft diff and compose commands (#168)
+- add rolecraft test command with assertion engine (#164)
+- add Node.js API layer with src/api/ modules (#159)
+- add rolecraft mcp check command for npm update checks
+- add MCP config validation to rolecraft doctor (P2)
+- add MCP security scan for gh: and npm: sources (P2)
+- add version pinning for npm (@version) and gh (@branch/@tag) MCP sources (P1)
+- add rolecraft mcp search command for GitHub and npm (P1) (#18)
+- add MCP lockfile for ci restore (P0) (#151)
+- add uvx:, pipx:, go:, deno:, cargo: MCP source types (#149)
+- enhance doctor command with comprehensive health checks (#147)
+- add multi-skill support to use and setup commands (#146)
+- multi-skill install with interactive selection, --list, and --skill flags (#145)
+
+### Fixed
+- readme table formatting and move mgalore to new row
+- reject empty convert sources (#171)
+- execSync→spawnSync for CodeQL alert, fix doc build (unclosed array<string> tag), add publish/registry to sidebar and nav (#173)
+- resolve CodeQL alerts 88 and 89 (#166)
+- resolve CodeQL alerts in test command (#165)
+- remove unused imports flagged by CodeQL (#82, #83) (#162)
+- remove unused imports flagged by CodeQL (#160)
+- validate MCP agent support — only 7 of 86+ agents have MCP (#150)
+- remove unused report function in doctor.js (CodeQL #73)
+
+### Changed
+- replace string concat with template literals
+- add Biome lint/format with pre-commit hook and fix CodeQL alerts
+- trigger CodeQL re-analysis
+- exclude test files and dev artifacts from npm bundle
+- bump actions/checkout from 7.0.0 to 7.0.1 (#148)
+- update repo references from sametcelikbicak to rolecraft-sh
+- release v1.6.0
+
+### Documentation
+- add mgalore to contributors (#175)
+- fix badge logo visibility with logoColor=white
+- collapse nav to 3 items with dropdowns for small screens
+- update AGENTS.md with interaction rules and branch strategy
+- add mcp update/check docs, add mcp to shell completions
+- add GitHub Action badge, CI guide, and docs page
+
+### Other
+- Update paths
 ## [v1.6.0] - 2026-07-20
 
 ### Added
@@ -32,31 +126,6 @@ All notable changes to this project will be documented in this file.
 - add Yurii201811 to contributors table
 - add getting-started, use-cases, and CLI reference pages (#103)
 - streamline README for Show HN launch
-## [v1.6.0] - 2026-07-20
-
-### Added
-- add --json flag to list command (#120)
-- add git and npm availability checks
-- add skills.sh search with --skills-sh flag (experimental) (#101)
-- add convert command for SKILL.md <-> .mdc format conversion (#100)
-- add droid, chatgpt, codearts-agent, universal agents (86 total)
-
-### Fixed
-- log reinstall failure in watch command
-- document install yes flag in help
-- resolve CodeQL alerts and flaky ENOTEMPTY tests
-- enable docs deployment after release
-
-### Changed
-- bump github/codeql-action/analyze from 4.37.0 to 4.37.1 (#115)
-- bump github/codeql-action/init from 4.37.0 to 4.37.1
-- bump actions/setup-node from 6.4.0 to 7.0.0
-
-### Documentation
-- add Benjamin Ayivoh to contributors, convert to grid layout
-- add star request to CONTRIBUTING.md
-- add getting-started, use-cases, and CLI reference pages (#103)
-- add Yurii201811, Gaohar Imran, Ajay Krishnan to contributors
 
 ## [v1.5.0] - 2026-07-15
 

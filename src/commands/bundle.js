@@ -2,12 +2,12 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { createInterface } from 'node:readline'
 import { stdin as input, stdout as output } from 'node:process'
-import { installCommand } from './install.js'
+import { apiInstallSkills } from '../api/install.js'
 
 function askQuestion(query) {
   const rl = createInterface({ input, output })
-  return new Promise(resolve => {
-    rl.question(query, answer => {
+  return new Promise((resolve) => {
+    rl.question(query, (answer) => {
       rl.close()
       resolve(answer.trim())
     })
@@ -19,18 +19,29 @@ function parseSources(raw, filePath) {
     const parsed = JSON.parse(raw)
     if (Array.isArray(parsed)) return parsed
     if (parsed.skills && Array.isArray(parsed.skills)) return parsed.skills
-    throw new Error('JSON bundle must be an array of sources or an object with a "skills" array')
+    throw new Error(
+      'JSON bundle must be an array of sources or an object with a "skills" array',
+    )
   }
 
-  return raw.split('\n')
-    .map(l => l.trim())
-    .filter(l => l && !l.startsWith('#'))
+  return raw
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith('#'))
 }
 
 async function resolveBundleFile(arg) {
-  const isFilePath = arg.endsWith('.json') || arg.endsWith('.txt') || arg.startsWith('./') || arg.startsWith('../') || arg.startsWith('/') || arg.startsWith('~')
+  const isFilePath =
+    arg.endsWith('.json') ||
+    arg.endsWith('.txt') ||
+    arg.startsWith('./') ||
+    arg.startsWith('../') ||
+    arg.startsWith('/') ||
+    arg.startsWith('~')
   if (isFilePath) {
-    const resolvedPath = arg.startsWith('~') ? join(process.env.HOME || '/tmp', arg.slice(1)) : arg
+    const resolvedPath = arg.startsWith('~')
+      ? join(process.env.HOME || '/tmp', arg.slice(1))
+      : arg
     for (const candidate of [resolvedPath, join(process.cwd(), arg)]) {
       try {
         await readFile(candidate, 'utf-8')
@@ -64,7 +75,9 @@ async function installSources(sources, label, options, noMcp = false) {
     return
   }
 
-  console.log(`\n📦 Installing ${sources.length} skill(s)${label}:${label ? '\n' : ''}`)
+  console.log(
+    `\n📦 Installing ${sources.length} skill(s)${label}:${label ? '\n' : ''}`,
+  )
 
   let successCount = 0
   let failCount = 0
@@ -80,7 +93,11 @@ async function installSources(sources, label, options, noMcp = false) {
     console.log('   [%s/%s] %s', i + 1, sources.length, source)
 
     try {
-      await installCommand(source, { global: true, project: true, noMcp: noMcp, dryRun: options.dryRun })
+      await apiInstallSkills(source, {
+        scope: { global: true, project: true },
+        yes: true,
+        noMcp: noMcp,
+      })
       successCount++
     } catch (err) {
       console.error('   ❌ %s: %s', source, err?.message)
@@ -99,7 +116,8 @@ async function installSources(sources, label, options, noMcp = false) {
     console.log(`✅ All ${successCount} skill(s) installed successfully.`)
   } else {
     console.log(`⚠️  ${successCount} installed, ${failCount} failed.`)
-    if (options.frozenLockfile) throw new Error('Some skills failed to install.')
+    if (options.frozenLockfile)
+      throw new Error('Some skills failed to install.')
   }
 }
 
@@ -112,7 +130,7 @@ export async function bundleCreateCommand(name) {
     filePath = join(process.cwd(), `${bundleName}.json`)
   } else {
     console.log('\n📝 Creating a new bundle file\n')
-    bundleName = await askQuestion('Bundle name (my-bundle): ') || 'my-bundle'
+    bundleName = (await askQuestion('Bundle name (my-bundle): ')) || 'my-bundle'
     const defaultPath = join(process.cwd(), `${bundleName}.json`)
     const answer = await askQuestion(`File path (${defaultPath}): `)
     filePath = answer || defaultPath
@@ -121,20 +139,20 @@ export async function bundleCreateCommand(name) {
 
   const template = {
     name: bundleName,
-    skills: [
-      'owner/skill-name',
-    ],
+    skills: ['owner/skill-name'],
   }
 
   try {
-    await writeFile(filePath, JSON.stringify(template, null, 2) + '\n', 'utf-8')
+    await writeFile(filePath, `${JSON.stringify(template, null, 2)}\n`, 'utf-8')
   } catch {
-    const overwrite = await askQuestion(`\n⚠️  ${filePath} already exists. Overwrite? [y/N]: `)
+    const overwrite = await askQuestion(
+      `\n⚠️  ${filePath} already exists. Overwrite? [y/N]: `,
+    )
     if (overwrite.toLowerCase() !== 'y') {
       console.log('Aborted.')
       return
     }
-    await writeFile(filePath, JSON.stringify(template, null, 2) + '\n', 'utf-8')
+    await writeFile(filePath, `${JSON.stringify(template, null, 2)}\n`, 'utf-8')
   }
   console.log(`\n✅ Created ${filePath}`)
   console.log(`\nAdd skills to the "skills" array and install with:\n`)

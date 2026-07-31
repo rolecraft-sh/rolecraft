@@ -30,5 +30,11 @@ jobs:
           npm audit --audit-level=high
         continue-on-error: true
 
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint
+
       - name: Run tests
         run: node --test --test-concurrency=1

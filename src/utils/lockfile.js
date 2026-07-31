@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join, dirname } from 'node:path'
 import { createHash } from 'node:crypto'
 import { homedir } from 'node:os'
+import { getAgentByFlag } from '../agents.js'
 
 function home(...parts) {
   return join(homedir(), ...parts)
@@ -15,312 +16,14 @@ export function getAgentsDir() {
   return home('.agents', 'skills')
 }
 
-export function getClaudeDir() {
-  return home('.claude', 'skills')
-}
-
-export function getCursorDir() {
-  return home('.cursor', 'skills')
-}
-
-export function getWindsurfDir() {
-  return home('.windsurf', 'skills')
-}
-
-export function getCodexDir() {
-  return home('.codex', 'skills')
-}
-
-export function getCopilotDir() {
-  return home('.copilot', 'skills')
-}
-
-export function getCopilotProjectDir() {
-  return join(process.cwd(), '.github', 'copilot', 'skills')
-}
-
-export function getAiderDir() {
-  return home('.aider', 'skills')
-}
-
-export function getClineDir() {
-  return home('.cline', 'skills')
-}
-
-export function getDevinDir() {
-  return home('.devin', 'skills')
-}
-
-export function getGeminiDir() {
-  return home('.gemini', 'skills')
-}
-
-export function getCodyDir() {
-  return home('.cody', 'skills')
-}
-
-export function getContinueDir() {
-  return home('.continue', 'skills')
-}
-
-export function getWarpDir() {
-  return home('.warp', 'skills')
-}
-
-export function getCodeiumDir() {
-  return home('.codeium', 'skills')
-}
-
-export function getFabricDir() {
-  return home('.fabric', 'skills')
-}
-
-export function getGooseDir() {
-  return home('.goose', 'skills')
-}
-
-export function getTabnineDir() {
-  return home('.tabnine', 'skills')
-}
-
-export function getSupermavenDir() {
-  return home('.supermaven', 'skills')
-}
-
-export function getPrPilotDir() {
-  return home('.pr-pilot', 'skills')
-}
-
-export function getLoomDir() {
-  return home('.loom', 'skills')
-}
-
-export function getRooDir() {
-  return home('.roo', 'skills')
-}
-
-export function getTraeDir() {
-  return home('.trae', 'skills')
-}
-
-export function getHermesDir() {
-  return home('.hermes', 'skills')
-}
-
-export function getKiroDir() {
-  return home('.kiro', 'skills')
-}
-
-export function getAugmentDir() {
-  return home('.augment', 'skills')
-}
-
-export function getKiloDir() {
-  return home('.kilo', 'skills')
-}
-
-export function getOpenHandsDir() {
-  return home('.openhands', 'skills')
-}
-
-export function getJunieDir() {
-  return home('.junie', 'skills')
-}
-
-export function getFactoryDir() {
-  return home('.factory', 'skills')
-}
-
-export function getCommandCodeDir() {
-  return home('.commandcode', 'skills')
-}
-
-export function getCortexDir() {
-  return home('.snowflake', 'cortex', 'skills')
-}
-
-export function getMistralVibeDir() {
-  return home('.vibe', 'skills')
-}
-
-export function getQwenCodeDir() {
-  return home('.qwen', 'skills')
-}
-
-export function getOpenClawDir() {
-  return home('.openclaw', 'skills')
-}
-
-export function getCodeBuddyDir() {
-  return home('.codebuddy', 'skills')
-}
-
-export function getMuxDir() {
-  return home('.mux', 'skills')
-}
-
-export function getPiDir() {
-  return home('.pi', 'agent', 'skills')
-}
-
-export function getAutohandCodeDir() {
-  return home('.autohand', 'skills')
-}
-
-export function getRovoDevDir() {
-  return home('.rovodev', 'skills')
-}
-
-export function getFirebenderDir() {
-  return home('.firebender', 'skills')
-}
-
-export function getBobDir() {
-  return home('.bob', 'skills')
-}
-
-export function getAiderDeskDir() {
-  return home('.aider-desk', 'skills')
-}
-
-export function getZapDir() {
-  return home('.zap', 'skills')
-}
-
-export function getCodeepDir() {
-  return home('.codeep', 'skills')
-}
-
-export function getKimiCodeDir() {
-  return home('.kimi-code', 'skills')
-}
-
-export function getZCodeDir() {
-  return home('.zcode', 'skills')
-}
-
-export function getCodeArtsDoerDir() {
-  return home('.codeartsdoer', 'skills')
-}
-
-export function getCodeMakerDir() {
-  return home('.codemaker', 'skills')
-}
-
-export function getCodeStudioDir() {
-  return home('.codestudio', 'skills')
-}
-
-export function getCrushDir() {
-  return home('.crush', 'skills')
-}
-
-export function getEveDir() {
-  return join(process.cwd(), 'agent', 'skills')
-}
-
-export function getForgeDir() {
-  return home('.forge', 'skills')
-}
-
-export function getInferenceShDir() {
-  return home('.inferencesh', 'skills')
-}
-
-export function getJazzDir() {
-  return home('.jazz', 'skills')
-}
-
-export function getIFlowDir() {
-  return home('.iflow', 'skills')
-}
-
-export function getKiloCodeDir() {
-  return home('.kilocode', 'skills')
-}
-
-export function getKodeDir() {
-  return home('.kode', 'skills')
-}
-
-export function getLingmaDir() {
-  return home('.lingma', 'skills')
-}
-
-export function getMcpJamDir() {
-  return home('.mcpjam', 'skills')
-}
-
-export function getMoxbyDir() {
-  return home('.moxby', 'skills')
-}
-
-export function getOnaDir() {
-  return home('.ona', 'skills')
-}
-
-export function getQoderDir() {
-  return home('.qoder', 'skills')
-}
-
-export function getReasonixDir() {
-  return home('.reasonix', 'skills')
-}
-
-export function getTerraMindDir() {
-  return home('.terramind', 'skills')
-}
-
-export function getTinyCloudDir() {
-  return home('.tinycloud', 'skills')
-}
-
-export function getZencoderDir() {
-  return home('.zencoder', 'skills')
-}
-
-export function getAstrbotDir() {
-  return home('.astrbot', 'data', 'skills')
-}
-
-export function getQoderCnDir() {
-  return home('.qoder-cn', 'skills')
-}
-
-export function getTraeCnDir() {
-  return home('.trae-cn', 'skills')
-}
-
-export function getZenflowDir() {
-  return home('.zencoder', 'skills')
-}
-
-export function getNeovateDir() {
-  return home('.neovate', 'skills')
-}
-
-export function getPochiDir() {
-  return home('.pochi', 'skills')
-}
-
-export function getAdalDir() {
-  return home('.adal', 'skills')
-}
-
-export function getDroidDir() {
-  return home('.factory', 'skills')
-}
-
-export function getChatgptDir() {
-  return home('.chatgpt', 'skills')
-}
-
-export function getCodeartsAgentDir() {
-  return home('.codeartsdoer', 'skills')
-}
-
-export function getUniversalDir() {
-  return home('.config', 'agents', 'skills')
+/**
+ * Resolve an agent's skill directory from agents.js data.
+ * Falls back to ~/.agents/skills for unknown flags.
+ */
+export function getDirForAgent(flag) {
+  const agent = getAgentByFlag(flag)
+  if (agent) return agent.getDir()
+  return home('.agents', 'skills')
 }
 
 export function getProjectLockPath(cwd) {
@@ -342,21 +45,102 @@ export async function readLock(lockPath = getGlobalLockPath()) {
 
 export async function writeLock(data, lockPath = getGlobalLockPath()) {
   await ensureParentDir(lockPath)
-  await writeFile(lockPath, JSON.stringify(data, null, 2) + '\n', 'utf-8')
+  await writeFile(lockPath, `${JSON.stringify(data, null, 2)}\n`, 'utf-8')
 }
 
-export async function addSkillToLock(slug, entry, lockPath = getGlobalLockPath()) {
+/**
+ * Maximum number of historical versions to retain per skill.
+ */
+const MAX_HISTORY = 5
+
+/**
+ * Push the current entry into the skill's history before overwriting it.
+ * Only pushes when the contentSha differs (i.e. a real update, not a re-install).
+ * Oldest entries are trimmed to MAX_HISTORY.
+ */
+function pushHistory(lock, slug, newEntry) {
+  const existing = lock.skills[slug]
+  if (!existing?.contentSha) return // nothing to save
+  if (existing.contentSha === newEntry.contentSha) return // no change
+
+  if (!lock.skills[slug].history) lock.skills[slug].history = []
+
+  lock.skills[slug].history.push({
+    contentSha: existing.contentSha,
+    fileHashes: existing.fileHashes || {},
+    installedAt: existing.installedAt,
+    source: existing.source,
+    sourceType: existing.sourceType,
+  })
+
+  // Keep only the most recent MAX_HISTORY entries
+  if (lock.skills[slug].history.length > MAX_HISTORY) {
+    lock.skills[slug].history = lock.skills[slug].history.slice(-MAX_HISTORY)
+  }
+}
+
+export async function addSkillToLock(
+  slug,
+  entry,
+  lockPath = getGlobalLockPath(),
+) {
   const lock = await readLock(lockPath)
   const existing = lock.skills[slug]
   const mergedAgents = existing?.agents
     ? [...new Set([...existing.agents, ...(entry.agents || [])])]
-    : (entry.agents || [])
-  lock.skills[slug] = { ...entry, agents: mergedAgents, installedAt: new Date().toISOString() }
+    : entry.agents || []
+
+  pushHistory(lock, slug, entry)
+
+  // Capture history before overwriting the entry (pushHistory modifies it in-place)
+  const history = lock.skills[slug]?.history || []
+
+  lock.skills[slug] = {
+    ...entry,
+    agents: mergedAgents,
+    installedAt: new Date().toISOString(),
+    history,
+  }
   await writeLock(lock, lockPath)
   return lock
 }
 
-export async function removeSkillFromLock(slug, lockPath = getGlobalLockPath()) {
+/**
+ * Get the rollback history for a specific skill.
+ * Returns an array of historical entries (newest first).
+ */
+export async function getSkillHistory(slug, lockPath = getGlobalLockPath()) {
+  const lock = await readLock(lockPath)
+  const entry = lock.skills[slug]
+  if (!entry?.history || entry.history.length === 0) return []
+  return [...entry.history].reverse()
+}
+
+/**
+ * Rollback a skill to the latest historical version.
+ * Removes the most recent history entry and restores its metadata.
+ * Returns the restored entry data, or null if no history exists.
+ */
+export async function popHistory(slug, lockPath = getGlobalLockPath()) {
+  const lock = await readLock(lockPath)
+  const entry = lock.skills[slug]
+  if (!entry?.history || entry.history.length === 0) return null
+
+  const prev = entry.history.pop()
+  // Restore the previous version's metadata into the current entry
+  lock.skills[slug].contentSha = prev.contentSha
+  lock.skills[slug].fileHashes = prev.fileHashes
+  lock.skills[slug].installedAt = prev.installedAt
+  lock.skills[slug].source = prev.source
+  lock.skills[slug].sourceType = prev.sourceType
+  await writeLock(lock, lockPath)
+  return prev
+}
+
+export async function removeSkillFromLock(
+  slug,
+  lockPath = getGlobalLockPath(),
+) {
   const lock = await readLock(lockPath)
   delete lock.skills[slug]
   await writeLock(lock, lockPath)
@@ -380,5 +164,3 @@ export function computeFileHashes(fileContents) {
   }
   return hashes
 }
-
-

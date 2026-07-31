@@ -1,15 +1,16 @@
 {
   "name": "rolecraft",
-  "version": "1.6.0",
-  "description": "Install AI agent skills as roles & behaviors directly from any source — zero-dependency CLI for opencode, claude-code, cursor, and more",
+  "version": "2.1.0",
+  "description": "The package manager for AI agents — install, test, publish, and manage skills & MCP servers across 86+ agents. Zero-dependency CLI for claude-code, cursor, opencode, and more.",
   "type": "module",
   "bin": {
     "rolecraft": "bin/rolecraft.js"
   },
-  "files": [
-    "bin",
-    "src"
-  ],
+  "exports": {
+    ".": {
+      "import": "./src/index.js"
+    }
+  },
   "preferGlobal": true,
   "keywords": [
     "skill",
@@ -81,9 +82,16 @@
   },
   "homepage": "https://rolecraft-sh.github.io/rolecraft/",
   "scripts": {
-    "lint": "node --check bin/rolecraft.js src/**/*.js",
+    "lint": "node --check bin/rolecraft.js src/**/*.js && biome check",
+    "lint:fix": "biome check --write",
     "test": "node --test --test-concurrency=1",
     "test:coverage": "node --experimental-test-coverage --test --test-coverage-exclude=\"**/*.test.js\" --test-coverage-include=\"src/**\" --test-coverage-include=\"bin/**\"",
+    "setup-hooks": "node scripts/setup-hooks.mjs",
+    "postinstall": "node scripts/setup-hooks.mjs || true",
+    "benchmark": "node benchmark/install-speed.js && node scripts/benchmark-visual.js",
+    "benchmark:visual": "node scripts/benchmark-visual.js",
+    "generate:agents-docs": "node scripts/generate-agents-docs.js",
+    "generate:readme": "node scripts/generate-readme.js",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"
@@ -92,6 +100,7 @@
     "node": ">=20"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.5.5",
     "vitepress": "^1.6.4"
   },
   "overrides": {

@@ -45,3 +45,12 @@ Do not invoke a skill that is already loaded in your context.
 ## Integration with Claude Code
 
 Once the XML is written to `AGENTS.md`, Claude Code and other spec-compliant agents automatically discover the skills and make them available via their native skill-loading mechanism.
+
+## Node.js API
+
+This command is also available as a programmatic function. See the [Node.js API documentation](../api.md) for detailed usage.
+
+```js
+import { agentsXml } from 'rolecraft'
+const { xml } = await agentsXml()
+```
