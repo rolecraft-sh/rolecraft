@@ -260,7 +260,7 @@ All API functions return plain objects (no side-effects). Available exports:
 | `rolecraft use <source>`                   | Preview a skill's files without installing                                  | [docs](docs/commands/use.md)         |
 | `rolecraft completions bash\|zsh\|fish`    | Generate shell completion scripts                                           | [docs](docs/commands/completions.md) |
 | `rolecraft setup [<source>]`               | Detect agents, optionally install a skill to all                            | [docs](docs/commands/setup.md)       |
-| `rolecraft list`                           | Show all installed skills                                                   | [docs](docs/commands/list.md)        |
+| `rolecraft list`                           | Show all installed skills (filter with `--agent`)                          | [docs](docs/commands/list.md)        |
 | `rolecraft doctor`                         | Run system health check                                                     | [docs](docs/commands/doctor.md)      |
 | `rolecraft agents-xml [--write]`           | Generate skills XML for AGENTS.md                                           | [docs](docs/commands/agents-xml.md)  |
 | `rolecraft mcp install/remove/list/search` | Install, remove, list, or search MCP servers for AI agents                  | [docs](docs/commands/mcp.md)         |

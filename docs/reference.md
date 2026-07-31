@@ -242,6 +242,7 @@ rolecraft use ./my-skill | head -50  # pipe to pager
 ```bash
 rolecraft list                  # all installed skills
 rolecraft list --json            # machine-readable JSON output
+rolecraft list --agent cursor    # only skills installed to cursor (-a alias)
 ```
 
 ### `rolecraft remove <slug>`

@@ -7,6 +7,8 @@ Show all installed skills.
 ```bash
 rolecraft list
 rolecraft list --json
+rolecraft list --agent <name>
+rolecraft list -a <name>
 ```
 
 ## Description
@@ -20,6 +22,17 @@ Output the skill list as JSON for machine consumption (scripts, CI, `jq`):
 ```bash
 rolecraft list --json | jq '.skills | keys'
 ```
+
+### `--agent, -a <name>`
+
+Filter the output to show only skills installed to a specific agent:
+
+```bash
+rolecraft list --agent cursor   # only skills installed to cursor
+rolecraft list -a claude-code   # alias
+```
+
+Agent names are matched case-insensitively (e.g. `--agent CURSOR` matches `cursor`). When a filter is set, the header and summary lines include the matched agent, using the casing stored in the lockfile.
 
 ## Node.js API
 

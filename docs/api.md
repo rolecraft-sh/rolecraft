@@ -62,8 +62,9 @@ List installed skills.
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `json` | `boolean` | `false` | Return structured data |
+| `agent` | `string` | — | Filter skills by agent name (case-insensitive) |
 
-Returns `{ skills: { [slug]: { name, slug, owner, description, source, sourceType, scope, installedAt, contentSha, ... } }, total: number, globals: number, projects: number }`.
+Returns `{ skills: { [slug]: { name, slug, owner, description, source, sourceType, scope, installedAt, contentSha, ... } }, total: number, globals: number, projects: number, agent?: string }`.
 
 ### `remove(slug, options?)`
 
