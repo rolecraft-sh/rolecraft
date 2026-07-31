@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.2.0] - 2026-07-31
+
+### Added
+- filter installed skills by agent (#158)
+- update demo GIFs with corrected timing and fix init dispatch (#197)
+- add template system to rolecraft init (--template, --list) (#196)
+- add rollback mechanism, parallel install, error handling improvements (#195)
+
+### Fixed
+- silence init stdout to avoid node:test desync (#199)
+- add rollback --help suggestion and showError integration test
+- remove redundant deploy-docs job from release-publish (docs.yml auto-deploys on push)
+
+### Changed
+- round 2 — fix remaining architectural issues (#194)
+- fix top 5 architectural issues (#193)
+- update changelog and version for v2.1.0 (#192)
+
+### Documentation
+- add adity982 to contributors
+- update landing page for new features (#198)
+- add RoleCraft branding to skills README
+- update README positioning, tagline, and npm description
+- update stale values — 87.4 kB, 86 agents
 ## [v2.1.0] - 2026-07-28
 
 ### Added
