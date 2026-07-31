@@ -7,6 +7,26 @@ import { tmpdir } from 'node:os'
 
 let tempDir, initModule, origCwd
 
+/**
+ * Runs a function while suppressing console.log.
+ *
+ * The init command prints `✅`/`→` (non-ASCII) to stdout. When node:test
+ * runs each test file in a child process, that output shares the same pipe
+ * as the v8-serialized result frames. A chunk boundary landing on a
+ * non-ASCII byte can make the runner desync and fail the whole file with
+ * "Unable to deserialize cloned data" — unrelated to the assertions.
+ * See nodejs/node#64061.
+ */
+async function quietly(fn) {
+  const origLog = console.log
+  console.log = () => {}
+  try {
+    return await fn()
+  } finally {
+    console.log = origLog
+  }
+}
+
 before(async () => {
   tempDir = mkdtempSync(join(tmpdir(), 'rolecraft-init-test-'))
   origCwd = process.cwd()
@@ -26,7 +46,7 @@ describe('init command', () => {
       await rm(dir, { recursive: true, force: true })
     }
 
-    await initModule.initCommand('test-skill')
+    await quietly(() => initModule.initCommand('test-skill'))
 
     const skPath = join(dir, 'SKILL.md')
     assert.ok(existsSync(skPath), 'SKILL.md was created')
@@ -47,7 +67,7 @@ describe('init command', () => {
       await rm(dir, { recursive: true, force: true })
     }
 
-    await initModule.initCommand()
+    await quietly(() => initModule.initCommand())
 
     const skPath = join(dir, 'SKILL.md')
     assert.ok(existsSync(skPath), 'SKILL.md was created')
@@ -63,9 +83,11 @@ describe('init command', () => {
       await rm(dir, { recursive: true, force: true })
     }
 
-    await initModule.initCommand('review-skill', {
-      template: 'code-review',
-    })
+    await quietly(() =>
+      initModule.initCommand('review-skill', {
+        template: 'code-review',
+      }),
+    )
 
     const skPath = join(dir, 'SKILL.md')
     assert.ok(existsSync(skPath), 'SKILL.md was created')
@@ -84,9 +106,11 @@ describe('init command', () => {
   it('throws for unknown template', async () => {
     await assert.rejects(
       () =>
-        initModule.initCommand('bad-template-skill', {
-          template: 'nonexistent',
-        }),
+        quietly(() =>
+          initModule.initCommand('bad-template-skill', {
+            template: 'nonexistent',
+          }),
+        ),
       /Unknown template/,
     )
   })
@@ -97,9 +121,11 @@ describe('init command', () => {
       await rm(dir, { recursive: true, force: true })
     }
 
-    await initModule.initCommand('git-skill', {
-      template: 'git-workflow',
-    })
+    await quietly(() =>
+      initModule.initCommand('git-skill', {
+        template: 'git-workflow',
+      }),
+    )
 
     const skPath = join(dir, 'SKILL.md')
     assert.ok(existsSync(skPath), 'SKILL.md was created')
