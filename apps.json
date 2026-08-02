@@ -1,0 +1,50 @@
+{
+  "$schema": "https://wvw.dev/apps.schema.json",
+  "store": {
+    "name": "RoleCraft",
+    "developer": "Samet ÇELİKBIÇAK",
+    "tagline": "The package manager for AI agents",
+    "github": "https://github.com/sametcelikbicak"
+  },
+  "categories": [
+    { "id": "cli", "name": "CLI Apps" },
+    { "id": "developer-tools", "name": "Developer Tools" }
+  ],
+  "apps": [
+    {
+      "id": "rolecraft",
+      "name": "RoleCraft",
+      "subtitle": "The package manager for AI agents",
+      "description": "Install, test, publish, and manage skills & MCP servers across 86+ agents. Zero-dependency CLI.",
+      "longDescription": "RoleCraft is a zero-dependency Node.js CLI that serves as the package manager for AI agent skills. Install skills from any source, test them, publish to a central registry, and manage MCP servers — all from a single tool. Compatible with 86+ AI coding agents including Claude Code, Cursor, Codex, OpenCode, Windsurf, and more.",
+      "icon": "https://raw.githubusercontent.com/rolecraft-sh/rolecraft/main/assets/rolecraft_logo.png",
+      "iconEmoji": "📦",
+      "iconStyle": {
+        "objectFit": "contain",
+        "bgColor": "#ffffff",
+        "padding": "10%"
+      },
+      "category": ["cli", "developer-tools"],
+      "platform": "Node.js",
+      "price": "Free",
+      "github": "https://github.com/rolecraft-sh/rolecraft",
+      "homepage": "https://rolecraft-sh.github.io/rolecraft/",
+      "language": "JavaScript",
+      "installCommand": "npx rolecraft",
+      "requirements": "Node.js 20+",
+      "features": [
+        "Zero-dependency CLI — no runtime dependencies",
+        "Install skills from GitHub, URLs, or local paths",
+        "Central skill registry with schema validation",
+        "MCP server management — install, verify, and run",
+        "Compatible with 86+ AI agents (Claude Code, Cursor, Codex, OpenCode...)",
+        "GitHub Action for CI/CD integration",
+        "Skill testing and verification built-in",
+        "Profile system for team collaboration"
+      ],
+      "screenshots": [
+        "https://raw.githubusercontent.com/rolecraft-sh/rolecraft/main/assets/rolecraft-demo.gif"
+      ]
+    }
+  ]
+}
