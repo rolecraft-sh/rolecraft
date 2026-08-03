@@ -1,5 +1,8 @@
 import { resolveSkills } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
+import { scanSkill } from '../utils/security.js'
+import { classifyScore } from '../utils/security.js'
+import { UserError } from '../utils/errors.js'
 import { detectAgents } from '../commands/setup.js'
 
 export async function setupApi(source, options = {}) {
@@ -69,6 +72,29 @@ export async function setupApi(source, options = {}) {
       sourcePath: skill.sourcePath || source,
       sourceType: skill.sourceType || 'local',
     }
+
+    // Security scan before install
+    const security = scanSkill(resolved)
+    const level = classifyScore(security.score)
+    if ((level === 'danger' || level === 'review') && !options.yes) {
+      const issues = security.issues
+        .filter((i) => i.severity !== 'low')
+        .map(
+          (i) =>
+            `  [${i.severity}] ${i.description}${i.file ? ` (${i.file})` : ''}`,
+        )
+        .join('\n')
+      throw new UserError(
+        `"${resolved.name}" blocked by security scan (score: ${security.score}/100).`,
+        {
+          suggestion:
+            'Review the flagged issues, or use --yes to skip the security check.',
+          detail: issues,
+          code: 'SECURITY_DANGER',
+        },
+      )
+    }
+
     const results = await installSkill(resolved, targets)
     installed.push({ name: resolved.name, slug: resolved.slug, results })
   }

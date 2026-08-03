@@ -127,6 +127,13 @@ export async function apiProfileDelete(name, options = {}) {
   return { name, deleted: true }
 }
 
+const ALLOWED_PROFILE_HOSTS = [
+  'github.com',
+  'raw.githubusercontent.com',
+  'gist.github.com',
+  'raw.gist.github.com',
+]
+
 export async function apiProfileImport(path) {
   const { readFile } = await import('node:fs/promises')
   const { resolve } = await import('node:path')
@@ -142,6 +149,13 @@ export async function apiProfileImport(path) {
   let data
   const isUrl = path.startsWith('http://') || path.startsWith('https://')
   if (isUrl) {
+    const parsedUrl = new URL(path)
+    if (!ALLOWED_PROFILE_HOSTS.includes(parsedUrl.hostname)) {
+      throw new Error(
+        `URL host "${parsedUrl.hostname}" is not allowed for profile imports. ` +
+          `Allowed hosts: ${ALLOWED_PROFILE_HOSTS.join(', ')}`,
+      )
+    }
     const res = await fetch(path)
     if (!res.ok) throw new Error(`Failed to fetch ${path}: ${res.status}`)
     data = parseProfileJSON(await res.text())

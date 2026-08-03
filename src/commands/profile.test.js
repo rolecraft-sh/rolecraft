@@ -945,7 +945,9 @@ describe('profile import command', () => {
     }))
 
     const logs = captureLogs()
-    await freshCmd.profileImportCommand('https://example.com/test-profile.json')
+    await freshCmd.profileImportCommand(
+      'https://raw.githubusercontent.com/test/test/main/profile.json',
+    )
 
     assert.ok(logs.some((l) => l.includes('url-profile')))
     fetchMock.mock.restore()

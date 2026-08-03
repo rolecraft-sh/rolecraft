@@ -282,7 +282,8 @@ export async function resolveMcpSource(source) {
       }
       await readFilesRecursive(cloneDir, cloneDir)
 
-      await rm(tmpDir, { recursive: true, force: true }).catch(() => {})
+      // Keep tmpDir on disk — MCP server needs the files at runtime.
+      // The OS cleans /tmp periodically; on error the catch block removes it.
       return {
         command: 'node',
         args: [command],

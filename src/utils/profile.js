@@ -20,6 +20,7 @@ import { listMcpServers, addMcpServer } from './mcp.js'
 import { readLock, getGlobalLockPath, getProjectLockPath } from './lockfile.js'
 import { resolveSource } from './resolver.js'
 import { installSkill } from './installer.js'
+import { scanSkill, classifyScore } from './security.js'
 
 const PROFILES_DIR = '.agents/profiles'
 
@@ -484,7 +485,7 @@ export async function applyMcpServers(agentFlag, servers) {
   return results
 }
 
-export async function ensureSkillsInstalled(skills, targetFlags) {
+export async function ensureSkillsInstalled(skills, targetFlags, options = {}) {
   if (!skills || !Array.isArray(skills) || skills.length === 0) return []
 
   const [globalLock, projectLock] = await Promise.all([
@@ -506,6 +507,26 @@ export async function ensureSkillsInstalled(skills, targetFlags) {
 
     try {
       const resolved = await resolveSource(slug)
+
+      // Security scan before install
+      const security = scanSkill(resolved)
+      const level = classifyScore(security.score)
+      if ((level === 'danger' || level === 'review') && !options.yes) {
+        const issues = security.issues
+          .filter((i) => i.severity !== 'low')
+          .map(
+            (i) =>
+              `  [${i.severity}] ${i.description}${i.file ? ` (${i.file})` : ''}`,
+          )
+          .join('\n')
+        results.push({
+          slug,
+          action: 'failed',
+          reason: `security scan blocked (score: ${security.score}/100): ${issues}`,
+        })
+        continue
+      }
+
       const installTargets = targetFlags || ['agents']
       const installResults = await installSkill(resolved, installTargets)
       results.push({
@@ -604,7 +625,11 @@ export async function applyProfileEntry(agentFlag, entry, options = {}) {
 
   if (!options.skipSkills && entry.skills) {
     const targets = options.targets || [agentFlag]
-    const skillResult = await ensureSkillsInstalled(entry.skills, targets)
+    const skillResult = await ensureSkillsInstalled(
+      entry.skills,
+      targets,
+      options,
+    )
     for (const r of skillResult) {
       if (r.action === 'installed') result.skills.applied.push(r.slug)
       else if (r.action === 'failed')
