@@ -88,7 +88,7 @@ export async function bundleApi(sources, options = {}) {
 
   const installOpts = {
     scope: { global: true, project: true },
-    yes: true,
+    yes: options.yes || false,
     noMcp: options.noMcp || false,
   }
 

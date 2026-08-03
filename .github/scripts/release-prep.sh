@@ -100,9 +100,9 @@ if [ -f package.json ]; then
   else
     node -e "
       const pkg = require('./package.json');
-      pkg.version = '$NEW_VERSION';
+      pkg.version = process.argv[1];
       require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');
-    "
+    " "$NEW_VERSION"
   fi
 fi
 

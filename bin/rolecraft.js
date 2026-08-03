@@ -574,6 +574,7 @@ const COMMANDS = {
     const opts = {
       dryRun: flags.includes('--dry-run'),
       noMcp: flags.includes('--no-mcp'),
+      yes: flags.includes('--yes') || flags.includes('-y'),
     }
     if (sources.length === 1) {
       return bundleCommand(sources[0], opts)

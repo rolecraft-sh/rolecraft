@@ -10,14 +10,6 @@ import { computeContentHash } from './lockfile.js'
 import { parseFrontmatter } from './converter.js'
 import { UserError } from './errors.js'
 
-// Convert through character codes to break CodeQL taint tracking.
-// Numeric values are not tracked as tainted, so the returned string is clean.
-function safeString(s) {
-  let r = ''
-  for (let i = 0; i < s.length; i++) r += String.fromCharCode(s.charCodeAt(i))
-  return r
-}
-
 let _runExec = defaultExecSync
 let runHttpsGet = defaultHttpsGet
 
@@ -414,11 +406,11 @@ function parseNpmRef(source) {
 
 function fetchJson(url) {
   const parsed = new URL(url)
-  const hostname = safeString(parsed.hostname)
+  const hostname = parsed.hostname
   if (!hostname.endsWith('.npmjs.org') && hostname !== 'npmjs.org') {
     throw new Error(`Fetch not allowed from ${hostname}`)
   }
-  const cleanUrl = `https://${hostname}${safeString(parsed.pathname)}${safeString(parsed.search)}`
+  const cleanUrl = `https://${hostname}${parsed.pathname}${parsed.search}`
   return new Promise((resolve, reject) => {
     const req = runHttpsGet(
       cleanUrl,
@@ -452,11 +444,11 @@ function fetchJson(url) {
 
 async function downloadFile(url, dest) {
   const parsed = new URL(url)
-  const dlHost = safeString(parsed.hostname)
+  const dlHost = parsed.hostname
   if (dlHost !== 'registry.npmjs.org') {
     throw new Error(`Download not allowed from ${dlHost}`)
   }
-  const dlUrl = `https://${dlHost}${safeString(parsed.pathname)}${safeString(parsed.search)}`
+  const dlUrl = `https://${dlHost}${parsed.pathname}${parsed.search}`
 
   const response = await fetch(dlUrl)
   if (!response.ok) {
@@ -470,7 +462,7 @@ async function downloadFile(url, dest) {
 
 async function resolveNpmInternal(source) {
   const { pkgName, version } = parseNpmRef(source)
-  const encodedName = encodeURIComponent(safeString(pkgName))
+  const encodedName = encodeURIComponent(pkgName)
 
   let metadata
   try {
@@ -510,6 +502,24 @@ async function resolveNpmInternal(source) {
 
   try {
     await downloadFile(tarballUrl, tarballPath)
+
+    // Validate tarball entries before extraction (prevent path traversal)
+    const listResult = runSpawn('tar', ['-tf', tarballPath], {
+      stdio: 'pipe',
+      timeout: 10000,
+    })
+    if (listResult.status === 0) {
+      const entries = listResult.stdout.toString().split('\n').filter(Boolean)
+      const dangerous = entries.some(
+        (e) => e.includes('..') || e.startsWith('/'),
+      )
+      if (dangerous) {
+        throw new Error(
+          `Tarball contains unsafe path entries: ${entries.find((e) => e.includes('..') || e.startsWith('/'))}`,
+        )
+      }
+    }
+
     const tarResult = runSpawn('tar', ['-xzf', tarballPath, '-C', tmpDir], {
       stdio: 'pipe',
       timeout: 30000,
