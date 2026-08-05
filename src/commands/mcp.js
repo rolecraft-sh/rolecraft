@@ -42,6 +42,16 @@ function requiresConfirmation(source) {
   return info.type === 'github'
 }
 
+// S-12: npm/local/uvx/etc. sources get a near-max security score (the scanner
+// only flags "published by anyone" as low), so surface the real risk directly.
+function warnMcpArbitraryCode(source, options) {
+  if (options.yes) return
+  const info = classifyMcpSource(source)
+  if (info.type === 'github') return // github gets full confirmation above
+  console.log('\n⚠️  MCP servers execute arbitrary code when started.')
+  console.log('   Only install from sources you trust.')
+}
+
 export async function mcpInstallCommand(source, options) {
   if (requiresConfirmation(source) && !options.yes) {
     console.log(`\n⚠️  Installing MCP server from GitHub repository: ${source}`)
@@ -55,6 +65,8 @@ export async function mcpInstallCommand(source, options) {
       return
     }
   }
+
+  warnMcpArbitraryCode(source, options)
 
   if (options.dryRun) {
     const { resolveMcpSource: mcpResolve } = await import('../utils/mcp.js')
@@ -119,6 +131,8 @@ export async function mcpUpdateCommand(source, options) {
       return
     }
   }
+
+  warnMcpArbitraryCode(source, options)
 
   if (options.dryRun) {
     const { resolveMcpSource: mcpResolve } = await import('../utils/mcp.js')

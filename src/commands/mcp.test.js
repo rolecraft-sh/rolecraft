@@ -95,6 +95,40 @@ describe('mcp command', () => {
         assert.ok(logs.some((l) => l.includes('not supported')))
       }),
     )
+
+    it(
+      'warns that MCP servers execute arbitrary code for npm sources',
+      withTempDir(async () => {
+        const { logs, restore } = capture('log')
+        await mcpModule.mcpInstallCommand('npm:@test/warn', {
+          agents: ['agents'],
+          name: 'warn-test',
+        })
+        restore()
+
+        assert.ok(
+          logs.some((l) => l.includes('execute arbitrary code when started')),
+        )
+        assert.ok(logs.some((l) => l.includes('Only install from sources')))
+      }),
+    )
+
+    it(
+      'suppresses arbitrary code warning with yes option',
+      withTempDir(async () => {
+        const { logs, restore } = capture('log')
+        await mcpModule.mcpInstallCommand('npm:@test/warn-yes', {
+          agents: ['agents'],
+          name: 'warn-yes',
+          yes: true,
+        })
+        restore()
+
+        assert.ok(
+          !logs.some((l) => l.includes('execute arbitrary code when started')),
+        )
+      }),
+    )
   })
 
   describe('mcpListCommand', () => {
@@ -181,6 +215,28 @@ describe('mcp command', () => {
         restore()
 
         assert.ok(logs.some((l) => l.includes('not supported')))
+      }),
+    )
+
+    it(
+      'warns that MCP servers execute arbitrary code for npm sources on update',
+      withTempDir(async () => {
+        const addModule = await import('../utils/mcp.js')
+        await addModule.addMcpServer('agents', 'warn-update', {
+          command: 'npx',
+          args: ['-y', '@test/old'],
+        })
+
+        const { logs, restore } = capture('log')
+        await mcpModule.mcpUpdateCommand('npm:@test/new', {
+          agents: ['agents'],
+          name: 'warn-update',
+        })
+        restore()
+
+        assert.ok(
+          logs.some((l) => l.includes('execute arbitrary code when started')),
+        )
       }),
     )
   })
