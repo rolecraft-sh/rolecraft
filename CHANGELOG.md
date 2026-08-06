@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.3.0] - 2026-08-06
+
+### Added
+- add apps.json for wvw.dev listing (#201)
+
+### Fixed
+- warn MCP servers execute arbitrary code for non-github sources (#211)
+- handle rejected debounce callbacks
+- security scan bypass in setup/profile/ci + bundle + P1 hardening (#202)
+
+### Changed
+- cover shared debounce utility
+- add shared debounce utility
+- use shared watch debouncer
+- share watch debounce logic
+- restore console stubs and add progress bar fail coverage
+- add unit tests for src/utils/spinner.js
+- update changelog and version for v2.2.0 (#200)
+
+### Documentation
+- add Kegorapetse to contributors (#209)
+- add Caner Bektaş to contributors list
 ## [v2.2.0] - 2026-07-31
 
 ### Added
