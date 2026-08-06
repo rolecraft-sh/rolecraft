@@ -8,6 +8,7 @@ import {
   rm,
   readdir,
 } from 'node:fs/promises'
+import { home } from './paths.js'
 import { join, relative, dirname } from 'node:path'
 import { homedir } from 'node:os'
 import {
@@ -22,9 +23,6 @@ function normalizeSlug(slug) {
   return slug.replace(/\//g, '-')
 }
 
-function home(...parts) {
-  return join(homedir(), ...parts)
-}
 
 /**
  * Get the backup directory path for a skill.

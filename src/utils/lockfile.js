@@ -3,10 +3,9 @@ import { join, dirname } from 'node:path'
 import { createHash } from 'node:crypto'
 import { homedir } from 'node:os'
 import { getAgentByFlag } from '../agents.js'
+import { home } from './paths.js'
 
-function home(...parts) {
-  return join(homedir(), ...parts)
-}
+
 
 export function getGlobalLockPath() {
   return home('.agents', '.skill-lock.json')

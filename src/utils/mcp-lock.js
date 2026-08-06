@@ -1,10 +1,9 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join, dirname } from 'node:path'
 import { homedir } from 'node:os'
+import { home } from './paths.js'
 
-function home(...parts) {
-  return join(homedir(), ...parts)
-}
+
 
 export function getMcpLockPath() {
   return home('.agents', '.mcp-lock.json')
