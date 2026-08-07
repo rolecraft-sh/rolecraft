@@ -4,8 +4,6 @@ import { createHash } from 'node:crypto'
 import { getAgentByFlag } from '../agents.js'
 import { home } from './paths.js'
 
-
-
 export function getGlobalLockPath() {
   return home('.agents', '.skill-lock.json')
 }
@@ -50,17 +48,10 @@ export async function readLock(lockPath = getGlobalLockPath()) {
   }
 }
 
-export async function writeLock(
-  data,
-  lockPath = getGlobalLockPath(),
-) {
+export async function writeLock(data, lockPath = getGlobalLockPath()) {
   await ensureParentDir(lockPath)
 
-  await writeFile(
-    lockPath,
-    `${JSON.stringify(data, null, 2)}\n`,
-    'utf-8',
-  )
+  await writeFile(lockPath, `${JSON.stringify(data, null, 2)}\n`, 'utf-8')
 }
 
 /**
@@ -97,8 +88,7 @@ function pushHistory(lock, slug, newEntry) {
   })
 
   if (lock.skills[slug].history.length > MAX_HISTORY) {
-    lock.skills[slug].history =
-      lock.skills[slug].history.slice(-MAX_HISTORY)
+    lock.skills[slug].history = lock.skills[slug].history.slice(-MAX_HISTORY)
   }
 }
 
@@ -134,10 +124,7 @@ export async function addSkillToLock(
  * Get the rollback history for a specific skill.
  * Returns an array of historical entries (newest first).
  */
-export async function getSkillHistory(
-  slug,
-  lockPath = getGlobalLockPath(),
-) {
+export async function getSkillHistory(slug, lockPath = getGlobalLockPath()) {
   const lock = await readLock(lockPath)
   const entry = lock.skills[slug]
 
@@ -153,10 +140,7 @@ export async function getSkillHistory(
  * Removes the most recent history entry and restores its metadata.
  * Returns the restored entry data, or null if no history exists.
  */
-export async function popHistory(
-  slug,
-  lockPath = getGlobalLockPath(),
-) {
+export async function popHistory(slug, lockPath = getGlobalLockPath()) {
   const lock = await readLock(lockPath)
   const entry = lock.skills[slug]
 
@@ -206,9 +190,7 @@ export function computeFileHashes(fileContents) {
   const hashes = {}
 
   for (const [name, content] of Object.entries(fileContents)) {
-    hashes[name] = createHash('sha256')
-      .update(content)
-      .digest('hex')
+    hashes[name] = createHash('sha256').update(content).digest('hex')
   }
 
   return hashes

@@ -17,7 +17,6 @@ import {
   computeFileHashes,
 } from './lockfile.js'
 import { getAgentByFlag } from '../agents.js'
-import { home } from './paths.js'
 
 function normalizeSlug(slug) {
   return slug.replace(/\//g, '-')
@@ -27,11 +26,7 @@ function normalizeSlug(slug) {
  * Get the backup directory path for a skill.
  */
 export function getBackupDir(slug) {
-  return home(
-    '.agents',
-    '.backups',
-    normalizeSlug(slug),
-  )
+  return home('.agents', '.backups', normalizeSlug(slug))
 }
 
 /**
@@ -44,20 +39,11 @@ export async function backupSkill(slug, fileContents) {
 
   await mkdir(backupDir, { recursive: true })
 
-  const timestamp = new Date()
-    .toISOString()
-    .replace(/[:.]/g, '-')
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
 
-  const backupFile = join(
-    backupDir,
-    `${timestamp}.json`,
-  )
+  const backupFile = join(backupDir, `${timestamp}.json`)
 
-  await writeFile(
-    backupFile,
-    JSON.stringify(fileContents, null, 2),
-    'utf-8',
-  )
+  await writeFile(backupFile, JSON.stringify(fileContents, null, 2), 'utf-8')
 
   return timestamp
 }
@@ -98,10 +84,7 @@ export async function restoreSkill(slug) {
     return null
   }
 
-  const raw = await readFile(
-    backups[0].path,
-    'utf-8',
-  )
+  const raw = await readFile(backups[0].path, 'utf-8')
 
   return JSON.parse(raw)
 }
@@ -116,17 +99,10 @@ export async function removeLatestBackup(slug) {
     return
   }
 
-  await rm(
-    backups[0].path,
-    { force: true },
-  ).catch(() => {})
+  await rm(backups[0].path, { force: true }).catch(() => {})
 }
 
-export async function installSkill(
-  resolved,
-  targets,
-  mode = 'copy',
-) {
+export async function installSkill(resolved, targets, mode = 'copy') {
   const slug = resolved.slug
 
   const agentNames = targets.map((target) => {
@@ -144,11 +120,7 @@ export async function installSkill(
     let label
 
     if (target === 'project') {
-      baseDir = join(
-        process.cwd(),
-        '.agents',
-        'skills',
-      )
+      baseDir = join(process.cwd(), '.agents', 'skills')
 
       label = './.agents/skills/'
     } else {
@@ -162,16 +134,10 @@ export async function installSkill(
       label = agent.label
     }
 
-    const slugDir = join(
-      baseDir,
-      normalizeSlug(slug),
-    )
+    const slugDir = join(baseDir, normalizeSlug(slug))
 
     if (mode === 'symlink' && resolved.skillDir) {
-      const relPath = relative(
-        dirname(slugDir),
-        resolved.skillDir,
-      )
+      const relPath = relative(dirname(slugDir), resolved.skillDir)
 
       await rm(slugDir, {
         recursive: true,
@@ -189,30 +155,23 @@ export async function installSkill(
 
         const oldFiles = {}
 
-        const oldEntries = await readdir(
-          slugDir,
-          {
-            withFileTypes: true,
-          },
-        ).catch(() => [])
+        const oldEntries = await readdir(slugDir, {
+          withFileTypes: true,
+        }).catch(() => [])
 
         for (const entry of oldEntries) {
           if (entry.isFile()) {
             try {
-              oldFiles[entry.name] =
-                await readFile(
-                  join(slugDir, entry.name),
-                  'utf-8',
-                )
+              oldFiles[entry.name] = await readFile(
+                join(slugDir, entry.name),
+                'utf-8',
+              )
             } catch {}
           }
         }
 
         if (Object.keys(oldFiles).length > 0) {
-          await backupSkill(
-            slug,
-            oldFiles,
-          ).catch(() => {})
+          await backupSkill(slug, oldFiles).catch(() => {})
         }
       } catch {
         // Directory does not exist yet.
@@ -228,38 +187,20 @@ export async function installSkill(
       })
 
       for (const file of resolved.files) {
-        const destination = join(
-          slugDir,
-          file,
-        )
+        const destination = join(slugDir, file)
 
-        if (
-          Object.hasOwn(
-            resolved.fileContents || {},
-            file,
-          )
-        ) {
-          await writeFile(
-            destination,
-            resolved.fileContents[file],
-          )
+        if (Object.hasOwn(resolved.fileContents || {}, file)) {
+          await writeFile(destination, resolved.fileContents[file])
         } else if (resolved.skillDir) {
-          const source = join(
-            resolved.skillDir,
-            file,
-          )
+          const source = join(resolved.skillDir, file)
 
           try {
             await stat(source)
 
-            await cp(
-              source,
-              destination,
-              {
-                recursive: true,
-                force: true,
-              },
-            )
+            await cp(source, destination, {
+              recursive: true,
+              force: true,
+            })
           } catch {
             // Skip files that do not exist.
           }
@@ -278,9 +219,7 @@ export async function installSkill(
         slug,
         contentSha: resolved.contentSha,
         fileHashes: resolved.fileContents
-          ? computeFileHashes(
-              resolved.fileContents,
-            )
+          ? computeFileHashes(resolved.fileContents)
           : undefined,
         installedAt: new Date().toISOString(),
         agents: agentNames,
@@ -298,18 +237,13 @@ export async function installSkill(
   }
 
   const outcomes = await Promise.allSettled(
-    targets.map((target) =>
-      installToTarget(target),
-    ),
+    targets.map((target) => installToTarget(target)),
   )
 
   const results = []
 
   for (const outcome of outcomes) {
-    if (
-      outcome.status === 'fulfilled' &&
-      outcome.value !== null
-    ) {
+    if (outcome.status === 'fulfilled' && outcome.value !== null) {
       results.push(outcome.value)
     }
   }
