@@ -1,4 +1,5 @@
 node_modules/
+.DS_Store
 .agents/
 .github/copilot/skills/
 opencode.json
