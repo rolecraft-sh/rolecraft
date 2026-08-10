@@ -151,8 +151,8 @@ describe('mdcToSkill', () => {
       mcp_servers: [{ name: 'github', source: 'gh:example/server' }],
     })
     assert.equal(body, '# Review\n\nInspect the change.')
-    assert.equal('alwaysApply' in attrs, false)
-    assert.equal('globs' in attrs, false)
+    assert.ok(!('alwaysApply' in attrs))
+    assert.ok(!('globs' in attrs))
   })
 
   it('derives a normalized slug from an unusual filename', () => {
