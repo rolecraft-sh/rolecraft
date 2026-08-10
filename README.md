@@ -431,6 +431,9 @@ Thanks to everyone who has contributed to RoleCraft:
       <td align="center"><a href="https://github.com/kegodev"><img src="https://github.com/kegodev.png" width="60" height="60" alt="kegodev"><br><b>Kegorapetse</b></a><br><sub><a href="https://github.com/rolecraft-sh/rolecraft/pull/208">Contributor</a></sub></td>
       <td align="center"><a href="https://github.com/devmaster1987"><img src="https://github.com/devmaster1987.png" width="60" height="60" alt="devmaster1987"><br><b>Dev Master</b></a><br><sub><a href="https://github.com/rolecraft-sh/rolecraft/pull/210">Contributor</a></sub></td>
   </tr>
+  <tr>
+      <td align="center"><a href="https://github.com/alloutflo"><img src="https://github.com/alloutflo.png" width="60" height="60" alt="alloutflo"><br><b>Florian Meyer</b></a><br><sub><a href="https://github.com/rolecraft-sh/rolecraft/pull/216">Contributor</a></sub></td>
+  </tr>
 </table>
 
 ---
