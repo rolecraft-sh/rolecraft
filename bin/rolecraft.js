@@ -54,6 +54,19 @@ function parsePositionals(args) {
   return args.filter((a) => !a.startsWith('-'))
 }
 
+/** Validate flags against allowed list, warn on unknown, exit non-zero if strict */
+function validateFlags(flags, allowed, command) {
+  const unknown = flags.filter(
+    (f) => !allowed.some((a) => f === a || f.startsWith(`${a}=`)),
+  )
+  if (unknown.length > 0) {
+    for (const u of unknown) {
+      console.error(`⚠️  ${command}: unknown flag "${u}" — ignoring`)
+    }
+    process.exitCode = 1
+  }
+}
+
 /**
  * Extract the value after a named flag (e.g. --skill react-rules).
  * Returns undefined when the flag is absent or has no subsequent value.
@@ -265,6 +278,27 @@ const COMMANDS = {
       })
     }
     const flags = parseFlags(args)
+    validateFlags(
+      flags,
+      [
+        '--yes',
+        '-y',
+        '--global',
+        '--project',
+        '--windsurf',
+        '--devin',
+        '--all',
+        '--no-mcp',
+        '--frozen-lockfile',
+        '--symlink',
+        '--copy',
+        '--list',
+        '--skill',
+        '--dry-run',
+        ...agents.map((a) => `--${a.flag}`),
+      ],
+      'install',
+    )
     const scope = buildInstallScope(flags, agents)
     const opts = {
       ...scope,
@@ -284,6 +318,8 @@ const COMMANDS = {
       usage()
       return
     }
+    const flags = parseFlags(args)
+    validateFlags(flags, ['--json', '--agent', '-a'], 'list')
     const agentIndex = args.findIndex(
       (arg) => arg === '--agent' || arg === '-a',
     )
@@ -302,6 +338,8 @@ const COMMANDS = {
       usage()
       return
     }
+    const flags = parseFlags(args)
+    validateFlags(flags, ['--dry-run'], 'remove')
     const pos = parsePositionals(args)
     const slug = pos[0]
     if (!slug) {
@@ -316,6 +354,8 @@ const COMMANDS = {
       usage()
       return
     }
+    const flags = parseFlags(args)
+    validateFlags(flags, ['--dry-run'], 'update')
     const pos = parsePositionals(args)
     const slug = pos[0]
     if (!slug) {
@@ -330,6 +370,8 @@ const COMMANDS = {
       usage()
       return
     }
+    const flags = parseFlags(args)
+    validateFlags(flags, ['--list', '--skill'], 'use')
     const pos = parsePositionals(args)
     const source = pos[0]
     if (!source) {
@@ -350,8 +392,13 @@ const COMMANDS = {
       usage()
       return
     }
-    const pos = parsePositionals(args)
     const flags = parseFlags(args)
+    validateFlags(
+      flags,
+      ['--list', '--template', '--description', '--agents'],
+      'init',
+    )
+    const pos = parsePositionals(args)
     return initCommand(pos[0], {
       list: flags.includes('--list'),
       template: parseFlagValue(args, '--template'),
@@ -365,6 +412,12 @@ const COMMANDS = {
       usage()
       return
     }
+    const flags = parseFlags(args)
+    validateFlags(
+      flags,
+      ['--interactive', '--skills-sh', '--registry'],
+      'search',
+    )
     const pos = parsePositionals(args)
     const query = pos[0]
     if (!query) {
@@ -418,6 +471,8 @@ const COMMANDS = {
       usage()
       return
     }
+    const flags = parseFlags(args)
+    validateFlags(flags, ['--dry-run', '--yes', '-y', '--list'], 'setup')
     const pos = parsePositionals(args)
     const source = pos[0]
     return setupCommand(source, {
@@ -433,6 +488,8 @@ const COMMANDS = {
       usage()
       return
     }
+    const flags = parseFlags(args)
+    validateFlags(flags, ['--dry-run'], 'upgrade')
     return upgradeCommand({ dryRun: args.includes('--dry-run') })
   },
 
@@ -441,6 +498,8 @@ const COMMANDS = {
       usage()
       return
     }
+    const flags = parseFlags(args)
+    validateFlags(flags, ['--json', '--network', '--deep'], 'doctor')
     return doctorCommand({
       json: args.includes('--json'),
       network: args.includes('--network'),
@@ -453,6 +512,8 @@ const COMMANDS = {
       usage()
       return
     }
+    const flags = parseFlags(args)
+    validateFlags(flags, ['--dry-run'], 'watch')
     const pos = parsePositionals(args)
     const slug = pos[0]
     const { watchers } = await watchCommand(slug, process.cwd(), {
@@ -472,6 +533,8 @@ const COMMANDS = {
       usage()
       return
     }
+    const flags = parseFlags(args)
+    validateFlags(flags, ['--json'], 'agents')
     return agentsCommand({ json: args.includes('--json') })
   },
 
@@ -480,6 +543,8 @@ const COMMANDS = {
       usage()
       return
     }
+    const flags = parseFlags(args)
+    validateFlags(flags, ['--write'], 'agents-xml')
     return agentsXmlCommand(args.includes('--write'))
   },
 
@@ -488,6 +553,8 @@ const COMMANDS = {
       usage()
       return
     }
+    const flags = parseFlags(args)
+    validateFlags(flags, ['--dry-run', '--output'], 'convert')
     const pos = parsePositionals(args)
     const source = pos[0]
     if (!source) {
@@ -505,6 +572,12 @@ const COMMANDS = {
       usage()
       return
     }
+    const flags = parseFlags(args)
+    validateFlags(
+      flags,
+      ['--json', '--brief', '--no-color', '--context'],
+      'diff',
+    )
     const pos = parsePositionals(args)
     return diffCommand(pos[0], pos[1], {
       json: args.includes('--json'),
@@ -519,6 +592,21 @@ const COMMANDS = {
       usage()
       return
     }
+    const flags = parseFlags(args)
+    validateFlags(
+      flags,
+      [
+        '--chain',
+        '--dry-run',
+        '--force',
+        '--json',
+        '--no-color',
+        '--name',
+        '--output',
+        '-o',
+      ],
+      'compose',
+    )
     const pos = parsePositionals(args)
     return composeCommand(pos, {
       mode: args.includes('--chain') ? 'chain' : 'merge',
@@ -536,6 +624,22 @@ const COMMANDS = {
       usage()
       return
     }
+    const flags = parseFlags(args)
+    validateFlags(
+      flags,
+      [
+        '--json',
+        '--verbose',
+        '-v',
+        '--no-color',
+        '--no-emoji',
+        '--all',
+        '--min-score',
+        '--only',
+        '--skill',
+      ],
+      'test',
+    )
     const pos = parsePositionals(args)
     const skillPath = pos[0]
     const minScore = parseFlagValue(args, '--min-score')
@@ -555,6 +659,8 @@ const COMMANDS = {
       usage()
       return
     }
+    const flags = parseFlags(args)
+    validateFlags(flags, ['--dry-run', '--no-mcp', '--yes', '-y'], 'bundle')
     if (args.length === 0) {
       console.error('Usage: rolecraft bundle <source> [...]')
       console.error('       rolecraft bundle <file>')
@@ -569,7 +675,6 @@ const COMMANDS = {
       }
       return bundleCreateCommand(parsePositionals(createArgs)[0])
     }
-    const flags = parseFlags(args)
     const sources = parsePositionals(args)
     const opts = {
       dryRun: flags.includes('--dry-run'),
@@ -587,6 +692,12 @@ const COMMANDS = {
       usage()
       return
     }
+    const flags = parseFlags(args)
+    validateFlags(
+      flags,
+      ['--dry-run', '--yes', '-y', '--repo', '--slug', '--name'],
+      'publish',
+    )
     const opts = { dryRun: false, yes: false, repo: '', slug: '', name: '' }
     const pos = []
     for (let i = 0; i < args.length; i++) {
@@ -613,6 +724,7 @@ const COMMANDS = {
       usage()
       return
     }
+    // profile command has its own subcommands, skip flag validation
     return profileCommand(args)
   },
 
@@ -621,6 +733,8 @@ const COMMANDS = {
       usage()
       return
     }
+    // mcp command has subcommands (install, list, search, check, update, remove)
+    // We can't easily validate without knowing subcommand, so skip
     return mcpCommand(args)
   },
 
@@ -640,7 +754,7 @@ COMMANDS.test = COMMANDS.testCommand
 COMMANDS['check-updates'] = COMMANDS.check
 
 // Only non-command names that show usage
-const ALWAYS_SHOW_USAGE = new Set(['help', undefined, null])
+const ALWAYS_SHOW_USAGE = new Set(['help', '--help', '-h', undefined, null])
 
 export async function main() {
   const [, , cmd, ...commandArgs] = process.argv
@@ -658,6 +772,11 @@ export async function main() {
   const handler = COMMANDS[cmd]
   if (handler) {
     await handler(commandArgs)
+  } else if (cmd) {
+    console.error(`❌ Unknown command: "${cmd}"`)
+    console.error('Run "rolecraft help" for available commands.')
+    process.exitCode = 1
+    usage()
   } else {
     usage()
   }

@@ -1281,4 +1281,51 @@ describe('installer', () => {
       assert.deepEqual(backups, [])
     })
   })
+
+  describe('assertSafeSlug (path traversal guard)', () => {
+    const safeBase = join(tempDir, 'safe-base')
+    const insideBase = join(tempDir, 'safe-base', 'my-skill')
+    const outsideBase = join(tempDir, 'escaped')
+
+    it('accepts a normal kebab-case slug inside baseDir', () => {
+      assert.doesNotThrow(() =>
+        installerModule.assertSafeSlug('my-skill', safeBase, insideBase),
+      )
+    })
+
+    it('accepts a slug with a slash that normalizes to a single segment', () => {
+      assert.doesNotThrow(() =>
+        installerModule.assertSafeSlug(
+          'ns/my-skill',
+          safeBase,
+          join(safeBase, 'ns-my-skill'),
+        ),
+      )
+    })
+
+    for (const bad of ['..', '.', '']) {
+      const label = bad === '' ? '<empty>' : bad
+      it(`rejects traversal/empty slug "${label}"`, () => {
+        assert.throws(
+          () => installerModule.assertSafeSlug(bad, safeBase, insideBase),
+          (err) => err.userCode === 'UNSAFE_SLUG',
+        )
+      })
+    }
+
+    it('rejects a slugDir that escapes baseDir', () => {
+      assert.throws(
+        () => installerModule.assertSafeSlug('foo', safeBase, outsideBase),
+        (err) => err.userCode === 'UNSAFE_SLUG',
+      )
+    })
+
+    it('rejects a normalized ".." slug that would resolve outside baseDir', () => {
+      const escaped = join(safeBase, '..', 'evil')
+      assert.throws(
+        () => installerModule.assertSafeSlug('..', safeBase, escaped),
+        (err) => err.userCode === 'UNSAFE_SLUG',
+      )
+    })
+  })
 })

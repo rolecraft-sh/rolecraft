@@ -15,6 +15,7 @@ Minimum score is 0. Each unique pattern match across all files counts once per c
 | 90–100 | SAFE | Installs without prompt |
 | 70–89 | REVIEW | Shows warning, asks for confirmation |
 | 0–69 | DANGER | Blocks install; use `--yes` to force |
+| Any score with a critical issue | DANGER | A single critical finding (e.g. prompt injection) overrides the score; `--yes` forces but always warns |
 
 ## Scan Categories
 
@@ -188,3 +189,7 @@ rolecraft install attacker/helper --yes
 ```
 
 This is intended for CI pipelines and fully trusted sources only.
+
+## MCP Server Scanning
+
+MCP servers referenced in a skill's frontmatter (`mcpServers`) are scanned with the same engine before installation. A server flagged DANGER blocks the whole skill install (`rolecraft install`/`rolecraft ci`), with `--yes` as the only bypass — it always prints a warning. See `MCP_SECURITY_DANGER` in the error output for the flagged issues.

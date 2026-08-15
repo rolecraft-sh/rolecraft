@@ -6,6 +6,7 @@ import {
   getAgentsDir,
   getProjectLockPath,
 } from '../utils/lockfile.js'
+import { assertSafeSlug } from '../utils/installer.js'
 
 function normalizeSlug(slug) {
   return slug.replace(/\//g, '-')
@@ -41,21 +42,22 @@ export async function apiRemove(slug, cwd = process.cwd(), options = {}) {
 
   if (options.dryRun) {
     const dirs = []
-    if (globalFound)
-      dirs.push({
-        scope: 'global',
-        path: join(getAgentsDir(), normalizeSlug(actualSlug)),
-      })
-    if (projectFound)
-      dirs.push({
-        scope: 'project',
-        path: join(cwd, '.agents', 'skills', normalizeSlug(actualSlug)),
-      })
+    if (globalFound) {
+      const dir = join(getAgentsDir(), normalizeSlug(actualSlug))
+      assertSafeSlug(actualSlug, getAgentsDir(), dir)
+      dirs.push({ scope: 'global', path: dir })
+    }
+    if (projectFound) {
+      const dir = join(cwd, '.agents', 'skills', normalizeSlug(actualSlug))
+      assertSafeSlug(actualSlug, join(cwd, '.agents', 'skills'), dir)
+      dirs.push({ scope: 'project', path: dir })
+    }
     return { dryRun: true, slug: actualSlug, dirs }
   }
 
   if (globalFound) {
     const dir = join(getAgentsDir(), normalizeSlug(actualSlug))
+    assertSafeSlug(actualSlug, getAgentsDir(), dir)
     await rm(dir, { recursive: true, force: true })
     await removeSkillFromLock(actualSlug)
     removed.push({ scope: 'global', path: dir })
@@ -63,6 +65,7 @@ export async function apiRemove(slug, cwd = process.cwd(), options = {}) {
 
   if (projectFound) {
     const projectDir = join(cwd, '.agents', 'skills', normalizeSlug(actualSlug))
+    assertSafeSlug(actualSlug, join(cwd, '.agents', 'skills'), projectDir)
     await rm(projectDir, { recursive: true, force: true })
     await removeSkillFromLock(actualSlug, projectLockPath)
     removed.push({ scope: 'project', path: projectDir })

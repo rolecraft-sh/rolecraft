@@ -71,9 +71,23 @@ describe('rolecraft CLI', () => {
   it('shows usage for unknown command', async () => {
     const { main } = await import('./rolecraft.js')
     const logs = captureLogs()
+    const errors = captureErrors()
     process.argv = ['node', 'rolecraft', 'nonexistent-command']
     await main()
     assert.ok(logs.some((l) => l.includes('rolecraft')))
+    assert.ok(errors.some((e) => e.includes('Unknown command')))
+    assert.equal(process.exitCode, 1)
+    process.exitCode = 0
+  })
+
+  it('sets exit code 1 for unknown flags', async () => {
+    const { main } = await import('./rolecraft.js')
+    const errors = captureErrors()
+    process.argv = ['node', 'rolecraft', 'list', '--bogusflag']
+    await main()
+    assert.ok(errors.some((e) => e.includes('unknown flag')))
+    assert.equal(process.exitCode, 1)
+    process.exitCode = 0
   })
 
   it('shows version for --version', async () => {

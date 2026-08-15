@@ -3,7 +3,7 @@ import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 import { readMcpLock } from '../utils/mcp-lock.js'
 import { resolveMcpSource, addMcpServer } from '../utils/mcp.js'
-import { scanSkill, classifyScore } from '../utils/security.js'
+import { scanSkill, scanMcpServer, classifyScore } from '../utils/security.js'
 
 export async function apiCi(cwd = process.cwd()) {
   const [globalLock, projectLock, mcpLock] = await Promise.all([
@@ -33,7 +33,7 @@ export async function apiCi(cwd = process.cwd()) {
 
       // Security scan — block dangerous skills even in CI
       const security = scanSkill(resolved)
-      const level = classifyScore(security.score)
+      const level = classifyScore(security.score, security.issues)
       if (level === 'danger') {
         failed.push({
           slug,
@@ -61,6 +61,19 @@ export async function apiCi(cwd = process.cwd()) {
     }
     try {
       const resolved = await resolveMcpSource(entry.source)
+
+      // Security scan for MCP servers
+      const mcpSecurity = scanMcpServer(resolved)
+      const mcpLevel = classifyScore(mcpSecurity.score, mcpSecurity.issues)
+      if (mcpLevel === 'danger') {
+        mcpFailed.push({
+          name,
+          source: entry.source,
+          reason: `blocked by MCP security scan (score: ${mcpSecurity.score}/100)`,
+        })
+        continue
+      }
+
       for (const agent of entry.agents) {
         await addMcpServer(agent, name, resolved, entry.source)
       }

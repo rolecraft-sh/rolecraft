@@ -10,6 +10,7 @@ import {
 } from 'node:fs/promises'
 import { home } from './paths.js'
 import { join, relative, dirname } from 'node:path'
+import { UserError } from './errors.js'
 import {
   addSkillToLock,
   getGlobalLockPath,
@@ -18,8 +19,50 @@ import {
 } from './lockfile.js'
 import { getAgentByFlag } from '../agents.js'
 
+import { resolve, sep } from 'node:path'
+
 function normalizeSlug(slug) {
   return slug.replace(/\//g, '-')
+}
+
+/**
+ * Reject slugs that could escape their base directory.
+ * `..`, `.`, empty, or any slug whose resolved path leaves baseDir is blocked.
+ * This prevents path-traversal via `slug: "..` in a malicious SKILL.md
+ * (which would otherwise make rm(slugDir, {recursive:true}) delete baseDir).
+ */
+export function assertSafeSlug(slug, baseDir, slugDir) {
+  const normalized = normalizeSlug(slug)
+
+  // Reject exact traversal tokens and empty slugs outright. Without this,
+  // slug "." resolves to baseDir and rm(baseDir) would delete the whole
+  // install directory.
+  if (!normalized || normalized === '.' || normalized === '..') {
+    throw new UserError(
+      `Refusing unsafe slug "${slug}": would delete the install directory itself.`,
+      {
+        suggestion:
+          'Slug must be a single kebab-case name (e.g. "my-skill"), not ".", "..", or a path.',
+        detail: `baseDir=${baseDir} slugDir=${slugDir}`,
+        code: 'UNSAFE_SLUG',
+      },
+    )
+  }
+
+  const root = resolve(baseDir)
+  const target = resolve(slugDir)
+  // target must be inside (or equal to) root
+  if (target !== root && !target.startsWith(root + sep)) {
+    throw new UserError(
+      `Refusing unsafe slug "${slug}": would escape the install directory.`,
+      {
+        suggestion:
+          'Slug must be a single kebab-case name (e.g. "my-skill"), not a path or "..".',
+        detail: `baseDir=${baseDir} slugDir=${slugDir}`,
+        code: 'UNSAFE_SLUG',
+      },
+    )
+  }
 }
 
 /**
@@ -135,6 +178,8 @@ export async function installSkill(resolved, targets, mode = 'copy') {
     }
 
     const slugDir = join(baseDir, normalizeSlug(slug))
+
+    assertSafeSlug(slug, baseDir, slugDir)
 
     if (mode === 'symlink' && resolved.skillDir) {
       const relPath = relative(dirname(slugDir), resolved.skillDir)

@@ -97,11 +97,13 @@ function parseMetadata(content) {
 async function readFileContents(skillDir) {
   let entries
   try {
-    entries = await readdir(skillDir, { withFileTypes: true })
+    entries = await readdir(skillDir, { withFileTypes: true, recursive: true })
   } catch {
     return {}
   }
-  const files = entries.filter((e) => e.name !== '.git').map((e) => e.name)
+  const files = entries
+    .filter((e) => e.isFile() && !e.name.startsWith('.git'))
+    .map((e) => e.name)
   const fileContents = {}
   for (const f of files) {
     try {

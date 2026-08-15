@@ -327,6 +327,7 @@ Scores range **0–100**:
 - **90+** → SAFE, install proceeds
 - **70–89** → REVIEW, prompts for confirmation
 - **<70** → DANGER, blocked unless `--yes`
+- **Any critical issue** → DANGER regardless of score (a single critical finding can never be silently skipped)
 
 ```bash
 rolecraft install ./my-skill              # auto-scanned

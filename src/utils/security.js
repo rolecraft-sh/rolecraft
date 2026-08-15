@@ -52,14 +52,14 @@ const PATTERNS = [
     severity: 'critical',
     category: 'prompt_injection',
     pattern:
-      /ignore\s+(all|previous|above)\s+(instructions|directives|commands)/i,
+      /ignore\s+(?:all|previous|above)\s+(?:of\s+the\s+)?(?:instructions|directives|commands)/i,
     description: 'Prompt injection: attempts to override instructions',
   },
   {
     severity: 'critical',
     category: 'prompt_injection',
     pattern:
-      /you\s+are\s+(now\s+)?a\s*(free|unrestricted|unlimited|unbounded|unconstrained|unfiltered)/i,
+      /you\s+are\s+(now\s+)?an?\s*(free|unrestricted|unlimited|unbounded|unconstrained|unfiltered)/i,
     description: 'Prompt injection: role override attempt',
   },
   {
@@ -222,7 +222,10 @@ export function scanSkill(resolved) {
   return { score: Math.max(0, score), issues }
 }
 
-export function classifyScore(score) {
+export function classifyScore(score, issues = []) {
+  // Any critical issue → danger regardless of score
+  const hasCritical = issues.some((i) => i.severity === 'critical')
+  if (hasCritical) return 'danger'
   if (score >= 90) return 'safe'
   if (score >= 70) return 'review'
   return 'danger'

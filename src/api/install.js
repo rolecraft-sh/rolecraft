@@ -1,6 +1,6 @@
 import { resolveSource, resolveSkills } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
-import { scanSkill } from '../utils/security.js'
+import { scanSkill, scanMcpServer, classifyScore } from '../utils/security.js'
 import {
   parseMcpServersFromSkill,
   resolveMcpSource,
@@ -108,8 +108,7 @@ export async function apiInstallSkills(source, options = {}) {
     }
 
     const security = scanSkill(resolved)
-    const level =
-      security.score >= 90 ? 'safe' : security.score >= 70 ? 'review' : 'danger'
+    const level = classifyScore(security.score, security.issues)
 
     if (level === 'danger' && !options.yes) {
       const issues = security.issues
@@ -149,6 +148,23 @@ export async function apiInstallSkills(source, options = {}) {
       )
     }
 
+    // --yes forces past danger/review but never silently: warn the user
+    // so a forced install of a flagged skill leaves a visible trail.
+    if (options.yes && (level === 'danger' || level === 'review')) {
+      const issues = security.issues
+        .filter((i) => i.severity === 'critical' || i.severity === 'high')
+        .map(
+          (i) =>
+            `  🔴 [${i.severity}] ${i.description}${i.file ? ` (${i.file})` : ''}`,
+        )
+        .join('\n')
+      const tag = level === 'danger' ? 'DANGER' : 'REVIEW'
+      console.error(
+        `\n⚠️  [${tag}] --yes forcing install of "${resolved.name}" despite security scan (score: ${security.score}/100).`,
+      )
+      if (issues) console.error(issues)
+    }
+
     const installResults = await installSkill(
       resolved,
       targets,
@@ -171,6 +187,37 @@ export async function apiInstallSkills(source, options = {}) {
         )
         for (const server of mcpServers) {
           const resolvedMcp = await resolveMcpSource(server.source)
+
+          // Security scan for MCP servers
+          const mcpSecurity = scanMcpServer(resolvedMcp)
+          const mcpLevel = classifyScore(mcpSecurity.score, mcpSecurity.issues)
+          if (mcpLevel === 'danger' && !options.yes) {
+            const issues = mcpSecurity.issues
+              .filter((i) => i.severity === 'critical' || i.severity === 'high')
+              .map(
+                (i) =>
+                  `  🔴 [${i.severity}] ${i.description}${i.file ? ` (${i.file})` : ''}`,
+              )
+              .join('\n')
+            throw new UserError(
+              `MCP server "${server.name}" blocked by security scan (score: ${mcpSecurity.score}/100).`,
+              {
+                suggestion:
+                  'Review the flagged issues, or use --yes to force install.',
+                detail: `Flagged issues:\n${issues}`,
+                code: 'MCP_SECURITY_DANGER',
+              },
+            )
+          }
+
+          // --yes forces past danger but never silently
+          if (options.yes && (mcpLevel === 'danger' || mcpLevel === 'review')) {
+            const tag = mcpLevel === 'danger' ? 'DANGER' : 'REVIEW'
+            console.error(
+              `\n⚠️  [${tag}] --yes forcing install of MCP server "${server.name}" despite security scan (score: ${mcpSecurity.score}/100).`,
+            )
+          }
+
           const installed = []
           for (const agent of mcpTargets) {
             const ok = await addMcpServer(agent, server.name, resolvedMcp)

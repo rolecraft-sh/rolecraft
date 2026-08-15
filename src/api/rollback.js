@@ -8,7 +8,11 @@ import {
   getSkillHistory,
   popHistory,
 } from '../utils/lockfile.js'
-import { restoreSkill, removeLatestBackup } from '../utils/installer.js'
+import {
+  restoreSkill,
+  removeLatestBackup,
+  assertSafeSlug,
+} from '../utils/installer.js'
 import { getAgentByFlag } from '../agents.js'
 import { UserError } from '../utils/errors.js'
 
@@ -108,6 +112,7 @@ export async function apiRollback(slug, options = {}) {
     }
 
     const slugDir = join(baseDir, normalizeSlug(slug))
+    assertSafeSlug(slug, baseDir, slugDir)
     await rm(slugDir, { recursive: true, force: true }).catch(() => {})
     await mkdir(slugDir, { recursive: true })
 
