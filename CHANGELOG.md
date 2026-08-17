@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.3.2] - 2026-08-17
+
+### Fixed
+- repair npm README images and tighten package contents (#222)
+
+### Changed
+- update changelog and version for v2.3.1 (#221)
 ## [v2.3.1] - 2026-08-17
 
 ### Added
