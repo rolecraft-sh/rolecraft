@@ -46,7 +46,7 @@ before(async () => {
 
 after(async () => {
   await rm(tempDir, { recursive: true, force: true })
-  await rm(join(process.cwd(), '.github', 'copilot', 'skills'), {
+  await rm(join(process.cwd(), '.github', 'skills'), {
     recursive: true,
     force: true,
   })
@@ -104,7 +104,13 @@ describe('installer', () => {
     assert.equal(results.length, 1)
     assert.equal(results[0].target, 'windsurf')
 
-    const skillDir = join(tempDir, '.windsurf', 'skills', 'test-my-skill')
+    const skillDir = join(
+      tempDir,
+      '.codeium',
+      'windsurf',
+      'skills',
+      'test-my-skill',
+    )
     assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 
@@ -114,11 +120,11 @@ describe('installer', () => {
     assert.equal(results.length, 1)
     assert.equal(results[0].target, 'codex')
 
-    const skillDir = join(tempDir, '.codex', 'skills', 'test-my-skill')
+    const skillDir = join(tempDir, '.agents', 'skills', 'test-my-skill')
     assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 
-  it('installs skill to copilot project directory (.github/copilot/skills/)', async () => {
+  it('installs skill to copilot project directory (.github/skills/)', async () => {
     const results = await installerModule.installSkill(resolvedSkill, [
       'copilot',
     ])
@@ -126,13 +132,7 @@ describe('installer', () => {
     assert.equal(results.length, 1)
     assert.equal(results[0].target, 'copilot')
 
-    const skillDir = join(
-      process.cwd(),
-      '.github',
-      'copilot',
-      'skills',
-      'test-my-skill',
-    )
+    const skillDir = join(process.cwd(), '.github', 'skills', 'test-my-skill')
     assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 
@@ -157,7 +157,12 @@ describe('installer', () => {
   })
 
   it('installs skill to devin directory', async () => {
+    const origCwd = process.cwd
+    process.cwd = () => tempDir
+
     const results = await installerModule.installSkill(resolvedSkill, ['devin'])
+
+    process.cwd = origCwd
 
     assert.equal(results.length, 1)
     assert.equal(results[0].target, 'devin')
@@ -206,7 +211,7 @@ describe('installer', () => {
     assert.equal(results.length, 1)
     assert.equal(results[0].target, 'warp')
 
-    const skillDir = join(tempDir, '.warp', 'skills', 'test-my-skill')
+    const skillDir = join(tempDir, '.agents', 'skills', 'test-my-skill')
     assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 
@@ -240,7 +245,7 @@ describe('installer', () => {
     assert.equal(results.length, 1)
     assert.equal(results[0].target, 'goose')
 
-    const skillDir = join(tempDir, '.goose', 'skills', 'test-my-skill')
+    const skillDir = join(tempDir, '.agents', 'skills', 'test-my-skill')
     assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 
@@ -252,7 +257,13 @@ describe('installer', () => {
     assert.equal(results.length, 1)
     assert.equal(results[0].target, 'tabnine')
 
-    const skillDir = join(tempDir, '.tabnine', 'skills', 'test-my-skill')
+    const skillDir = join(
+      tempDir,
+      '.tabnine',
+      'agent',
+      'skills',
+      'test-my-skill',
+    )
     assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 
@@ -530,7 +541,7 @@ describe('installer', () => {
     assert.equal(results[0].target, 'openhands')
     const skillDir = join(
       process.env.HOME,
-      '.openhands',
+      '.agents',
       'skills',
       'test-my-skill',
     )
@@ -725,11 +736,17 @@ describe('installer', () => {
     process.cwd = origCwd
   })
 
-  it('installs skill to forge directory', async () => {
+  it('installs skill to forge directory (.forge/skills/)', async () => {
+    const origCwd = process.cwd
+    process.cwd = () => tempDir
+
     const results = await installerModule.installSkill(resolvedSkill, ['forge'])
+
+    process.cwd = origCwd
+
     assert.equal(results.length, 1)
     assert.equal(results[0].target, 'forge')
-    const skillDir = join(process.env.HOME, '.forge', 'skills', 'test-my-skill')
+    const skillDir = join(tempDir, '.forge', 'skills', 'test-my-skill')
     assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 
@@ -1052,7 +1069,7 @@ describe('installer', () => {
     assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 
-  it('installs skill to chatgpt directory (~/.chatgpt/skills/)', async () => {
+  it('installs skill to chatgpt directory (~/.agents/skills/)', async () => {
     const results = await installerModule.installSkill(resolvedSkill, [
       'chatgpt',
     ])
@@ -1060,7 +1077,7 @@ describe('installer', () => {
     assert.equal(results[0].target, 'chatgpt')
     const skillDir = join(
       process.env.HOME,
-      '.chatgpt',
+      '.agents',
       'skills',
       'test-my-skill',
     )
@@ -1098,13 +1115,14 @@ describe('installer', () => {
     assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 
-  it('installs skill to amp directory (~/.agents/skills/)', async () => {
+  it('installs skill to amp directory (~/.config/agents/skills/)', async () => {
     const results = await installerModule.installSkill(resolvedSkill, ['amp'])
     assert.equal(results.length, 1)
     assert.equal(results[0].target, 'amp')
     const skillDir = join(
       process.env.HOME,
-      '.agents',
+      '.config',
+      'agents',
       'skills',
       'test-my-skill',
     )
@@ -1182,18 +1200,19 @@ describe('installer', () => {
     assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 
-  it('installs skill to replit directory (~/.agents/skills/)', async () => {
+  it('installs skill to replit directory (./.agents/skills/)', async () => {
+    const origCwd = process.cwd
+    process.cwd = () => tempDir
+
     const results = await installerModule.installSkill(resolvedSkill, [
       'replit',
     ])
+
+    process.cwd = origCwd
+
     assert.equal(results.length, 1)
     assert.equal(results[0].target, 'replit')
-    const skillDir = join(
-      process.env.HOME,
-      '.agents',
-      'skills',
-      'test-my-skill',
-    )
+    const skillDir = join(tempDir, '.agents', 'skills', 'test-my-skill')
     assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 

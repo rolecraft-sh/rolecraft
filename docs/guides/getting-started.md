@@ -15,7 +15,7 @@ A skill is a reusable capability for your AI coding agent. Think of it as a plug
 - **Team conventions** — one command sets up every agent on every developer's machine
 - **MCP servers** — skills can declare and install MCP servers alongside themselves
 
-rolecraft manages all of this across **86+ AI agents** with a single CLI and **zero runtime dependencies**.
+rolecraft manages all of this across **86 AI agents** (26 verified) with a single CLI and **zero runtime dependencies**.
 
 ---
 

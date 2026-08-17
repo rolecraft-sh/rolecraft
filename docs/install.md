@@ -48,20 +48,20 @@ Where do you want to install this skill?
 | `--all`         | all known agent directories        |
 | `--claude`      | `~/.claude/skills/`                |
 | `--cursor`      | `~/.cursor/skills/`                |
-| `--windsurf`    | `~/.windsurf/skills/` (legacy)     |
-| `--devin`       | `~/.devin/skills/`                 |
-| `--codex`       | `~/.codex/skills/`                 |
-| `--copilot`     | `./.github/copilot/skills/`        |
+| `--windsurf`    | `~/.codeium/windsurf/skills/`     |
+| `--devin`       | `./.devin/skills/`                 |
+| `--codex`       | `~/.agents/skills/`                |
+| `--copilot`     | `./.github/skills/`                |
 | `--aider`       | `~/.aider/skills/`                 |
 | `--cline`       | `~/.cline/skills/`                 |
 | `--gemini`      | `~/.gemini/skills/`                |
 | `--cody`        | `~/.cody/skills/`                  |
 | `--continue`    | `~/.continue/skills/`              |
-| `--warp`        | `~/.warp/skills/`                  |
+| `--warp`        | `~/.agents/skills/`                |
 | `--codeium`     | `~/.codeium/skills/`               |
 | `--fabric`      | `~/.fabric/skills/`                |
-| `--goose`       | `~/.goose/skills/`                 |
-| `--tabnine`     | `~/.tabnine/skills/`               |
+| `--goose`       | `~/.agents/skills/`                |
+| `--tabnine`     | `~/.tabnine/agent/skills/`         |
 | `--supermaven`  | `~/.supermaven/skills/`            |
 | `--pr-pilot`    | `~/.pr-pilot/skills/`              |
 | `--loom`        | `~/.loom/skills/`                  |
@@ -71,7 +71,7 @@ Where do you want to install this skill?
 | `--kiro`        | `~/.kiro/skills/`                  |
 | `--augment`     | `~/.augment/skills/`               |
 | `--kilo`        | `~/.kilo/skills/`                  |
-| `--openhands`   | `~/.openhands/skills/`             |
+| `--openhands`   | `~/.agents/skills/`                |
 | `--junie`       | `~/.junie/skills/`                 |
 | `--factory`     | `~/.factory/skills/`               |
 | `--command-code` | `~/.commandcode/skills/`         |
@@ -92,7 +92,7 @@ Where do you want to install this skill?
 | `--code-studio`     | `~/.codestudio/skills/`            |
 | `--crush`           | `~/.crush/skills/`                 |
 | `--eve`             | `./agent/skills/`                  |
-| `--forge`           | `~/.forge/skills/`                 |
+| `--forge`           | `./.forge/skills/`                 |
 | `--inference-sh`    | `~/.inferencesh/skills/`           |
 | `--jazz`            | `~/.jazz/skills/`                  |
 | `--iflow`           | `~/.iflow/skills/`                 |

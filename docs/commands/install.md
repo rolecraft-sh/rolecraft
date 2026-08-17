@@ -79,7 +79,7 @@ interactively to select which skills to install.
 | `--all`         | all known agent directories        |
 | `--claude`      | `~/.claude/skills/`                |
 | `--cursor`      | `~/.cursor/skills/`                |
-| `--devin`       | `~/.devin/skills/`                 |
+| `--devin`       | `./.devin/skills/`                 |
 | *(and 25+ more — see [docs/agents.md](../agents.md))* | |
 
 ## Mode flags

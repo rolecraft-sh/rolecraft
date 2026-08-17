@@ -45,22 +45,41 @@ $ rolecraft agents
 Agent Capability Manifest
 =========================
 
-VERIFIED (3)
+VERIFIED (26)
   opencode     ~/.agents/skills/         MCP: -
   claude-code  ~/.claude/skills/         MCP: mcpServers
   cursor       ~/.cursor/skills/         MCP: mcpServers
-
-COMMUNITY (3)
-  windsurf     ~/.windsurf/skills/       MCP: mcpServers
-  codex        ~/.codex/skills/          MCP: -
-  continue     ~/.continue/skills/       MCP: experimental.mcpServers
-
-LEGACY (1)
-  copilot      ./.github/copilot/skills/  MCP: -
-
-EXPERIMENTAL (79)
-  aider        ~/.aider/skills/          MCP: -
+  windsurf     ~/.codeium/windsurf/skills/  MCP: mcpServers
+  devin        ./.devin/skills/          MCP: -
+  codex        ~/.agents/skills/         MCP: -
+  copilot      ./.github/skills/         MCP: -
   cline        ~/.cline/skills/          MCP: -
+  continue     ~/.continue/skills/       MCP: experimental.mcpServers
+  gemini-cli   ~/.gemini/skills/         MCP: -
+  qwen-code    ~/.qwen/skills/           MCP: -
+  roo          ~/.roo/skills/            MCP: -
+  trae         ~/.trae/skills/           MCP: -
+  junie        ~/.junie/skills/          MCP: -
+  kiro         ~/.kiro/skills/           MCP: -
+  lingma       ~/.lingma/skills/         MCP: -
+  forge        ./.forge/skills/          MCP: -
+  jazz         ~/.jazz/skills/           MCP: -
+  chatgpt      ~/.agents/skills/         MCP: -
+  amp          ~/.config/agents/skills/  MCP: -
+  replit       ./.agents/skills/         MCP: -
+  zed          ~/.agents/skills/         MCP: -
+  warp         ~/.agents/skills/         MCP: -
+  goose        ~/.agents/skills/         MCP: -
+  tabnine      ~/.tabnine/agent/skills/  MCP: -
+  openhands    ~/.agents/skills/         MCP: -
+
+COMMUNITY (0)
+
+LEGACY (0)
+
+EXPERIMENTAL (60)
+  aider        ~/.aider/skills/          MCP: -
+  cody         ~/.cody/skills/           MCP: -
   ...
 ```
 

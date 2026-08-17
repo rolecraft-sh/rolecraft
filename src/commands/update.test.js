@@ -174,11 +174,11 @@ describe('update command', () => {
       '# slug: wind/skill\nname: Wind Skill\nContent',
     )
 
-    mkdirSync(join(tempDir, '.windsurf', 'skills', 'wind-skill'), {
+    mkdirSync(join(tempDir, '.codeium', 'windsurf', 'skills', 'wind-skill'), {
       recursive: true,
     })
     writeFileSync(
-      join(tempDir, '.windsurf', 'skills', 'wind-skill', 'SKILL.md'),
+      join(tempDir, '.codeium', 'windsurf', 'skills', 'wind-skill', 'SKILL.md'),
       '# slug: wind/skill\nname: Wind Skill\nContent',
     )
 
@@ -229,12 +229,16 @@ describe('update command', () => {
     console.log = (...args) => {
       if (args.length) logs.push(String(args[0]))
     }
+    const origCwd = process.cwd
+    process.cwd = () => tempDir
 
     await updateModule.updateCommand('dev/skill')
 
+    process.cwd = origCwd
+    console.log = origLog
+
     assert.ok(logs.some((l) => l.includes('Updated')))
     assert.ok(logs.some((l) => l.includes('devin')))
-    console.log = origLog
   })
 
   it('finds skill by normalized slug when exact match fails', async () => {
@@ -453,12 +457,12 @@ describe('update command', () => {
       '# slug: cod/skill\nname: Codex Skill\nContent',
     )
 
-    mkdirSync(join(tempDir, '.codex', 'skills', 'cod-skill'), {
+    mkdirSync(join(tempDir, '.agents', 'skills', 'cod-skill'), {
       recursive: true,
     })
     writeFileSync(
-      join(tempDir, '.codex', 'skills', 'cod-skill', 'SKILL.md'),
-      '# slug: cod/skill\nname: Codex Skill\nContent',
+      join(tempDir, '.agents', 'skills', 'cod-skill', 'SKILL.md'),
+      '# slug: cod/skill\nname: Cod Skill\nContent',
     )
 
     const logs = []
@@ -498,11 +502,11 @@ describe('update command', () => {
       '# slug: cop/skill\nname: Copilot Skill\nContent',
     )
 
-    mkdirSync(join(tempDir, '.github', 'copilot', 'skills', 'cop-skill'), {
+    mkdirSync(join(tempDir, '.github', 'skills', 'cop-skill'), {
       recursive: true,
     })
     writeFileSync(
-      join(tempDir, '.github', 'copilot', 'skills', 'cop-skill', 'SKILL.md'),
+      join(tempDir, '.github', 'skills', 'cop-skill', 'SKILL.md'),
       '# slug: cop/skill\nname: Copilot Skill\nContent',
     )
 

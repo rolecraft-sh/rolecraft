@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>The Package Manager for AI Agents</b><br>
-  Install · Test · Publish · Manage Skills & MCP Servers across 86+ Agents<br>
+   Install · Test · Publish · Manage Skills & MCP Servers across 86 Agents (16 Verified)<br>
   Zero-dependency CLI · No signup · Offline-first
 </p>
 
@@ -51,7 +51,7 @@
 ---
 
 <p align="center">
-  <b>⚡ Zero dependencies</b> · <b>📦 87.4 kB</b> · <b>🤖 86+ agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 Security scoring</b> · <b>📝 Skill testing</b> · <b>🔧 Init templates</b> · <b>🌐 Offline-first</b>
+  <b>⚡ Zero dependencies</b> · <b>📦 87.4 kB</b> · <b>🤖 26 verified agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 Security scoring</b> · <b>📝 Skill testing</b> · <b>🔧 Init templates</b> · <b>🌐 Offline-first</b>
 </p>
 
 <p align="center">

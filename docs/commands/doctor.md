@@ -22,7 +22,7 @@ Scans your system and reports on:
 - **Lockfile schema** — validates global lockfile format
 - **Global & project lockfiles** — skill count per scope
 - **Disk usage** — total size of installed skills
-- **Agent detection** — finds installed agents among 86+ supported, per-agent skill count and directory permissions
+- **Agent detection** — finds installed agents among 86 supported, per-agent skill count and directory permissions
 - **Orphaned skill dirs** — directories not tracked in any lockfile
 - **Skill integrity** — verifies skill directories exist, content hashes match, and checks for broken symlinks
 - **MCP servers** — counts configured MCP servers across detected agents

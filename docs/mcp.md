@@ -97,7 +97,7 @@ rolecraft install ./my-postgres-rules --cursor --claude --windsurf
 ```
 
 This does **three things** automatically:
-1. **Skill installation** → copies `my-postgres-rules` to `~/.cursor/skills/`, `~/.claude/skills/`, `~/.windsurf/skills/`
+1. **Skill installation** → copies `my-postgres-rules` to `~/.cursor/skills/`, `~/.claude/skills/`, `~/.codeium/windsurf/skills/`
 2. **MCP installation** → reads `mcp_servers` from SKILL.md, resolves the sources
 3. **Config wiring** → writes MCP config in each agent's native format:
    - Cursor: `~/.cursor/mcp.json`
@@ -131,7 +131,7 @@ rolecraft bundle install team-onboarding.json
 | claude-code | `~/.claude.json` | Standard `mcpServers` object |
 | cursor | `~/.cursor/mcp.json` | Standard `mcpServers` object |
 | windsurf | `~/.windsurf/mcp_config.json` | Standard `mcpServers` object |
-| devin | `~/.devin/mcp.json` | Standard `mcpServers` object |
+| devin | `./.devin/mcp.json` | Standard `mcpServers` object |
 | copilot | `./.github/copilot/.mcp.json` | `{ inputs: [], servers: {} }` |
 | continue | `~/.continue/config.json` | `{ experimental: { mcpServers: [] } }` |
 

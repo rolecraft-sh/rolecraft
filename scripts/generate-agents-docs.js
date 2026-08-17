@@ -12,7 +12,6 @@ const DUAL_PATH_AGENTS = new Set([
   'claude-code',
   'cursor',
   'windsurf',
-  'devin',
   'codex',
   'aider',
   'cline',
@@ -23,11 +22,13 @@ const DUAL_PATH_AGENTS = new Set([
 const NAME_TO_DIR = {
   'claude-code': 'claude',
   opencode: 'agents',
+  codex: 'agents',
+  chatgpt: 'agents',
 }
 
 function formatDirLabel(agent) {
   if (agent.name === 'copilot') {
-    return './.github/copilot/skills/ or ~/.copilot/skills/'
+    return './.github/skills/ or ~/.copilot/skills/'
   }
   if (DUAL_PATH_AGENTS.has(agent.name)) {
     const homePath = agent.label

@@ -38,26 +38,26 @@ const AGENTS_DATA = [
   {
     flag: 'windsurf',
     name: 'windsurf',
-    getDir: () => home('.windsurf', 'skills'),
-    label: '~/.windsurf/skills/',
+    getDir: () => home('.codeium', 'windsurf', 'skills'),
+    label: '~/.codeium/windsurf/skills/',
   },
   {
     flag: 'devin',
     name: 'devin',
-    getDir: () => home('.devin', 'skills'),
-    label: '~/.devin/skills/',
+    getDir: () => proj('.devin', 'skills'),
+    label: './.devin/skills/',
   },
   {
     flag: 'codex',
     name: 'codex',
-    getDir: () => home('.codex', 'skills'),
-    label: '~/.codex/skills/',
+    getDir: () => home('.agents', 'skills'),
+    label: '~/.agents/skills/',
   },
   {
     flag: 'copilot',
     name: 'copilot',
-    getDir: () => proj('.github', 'copilot', 'skills'),
-    label: './.github/copilot/skills/',
+    getDir: () => proj('.github', 'skills'),
+    label: './.github/skills/',
   },
   {
     flag: 'aider',
@@ -92,8 +92,8 @@ const AGENTS_DATA = [
   {
     flag: 'warp',
     name: 'warp',
-    getDir: () => home('.warp', 'skills'),
-    label: '~/.warp/skills/',
+    getDir: () => home('.agents', 'skills'),
+    label: '~/.agents/skills/',
   },
   {
     flag: 'codeium',
@@ -110,14 +110,14 @@ const AGENTS_DATA = [
   {
     flag: 'goose',
     name: 'goose',
-    getDir: () => home('.goose', 'skills'),
-    label: '~/.goose/skills/',
+    getDir: () => home('.agents', 'skills'),
+    label: '~/.agents/skills/',
   },
   {
     flag: 'tabnine',
     name: 'tabnine',
-    getDir: () => home('.tabnine', 'skills'),
-    label: '~/.tabnine/skills/',
+    getDir: () => home('.tabnine', 'agent', 'skills'),
+    label: '~/.tabnine/agent/skills/',
   },
   {
     flag: 'supermaven',
@@ -176,8 +176,8 @@ const AGENTS_DATA = [
   {
     flag: 'openhands',
     name: 'openhands',
-    getDir: () => home('.openhands', 'skills'),
-    label: '~/.openhands/skills/',
+    getDir: () => home('.agents', 'skills'),
+    label: '~/.agents/skills/',
   },
   {
     flag: 'junie',
@@ -302,8 +302,8 @@ const AGENTS_DATA = [
   {
     flag: 'forge',
     name: 'forge',
-    getDir: () => home('.forge', 'skills'),
-    label: '~/.forge/skills/',
+    getDir: () => proj('.forge', 'skills'),
+    label: './.forge/skills/',
   },
   {
     flag: 'inference-sh',
@@ -464,8 +464,8 @@ const AGENTS_DATA = [
   {
     flag: 'chatgpt',
     name: 'chatgpt',
-    getDir: () => home('.chatgpt', 'skills'),
-    label: '~/.chatgpt/skills/',
+    getDir: () => home('.agents', 'skills'),
+    label: '~/.agents/skills/',
   },
   {
     flag: 'codearts-agent',
@@ -482,8 +482,8 @@ const AGENTS_DATA = [
   {
     flag: 'amp',
     name: 'amp',
-    getDir: () => home('.agents', 'skills'),
-    label: '~/.agents/skills/',
+    getDir: () => home('.config', 'agents', 'skills'),
+    label: '~/.config/agents/skills/',
   },
   {
     flag: 'antigravity',
@@ -518,8 +518,8 @@ const AGENTS_DATA = [
   {
     flag: 'replit',
     name: 'replit',
-    getDir: () => home('.agents', 'skills'),
-    label: '~/.agents/skills/',
+    getDir: () => proj('.agents', 'skills'),
+    label: './.agents/skills/',
   },
   {
     flag: 'zed',

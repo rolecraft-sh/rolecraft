@@ -245,20 +245,20 @@ _rolecraft() {
             '--project[Install to ./.agents/skills/]' \\
             '--claude[Also install to ~/.claude/skills/]' \\
             '--cursor[Also install to ~/.cursor/skills/]' \\
-            '--windsurf[Also install to ~/.windsurf/skills/]' \\
-            '--devin[Also install to ~/.devin/skills/]' \\
-            '--codex[Also install to ~/.codex/skills/]' \\
-            '--copilot[Also install to ~/.copilot/skills/]' \\
+            '--windsurf[Also install to ~/.codeium/windsurf/skills/]' \\
+            '--devin[Also install to ./.devin/skills/]' \\
+            '--codex[Also install to ~/.agents/skills/]' \\
+            '--copilot[Also install to ./.github/skills/]' \\
             '--aider[Also install to ~/.aider/skills/]' \\
             '--cline[Also install to ~/.cline/skills/]' \\
             '--gemini[Also install to ~/.gemini/skills/]' \\
             '--cody[Also install to ~/.cody/skills/]' \\
             '--continue[Also install to ~/.continue/skills/]' \\
-            '--warp[Also install to ~/.warp/skills/]' \\
+            '--warp[Also install to ~/.agents/skills/]' \\
             '--codeium[Also install to ~/.codeium/skills/]' \\
             '--fabric[Also install to ~/.fabric/skills/]' \\
-            '--goose[Also install to ~/.goose/skills/]' \\
-            '--tabnine[Also install to ~/.tabnine/skills/]' \\
+            '--goose[Also install to ~/.agents/skills/]' \\
+            '--tabnine[Also install to ~/.tabnine/agent/skills/]' \\
             '--supermaven[Also install to ~/.supermaven/skills/]' \\
             '--pr-pilot[Also install to ~/.pr-pilot/skills/]' \\
             '--loom[Also install to ~/.loom/skills/]' \\
@@ -268,7 +268,7 @@ _rolecraft() {
             '--kiro[Also install to ~/.kiro/skills/]' \\
             '--augment[Also install to ~/.augment/skills/]' \\
             '--kilo[Also install to ~/.kilo/skills/]' \\
-            '--openhands[Also install to ~/.openhands/skills/]' \\
+            '--openhands[Also install to ~/.agents/skills/]' \\
             '--junie[Also install to ~/.junie/skills/]' \\
              '--factory[Also install to ~/.factory/skills/]' \\
              '--command-code[Also install to ~/.commandcode/skills/]' \\
@@ -289,7 +289,7 @@ _rolecraft() {
             '--kimi-code[Also install to ~/.kimi-code/skills/]' \\
              '--zcode[Also install to ~/.zcode/skills/]' \\
              '--droid[Also install to ~/.factory/skills/]' \\
-             '--chatgpt[Also install to ~/.chatgpt/skills/]' \\
+             '--chatgpt[Also install to ~/.agents/skills/]' \\
              '--codearts-agent[Also install to ~/.codeartsdoer/skills/]' \\
              '--universal[Also install to ~/.config/agents/skills/]' \\
              '--all[Install to all locations]' \\
@@ -394,20 +394,20 @@ for cmd in install bundle use setup upgrade check
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l project        -d 'Install to ./.agents/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l claude         -d 'Install to ~/.claude/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l cursor         -d 'Install to ~/.cursor/skills/'
-  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l windsurf       -d 'Install to ~/.windsurf/skills/'
-  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l devin          -d 'Install to ~/.devin/skills/'
-  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l codex          -d 'Install to ~/.codex/skills/'
-  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l copilot        -d 'Install to ~/.copilot/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l windsurf       -d 'Install to ~/.codeium/windsurf/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l devin          -d 'Install to ./.devin/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l codex          -d 'Install to ~/.agents/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l copilot        -d 'Install to ./.github/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l aider          -d 'Install to ~/.aider/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l cline          -d 'Install to ~/.cline/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l gemini         -d 'Install to ~/.gemini/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l cody           -d 'Install to ~/.cody/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l continue       -d 'Install to ~/.continue/skills/'
-  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l warp           -d 'Install to ~/.warp/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l warp           -d 'Install to ~/.agents/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l codeium        -d 'Install to ~/.codeium/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l fabric         -d 'Install to ~/.fabric/skills/'
-  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l goose          -d 'Install to ~/.goose/skills/'
-  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l tabnine        -d 'Install to ~/.tabnine/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l goose          -d 'Install to ~/.agents/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l tabnine        -d 'Install to ~/.tabnine/agent/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l supermaven     -d 'Install to ~/.supermaven/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l pr-pilot       -d 'Install to ~/.pr-pilot/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l loom           -d 'Install to ~/.loom/skills/'
@@ -417,7 +417,7 @@ for cmd in install bundle use setup upgrade check
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l kiro           -d 'Install to ~/.kiro/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l augment        -d 'Install to ~/.augment/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l kilo           -d 'Install to ~/.kilo/skills/'
-  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l openhands      -d 'Install to ~/.openhands/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l openhands      -d 'Install to ~/.agents/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l junie          -d 'Install to ~/.junie/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l factory        -d 'Install to ~/.factory/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l command-code    -d 'Install to ~/.commandcode/skills/'
@@ -438,7 +438,7 @@ for cmd in install bundle use setup upgrade check
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l kimi-code       -d 'Install to ~/.kimi-code/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l zcode           -d 'Install to ~/.zcode/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l droid           -d 'Install to ~/.factory/skills/'
-  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l chatgpt         -d 'Install to ~/.chatgpt/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l chatgpt         -d 'Install to ~/.agents/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l codearts-agent  -d 'Install to ~/.codeartsdoer/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l universal       -d 'Install to ~/.config/agents/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l all            -d 'Install to all locations'

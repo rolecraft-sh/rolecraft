@@ -55,7 +55,11 @@ describe('agent manifest', () => {
     assert.ok(shared.length > 0)
     for (const agent of shared) {
       assert.equal(agent.skillInstallScope, 'global ~/.agents/skills')
-      assert.equal(agent.supportLevel, SUPPORT_LEVELS.EXPERIMENTAL)
+      assert.ok(
+        [SUPPORT_LEVELS.VERIFIED, SUPPORT_LEVELS.EXPERIMENTAL].includes(
+          agent.supportLevel,
+        ),
+      )
     }
   })
 
