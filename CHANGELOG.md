@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.3.1] - 2026-08-17
+
+### Added
+- complete P3 polish — npm allowlist, docs accuracy, sitemap+OG (#220)
+- verify 10 more agent skill directories (26 verified total) (#219)
+
+### Fixed
+- guard against slug path traversal and harden security scans (#218)
+
+### Changed
+- cover converter utilities (#216)
+- bump github/codeql-action/init from 4.37.3 to 4.37.6 (#215)
+- bump github/codeql-action/analyze from 4.37.3 to 4.37.6 (#214)
+- extract home helper to shared utility (#210)
+- update changelog and version for v2.3.0 (#212)
+
+### Documentation
+- add alloutflo to contributors list (#217)
+- add devmaster1987 to contributors list (#213)
 ## [v2.3.0] - 2026-08-06
 
 ### Added
