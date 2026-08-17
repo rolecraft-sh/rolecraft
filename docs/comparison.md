@@ -7,7 +7,7 @@
 | | rolecraft | skills (Vercel) | @agentskill.sh/cli |
 |---|---|---|---|
 | **Runtime** | Zero-dep Node ESM | 1 dep (Node) | 2 deps (TypeScript) |
-| **File size** | 87.4 kB | ~465 KB | ~84 KB |
+| **File size** | 107.3 kB | ~465 KB | ~84 KB |
 | **Agent targets** | **86** | 72 | 15+ |
 | **Skill marketplace** | rolecraft registry | skills.sh (90K+) | agentskill.sh (100K+) |
 | **Publish your own** | ✅ | ❌ | ❌ |
@@ -72,12 +72,12 @@ These aren't CLI tools — they're curated SKILL.md repositories. rolecraft can 
 |-----------|--------|----------------------|
 | [skills.sh](https://skills.sh) | 90,000+ | `rolecraft install <owner/repo>` |
 | [agentskill.sh](https://agentskill.sh) | 100,000+ | `rolecraft install <slug>` |
-| [rolecraft Registry](https://github.com/rolecraft-sh/registry) | 29+ | `rolecraft install <slug>` |
+| [rolecraft Registry](https://github.com/rolecraft-sh/registry) | 66 | `rolecraft install <slug>` |
 | [garden-skills](https://github.com/ConardLi/garden-skills) (ConardLi) | ~5 curated | `rolecraft install ConardLi/garden-skills` |
 | [anthropic/skills](https://github.com/anthropic/skills) | 157K★ repo | `rolecraft install anthropic/skills` |
 
 ## Benchmark
 
-rolecraft installs skills **up to 301× faster** than `npx skills` in cold-cache scenarios (local install: ~301×, GitHub install: ~9.8×).
+rolecraft installs skills **up to 381× faster** than `npx skills` in cold-cache scenarios (local install: ~381×, GitHub install: ~6.9×).
 
 [→ Full benchmark results](benchmark/RESULTS.md)

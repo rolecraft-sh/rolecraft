@@ -132,16 +132,27 @@ async function main() {
     rcGh.avg,
   )
 
-  await bench(
-    '@agentskill.sh/cli',
-    async () => {
-      execSync(
-        `echo "1" | npx --yes @agentskill.sh/cli install ${GITHUB_SOURCE} 2>/dev/null`,
-        { stdio: 'pipe', timeout: 120000, cwd: '/tmp' },
-      )
-    },
-    rcGh.avg,
-  )
+  let agentskillFailed = false
+  try {
+    await bench(
+      '@agentskill.sh/cli',
+      async () => {
+        execSync(
+          `echo "1" | npx --yes @agentskill.sh/cli install ${GITHUB_SOURCE} 2>/dev/null`,
+          { stdio: 'pipe', timeout: 120000, cwd: '/tmp' },
+        )
+      },
+      rcGh.avg,
+    )
+  } catch {
+    agentskillFailed = true
+    console.log(
+      `  ${'@agentskill.sh/cli'.padEnd(25)}  ─────────  ─────────  ─────────  ─────────  failed`,
+    )
+    console.log(
+      '  → exits with an error during agent detection; recorded as failed',
+    )
+  }
 
   console.log()
 
@@ -163,7 +174,7 @@ async function main() {
     github: {
       rolecraft: rcGh,
       vercel: vercelGh,
-      agentskill: null,
+      agentskill: agentskillFailed ? 'failed' : null,
       githubRatio: Number.parseFloat(vercelGh.ratio.toFixed(2)),
     },
     agents: {

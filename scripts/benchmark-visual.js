@@ -31,21 +31,21 @@ const DEFAULT = {
   node: 'v24.18.0',
   os: 'macOS (darwin, arm64)',
   iterations: 10,
-  date: '2026-07-28',
+  date: '2026-08-17',
   local: {
-    rolecraft: { avg: 15.34, min: 4.33, max: 57.0, p50: 12.83 },
-    vercel: { avg: 4622.61, min: 4036.72, max: 7761.7, p50: 4303.5 },
+    rolecraft: { avg: 10.23, min: 5.56, max: 16.95, p50: 9.05 },
+    vercel: { avg: 3893.83, min: 3574.97, max: 4527.98, p50: 3868.26 },
     agentskill: null,
-    localRatio: 301.4,
+    localRatio: 380.68,
   },
   github: {
-    rolecraft: { avg: 1366.86, min: 1301.34, max: 1506.12, p50: 1357.13 },
-    vercel: { avg: 13327.47, min: 11773.34, max: 17290.04, p50: 12524.37 },
-    agentskill: null,
-    githubRatio: 9.75,
+    rolecraft: { avg: 1578.82, min: 1436.98, max: 1773.16, p50: 1574.09 },
+    vercel: { avg: 10949.9, min: 10235.08, max: 11554.33, p50: 11065.96 },
+    agentskill: 'failed',
+    githubRatio: 6.94,
   },
   packageSize: {
-    rolecraft: '87.4 kB',
+    rolecraft: '107.3 kB',
     vercel: '~465 KB',
     agentskill: '~84 KB',
   },
@@ -53,8 +53,18 @@ const DEFAULT = {
   agents: { rolecraft: 86, vercel: 72, agentskill: '15+' },
 }
 
-const data = existsSync(DATA_PATH)
+const raw = existsSync(DATA_PATH)
   ? JSON.parse(readFileSync(DATA_PATH, 'utf-8'))
+  : null
+
+const data = raw
+  ? {
+      ...DEFAULT,
+      ...raw,
+      local: { ...DEFAULT.local, ...(raw.local || {}) },
+      github: { ...DEFAULT.github, ...(raw.github || {}) },
+      agents: { ...DEFAULT.agents, ...(raw.agents || {}) },
+    }
   : DEFAULT
 
 const fmt = (n) => Number(n).toLocaleString('en-US')
