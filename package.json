@@ -18,11 +18,9 @@
     "!src/**/*.test.js",
     "!src/**/*.test.mjs",
     "!src/**/__fixtures__/",
-    "apps.json",
     "scripts/setup-hooks.mjs",
     "README.md",
-    "LICENSE",
-    "CHANGELOG.md"
+    "LICENSE"
   ],
   "preferGlobal": true,
   "keywords": [

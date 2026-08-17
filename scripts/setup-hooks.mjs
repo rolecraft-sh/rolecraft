@@ -11,8 +11,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const hooksDir = join(__dirname, '..', 'hooks')
 
 if (!existsSync(hooksDir)) {
-  console.error('hooks/ directory not found:', hooksDir)
-  process.exit(1)
+  // Published npm packages ship without hooks/ — skip silently for consumers
+  process.exit(0)
 }
 
 // Make all hooks executable so they actually run

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/rolecraft_logo.png" alt="RoleCraft" width="200" height="200">
+  <img src="https://raw.githubusercontent.com/rolecraft-sh/rolecraft/main/assets/rolecraft_logo.png" alt="RoleCraft" width="200" height="200">
 </p>
 
 <h1 align="center">RoleCraft</h1>
@@ -45,7 +45,7 @@
 </p>
 
 <p align="center">
-  <img src="assets/rolecraft-demo.gif" alt="RoleCraft demo" width="720">
+  <img src="https://raw.githubusercontent.com/rolecraft-sh/rolecraft/main/assets/rolecraft-demo.gif" alt="RoleCraft demo" width="720">
 </p>
 
 ---
@@ -55,7 +55,7 @@
 </p>
 
 <p align="center">
-  <a href="benchmark/RESULTS.md"><img src="benchmark/comparison.svg" alt="Benchmark: significantly faster than Vercel" width="600"></a>
+  <a href="benchmark/RESULTS.md"><img src="https://raw.githubusercontent.com/rolecraft-sh/rolecraft/main/benchmark/comparison.svg" alt="Benchmark: significantly faster than Vercel" width="600"></a>
   <br>
   <a href="benchmark/RESULTS.md"><b>Full benchmark results →</b></a>
     
