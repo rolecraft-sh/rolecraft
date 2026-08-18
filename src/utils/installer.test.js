@@ -1259,6 +1259,9 @@ describe('installer', () => {
     })
 
     it('listBackups returns backups newest-first', async () => {
+      // Ensure the first backup gets a distinct timestamp from the
+      // previous test's backup (backup filenames are ms-precision).
+      await new Promise((r) => setTimeout(r, 10))
       await installerModule.backupSkill(backupSlug, { 'file1.md': 'v1' })
       // Small delay to ensure distinct timestamps
       await new Promise((r) => setTimeout(r, 10))
@@ -1267,7 +1270,7 @@ describe('installer', () => {
       await installerModule.backupSkill(backupSlug, { 'file3.md': 'v3' })
 
       const backups = await installerModule.listBackups(backupSlug)
-      assert.ok(backups.length >= 4) // at least 3 new + 1 from previous test
+      assert.equal(backups.length, 4) // 3 from this test + 1 from previous test
       // Newest first
       assert.ok(backups[0].timestamp >= backups[1].timestamp)
       assert.ok(backups[2].path.endsWith('.json'))
