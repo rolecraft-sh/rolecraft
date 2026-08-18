@@ -155,13 +155,9 @@ $ rolecraft mcp search github
 
 🔍 MCP server search results for "github":
 
-   github/github-mcp-server
-   ├─ Official GitHub MCP server  ⭐ 8500  Go
-   └─ rolecraft mcp install gh:github/github-mcp-server
-
-   modelcontextprotocol/servers
-   ├─ MCP server implementations  ⭐ 12000  TypeScript
-   └─ rolecraft mcp install gh:modelcontextprotocol/servers
+  REPOSITORY                     DESCRIPTION                    STARS  LANGUAGE
+  github/github-mcp-server       Official GitHub MCP server     8500   Go
+  modelcontextprotocol/servers   MCP server implementations     12000  TypeScript
 
 12 result(s) found.
 ```

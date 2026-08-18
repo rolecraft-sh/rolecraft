@@ -1,25 +1,17 @@
-import { stdin as input, stdout as output } from 'node:process'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 import { apiSearch } from '../api/search.js'
 import { searchRegistry } from '../utils/registry-client.js'
+import { pickItem, renderTable, theme } from '../utils/tui.js'
 
 export { setFetch } from '../api/search.js'
 export { setRegistryFetch } from '../utils/registry-client.js'
+export { setPromptUser } from '../utils/tui.js'
 
-const CSI = '\x1b['
-const sgr = (n) => `${CSI}${n}m`
-const cursorTo = (r, c) => `${CSI}${r};${c}H`
-const eraseLine = `${CSI}K`
-const hideCursor = `${CSI}?25l`
-const showCursor = `${CSI}?25h`
-const clearScreen = `${CSI}2J${CSI}H`
-
-const text = (code, s) => `${code}${s}${sgr(0)}`
-const cyan = (s) => text(sgr(36), s)
-const yellow = (s) => text(sgr(33), s)
-const dim = (s) => text(sgr(2), s)
-const bold = (s) => text(sgr(1), s)
+const cyan = (s) => theme.cyan(s)
+const yellow = (s) => theme.yellow(s)
+const dim = (s) => theme.dim(s)
+const bold = (s) => theme.bold(s)
 
 export function formatRepo(r) {
   const desc = r.description || 'No description'
@@ -28,178 +20,25 @@ export function formatRepo(r) {
   return `${bold(r.full_name)}\n  ${dim(desc)}  ${yellow(`⭐ ${stars}`)}  ${cyan(lang)}`
 }
 
-let promptUser = defaultPrompt
-
-async function defaultPrompt(query) {
-  const { createInterface } = await import('node:readline')
-  const rl = createInterface({ input, output })
-  return new Promise((resolve) => {
-    rl.question(query, (answer) => {
-      rl.close()
-      resolve(answer.trim().toLowerCase())
-    })
-  })
-}
-
-export function setPromptUser(fn) {
-  promptUser = fn || defaultPrompt
-}
-
-const ITEM_LINES = 4
-
-function tuiFormat(item, selected) {
-  const sel = selected ? `${sgr(7)} > ${sgr(0)}` : '   '
+function searchItemCard(item, selected) {
+  const sel = selected ? theme.reverse(' > ') : '   '
   const name = selected ? bold(item.full_name) : dim(item.full_name)
   const desc = item.description || 'No description'
   return [
     `${sel}${name}`,
-    `   ├─ ${desc}`,
-    `   ├─ ⭐ ${item.stargazers_count}  📝 ${item.language || 'N/A'}`,
-    `   └─ rolecraft install ${item.full_name}`,
+    `   ${desc}`,
+    `   ⭐ ${item.stargazers_count} · ${item.language || 'N/A'}`,
+    `   rolecraft install ${item.full_name}`,
   ]
 }
 
-async function runTUI(items) {
-  const wasRaw = input.isRaw
-  input.setRawMode(true)
-  input.resume()
-
-  let selectedIndex = 0
-  let scrollOffset = 0
-  let firstRender = true
-  let termRows = output.rows || 24
-  const reservedRows = 2
-  let availRows = termRows - reservedRows
-  let visibleCount = Math.min(
-    Math.max(1, Math.floor(availRows / ITEM_LINES)),
-    items.length,
-  )
-  let statusRow = termRows
-  const firstLine = 2
-
-  function updateLayout() {
-    termRows = output.rows || 24
-    availRows = termRows - reservedRows
-    visibleCount = Math.min(
-      Math.max(1, Math.floor(availRows / ITEM_LINES)),
-      items.length,
-    )
-    statusRow = termRows
-    if (scrollOffset + visibleCount > items.length)
-      scrollOffset = Math.max(0, items.length - visibleCount)
-    if (selectedIndex >= items.length) selectedIndex = items.length - 1
-  }
-
-  function render() {
-    let out = firstRender ? clearScreen + hideCursor : hideCursor
-    firstRender = false
-    out += cursorTo(firstLine, 1)
-    const end = Math.min(scrollOffset + visibleCount, items.length)
-    const usedLines = (end - scrollOffset) * ITEM_LINES
-    for (let i = scrollOffset; i < end; i++) {
-      const lines = tuiFormat(items[i], i === selectedIndex)
-      out += cursorTo(firstLine + (i - scrollOffset) * ITEM_LINES, 1)
-      for (const line of lines) out += `${eraseLine}${line}\n`
-    }
-    for (let i = usedLines + firstLine; i < statusRow; i++)
-      out += `${cursorTo(i, 1) + eraseLine}\n`
-    out +=
-      cursorTo(statusRow, 1) +
-      eraseLine +
-      sgr(7) +
-      '  ↑/↓ move · Enter select · q quit  ' +
-      sgr(0)
-    output.write(out)
-  }
-
-  function ensureVisible(index) {
-    if (index < scrollOffset) {
-      scrollOffset = index
-      return true
-    }
-    if (index >= scrollOffset + visibleCount) {
-      scrollOffset = index - visibleCount + 1
-      return true
-    }
-    return false
-  }
-
-  render()
-
-  return new Promise((resolve) => {
-    function onData(buf) {
-      const key = buf.toString()
-
-      if (key === '\u001b[A') {
-        if (selectedIndex > 0) {
-          selectedIndex--
-          ensureVisible(selectedIndex)
-          render()
-        }
-      } else if (key === '\u001b[B') {
-        if (selectedIndex < items.length - 1) {
-          selectedIndex++
-          ensureVisible(selectedIndex)
-          render()
-        }
-      } else if (key === '\r' || key === '\n') {
-        cleanup()
-        resolve(selectedIndex)
-      } else if (key === '\u0003' || key === 'q' || key === 'Q') {
-        cleanup()
-        resolve(-1)
-      }
-    }
-
-    function onResize() {
-      updateLayout()
-      render()
-    }
-
-    function cleanup() {
-      input.removeListener('data', onData)
-      output.removeListener('resize', onResize)
-      input.pause()
-      input.setRawMode(wasRaw)
-      output.write(clearScreen + showCursor)
-    }
-
-    input.on('data', onData)
-    output.on('resize', onResize)
-  })
-}
-
-async function promptSelect(items) {
-  console.log()
-  for (let i = 0; i < items.length; i++) {
-    const line = formatRepo(items[i]).split('\n')
-    console.log(`  ${bold(cyan(String(i + 1).padStart(2, ' ')))} ${line[0]}`)
-    console.log(`     ${line[1]}`)
-    console.log()
-  }
-
-  const answer = await promptUser(
-    `Which skill to install? [1-${items.length}, q to quit]: `,
-  )
-
-  const trimmed = (answer || '').trim().toLowerCase()
-  if (trimmed === 'q') return -1
-  const index = parseInt(trimmed, 10)
-  if (Number.isNaN(index) || index < 1 || index > items.length) {
-    console.log(`Invalid choice. Enter a number between 1 and ${items.length}.`)
-    return -2
-  }
-  return index - 1
-}
-
 async function pickAndInstall(items) {
-  let selectedIndex
-
-  if (output.isTTY && items.length > 0) {
-    selectedIndex = await runTUI(items)
-  } else {
-    selectedIndex = await promptSelect(items)
-  }
+  const selectedIndex = await pickItem(items, {
+    format: searchItemCard,
+    question: `Which skill to install? [1-${items.length}, q to quit]: `,
+    linesPerItem: 4,
+    footer: '↑/↓ move · Enter select · q quit',
+  })
 
   if (selectedIndex === -1) {
     console.log('Aborted.')
@@ -249,14 +88,19 @@ export async function searchCommand(query, options = {}) {
       }
 
       console.log(`\n📦 Registry results for "${query}":\n`)
-      for (const skill of items) {
-        const line = formatRegistryItem(skill).split('\n')
-        console.log(`   ${line[0]}`)
-        console.log(`   ├─ ${line[1]}`)
-        console.log(`   └─ rolecraft install ${skill.slug}`)
-        console.log()
-      }
-      console.log(`${items.length} result(s) found.`)
+      const rows = items.map((s) => [
+        s.slug,
+        s.description || 'No description',
+        `v${(s.latest || 'v1.0.0').replace(/^v/, '')}`,
+        String(s.stars || 0),
+        String(s.installs || 0),
+      ])
+      for (const line of renderTable(
+        ['SLUG', 'DESCRIPTION', 'VERSION', 'STARS', 'INSTALLS'],
+        rows,
+      ))
+        console.log(line)
+      console.log(`\n${items.length} result(s) found.`)
     } catch (err) {
       if (err.message?.includes('rate limit')) {
         console.log(
@@ -284,16 +128,18 @@ export async function searchCommand(query, options = {}) {
       }
 
       console.log(`\n🔍 [Experimental] skills.sh results for "${query}":\n`)
-      for (const skill of items) {
-        const line = formatSkillsShItem(skill).split('\n')
-        console.log(`   ${line[0]}`)
-        console.log(`   ├─ ${line[1]}`)
-        console.log(
-          `   └─ rolecraft install ${skill.installSource || `${skill.source}/${skill.skillId}`}`,
-        )
-        console.log()
-      }
-      console.log(`${items.length} result(s) found.`)
+      const rows = items.map((s) => [
+        `${s.source}/${s.skillId}`,
+        s.name || 'No description',
+        String(s.installs || 0),
+        'skills.sh',
+      ])
+      for (const line of renderTable(
+        ['SKILL', 'DESCRIPTION', 'INSTALLS', 'SOURCE'],
+        rows,
+      ))
+        console.log(line)
+      console.log(`\n${items.length} result(s) found.`)
       console.log(
         '\n⚠️  skills.sh integration is experimental. The API may change or become unavailable.',
       )
@@ -331,25 +177,22 @@ export async function searchCommand(query, options = {}) {
     return
   }
 
-  if (data.fromLookup) {
-    console.log(`\n🔍 Search results for "${query}":\n`)
-  } else {
-    console.log(`\n🔍 Search results for "${query}":\n`)
-  }
+  console.log(`\n🔍 Search results for "${query}":\n`)
 
   if (options.interactive) {
     await pickAndInstall(items)
   } else {
-    for (const repo of items) {
-      const desc = repo.description || 'No description'
-      console.log(`   ${repo.full_name}`)
-      console.log(`   ├─ ${desc}`)
-      console.log(
-        `   ├─ ⭐ ${repo.stargazers_count}  📝 ${repo.language || 'N/A'}`,
-      )
-      console.log(`   └─ rolecraft install ${repo.full_name}`)
-      console.log()
-    }
-    console.log(`${items.length} result(s) found.`)
+    const rows = items.map((r) => [
+      r.full_name,
+      r.description || 'No description',
+      String(r.stargazers_count || 0),
+      r.language || 'N/A',
+    ])
+    for (const line of renderTable(
+      ['REPOSITORY', 'DESCRIPTION', 'STARS', 'LANGUAGE'],
+      rows,
+    ))
+      console.log(line)
+    console.log(`\n${items.length} result(s) found.`)
   }
 }

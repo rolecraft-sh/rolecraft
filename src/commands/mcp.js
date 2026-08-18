@@ -9,23 +9,10 @@ import {
   apiMcpSearch,
 } from '../api/mcp.js'
 import { classifyMcpSource, getSupportedMcpAgents } from '../utils/mcp.js'
+import { ICONS, pickItem, renderTable, theme } from '../utils/tui.js'
 
 export { setFetch } from '../api/mcp.js'
 import agents from '../agents.js'
-
-const CSI = '\x1b['
-const sgr = (n) => `${CSI}${n}m`
-const cursorTo = (r, c) => `${CSI}${r};${c}H`
-const eraseLine = `${CSI}K`
-const hideCursor = `${CSI}?25l`
-const showCursor = `${CSI}?25h`
-const clearScreen = `${CSI}2J${CSI}H`
-
-const text = (code, s) => `${code}${s}${sgr(0)}`
-const cyan = (s) => text(sgr(36), s)
-const yellow = (s) => text(sgr(33), s)
-const dim = (s) => text(sgr(2), s)
-const bold = (s) => text(sgr(1), s)
 
 function askConfirmation(query) {
   const rl = createInterface({ input, output })
@@ -50,6 +37,14 @@ function warnMcpArbitraryCode(source, options) {
   if (info.type === 'github') return // github gets full confirmation above
   console.log('\n⚠️  MCP servers execute arbitrary code when started.')
   console.log('   Only install from sources you trust.')
+}
+
+function renderMcpResults(results, action) {
+  const rows = results.map((r) => [
+    r.agent,
+    r.success ? `${ICONS.ok} ${action}` : `${ICONS.warn} not supported`,
+  ])
+  for (const line of renderTable(['AGENT', 'STATUS'], rows)) console.log(line)
 }
 
 export async function mcpInstallCommand(source, options) {
@@ -81,13 +76,7 @@ export async function mcpInstallCommand(source, options) {
 
   const result = await apiMcpInstall(source, options)
 
-  for (const r of result.results) {
-    if (r.success) {
-      console.log(`   ✅ ${r.agent}: MCP server "${result.name}" installed`)
-    } else {
-      console.log(`   ⚠️  ${r.agent}: not supported`)
-    }
-  }
+  renderMcpResults(result.results, 'installed')
 
   const succeeded = result.results.filter((r) => r.success).length
   console.log(
@@ -104,18 +93,14 @@ export async function mcpListCommand(options) {
     return
   }
 
-  const byAgent = {}
-  for (const s of result.servers) {
-    if (!byAgent[s.agent]) byAgent[s.agent] = []
-    byAgent[s.agent].push(s)
-  }
-
-  for (const [agent, servers] of Object.entries(byAgent)) {
-    console.log(`\n${agent}:`)
-    for (const s of servers) {
-      console.log(`   - ${s.name} (${s.command} ${(s.args || []).join(' ')})`)
-    }
-  }
+  console.log(`\nConfigured MCP servers (${result.servers.length}):\n`)
+  const rows = result.servers.map((s) => [
+    s.agent,
+    s.name,
+    `${s.command} ${(s.args || []).join(' ')}`,
+  ])
+  for (const line of renderTable(['AGENT', 'SERVER', 'COMMAND'], rows))
+    console.log(line)
 }
 
 export async function mcpUpdateCommand(source, options) {
@@ -147,13 +132,7 @@ export async function mcpUpdateCommand(source, options) {
 
   const result = await apiMcpUpdate(source, options)
 
-  for (const r of result.results) {
-    if (r.success) {
-      console.log(`   ✅ ${r.agent}: MCP server "${result.name}" updated`)
-    } else {
-      console.log(`   ⚠️  ${r.agent}: not supported`)
-    }
-  }
+  renderMcpResults(result.results, 'updated')
 
   const succeeded = result.results.filter((r) => r.success).length
   console.log(
@@ -165,13 +144,7 @@ export async function mcpUpdateCommand(source, options) {
 export async function mcpRemoveCommand(name, options) {
   const result = await apiMcpRemove(name, options)
 
-  for (const r of result.results) {
-    if (r.success) {
-      console.log(`   ✅ ${r.agent}: MCP server "${name}" removed`)
-    } else {
-      console.log(`   ⚠️  ${r.agent}: not supported`)
-    }
-  }
+  renderMcpResults(result.results, 'removed')
 
   const succeeded = result.results.filter((r) => r.success).length
   if (succeeded === 0) {
@@ -193,214 +166,61 @@ export async function mcpCheckCommand() {
   }
 
   console.log(
-    `\nChecking ${result.servers.length} MCP server(s) for updates...\n`,
+    `\nChecking ${result.servers.length} MCP server(s) for updates:\n`,
   )
 
+  const rows = []
   for (const s of result.servers) {
     if (s.status === 'skipped') {
-      console.log(`   ⏭️  ${s.name.padEnd(30)} ${s.reason}`)
+      rows.push([s.name, `${ICONS.skip} skipped`, s.reason])
     } else if (s.status === 'update_available') {
-      console.log(
-        `   🔄 ${s.name.padEnd(30)} ${s.installedVersion} → ${s.latestVersion} (${s.agents})`,
-      )
+      rows.push([
+        s.name,
+        `${ICONS.update} update`,
+        `${s.installedVersion} → ${s.latestVersion} (${s.agents})`,
+      ])
     } else if (s.status === 'up_to_date') {
-      const versionInfo =
+      const detail =
         s.versionPinned === false
           ? `latest: ${s.version} (no version pinned)`
           : `${s.version} is latest`
-      console.log(`   ✅ ${s.name.padEnd(30)} ${versionInfo} (${s.agents})`)
+      rows.push([s.name, `${ICONS.ok} up to date`, `${detail} (${s.agents})`])
     } else if (s.status === 'error') {
-      console.log(`   ❌ ${s.name.padEnd(30)} ${s.reason}`)
+      rows.push([s.name, `${ICONS.error} error`, s.reason])
     }
   }
+  for (const line of renderTable(['SERVER', 'STATUS', 'DETAIL'], rows))
+    console.log(line)
 
   console.log(
-    `\n${result.updatesAvailable > 0 ? `⚠️  ${result.updatesAvailable} MCP server(s) have updates available.` : '✅ All MCP servers are up to date.'}\n`,
+    result.updatesAvailable > 0
+      ? `\n${result.updatesAvailable} MCP server(s) have updates available.\n`
+      : '\nAll MCP servers are up to date.\n',
   )
 }
 
-function formatMcpRepo(r) {
-  const desc = r.description || 'No description'
-  const stars = r.stargazers_count || 0
-  const lang = r.language || 'N/A'
-  const topics =
-    r.topics && r.topics.length > 0 ? r.topics.slice(0, 3).join(', ') : ''
-  return `${bold(r.name)}\n  ${dim(desc)}  ${yellow(`⭐ ${stars}`)}  ${cyan(lang)}${topics ? `  ${dim(topics)}` : ''}`
-}
-
-function formatMcpNpmItem(pkg) {
-  const desc = pkg.description || 'No description'
-  const keywords =
-    pkg.keywords && pkg.keywords.length > 0
-      ? pkg.keywords.slice(0, 3).join(', ')
-      : ''
-  return `${bold(pkg.name)}\n  ${dim(desc)}${keywords ? `  ${dim(keywords)}` : ''}`
-}
-
-const MCP_ITEM_LINES = 3
-
-function mcpTuiFormat(item, selected, sourceType) {
-  const sel = selected ? `${sgr(7)} > ${sgr(0)}` : '   '
-  const name = selected ? bold(item.name) : dim(item.name)
+function mcpItemCard(item, selected, sourceType) {
+  const sel = selected ? theme.reverse(' > ') : '   '
+  const name = selected ? theme.bold(item.name) : theme.dim(item.name)
   const desc = item.description || 'No description'
   const installCmd =
     sourceType === 'npm'
       ? `rolecraft mcp install npm:${item.name}`
       : `rolecraft mcp install gh:${item.name}`
-  return [`${sel}${name}`, `   ├─ ${desc}`, `   └─ ${installCmd}`]
-}
-
-async function mcpRunTUI(items, sourceType) {
-  const wasRaw = input.isRaw
-  input.setRawMode(true)
-  input.resume()
-
-  let selectedIndex = 0
-  let scrollOffset = 0
-  let firstRender = true
-  let termRows = output.rows || 24
-  const reservedRows = 2
-  let availRows = termRows - reservedRows
-  let visibleCount = Math.min(
-    Math.max(1, Math.floor(availRows / MCP_ITEM_LINES)),
-    items.length,
-  )
-  let statusRow = termRows
-  const firstLine = 2
-
-  function updateLayout() {
-    termRows = output.rows || 24
-    availRows = termRows - reservedRows
-    visibleCount = Math.min(
-      Math.max(1, Math.floor(availRows / MCP_ITEM_LINES)),
-      items.length,
-    )
-    statusRow = termRows
-    if (scrollOffset + visibleCount > items.length)
-      scrollOffset = Math.max(0, items.length - visibleCount)
-    if (selectedIndex >= items.length) selectedIndex = items.length - 1
-  }
-
-  function render() {
-    let out = firstRender ? clearScreen + hideCursor : hideCursor
-    firstRender = false
-    out += cursorTo(firstLine, 1)
-    const end = Math.min(scrollOffset + visibleCount, items.length)
-    const usedLines = (end - scrollOffset) * MCP_ITEM_LINES
-    for (let i = scrollOffset; i < end; i++) {
-      const lines = mcpTuiFormat(items[i], i === selectedIndex, sourceType)
-      out += cursorTo(firstLine + (i - scrollOffset) * MCP_ITEM_LINES, 1)
-      for (const line of lines) out += `${eraseLine}${line}\n`
-    }
-    for (let i = usedLines + firstLine; i < statusRow; i++)
-      out += `${cursorTo(i, 1) + eraseLine}\n`
-    out +=
-      cursorTo(statusRow, 1) +
-      eraseLine +
-      sgr(7) +
-      '  ↑/↓ move · Enter select · q quit  ' +
-      sgr(0)
-    output.write(out)
-  }
-
-  function ensureVisible(index) {
-    if (index < scrollOffset) {
-      scrollOffset = index
-      return true
-    }
-    if (index >= scrollOffset + visibleCount) {
-      scrollOffset = index - visibleCount + 1
-      return true
-    }
-    return false
-  }
-
-  render()
-
-  return new Promise((resolve) => {
-    function onData(buf) {
-      const key = buf.toString()
-
-      if (key === '\u001b[A') {
-        if (selectedIndex > 0) {
-          selectedIndex--
-          ensureVisible(selectedIndex)
-          render()
-        }
-      } else if (key === '\u001b[B') {
-        if (selectedIndex < items.length - 1) {
-          selectedIndex++
-          ensureVisible(selectedIndex)
-          render()
-        }
-      } else if (key === '\r' || key === '\n') {
-        cleanup()
-        resolve(selectedIndex)
-      } else if (key === '\u0003' || key === 'q' || key === 'Q') {
-        cleanup()
-        resolve(-1)
-      }
-    }
-
-    function onResize() {
-      updateLayout()
-      render()
-    }
-
-    function cleanup() {
-      input.removeListener('data', onData)
-      output.removeListener('resize', onResize)
-      input.pause()
-      input.setRawMode(wasRaw)
-      output.write(clearScreen + showCursor)
-    }
-
-    input.on('data', onData)
-    output.on('resize', onResize)
-  })
-}
-
-async function mcpPromptSelect(items, sourceType) {
-  console.log()
-  for (let i = 0; i < items.length; i++) {
-    const line =
-      sourceType === 'npm'
-        ? formatMcpNpmItem(items[i]).split('\n')
-        : formatMcpRepo(items[i]).split('\n')
-    console.log(`  ${bold(cyan(String(i + 1).padStart(2, ' ')))} ${line[0]}`)
-    console.log(`     ${line[1]}`)
-    console.log()
-  }
-
-  const { createInterface } = await import('node:readline')
-  const rl = createInterface({ input, output })
-  const answer = await new Promise((resolve) => {
-    rl.question(
-      `Which MCP server to install? [1-${items.length}, q to quit]: `,
-      (a) => {
-        rl.close()
-        resolve(a.trim().toLowerCase())
-      },
-    )
-  })
-
-  if (answer === 'q') return -1
-  const index = parseInt(answer, 10)
-  if (Number.isNaN(index) || index < 1 || index > items.length) {
-    console.log(`Invalid choice. Enter a number between 1 and ${items.length}.`)
-    return -2
-  }
-  return index - 1
+  return [
+    `${sel}${name}`,
+    `   ${desc}`,
+    `   ${sourceType === 'npm' ? '📦 npm' : '🟢 github'} · ${installCmd}`,
+  ]
 }
 
 async function mcpPickAndInstall(items, sourceType, installOptions) {
-  let selectedIndex
-
-  if (output.isTTY && items.length > 0) {
-    selectedIndex = await mcpRunTUI(items, sourceType)
-  } else {
-    selectedIndex = await mcpPromptSelect(items, sourceType)
-  }
+  const selectedIndex = await pickItem(items, {
+    format: (item, selected) => mcpItemCard(item, selected, sourceType),
+    question: `Which MCP server to install? [1-${items.length}, q to quit]: `,
+    linesPerItem: 3,
+    footer: '↑/↓ move · Enter select · q quit',
+  })
 
   if (selectedIndex === -1) {
     console.log('Aborted.')
@@ -454,19 +274,31 @@ export async function mcpSearchCommand(query, options = {}) {
   console.log(
     `\n🔍 ${sourceType === 'npm' ? 'npm MCP packages' : 'MCP server search results'} for "${query}":\n`,
   )
-  for (const item of items) {
-    const line =
-      sourceType === 'npm'
-        ? formatMcpNpmItem(item).split('\n')
-        : formatMcpRepo(item).split('\n')
-    console.log(`   ${line[0]}`)
-    console.log(`   ├─ ${line[1]}`)
-    console.log(
-      `   └─ rolecraft mcp install ${sourceType === 'npm' ? `npm:${item.name}` : `gh:${item.name}`}`,
-    )
-    console.log()
+  if (sourceType === 'npm') {
+    const rows = items.map((p) => [
+      p.name,
+      p.description || 'No description',
+      (p.keywords || []).slice(0, 3).join(', '),
+    ])
+    for (const line of renderTable(
+      ['PACKAGE', 'DESCRIPTION', 'KEYWORDS'],
+      rows,
+    ))
+      console.log(line)
+  } else {
+    const rows = items.map((r) => [
+      r.full_name || r.name,
+      r.description || 'No description',
+      String(r.stargazers_count || 0),
+      r.language || 'N/A',
+    ])
+    for (const line of renderTable(
+      ['REPOSITORY', 'DESCRIPTION', 'STARS', 'LANGUAGE'],
+      rows,
+    ))
+      console.log(line)
   }
-  console.log(`${items.length} result(s) found.`)
+  console.log(`\n${items.length} result(s) found.`)
 }
 
 export async function mcpCommand(args) {
@@ -530,6 +362,7 @@ export async function mcpCommand(args) {
         console.error(
           'Usage: rolecraft mcp remove <name> [--cursor --claude ...]',
         )
+        console.error('Missing name argument.')
         throw new Error('Missing name argument.')
       }
       return mcpRemoveCommand(name, options)

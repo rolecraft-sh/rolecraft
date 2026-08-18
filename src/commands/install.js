@@ -3,6 +3,7 @@ import { stdin as input, stdout as output } from 'node:process'
 import { apiInstallSkills } from '../api/install.js'
 import agents from '../agents.js'
 import { createProgressBar } from '../utils/spinner.js'
+import { ICONS, renderTable } from '../utils/tui.js'
 
 let createInterface = defaultCreateInterface
 let askQuestion = defaultAskQuestion
@@ -112,14 +113,17 @@ export async function installCommand(source, options) {
     const skills = await resolveSkills(source)
     bar.succeed(`Found ${skills.length} skill(s)`)
     console.log()
-    for (const s of skills) {
-      console.log(`  ${s.name}`)
-      console.log(`    Slug:       ${s.slug}`)
-      console.log(`    Owner:      ${s.owner}`)
-      if (s.description) console.log(`    Description: ${s.description}`)
-      console.log(`    Files:      ${s.files.join(', ')}`)
-      console.log()
-    }
+    const rows = skills.map((s) => [
+      s.slug,
+      s.name,
+      s.description || '-',
+      s.files.join(', '),
+    ])
+    for (const line of renderTable(
+      ['SLUG', 'NAME', 'DESCRIPTION', 'FILES'],
+      rows,
+    ))
+      console.log(line)
     return
   }
 
@@ -189,18 +193,18 @@ export async function installCommand(source, options) {
     }
   }
 
+  const rows = result.results.map((skillResult) => [
+    skillResult.name || skillResult.slug,
+    skillResult.install.map((r) => r.label).join(', '),
+    `${ICONS.ok} installed`,
+  ])
+  for (const line of renderTable(['SKILL', 'TARGETS', 'STATUS'], rows))
+    console.log(line)
+
   for (const skillResult of result.results) {
-    console.log()
-    console.log(`   Skill:    ${skillResult.name}`)
-    console.log(`   Slug:     ${skillResult.slug}`)
-    console.log(`   Owner:    ${skillResult.owner}`)
     if (skillResult.security) {
       const { formatSecurityReport } = await import('../utils/security.js')
       console.log(formatSecurityReport(skillResult.security))
-    }
-    console.log(`\n  Installed "${skillResult.name}":`)
-    for (const r of skillResult.install) {
-      console.log(`    ${r.label} -> ${r.path}`)
     }
   }
 

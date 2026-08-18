@@ -141,9 +141,11 @@ describe('list command', () => {
 
     await listModule.listCommand()
 
-    assert.ok(logs.some((l) => l.includes('test/skill')))
-    assert.ok(logs.some((l) => l.includes('Source: owner/repo')))
-    assert.ok(logs.some((l) => l.includes('Type: github')))
+    const row = logs.find((l) => l.includes('test/skill'))
+    assert.ok(row, 'skill row not found')
+    assert.ok(row.includes('2025-01-15'))
+    assert.ok(row.includes('owner/repo'))
+    assert.ok(logs.some((l) => l.includes('SOURCE')))
     assert.ok(logs.some((l) => l.includes('1 skill(s)')))
   })
 
@@ -257,7 +259,10 @@ describe('list command', () => {
 
     await listModule.listCommand(projectDir)
 
-    assert.ok(logs.some((l) => l.includes('Scope: project')))
+    const row = logs.find((l) => l.includes('proj/skill'))
+    assert.ok(row, 'skill row not found')
+    assert.ok(row.includes('project'))
+    assert.ok(logs.some((l) => l.includes('SCOPE')))
   })
 
   it('shows scope as global, project when skill exists in both', async () => {
@@ -293,6 +298,8 @@ describe('list command', () => {
 
     await listModule.listCommand(projectDir)
 
-    assert.ok(logs.some((l) => l.includes('Scope: global, project')))
+    const row = logs.find((l) => l.includes('shared/skill'))
+    assert.ok(row, 'skill row not found')
+    assert.ok(row.includes('global, project'))
   })
 })

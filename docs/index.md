@@ -4,7 +4,7 @@ layout: home
 hero:
   name: "RoleCraft"
   text: "The Package Manager for AI Agents"
-  tagline: Install · Test · Publish · Manage Skills & MCP Servers across 86 Agents (16 Verified)
+  tagline: Install · Test · Publish · Manage Skills & MCP Servers across 86 Agents (26 Verified)
   image:
     src: /rolecraft-demo.gif
     alt: RoleCraft Demo

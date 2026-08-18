@@ -24,9 +24,8 @@ Sample output:
 ```
 📦 Registry results for "code-review":
 
-   code-review
-   ├─ Best practices for code review
-   └─ rolecraft install code-review
+  SLUG         DESCRIPTION                  VERSION  STARS  INSTALLS
+  code-review  Best practices for code review  v1.0.0  482    1520
 
 1 result(s) found.
 ```

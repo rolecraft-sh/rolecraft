@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>The Package Manager for AI Agents</b><br>
-   Install · Test · Publish · Manage Skills & MCP Servers across 86 Agents (16 Verified)<br>
+   Install · Test · Publish · Manage Skills & MCP Servers across 86 Agents (26 Verified)<br>
   Zero-dependency CLI · No signup · Offline-first
 </p>
 

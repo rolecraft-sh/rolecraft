@@ -1,4 +1,5 @@
 import { apiList } from '../api/list.js'
+import { renderTable } from '../utils/tui.js'
 
 export async function listCommand(cwd, options = {}) {
   const result = await apiList(cwd === undefined ? null : cwd, {
@@ -31,24 +32,23 @@ export async function listCommand(cwd, options = {}) {
 
   console.log(
     result.agent
-      ? `Installed skills for ${result.agent}:\n`
-      : 'Installed skills:\n',
+      ? `Installed skills for ${result.agent} (${entries.length}):\n`
+      : `Installed skills (${entries.length}):\n`,
   )
-  for (const [slug, entry] of entries) {
-    const date = entry.installedAt
-      ? new Date(entry.installedAt).toLocaleDateString()
-      : 'unknown'
-    console.log(`   ${slug}`)
-    console.log(`   ├─ Installed: ${date}`)
-    console.log(`   ├─ Scope: ${entry.scope}`)
-    if (entry.source) console.log(`   ├─ Source: ${entry.source}`)
-    if (entry.sourceType) console.log(`   └─ Type: ${entry.sourceType}`)
-    console.log()
+  const rows = entries.map(([slug, entry]) => [
+    slug,
+    entry.scope || 'global',
+    entry.installedAt ? entry.installedAt.slice(0, 10) : '-',
+    entry.source || '-',
+  ])
+  for (const line of renderTable(
+    ['SLUG', 'SCOPE', 'INSTALLED', 'SOURCE'],
+    rows,
+  )) {
+    console.log(line)
   }
 
   console.log(
-    result.agent
-      ? `${entries.length} skill(s) total for ${result.agent}.`
-      : `${entries.length} skill(s) total.`,
+    `\n${entries.length} skill(s) total${result.agent ? ` for ${result.agent}` : ''}.`,
   )
 }

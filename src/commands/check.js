@@ -1,4 +1,5 @@
 import { apiCheck } from '../api/check.js'
+import { ICONS, renderTable } from '../utils/tui.js'
 
 export async function checkCommand() {
   const result = await apiCheck(process.cwd())
@@ -9,27 +10,30 @@ export async function checkCommand() {
     return
   }
 
-  console.log(`\nChecking ${skills.length} installed skills for updates...\n`)
+  console.log(`\nChecking ${skills.length} skill(s) for updates:\n`)
 
+  const rows = []
   for (const s of skills) {
     if (s.status === 'skipped') {
-      console.log(`   ⏭️  ${s.slug.padEnd(30)} ${s.reason}`)
+      rows.push([s.slug, `${ICONS.skip} skipped`, s.reason])
     } else if (s.status === 'update_available') {
-      if (s.fromRegistry) {
-        console.log(
-          `   🔄 ${s.slug.padEnd(30)} ${s.current} → ${s.latest} (registry)`,
-        )
-      } else {
-        console.log(`   🔄 ${s.slug.padEnd(30)} update available`)
-      }
+      const detail = s.fromRegistry
+        ? `${s.current} → ${s.latest} (registry)`
+        : 'update available'
+      rows.push([s.slug, `${ICONS.update} update`, detail])
     } else if (s.status === 'up_to_date') {
-      console.log(`   ✅ ${s.slug.padEnd(30)} up to date`)
+      rows.push([s.slug, `${ICONS.ok} up to date`, '-'])
     } else if (s.status === 'error') {
-      console.log(`   ❌ ${s.slug.padEnd(30)} ${s.reason}`)
+      rows.push([s.slug, `${ICONS.error} error`, s.reason])
     }
+  }
+  for (const line of renderTable(['SKILL', 'STATUS', 'DETAIL'], rows)) {
+    console.log(line)
   }
 
   console.log(
-    `\n${updatesAvailable > 0 ? `⚠️  ${updatesAvailable} skill(s) have updates available. Run \`rolecraft update <slug>\` to update.` : '✅ All skills are up to date.'}\n`,
+    updatesAvailable > 0
+      ? `\n${updatesAvailable} update(s) available — run \`rolecraft update <slug>\`\n`
+      : '\nAll skills are up to date.\n',
   )
 }

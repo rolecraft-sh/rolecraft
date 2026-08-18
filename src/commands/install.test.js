@@ -55,7 +55,7 @@ describe('install command', () => {
       global: true,
     })
 
-    assert.ok(logs.some((l) => l.includes('Installed')))
+    assert.ok(logs.some((l) => l.includes('installed')))
     restore()
   })
 
@@ -68,7 +68,7 @@ describe('install command', () => {
       project: true,
     })
 
-    assert.ok(logs.some((l) => l.includes('Installed')))
+    assert.ok(logs.some((l) => l.includes('installed')))
     restore()
     process.cwd = origCwd
   })
@@ -80,7 +80,7 @@ describe('install command', () => {
       claude: true,
     })
 
-    assert.ok(logs.some((l) => l.includes('Installed')))
+    assert.ok(logs.some((l) => l.includes('installed')))
     restore()
   })
 
@@ -91,7 +91,7 @@ describe('install command', () => {
       cursor: true,
     })
 
-    assert.ok(logs.some((l) => l.includes('Installed')))
+    assert.ok(logs.some((l) => l.includes('installed')))
     restore()
   })
 
@@ -102,7 +102,7 @@ describe('install command', () => {
       global: true,
     })
 
-    assert.ok(logs.some((l) => l.includes('Installed')))
+    assert.ok(logs.some((l) => l.includes('installed')))
     restore()
   })
 
@@ -118,7 +118,7 @@ describe('install command', () => {
       cursor: true,
     })
 
-    assert.ok(logs.some((l) => l.includes('Installed')))
+    assert.ok(logs.some((l) => l.includes('installed')))
     restore()
     process.cwd = origCwd
   })
@@ -144,7 +144,7 @@ describe('askScope', () => {
     process.cwd = () => tempDir
     const { logs, restore } = capture('log')
     await installModule.installCommand(join(tempDir, 'test-skill'), {})
-    assert.ok(logs.some((l) => l.includes('Installed')))
+    assert.ok(logs.some((l) => l.includes('installed')))
     restore()
     process.cwd = origCwd
   })
@@ -155,7 +155,7 @@ describe('askScope', () => {
     process.cwd = () => tempDir
     const { logs, restore } = capture('log')
     await installModule.installCommand(join(tempDir, 'test-skill'), {})
-    assert.ok(logs.some((l) => l.includes('Installed')))
+    assert.ok(logs.some((l) => l.includes('installed')))
     restore()
     process.cwd = origCwd
   })
@@ -173,7 +173,7 @@ describe('askScope', () => {
 
     const { logs, restore } = capture('log')
     await installModule.installCommand(join(tempDir, 'test-skill'), {})
-    assert.ok(logs.some((l) => l.includes('Installed')))
+    assert.ok(logs.some((l) => l.includes('installed')))
     assert.ok(called, 'defaultAskQuestion should have called createInterface')
     restore()
   })
@@ -191,7 +191,7 @@ describe('askScope', () => {
       global: true,
       frozenLockfile: true,
     })
-    assert.ok(logs.some((l) => l.includes('Installed')))
+    assert.ok(logs.some((l) => l.includes('installed')))
     restore()
   })
 
@@ -209,7 +209,7 @@ describe('askScope', () => {
     assert.ok(logs.some((l) => l.includes('[dry-run]')))
     assert.ok(logs.some((l) => l.includes('dry-run-skill')))
     assert.ok(logs.some((l) => l.includes('Targets')))
-    assert.ok(!logs.some((l) => l.includes('Installed')))
+    assert.ok(!logs.some((l) => l.includes('installed')))
     restore()
   })
 
@@ -231,7 +231,7 @@ describe('askScope', () => {
       restore()
     }
 
-    assert.ok(!logs.some((l) => l.includes('Installed')))
+    assert.ok(!logs.some((l) => l.includes('installed')))
     assert.equal(
       existsSync(join(tempDir, '.agents', 'skills', 'test-danger')),
       false,
@@ -248,7 +248,7 @@ describe('askScope', () => {
 
     const { logs, restore } = capture('log')
     await installModule.installCommand(dangerDir, { global: true, yes: true })
-    assert.ok(logs.some((l) => l.includes('Installed')))
+    assert.ok(logs.some((l) => l.includes('installed')))
     restore()
   })
 
@@ -287,7 +287,7 @@ describe('askScope', () => {
     }
 
     assert.ok(logs.some((l) => l.includes('Skipping')))
-    assert.ok(!logs.some((l) => l.includes('Installed')))
+    assert.ok(!logs.some((l) => l.includes('installed')))
     assert.equal(
       existsSync(join(tempDir, '.agents', 'skills', 'test-review-cancel')),
       false,
@@ -304,7 +304,7 @@ describe('askScope', () => {
 
     const { logs, restore } = capture('log')
     await installModule.installCommand(reviewDir, { global: true, yes: true })
-    assert.ok(logs.some((l) => l.includes('Installed')))
+    assert.ok(logs.some((l) => l.includes('installed')))
     restore()
   })
 
@@ -328,7 +328,7 @@ describe('askScope', () => {
     await installModule.installCommand(mcpSkill, { claude: true })
     restore()
 
-    assert.ok(logs.some((l) => l.includes('Installed')))
+    assert.ok(logs.some((l) => l.includes('installed')))
     assert.ok(logs.some((l) => l.includes('my-test-mcp')))
   })
 
@@ -346,7 +346,7 @@ describe('askScope', () => {
 
     assert.ok(logs.some((l) => l.includes('list-me')))
     assert.ok(logs.some((l) => l.includes('Found')))
-    assert.ok(!logs.some((l) => l.includes('Installed')))
+    assert.ok(!logs.some((l) => l.includes('installed')))
   })
 
   it('--skill flag selects specific skill from multi-skill source', async () => {
@@ -369,7 +369,7 @@ describe('askScope', () => {
     })
     restore()
 
-    assert.ok(logs.some((l) => l.includes('Installed')))
+    assert.ok(logs.some((l) => l.includes('installed')))
     assert.ok(logs.some((l) => l.includes('alpha')))
     assert.ok(!logs.some((l) => l.includes('beta')))
   })
@@ -411,7 +411,7 @@ describe('askScope', () => {
 
     assert.ok(logs.some((l) => l.includes('s1')))
     assert.ok(logs.some((l) => l.includes('s2')))
-    assert.ok(logs.some((l) => l.includes('Installed')))
+    assert.ok(logs.some((l) => l.includes('installed')))
   })
 
   it('--no-mcp skips MCP server installation', async () => {
@@ -437,7 +437,7 @@ describe('askScope', () => {
     })
     restore()
 
-    assert.ok(logs.some((l) => l.includes('Installed')))
+    assert.ok(logs.some((l) => l.includes('installed')))
     assert.ok(!logs.some((l) => l.includes('should-not-install')))
   })
 })

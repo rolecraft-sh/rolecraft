@@ -64,7 +64,8 @@ rolecraft/
 │       ├── mcp.js            # MCP server config read/write
 │       ├── profile.js        # profile CRUD, capture, apply utilities
 │       ├── resolver.js       # source resolver (local / GitHub / GitLab / npm)
-│       └── security.js       # static analysis scoring (0–100)
+│       ├── security.js       # static analysis scoring (0–100)
+│       └── tui.js            # zero-dep terminal UI: theme + tables + pickers
 ├── package.json
 ├── CHANGELOG.md              # Release history
 ├── CONTRIBUTING.md           # Contribution guide
