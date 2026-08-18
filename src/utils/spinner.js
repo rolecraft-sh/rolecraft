@@ -1,4 +1,5 @@
 import { stdout } from 'node:process'
+import { theme } from './tui.js'
 
 const FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
 const INTERVAL = 80
@@ -44,11 +45,11 @@ export function createSpinner(text) {
     },
     succeed(msg) {
       if (id) clearInterval(id)
-      stdout.write(`\r${msg || '✓'} ${text}\n`)
+      stdout.write(`\r${theme.green(msg || '✓')} ${text}\n`)
     },
     fail(msg) {
       if (id) clearInterval(id)
-      stdout.write(`\r${msg || '✗'} ${text}\n`)
+      stdout.write(`\r${theme.red(msg || '✗')} ${text}\n`)
     },
   }
 }
@@ -99,11 +100,11 @@ export function createProgressBar(text) {
     succeed(msg) {
       if (id) clearInterval(id)
       render(100)
-      stdout.write(` ${msg || '✓'}\n`)
+      stdout.write(` ${theme.green(msg || '✓')}\n`)
     },
     fail(msg) {
       if (id) clearInterval(id)
-      stdout.write(`\r${msg || '✗'} ${text}\n`)
+      stdout.write(`\r${theme.red(msg || '✗')} ${text}\n`)
     },
   }
 }
