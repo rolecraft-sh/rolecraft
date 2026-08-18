@@ -5,6 +5,7 @@ import {
   readLock,
   getProjectLockPath,
   getAgentsDir,
+  normalizeSlug,
 } from '../utils/lockfile.js'
 
 const SKILLS_SYSTEM_HEADER = `Only use skills listed in <available_skills> below.
@@ -35,7 +36,7 @@ function generateXml(allSkills) {
 
   const skillsXml = entries
     .map(([, entry]) => {
-      const normSlug = entry.slug.replace(/\//g, '-')
+      const normSlug = normalizeSlug(entry.slug)
       const searchDirs = [
         join(getAgentsDir(), normSlug),
         join(process.cwd(), '.agents', 'skills', normSlug),

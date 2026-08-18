@@ -7,6 +7,7 @@ import {
   getProjectLockPath,
   getSkillHistory,
   popHistory,
+  normalizeSlug,
 } from '../utils/lockfile.js'
 import {
   restoreSkill,
@@ -15,10 +16,6 @@ import {
 } from '../utils/installer.js'
 import { getAgentByFlag } from '../agents.js'
 import { UserError } from '../utils/errors.js'
-
-function normalizeSlug(slug) {
-  return slug.replace(/\//g, '-')
-}
 
 export async function apiRollback(slug, options = {}) {
   const { dryRun = false, list = false } = options

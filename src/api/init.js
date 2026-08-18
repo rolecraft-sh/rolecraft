@@ -1,11 +1,12 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import { normalizeSlug } from '../utils/lockfile.js'
 
 export async function initApi(name) {
   const skillName = name || 'my-skill'
   const slug = skillName.includes('/') ? skillName : skillName
   const displayName = slug.includes('/') ? slug.split('/')[1] : slug
-  const dirName = slug.replace(/\//g, '-')
+  const dirName = normalizeSlug(slug)
   const dir = join(process.cwd(), dirName)
   const owner = slug.includes('/') ? slug.split('/')[0] : 'local'
 

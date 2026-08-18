@@ -23,8 +23,14 @@ after(async () => {
 
 describe('lockfile', () => {
   it('normalizeSlug converts path separators to hyphens', () => {
-    assert.equal(lockModule.normalizeSlug('owner/group/skill'), 'owner-group-skill')
-    assert.equal(lockModule.normalizeSlug('already-normalized'), 'already-normalized')
+    assert.equal(
+      lockModule.normalizeSlug('owner/group/skill'),
+      'owner-group-skill',
+    )
+    assert.equal(
+      lockModule.normalizeSlug('already-normalized'),
+      'already-normalized',
+    )
   })
 
   it('getGlobalLockPath returns path inside homedir', () => {

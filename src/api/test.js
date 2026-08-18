@@ -2,7 +2,7 @@ import { readFileSync, existsSync } from 'node:fs'
 import { join, basename } from 'node:path'
 import { homedir } from 'node:os'
 import { parseFrontmatter } from '../utils/converter.js'
-import { readLock } from '../utils/lockfile.js'
+import { readLock, normalizeSlug } from '../utils/lockfile.js'
 
 const ASSERTIONS = [
   {
@@ -302,7 +302,7 @@ async function testAllSkills(options) {
   }
 
   for (const slug of allSlugs) {
-    const normSlug = slug.replace(/\//g, '-')
+    const normSlug = normalizeSlug(slug)
     let skillFile = join(agentsDir, normSlug, 'SKILL.md')
 
     if (!existsSync(skillFile)) {

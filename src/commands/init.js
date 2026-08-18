@@ -5,6 +5,7 @@ import {
   getTemplate,
   generateSkill,
 } from '../utils/templates/index.js'
+import { normalizeSlug } from '../utils/lockfile.js'
 
 export async function initCommand(name, options = {}) {
   // Handle --list
@@ -21,7 +22,7 @@ export async function initCommand(name, options = {}) {
   const skillName = name || 'my-skill'
   const slug = skillName.includes('/') ? skillName : skillName
   const displayName = slug.includes('/') ? slug.split('/')[1] : slug
-  const dirName = slug.replace(/\//g, '-')
+  const dirName = normalizeSlug(slug)
   const dir = join(process.cwd(), dirName)
   const owner = slug.includes('/') ? slug.split('/')[0] : 'local'
 

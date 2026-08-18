@@ -14,6 +14,7 @@ import {
   getProjectLockPath,
   getAgentsDir,
   computeContentHash,
+  normalizeSlug,
 } from '../utils/lockfile.js'
 import { detectAgents } from '../commands/setup.js'
 import { parseFrontmatter, splitSections } from '../utils/converter.js'
@@ -268,7 +269,7 @@ function parseSkillContent(skillDir) {
 function detectSkillConflicts(allSkills, agentsDir, cwd) {
   const skills = {}
   for (const slug of Object.keys(allSkills)) {
-    const normSlug = slug.replace(/\//g, '-')
+    const normSlug = normalizeSlug(slug)
     const searchDirs = [
       join(agentsDir, normSlug),
       join(cwd, '.agents', 'skills', normSlug),
@@ -482,7 +483,7 @@ export async function apiDoctor(cwd = process.cwd(), options = {}) {
   let brokenSymlinks = 0
 
   for (const [slug, entry] of Object.entries(allSkills)) {
-    const normSlug = slug.replace(/\//g, '-')
+    const normSlug = normalizeSlug(slug)
     const searchDirs = [
       join(getAgentsDir(), normSlug),
       join(cwd, '.agents', 'skills', normSlug),

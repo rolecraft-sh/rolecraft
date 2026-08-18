@@ -3,6 +3,7 @@ import {
   getProjectLockPath,
   computeContentHash,
   getAgentsDir,
+  normalizeSlug,
 } from '../utils/lockfile.js'
 import { readFile, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -75,7 +76,7 @@ export async function apiVerify(cwd = process.cwd(), frozen = false) {
       continue
     }
 
-    const normSlug = slug.replace(/\//g, '-')
+    const normSlug = normalizeSlug(slug)
     const dirsToCheck = (entry.agents || [])
       .map((name) => {
         if (name === 'project') return join(cwd, '.agents', 'skills', normSlug)

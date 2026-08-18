@@ -1,6 +1,10 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { readLock, getProjectLockPath, normalizeSlug } from '../utils/lockfile.js'
+import {
+  readLock,
+  getProjectLockPath,
+  normalizeSlug,
+} from '../utils/lockfile.js'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 import agents from '../agents.js'
