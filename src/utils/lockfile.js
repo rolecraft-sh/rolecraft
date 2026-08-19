@@ -4,6 +4,8 @@ import { createHash } from 'node:crypto'
 import { getAgentByFlag } from '../agents.js'
 import { home } from './paths.js'
 
+const LOCKFILE_VERSION = 3
+
 export function normalizeSlug(slug) {
   return slug.replace(/\//g, '-')
 }
@@ -44,7 +46,7 @@ export async function readLock(lockPath = getGlobalLockPath()) {
     return JSON.parse(raw)
   } catch {
     return {
-      version: 3,
+      version: LOCKFILE_VERSION,
       skills: {},
       dismissed: {},
       lastSelectedAgents: [],

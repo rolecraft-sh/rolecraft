@@ -10,6 +10,8 @@ import { computeContentHash } from './lockfile.js'
 import { parseFrontmatter } from './converter.js'
 import { UserError } from './errors.js'
 
+const SCAN_MAX_DEPTH = 3
+
 let _runExec = defaultExecSync
 let runHttpsGet = defaultHttpsGet
 
@@ -131,7 +133,7 @@ async function enrichSkill(found) {
   }
 }
 
-async function scanForSkill(dir, maxDepth = 3) {
+async function scanForSkill(dir, maxDepth = SCAN_MAX_DEPTH) {
   const results = []
   const seenDirs = new Set()
 
