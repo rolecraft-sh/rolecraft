@@ -7,6 +7,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  deployments: write
 concurrency:
   group: pages
   cancel-in-progress: false
@@ -32,3 +33,11 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
+      - name: Prune old deployments
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ids=$(gh api "repos/${{ github.repository }}/deployments?environment=github-pages&per_page=100" --paginate --jq '.[].id')
+          echo "$ids" | tail -n +4 | while read -r id; do
+            gh api -X DELETE "repos/${{ github.repository }}/deployments/$id" > /dev/null 2>&1 || true
+          done
