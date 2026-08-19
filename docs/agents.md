@@ -4,13 +4,13 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 
 | Agent | Directory | Support | MCP |
 | ----- | --------- | ------- | --- |
-| opencode | `~/.agents/skills/ or ./.agents/skills/` | verified | - |
+| opencode | `~/.agents/skills/ or ./.agents/skills/` | verified | mcpServers |
 | claude-code | `~/.claude/skills/ or ./.claude/skills/` | verified | mcpServers |
 | cursor | `~/.cursor/skills/ or ./.cursor/skills/` | verified | mcpServers |
 | windsurf | `~/.codeium/windsurf/skills/ or ./.windsurf/skills/` | verified | mcpServers |
-| devin | `./.devin/skills/` | verified | - |
+| devin | `./.devin/skills/` | verified | mcpServers |
 | codex | `~/.agents/skills/ or ./.agents/skills/` | verified | - |
-| copilot | `./.github/skills/ or ~/.copilot/skills/` | verified | - |
+| copilot | `./.github/skills/ or ~/.copilot/skills/` | verified | servers |
 | aider | `~/.aider/skills/ or ./.aider/skills/` | experimental | - |
 | cline | `~/.cline/skills/ or ./.cline/skills/` | verified | - |
 | gemini-cli | `~/.gemini/skills/` | verified | - |
@@ -93,7 +93,7 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 
 > **Support levels:** `verified` — actively tested and maintained; `community` — community-contributed, maintained on best-effort; `legacy` — previous generation, no active development; `experimental` — known to exist, not formally tested.
 
-> **MCP support:** 4 agent(s) support MCP server configuration. Format: `mcpServers`, `experimental.mcpServers`
+> **MCP support:** 7 agent(s) support MCP server configuration. Format: `mcpServers`, `servers`, `experimental.mcpServers`
 
 > **Agent count:** 86 total — 26 verified, 0 community, 0 legacy, 60 experimental.
 

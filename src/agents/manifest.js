@@ -43,8 +43,9 @@ const MANIFEST_DATA = {
   opencode: {
     skillInstallScope: 'global ~/.agents/skills',
     mcpSupport: {
-      supported: false,
-      format: null,
+      supported: true,
+      format: MCP_CONFIG_FORMATS.STANDARD,
+      configPath: '~/.agents/mcp.json',
     },
     instructionFormat: INSTRUCTION_FORMATS.SKILL_MD,
     supportLevel: SUPPORT_LEVELS.VERIFIED,
@@ -92,8 +93,9 @@ const MANIFEST_DATA = {
   devin: {
     skillInstallScope: 'project ./.devin/skills',
     mcpSupport: {
-      supported: false,
-      format: null,
+      supported: true,
+      format: MCP_CONFIG_FORMATS.STANDARD,
+      configPath: './.devin/mcp.json',
     },
     instructionFormat: INSTRUCTION_FORMATS.SKILL_MD,
     supportLevel: SUPPORT_LEVELS.VERIFIED,
@@ -119,8 +121,9 @@ const MANIFEST_DATA = {
   copilot: {
     skillInstallScope: 'project ./.github/skills',
     mcpSupport: {
-      supported: false,
-      format: null,
+      supported: true,
+      format: MCP_CONFIG_FORMATS.COPILOT,
+      configPath: './.github/copilot/.mcp.json',
     },
     instructionFormat: INSTRUCTION_FORMATS.SKILL_MD,
     supportLevel: SUPPORT_LEVELS.VERIFIED,

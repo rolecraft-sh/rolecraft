@@ -288,7 +288,7 @@ _rolecraft() {
             '--codeep[Also install to ~/.codeep/skills/]' \\
             '--kimi-code[Also install to ~/.kimi-code/skills/]' \\
              '--zcode[Also install to ~/.zcode/skills/]' \\
-             '--droid[Also install to ~/.factory/skills/]' \\
+             '--droid[Also install to ~/.droid/skills/]' \\
              '--chatgpt[Also install to ~/.agents/skills/]' \\
              '--codearts-agent[Also install to ~/.codeartsdoer/skills/]' \\
              '--universal[Also install to ~/.config/agents/skills/]' \\
@@ -437,7 +437,7 @@ for cmd in install bundle use setup upgrade check
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l codeep          -d 'Install to ~/.codeep/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l kimi-code       -d 'Install to ~/.kimi-code/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l zcode           -d 'Install to ~/.zcode/skills/'
-  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l droid           -d 'Install to ~/.factory/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l droid           -d 'Install to ~/.droid/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l chatgpt         -d 'Install to ~/.agents/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l codearts-agent  -d 'Install to ~/.codeartsdoer/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l universal       -d 'Install to ~/.config/agents/skills/'

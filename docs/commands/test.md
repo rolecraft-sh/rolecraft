@@ -70,7 +70,7 @@ $ rolecraft test ./my-skill/SKILL.md
   ✅ Example commands present
   ❌ No agent targets specified
 
-Score: 73/100 -> B (Good)
+Score: 73/100 -> C (Adequate)
 
 Suggestions:
   -> Add "slug" field to frontmatter
@@ -87,7 +87,7 @@ Testing all installed skills...
   ✅ react-rules       92/100  A
   ✅ testing-guide     88/100  B
   ❌ legacy-rules      34/100  D  -> needs review
-  ✅ my-skill          73/100  B
+  ✅ my-skill          73/100  C
 
 📋 Summary: 3/4 passed, 1 failed
 ```
@@ -108,7 +108,7 @@ $ rolecraft test ./skill.SKILL.md --only name-defined,slug-defined
 import { test } from 'rolecraft'
 
 const result = await test('./my-skill/SKILL.md')
-// { skill: 'my-skill', score: 73, grade: 'B', label: 'Good',
+// { skill: 'my-skill', score: 73, grade: 'C', label: 'Adequate',
 //   assertions: [{ name: 'name-defined', pass: true, weight: 10 }, ...],
 //   suggestions: ['Add "slug" field to frontmatter'] }
 

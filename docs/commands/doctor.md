@@ -47,7 +47,7 @@ $ rolecraft doctor
    ✅ Node.js version                        v22.0.0
    ✅ Git availability                       detected
    ✅ npm availability                       detected
-   ✅ rolecraft version                      v1.6.0
+   ✅ rolecraft version                      v2.3.2
    ✅ Node.js location                       /usr/local/bin/node
    ✅ Platform                               darwin 24.0.0
    ✅ Home directory                         /home/user
@@ -78,7 +78,7 @@ $ rolecraft doctor --json
     "Skill integrity": { "status": "warn", "detail": "3 checked, 1 missing director(ies)" },
     "MCP servers": { "status": "warn", "detail": "none configured" }
   },
-  "summary": { "passed": 12, "warnings": 3, "errors": 0 }
+  "summary": { "total": 15, "passed": 12, "warnings": 3, "errors": 0 }
 }
 ```
 
@@ -103,7 +103,7 @@ $ rolecraft doctor --deep
 
 🔍 Skill Conflict Analysis
 
-   ⚠️ "react-rules" ve "frontend-rules" arasında çelişki:
+   ⚠️ Conflict between "react-rules" and "frontend-rules":
        - Code Style: "use tabs" vs "use spaces"
        - Naming: "camelCase" vs "snake_case"
 

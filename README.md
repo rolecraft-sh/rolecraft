@@ -51,7 +51,7 @@
 ---
 
 <p align="center">
-  <b>⚡ Zero dependencies</b> · <b>📦 107.3 kB</b> · <b>🤖 26 verified agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 Security scoring</b> · <b>📝 Skill testing</b> · <b>🔧 Init templates</b> · <b>🌐 Offline-first</b>
+  <b>⚡ Zero dependencies</b> · <b>📦 432.8 kB</b> · <b>🤖 26 verified agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 Security scoring</b> · <b>📝 Skill testing</b> · <b>🔧 Init templates</b> · <b>🌐 Offline-first</b>
 </p>
 
 <p align="center">
@@ -98,7 +98,7 @@ rolecraft convert ./my-skill
 rolecraft convert --help
 ```
 
-**Requirements:** Node.js >= 20 · 107.3 kB · zero dependencies · 86 agents · [Getting Started →](docs/guides/getting-started.md) · [Full install guide →](docs/install.md)
+**Requirements:** Node.js >= 20 · 432.8 kB · zero dependencies · 86 agents · [Getting Started →](docs/guides/getting-started.md) · [Full install guide →](docs/install.md)
 
 > **Why zero dependencies?** Every dependency is a supply-chain risk. rolecraft uses only Node.js built-ins (`fs`, `path`, `crypto`, `https`) — no `node_modules` surprises.
 
@@ -151,7 +151,7 @@ No other CLI combines both. npx skills has no MCP support. ags has a separate MC
 
 ## Features
 
-- **Zero dependencies** — 107.3 kB, only Node.js built-ins
+- **Zero dependencies** — 432.8 kB, only Node.js built-ins
 - **MCP + Skills in one command** — install skills and their MCP servers together
 - **Any source** — local folder, GitHub/GitLab/SSH URL, npm package
 - **86 agents** — opencode, claude-code, cursor, copilot, aider, and more
@@ -253,6 +253,7 @@ All API functions return plain objects (no side-effects). Available exports:
 | ------------------------------------------ | --------------------------------------------------------------------------- | ------------------------------------ |
 | `rolecraft init [<name>]`                  | Scaffold a new `SKILL.md` (`--template`, `--list`)                          | [docs](docs/commands/init.md)        |
 | `rolecraft install <source>`               | Install a skill with security scan (local path, GitHub/GitLab/SSH URL, npm) | [docs](docs/commands/install.md)     |
+| `rolecraft publish <source>`               | Publish a skill to the rolecraft Registry                                   | [docs](docs/commands/publish.md)     |
 | `rolecraft bundle <sources>`               | Install multiple skills from inline sources or file                         | [docs](docs/commands/bundle.md)      |
 | `rolecraft bundle create`                  | Create a new bundle file                                                    | [docs](docs/commands/bundle.md)      |
 | `rolecraft search <query>`                 | Search for skills on GitHub (TUI with `--interactive`)                      | [docs](docs/commands/search.md)      |
@@ -262,13 +263,17 @@ All API functions return plain objects (no side-effects). Available exports:
 | `rolecraft setup [<source>]`               | Detect agents, optionally install a skill to all                            | [docs](docs/commands/setup.md)       |
 | `rolecraft list`                           | Show all installed skills (filter with `--agent`)                           | [docs](docs/commands/list.md)        |
 | `rolecraft doctor`                         | Run system health check                                                     | [docs](docs/commands/doctor.md)      |
+| `rolecraft agents`                         | Show agent capability manifest                                              | [docs](docs/commands/agents.md)      |
 | `rolecraft agents-xml [--write]`           | Generate skills XML for AGENTS.md                                           | [docs](docs/commands/agents-xml.md)  |
 | `rolecraft mcp install/remove/list/search` | Install, remove, list, or search MCP servers for AI agents                  | [docs](docs/commands/mcp.md)         |
+| `rolecraft mcp check/update`               | Check for MCP server updates or update a server                             | [docs](docs/commands/mcp.md)         |
 | `rolecraft profile save/apply/list`        | Save, apply, and share multi-agent configuration profiles                   | [docs](docs/commands/profile.md)     |
 | `rolecraft verify`                         | Check installed skill integrity via content hash                            | [docs](docs/commands/verify.md)      |
 | `rolecraft watch [<slug>]`                 | Watch skills for changes and auto-sync                                      | [docs](docs/commands/watch.md)       |
 | `rolecraft ci`                             | Re-install all skills from lockfile (CI mode)                               | [docs](docs/commands/ci.md)          |
 | `rolecraft convert <source>`               | Convert between SKILL.md and .mdc formats                                   | [docs](docs/commands/convert.md)     |
+| `rolecraft diff <a> <b>`                   | Compare two skills section-by-section                                       | [docs](docs/commands/diff.md)        |
+| `rolecraft compose <a> <b> [...]`          | Compose multiple skills into one                                            | [docs](docs/commands/compose.md)     |
 | `rolecraft upgrade`                        | Upgrade rolecraft to the latest version                                     | [docs](docs/commands/upgrade.md)     |
 | `rolecraft test <skill-path>`              | Test a skill quality with built-in assertions                               | [docs](docs/commands/test.md)        |
 | `rolecraft remove <slug>`                  | Uninstall a skill                                                           | [docs](docs/commands/remove.md)      |
@@ -289,7 +294,7 @@ All API functions return plain objects (no side-effects). Available exports:
 | GitLab / SSH git URL                 | ✅               | ✅              | ❌                  |
 | npm package source                   | ✅               | ✅              | ❌                  |
 | **MCP server management**            | ✅               | ❌              | ❌                  |
-| Agent targets                        | **87**           | 72              | 15+                 |
+| Agent targets                        | **86**           | 72              | 15+                 |
 | **Registry / marketplace**           | ✅               | ✅ (skills.sh)  | ⚠️ (registry only)  |
 | Bundle install + create              | ✅               | ❌              | ✅ (skillset only)  |
 | Interactive TUI search + install     | ✅               | ✅              | ❌                  |
@@ -306,7 +311,7 @@ All API functions return plain objects (no side-effects). Available exports:
 | AGENTS.md XML generation             | ✅               | ❌              | ❌                  |
 | Self-upgrade command                 | ✅               | ❌              | ❌                  |
 | **Publish to registry**              | ✅               | ❌              | ❌                  |
-| File size                            | 107.3 kB          | ~465 KB         | ~84 KB              |
+| File size                            | 432.8 kB          | ~465 KB         | ~84 KB              |
 
 [See full table →](docs/comparison.md)
 

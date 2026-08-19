@@ -7,7 +7,7 @@ If you're using [Vercel's `skills` CLI](https://github.com/vercel-labs/skills) a
 | Reason | rolecraft | Vercel skills |
 |---|---|---|
 | Dependencies | **0** (zero-dep) | 1 (`supports-color`) |
-| Package size | **107.3 kB** | ~465 KB |
+| Package size | **432.8 kB** | ~465 KB |
 | Agent targets | **86** | 72 |
 | Telemetry | **None** | Anonymous telemetry |
 | Offline installs | **Fully supported** | Requires network |

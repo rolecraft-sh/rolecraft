@@ -155,7 +155,7 @@ rolecraft setup your-org/ci-rules --yes              # install
 Lockfile-based deterministic re-install:
 
 ```bash
-rolecraft ci --yes
+rolecraft ci
 ```
 
 ---

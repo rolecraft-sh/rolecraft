@@ -21,7 +21,7 @@ jobs:
           node-version: 20
       - uses: rolecraft-sh/rolecraft-action@v1
         with:
-          command: ci --yes
+          command: ci
 ```
 
 ## Examples
@@ -31,7 +31,7 @@ jobs:
 ```yaml
 - uses: rolecraft-sh/rolecraft-action@v1
   with:
-    command: ci --yes
+    command: ci
 ```
 
 ### Verify skill integrity

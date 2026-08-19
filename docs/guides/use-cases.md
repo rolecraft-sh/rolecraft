@@ -43,7 +43,7 @@ rules: |
 
 ```bash
 # CI pipeline
-rolecraft ci --yes
+rolecraft ci
 ```
 
 The lockfile (`~/.agents/.skill-lock.json`) pins exact sources and content hashes. Same install every time.
@@ -51,13 +51,13 @@ The lockfile (`~/.agents/.skill-lock.json`) pins exact sources and content hashe
 ```yaml
 # GitHub Actions workflow
 - run: npm install -g rolecraft
-- run: rolecraft ci --yes
+- run: rolecraft ci
 ```
 
 Use `--dry-run` to preview changes before applying:
 
 ```bash
-rolecraft ci --yes --dry-run
+rolecraft ci
 ```
 
 **Who it's for:** DevOps engineers, platform teams, CI/CD maintainers.

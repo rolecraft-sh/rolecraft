@@ -33,6 +33,7 @@ Install a skill with security scan.
 |--------|------|---------|-------------|
 | `global` | `boolean` | `false` | Install to `~/.agents/skills/` |
 | `project` | `boolean` | `true` | Install to `./.agents/skills/` |
+| `scope` | `object` | `{ project: true }` | Target scope object (`{ project, global, [agentFlag]: true, ... }`); overrides `global`/`project` |
 | `yes` | `boolean` | `false` | Bypass security prompts |
 | `dryRun` | `boolean` | `false` | Preview only |
 | `symlink` | `boolean` | `false` | Symlink instead of copy |
@@ -90,7 +91,7 @@ Returns `{ slug, source, updated: boolean }`.
 
 Check installed skills for available updates.
 
-Returns `{ updates: [{ slug, hasUpdate }], current: [...] }`.
+Returns `{ skills: [{ slug, status: 'update_available'|'up_to_date'|'error', current?, latest?, source?, fromRegistry?, oldHash?, newHash?, hash?, reason? }], updatesAvailable: number, total: number }`.
 
 ### `verify(options?)`
 
@@ -102,11 +103,7 @@ Returns `{ verified: [...], failed: [...] }`.
 
 Re-install all skills and MCP servers from lockfile.
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `yes` | `boolean` | `false` | Non-interactive mode |
-| `dryRun` | `boolean` | `false` | Preview only |
-| `frozenLockfile` | `boolean` | `false` | Fail if lockfile changes |
+Takes no options. Non-interactive by design — installs everything from the lockfile.
 
 Returns `{ installed: [{ slug, name, scope }], failed: [{ slug, reason }], skillCount, mcpCount, total, allPassed, mcpInstalled: [{ name, agents }], mcpFailed: [{ name, reason }] }`.
 
@@ -202,13 +199,13 @@ Install an MCP server.
 | `yes` | `boolean` | `false` | Skip confirmation and security blocks |
 | `dryRun` | `boolean` | `false` | Preview without making changes |
 
-Returns `{ server: { name, command, args }, agent, configPath }`.
+Returns `{ name, source, resolved: { command, args }, results: [{ agent, name, success }], scanResult }`.
 
 ### `mcpList(options?)`
 
 List all installed MCP servers.
 
-Returns `{ servers: [{ name, command, args, agent }] }`.
+Returns `{ servers: [{ agent, name, command, args }], total: number }`.
 
 ### `mcpUpdate(name, options?)`
 
@@ -220,7 +217,7 @@ Update an MCP server.
 | `yes` | `boolean` | `false` | Skip confirmation |
 | `dryRun` | `boolean` | `false` | Preview without making changes |
 
-Returns `{ server: { name, command, args } }`.
+Returns `{ name, source, resolved: { command, args }, results: [{ agent, name, success }] }`.
 
 ### `mcpRemove(name, options?)`
 
@@ -230,13 +227,13 @@ Remove an MCP server.
 |--------|------|---------|-------------|
 | `dryRun` | `boolean` | `false` | Preview only |
 
-Returns `{ removed: true }`.
+Returns `{ name, results: [{ agent, name, success }] }`.
 
 ### `mcpCheck(options?)`
 
 Check MCP server health.
 
-Returns `{ servers: [{ name, currentVersion, latestVersion, hasUpdate }], updatesAvailable: number }`.
+Returns `{ servers: [{ agent, name, currentVersion, latestVersion, hasUpdate }], updatesAvailable: number, total: number }`.
 
 ### `mcpSearch(query, options?)`
 
@@ -247,11 +244,11 @@ Search for MCP servers on npm or GitHub.
 | `npm` | `boolean` | `false` | Search npm registry instead of GitHub |
 | `interactive` | `boolean` | `false` | Enable TUI picker |
 
-Returns `{ results: [{ name, description, source, stars }] }`.
+Returns `{ results: [{ name, description, source, stars }], source: 'npm'|'github', total: number }`.
 
 ### `profileSave(name, options?)`
 
-Save current agent configuration as a profile. Returns `{ agents: number }`.
+Save current agent configuration as a profile. Returns `{ name, agents: number, profile: { name, description, agents } }`.
 
 ### `profileApply(name, options?)`
 

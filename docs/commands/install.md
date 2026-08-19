@@ -77,10 +77,14 @@ interactively to select which skills to install.
 | `--project`     | `./.agents/skills/` (default)      |
 | `--global`      | `~/.agents/skills/`                |
 | `--all`         | all known agent directories        |
+| `--agents`      | `~/.agents/skills/` (opencode)     |
 | `--claude`      | `~/.claude/skills/`                |
 | `--cursor`      | `~/.cursor/skills/`                |
+| `--windsurf`    | `~/.codeium/windsurf/skills/`      |
 | `--devin`       | `./.devin/skills/`                 |
-| *(and 25+ more — see [docs/agents.md](../agents.md))* | |
+| `--codex`       | `~/.agents/skills/`                |
+| `--copilot`     | `./.github/skills/`                |
+| *(79 more agent flags — see [docs/agents.md](../agents.md))* | |
 
 ## Mode flags
 
@@ -90,6 +94,8 @@ interactively to select which skills to install.
 | `--copy`              | Force copy (default)                       |
 | `--dry-run`           | Preview without copying files              |
 | `--frozen-lockfile`   | Fail if skill is already installed         |
+| `--yes`, `-y`         | Non-interactive: accept all defaults and skip prompts |
+| `--no-mcp`            | Skip MCP server installation from skill    |
 
 ## Examples
 

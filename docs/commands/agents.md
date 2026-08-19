@@ -42,53 +42,40 @@ Each agent entry includes:
 ```bash
 $ rolecraft agents
 
-Agent Capability Manifest
-=========================
+🔍 Agent Capability Manifest
 
-VERIFIED (26)
-  opencode     ~/.agents/skills/         MCP: -
-  claude-code  ~/.claude/skills/         MCP: mcpServers
-  cursor       ~/.cursor/skills/         MCP: mcpServers
-  windsurf     ~/.codeium/windsurf/skills/  MCP: mcpServers
-  devin        ./.devin/skills/          MCP: -
-  codex        ~/.agents/skills/         MCP: -
-  copilot      ./.github/skills/         MCP: -
-  cline        ~/.cline/skills/          MCP: -
-  continue     ~/.continue/skills/       MCP: experimental.mcpServers
-  gemini-cli   ~/.gemini/skills/         MCP: -
-  qwen-code    ~/.qwen/skills/           MCP: -
-  roo          ~/.roo/skills/            MCP: -
-  trae         ~/.trae/skills/           MCP: -
-  junie        ~/.junie/skills/          MCP: -
-  kiro         ~/.kiro/skills/           MCP: -
-  lingma       ~/.lingma/skills/         MCP: -
-  forge        ./.forge/skills/          MCP: -
-  jazz         ~/.jazz/skills/           MCP: -
-  chatgpt      ~/.agents/skills/         MCP: -
-  amp          ~/.config/agents/skills/  MCP: -
-  replit       ./.agents/skills/         MCP: -
-  zed          ~/.agents/skills/         MCP: -
-  warp         ~/.agents/skills/         MCP: -
-  goose        ~/.agents/skills/         MCP: -
-  tabnine      ~/.tabnine/agent/skills/  MCP: -
-  openhands    ~/.agents/skills/         MCP: -
+Total agents: 86
 
-COMMUNITY (0)
+## VERIFIED
 
-LEGACY (0)
+| Agent | Skill Scope | MCP | Instruction | Docs |
+|-------|-------------|-----|-------------|------|
+| opencode | ~/.agents/skills/ | ❌ | skill-md | [docs](https://opencode.ai) |
+| claude-code | ~/.claude/skills/ | ✅ | skill-md | [docs](https://docs.anthropic.com/en/docs/claude-code) |
+| cursor | ~/.cursor/skills/ | ✅ | skill-md | [docs](https://cursor.com) |
+| windsurf | ~/.codeium/windsurf/skills/ | ✅ | skill-md | [docs](https://docs.windsurf.com) |
+| devin | ./.devin/skills/ | ❌ | skill-md | [docs](https://devin.ai) |
+| ... | ... | ... | ... | ... |
 
-EXPERIMENTAL (60)
-  aider        ~/.aider/skills/          MCP: -
-  cody         ~/.cody/skills/           MCP: -
-  ...
+## MCP-Supported Agents
+
+These agents have built-in MCP configuration support:
+  • claude-code (mcpServers)
+  • cursor (mcpServers)
+  • windsurf (mcpServers)
+  • continue (experimental.mcpServers)
+
+## Validation
+
+Manifest valid: ✅ Yes
+Agent count: 86
 ```
 
 ```bash
 $ rolecraft agents --json
 
 {
-  "version": "1.0",
-  "generated": "2026-07-28",
+  "version": 1,
   "agentCount": 86,
   "agents": [
     {
@@ -96,15 +83,17 @@ $ rolecraft agents --json
       "name": "claude-code",
       "label": "~/.claude/skills/",
       "skillInstallScope": "global ~/.claude/skills",
-      "supportLevel": "verified",
       "mcpSupport": {
         "supported": true,
         "format": "mcpServers",
         "configPath": "~/.claude.json"
       },
       "instructionFormat": "skill-md",
+      "supportLevel": "verified",
       "docUrl": "https://docs.anthropic.com/en/docs/claude-code",
-      "lastVerified": "2026-07-27"
+      "lastVerified": "2026-07-27",
+      "notes": null,
+      "aliasFor": null
     }
   ]
 }
@@ -112,11 +101,4 @@ $ rolecraft agents --json
 
 ## Node.js API
 
-This command is also available as programmatic functions. See the [Node.js API documentation](../api.md) for detailed usage.
-
-```js
-import { getAgentManifest, validateManifest } from 'rolecraft'
-
-const agents = getAgentManifest()
-const validation = validateManifest()
-```
+This command is not available as a package-level API function. The manifest is internal to the CLI — see the [Node.js API documentation](../api.md) for the functions that are exported from `rolecraft`.

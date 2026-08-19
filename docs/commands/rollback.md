@@ -22,7 +22,6 @@ rolecraft rollback <slug> [options]
 |--------|-------------|
 | `--list` | Show available rollback versions without restoring |
 | `--dry-run` | Preview which files would be restored |
-| `--yes`, `-y` | Skip confirmation prompt. Overrides `--dry-run` when both are set |
 | `--help`, `-h` | Show help |
 
 ## Examples

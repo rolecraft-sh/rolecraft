@@ -5,12 +5,12 @@ Scaffold a new `SKILL.md` for your agent skill.
 ## Usage
 
 ```bash
-rolecraft init                               # create ./SKILL.md (default: my-skill)
+rolecraft init                               # create ./my-skill/SKILL.md (default: my-skill)
 rolecraft init my-custom-tool                # create ./my-custom-tool/SKILL.md
 rolecraft init namespace/skill               # create ./namespace-skill/SKILL.md
 rolecraft init --list                        # list available templates
 rolecraft init my-skill --template basic     # scaffold from a template
-rolecraft init my-skill --template mcp       # scaffold with MCP server setup
+rolecraft init my-skill --template react     # scaffold with React best practices
 ```
 
 ## Description
@@ -30,13 +30,14 @@ Use `--list` to see all available templates. Use `--template <name>` to scaffold
 
 | Template | Description |
 |----------|-------------|
-| `basic` | Minimal frontmatter with name, slug, owner, and description. No body sections. |
-| `standard` | Full scaffold with frontmatter and structured sections (description, when to use, examples, links). Recommended for most skills. **(default)** |
-| `mcp` | Pre-configured with MCP server declarations in frontmatter. Ideal for skills that integrate with external tools. |
-| `rules` | Rule-based skill with instruction-style body. Suitable for Claude Code `.mdc`-style agent rules. |
-| `empty` | Just the frontmatter — no body content. Useful when you want full control over the structure. |
+| `basic` | General-purpose skill template for AI agent instructions |
+| `code-review` | Code review guidelines and best practices for AI agents |
+| `git-workflow` | Git workflow conventions and branch strategy for AI agents |
+| `testing` | Testing guidelines and best practices for AI agents |
+| `security` | Security guidelines and dangerous pattern detection for AI agents |
+| `react` | React best practices and component patterns for AI agents |
 
-The `standard` template is used when no `--template` flag is provided.
+When no `--template` flag is provided, a minimal frontmatter scaffold is created (backward-compatible with older versions).
 
 ## Examples
 
@@ -44,17 +45,18 @@ The `standard` template is used when no `--template` flag is provided.
 ```bash
 rolecraft init --list
 # Available templates:
-#   basic      Minimal frontmatter only
-#   standard   Full scaffold with structured sections (default)
-#   mcp        Pre-configured with MCP server declarations
-#   rules      Rule-based skill for agent instructions
-#   empty      Just the frontmatter
+#   basic                General-purpose skill template for AI agent instructions
+#   code-review          Code review guidelines and best practices for AI agents
+#   git-workflow         Git workflow conventions and branch strategy for AI agents
+#   testing              Testing guidelines and best practices for AI agents
+#   security             Security guidelines and dangerous pattern detection for AI agents
+#   react                React best practices and component patterns for AI agents
 ```
 
 ### Scaffold with default template
 ```bash
 rolecraft init
-# Creates ./SKILL.md
+# Creates ./my-skill/SKILL.md
 
 rolecraft init code-reviewer
 # Creates ./code-reviewer/SKILL.md
@@ -68,14 +70,11 @@ rolecraft init myorg/ts-helper
 rolecraft init my-tool --template basic
 # Creates ./my-tool/SKILL.md with minimal frontmatter
 
-rolecraft init db-agent --template mcp
-# Creates ./db-agent/SKILL.md pre-configured with MCP server setup
+rolecraft init review-bot --template code-review
+# Creates ./review-bot/SKILL.md pre-filled with code review guidelines
 
-rolecraft init my-rules --template rules
-# Creates ./my-rules/SKILL.md as a rule-based skill
-
-rolecraft init scratch --template empty
-# Creates ./scratch/SKILL.md with frontmatter only
+rolecraft init my-rules --template git-workflow
+# Creates ./my-rules/SKILL.md as a git workflow skill
 ```
 
 ## Node.js API

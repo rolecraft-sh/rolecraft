@@ -45,7 +45,7 @@ const DEFAULT = {
     githubRatio: 6.94,
   },
   packageSize: {
-    rolecraft: '107.3 kB',
+    rolecraft: '432.8 kB',
     vercel: '~465 KB',
     agentskill: '~84 KB',
   },

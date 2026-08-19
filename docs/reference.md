@@ -21,6 +21,7 @@ Complete reference for all rolecraft commands, flags, and options.
 | `rollback <slug>` | Restore a skill to previous version (from backup history) |
 | `setup [source]` | Detect agents and optionally install a skill |
 | `search <query>` | Search GitHub for skills (`--skills-sh` for skills.sh) |
+| `publish <source>` | Publish a skill to the registry (requires `GITHUB_TOKEN`) |
 | `check` | Check for available updates |
 | `ci` | Re-install all skills from lockfile (CI mode) |
 | `verify` | Check installed skill integrity via content hash |
@@ -28,7 +29,7 @@ Complete reference for all rolecraft commands, flags, and options.
 | `watch [slug]` | Watch skills for changes and auto-sync |
 | `convert <source>` | Convert between SKILL.md and .mdc formats |
 | `profile save/apply/list` | Save, apply, and manage multi-agent profiles |
-| `mcp install/list/remove` | Install, list, and remove MCP servers |
+| `mcp install/list/remove/update/check/search` | Install, list, remove, update, check, and search MCP servers |
 | `agents-xml [--write]` | Generate skills XML for AGENTS.md |
 | `completions bash\|zsh\|fish` | Generate shell completion scripts |
 | `test <skill-path>` | Test a skill quality with built-in assertions |
@@ -46,7 +47,7 @@ These flags work across multiple commands:
 
 | Flag | Affects | Description |
 |------|---------|-------------|
-| `--yes` / `-y` | install, setup, bundle, ci, mcp, profile, publish | Non-interactive: accept all defaults, bypass security prompts |
+| `--yes` / `-y` | install, setup, bundle, mcp, profile, publish | Non-interactive: accept all defaults, bypass security prompts |
 | `--dry-run` | install, setup, bundle, remove, update, profile, mcp, upgrade, watch, convert | Preview without making changes |
 | `--global` | install, use, setup | Install to `~/.agents/skills/` (user-wide) |
 | `--project` | install, use, setup | Install to `./.agents/skills/` (repo-scoped, default) |
@@ -85,8 +86,8 @@ Pass any of these to `install`, `setup`, or `profile` to target specific agents:
 | `--warp` | warp | `~/.agents/skills/` |
 | `--codeium` | codeium | `~/.codeium/skills/` |
 | `--fabric` | fabric | `~/.fabric/skills/` |
-| `--goose` | goose | `~/.goose/skills/` |
-| `--tabnine` | tabnine | `~/.tabnine/skills/` |
+| `--goose` | goose | `~/.agents/skills/` |
+| `--tabnine` | tabnine | `~/.tabnine/agent/skills/` |
 | `--supermaven` | supermaven | `~/.supermaven/skills/` |
 | `--pr-pilot` | pr-pilot | `~/.pr-pilot/skills/` |
 | `--loom` | loom | `~/.loom/skills/` |
@@ -96,7 +97,7 @@ Pass any of these to `install`, `setup`, or `profile` to target specific agents:
 | `--kiro` | kiro | `~/.kiro/skills/` |
 | `--augment` | augment | `~/.augment/skills/` |
 | `--kilo` | kilo | `~/.kilo/skills/` |
-| `--openhands` | openhands | `~/.openhands/skills/` |
+| `--openhands` | openhands | `~/.agents/skills/` |
 | `--junie` | junie | `~/.junie/skills/` |
 | `--factory` | factory | `~/.factory/skills/` |
 | `--command-code` | command-code | `~/.commandcode/skills/` |
@@ -119,21 +120,21 @@ Pass any of these to `install`, `setup`, or `profile` to target specific agents:
 | `--astrbot` | astrbot | `~/.astrbot/data/skills/` |
 | `--qoder-cn` | qoder-cn | `~/.qoder-cn/skills/` |
 | `--trae-cn` | trae-cn | `~/.trae-cn/skills/` |
-| `--zenflow` | zenflow | `~/.zencoder/skills/` |
+| `--zenflow` | zenflow | `~/.zenflow/skills/` |
 | `--neovate` | neovate | `~/.neovate/skills/` |
 | `--pochi` | pochi | `~/.pochi/skills/` |
 | `--adal` | adal | `~/.adal/skills/` |
-| `--droid` | droid | `~/.factory/skills/` |
+| `--droid` | droid | `~/.droid/skills/` |
 | `--chatgpt` | chatgpt | `~/.agents/skills/` |
 | `--codearts-agent` | codearts-agent | `~/.codeartsdoer/skills/` |
 | `--universal` | universal | `~/.config/agents/skills/` |
-| `--amp` | amp | `~/.agents/skills/` |
+| `--amp` | amp | `~/.config/agents/skills/` |
 | `--antigravity` | antigravity | `~/.agents/skills/` |
 | `--antigravity-cli` | antigravity-cli | `~/.agents/skills/` |
 | `--deepagents` | deep-agents | `~/.agents/skills/` |
 | `--dexto` | dexto | `~/.agents/skills/` |
 | `--loaf` | loaf | `~/.agents/skills/` |
-| `--replit` | replit | `~/.agents/skills/` |
+| `--replit` | replit | `./.agents/skills/` |
 | `--zed` | zed | `~/.agents/skills/` |
 | `--promptscript` | promptscript | `./agent/skills/` |
 | `--code-arts-doer` | code-arts-doer | `~/.codeartsdoer/skills/` |
@@ -175,9 +176,9 @@ Scaffold a new skill:
 
 ```bash
 rolecraft init my-skill                # creates ./my-skill/SKILL.md
-rolecraft init                         # creates ./SKILL.md
+rolecraft init                         # creates ./my-skill/SKILL.md (default: my-skill)
 rolecraft init --list                  # list available templates
-rolecraft init my-skill --template mcp # scaffold from a specific template
+rolecraft init my-skill --template basic # scaffold from a specific template
 ```
 
 **Options:**
@@ -185,7 +186,7 @@ rolecraft init my-skill --template mcp # scaffold from a specific template
 | Option | Description |
 |--------|-------------|
 | `--list` | List available templates with descriptions |
-| `--template <name>` | Scaffold from a named template (`basic`, `standard`, `mcp`, `rules`, `empty`) |
+| `--template <name>` | Scaffold from a named template (`basic`, `code-review`, `git-workflow`, `testing`, `security`, `react`) |
 
 See the [init command docs](./commands/init.md) for available templates and full examples.
 
@@ -315,7 +316,7 @@ No arguments. Checks all installed skills for newer versions.
 
 ### `rolecraft ci`
 
-Re-install all skills and MCP servers from lockfiles. Use `--yes` in CI.
+Re-install all skills and MCP servers from lockfiles. Non-interactive by design — no flags needed.
 
 ### `rolecraft verify`
 

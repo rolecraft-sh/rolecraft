@@ -210,7 +210,7 @@ Options for search:
 
 Options for init:
   --list              List available templates
-  --template <name>   Scaffold from a named template (basic, standard, mcp, rules, empty)
+  --template <name>   Scaffold from a named template (basic, code-review, git-workflow, testing, security, react)
 
 Options for setup:
   --list         List available skills from a source without installing
@@ -220,8 +220,6 @@ Options for install:
   --yes, -y      Non-interactive: accept all defaults and skip prompts
   --global       Install to ~/.agents/skills/
   --project      Install to ./.agents/skills/ (default)
-  --windsurf     Also install to ~/.windsurf/skills/
-  --devin        Also install to ~/.devin/skills/
 ${agentFlags.join('\n')}
   --all              Install to all locations
   --no-mcp           Skip MCP server installation from skill
@@ -472,7 +470,11 @@ const COMMANDS = {
       return
     }
     const flags = parseFlags(args)
-    validateFlags(flags, ['--dry-run', '--yes', '-y', '--list'], 'setup')
+    validateFlags(
+      flags,
+      ['--dry-run', '--yes', '-y', '--list', '--skill'],
+      'setup',
+    )
     const pos = parsePositionals(args)
     const source = pos[0]
     return setupCommand(source, {

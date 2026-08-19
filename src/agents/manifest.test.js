@@ -38,7 +38,7 @@ describe('agent manifest', () => {
     const opencode = manifest.find((a) => a.name === 'opencode')
     assert.ok(opencode)
     assert.equal(opencode.supportLevel, SUPPORT_LEVELS.VERIFIED)
-    assert.equal(opencode.mcpSupport.supported, false)
+    assert.equal(opencode.mcpSupport.supported, true)
   })
 
   it('includes claude-code as verified with MCP', () => {

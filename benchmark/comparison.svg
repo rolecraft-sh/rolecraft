@@ -31,7 +31,7 @@
   <text x="40" y="450" font-family="system-ui,sans-serif" font-size="16" fill="#1e293b" font-weight="700">📦 Package Size</text>
   <text x="40" y="497" font-family="system-ui,sans-serif" font-size="13" fill="#15803d" font-weight="600">rolecraft</text>
   <rect x="185" y="484" width="63.92340425531915" height="24" rx="3" fill="#15803d" opacity="0.9"/>
-  <text x="256.92340425531916" y="500" font-family="system-ui,sans-serif" font-size="13" fill="#64748b">107.3 kB</text>
+  <text x="256.92340425531916" y="500" font-family="system-ui,sans-serif" font-size="13" fill="#64748b">432.8 kB</text>
 
   <text x="40" y="535" font-family="system-ui,sans-serif" font-size="13" fill="#1d4ed8" font-weight="600">Vercel skills</text>
   <rect x="185" y="522" width="277.02127659574467" height="24" rx="3" fill="#1d4ed8" opacity="0.9"/>

@@ -15,7 +15,6 @@ Restore a skill to its previous version. Requires a history entry
 Options:
   --list              Show available rollback versions
   --dry-run           Preview what would be restored without making changes
-  --yes, -y           Skip confirmation prompt
   --help, -h          Show this help
 
 Examples:

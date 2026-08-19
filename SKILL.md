@@ -85,7 +85,7 @@ npx rolecraft convert ./my-skill
 
 ## Supported agents (86 total · 26 verified)
 
-`opencode`, `claude-code`, `cursor`, `windsurf`, `devin`, `codex`, `copilot`, `aider`, `cline`, `gemini-cli`, `cody`, `continue`, `warp`, `codeium`, `fabric`, `goose`, `tabnine`, `supermaven`, `pr-pilot`, `loom`, `roo`, `trae`, `hermes`, `kiro`, `augment`, `kilo`, `openhands`, `junie`, `factory`, `command-code`, `cortex`, `mistral-vibe`, `qwen-code`, `openclaw`, `codebuddy`, `mux`, `pi`, `autohand-code`, `rovo`, `firebender`, `bob`, `aider-desk`, and 25+ more.
+`opencode`, `claude-code`, `cursor`, `windsurf`, `devin`, `codex`, `copilot`, `aider`, `cline`, `gemini-cli`, `cody`, `continue`, `warp`, `codeium`, `fabric`, `goose`, `tabnine`, `supermaven`, `pr-pilot`, `loom`, `roo`, `trae`, `hermes`, `kiro`, `augment`, `kilo`, `openhands`, `junie`, `factory`, `command-code`, `cortex`, `mistral-vibe`, `qwen-code`, `openclaw`, `codebuddy`, `mux`, `pi`, `autohand-code`, `rovo-dev`, `firebender`, `ibm-bob`, `aider-desk`, and 44 more.
 
 ## Examples
 
