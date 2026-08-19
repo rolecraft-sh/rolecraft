@@ -415,28 +415,11 @@ Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
 
 Thanks to everyone who has contributed to RoleCraft:
 
-<table>
-  <tr>
-    <td align="center"><a href="https://github.com/sametcelikbicak"><img src="https://github.com/sametcelikbicak.png" width="60" height="60" alt="sametcelikbicak"><br><b>Samet ÇELİKBIÇAK</b></a><br><sub>Owner & Maintainer</sub></td>
-    <td align="center"><a href="https://github.com/fengjikui"><img src="https://github.com/fengjikui.png" width="60" height="60" alt="fengjikui"><br><b>冯基魁</b></a><br><sub><a href="https://github.com/sametcelikbicak/rolecraft/pull/62">Contributor</a></sub></td>
-    <td align="center"><a href="https://github.com/Yurii201811"><img src="https://github.com/Yurii201811.png" width="60" height="60" alt="Yurii201811"><br><b>Yurii201811</b></a><br><sub><a href="https://github.com/sametcelikbicak/rolecraft/pull/104">Contributor</a></sub></td>
-    <td align="center"><a href="https://github.com/gaoharimran29-glitch"><img src="https://github.com/gaoharimran29-glitch.png" width="60" height="60" alt="gaoharimran29-glitch"><br><b>Gaohar Imran</b></a><br><sub><a href="https://github.com/sametcelikbicak/rolecraft/pull/113">Contributor</a></sub></td>
-    <td align="center"><a href="https://github.com/ajaynomics"><img src="https://github.com/ajaynomics.png" width="60" height="60" alt="ajaynomics"><br><b>Ajay Krishnan</b></a><br><sub><a href="https://github.com/sametcelikbicak/rolecraft/pull/114">Contributor</a></sub></td>
-    <td align="center"><a href="https://github.com/BenjaminAyivoh1"><img src="https://github.com/BenjaminAyivoh1.png" width="60" height="60" alt="BenjaminAyivoh1"><br><b>Benjamin Ayivoh</b></a><br><sub><a href="https://github.com/sametcelikbicak/rolecraft/pull/120">Contributor</a></sub></td>
-  </tr>
-  <tr>
-      <td align="center"><a href="https://github.com/mgalore"><img src="https://github.com/mgalore.png" width="60" height="60" alt="mgalore"><br><b>Jonathan</b></a><br><sub><a href="https://github.com/rolecraft-sh/rolecraft/pull/171">Contributor</a></sub></td>
-      <td align="center"><a href="https://github.com/MFA-G"><img src="https://github.com/MFA-G.png" width="60" height="60" alt="MFA-G"><br><b>Mochammad Fadhlan Al-Ghiffari</b></a><br><sub><a href="https://github.com/rolecraft-sh/rolecraft/pull/180">Contributor</a></sub></td>
-      <td align="center"><a href="https://github.com/adity982"><img src="https://github.com/adity982.png" width="60" height="60" alt="adity982"><br><b>ADITYA</b></a><br><sub><a href="https://github.com/rolecraft-sh/rolecraft/pull/158">Contributor</a></sub></td>
-      <td align="center"><a href="https://github.com/canerbektas"><img src="https://github.com/canerbektas.png" width="60" height="60" alt="canerbektas"><br><b>Caner BEKTAŞ</b></a><br><sub><a href="https://github.com/rolecraft-sh/rolecraft/pull/206">Contributor</a></sub></td>
-      <td align="center"><a href="https://github.com/kegodev"><img src="https://github.com/kegodev.png" width="60" height="60" alt="kegodev"><br><b>Kegorapetse</b></a><br><sub><a href="https://github.com/rolecraft-sh/rolecraft/pull/208">Contributor</a></sub></td>
-      <td align="center"><a href="https://github.com/devmaster1987"><img src="https://github.com/devmaster1987.png" width="60" height="60" alt="devmaster1987"><br><b>Dev Master</b></a><br><sub><a href="https://github.com/rolecraft-sh/rolecraft/pull/210">Contributor</a></sub></td>
-  </tr>
-  <tr>
-      <td align="center"><a href="https://github.com/alloutflo"><img src="https://github.com/alloutflo.png" width="60" height="60" alt="alloutflo"><br><b>Florian Meyer</b></a><br><sub><a href="https://github.com/rolecraft-sh/rolecraft/pull/216">Contributor</a></sub></td>
-      <td align="center"><a href="https://github.com/Lukakatche"><img src="https://github.com/Lukakatche.png" width="60" height="60" alt="Lukakatche"><br><b>Lukakatche</b></a><br><sub><a href="https://github.com/rolecraft-sh/rolecraft/pull/163">Contributor</a></sub></td>
-  </tr>
-</table>
+All contributions are tracked automatically by GitHub — the list below stays in sync without any manual edits.
+
+<a href="https://github.com/rolecraft-sh/rolecraft/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=rolecraft-sh/rolecraft" alt="Contributors" />
+</a>
 
 ---
 
