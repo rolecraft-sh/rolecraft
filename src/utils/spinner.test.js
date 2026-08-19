@@ -1,5 +1,6 @@
 import { describe, it, beforeEach, afterEach } from 'node:test'
 import assert from 'node:assert/strict'
+import { spawnSync } from 'node:child_process'
 import { stdout } from 'node:process'
 import { createSpinner, createProgressBar } from './spinner.js'
 
@@ -169,5 +170,42 @@ describe('createProgressBar', () => {
       assert.ok(out.includes('✗'))
       assert.ok(out.includes('download'))
     })
+  })
+})
+
+describe('marker colors', () => {
+  const spinnerUrl = new URL('./spinner.js', import.meta.url).href
+
+  function runWithEnv(env) {
+    const script = `
+      process.stdout.isTTY = true
+      import(${JSON.stringify(spinnerUrl)}).then(
+        ({ createSpinner, createProgressBar }) => {
+          createSpinner('install').succeed()
+          createSpinner('install').fail()
+          createProgressBar('download').succeed()
+          createProgressBar('download').fail()
+        },
+      )
+    `
+    return spawnSync(process.execPath, ['--input-type=module', '-'], {
+      input: script,
+      env: { ...process.env, NO_COLOR: '', ...env },
+      encoding: 'utf-8',
+    })
+  }
+
+  it('emits green check and red cross under FORCE_COLOR', () => {
+    const result = runWithEnv({ FORCE_COLOR: '1' })
+    assert.equal(result.status, 0, result.stderr)
+    assert.ok(result.stdout.includes('\x1b[32m✓\x1b[0m'))
+    assert.ok(result.stdout.includes('\x1b[31m✗\x1b[0m'))
+  })
+
+  it('stays bare when NO_COLOR overrides FORCE_COLOR', () => {
+    const result = runWithEnv({ FORCE_COLOR: '1', NO_COLOR: '1' })
+    assert.equal(result.status, 0, result.stderr)
+    assert.ok(result.stdout.includes('✓'))
+    assert.ok(!result.stdout.includes('\x1b[32m'))
   })
 })
