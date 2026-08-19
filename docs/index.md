@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: "RoleCraft"
-  text: "The Package Manager for AI Agents"
-  tagline: Install · Test · Publish · Manage Skills & MCP Servers across 86 Agents (26 Verified)
+  text: "The Security-First Skill Manager for AI Agents"
+  tagline: Every install runs a security scan · Skills & MCP Servers across 86 Agents (26 Verified)
   image:
     src: /rolecraft-demo.gif
     alt: RoleCraft Demo

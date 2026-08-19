@@ -5,8 +5,8 @@
 <h1 align="center">RoleCraft</h1>
 
 <p align="center">
-  <b>The Package Manager for AI Agents</b><br>
-   Install · Test · Publish · Manage Skills & MCP Servers across 86 Agents (26 Verified)<br>
+  <b>The Security-First Skill Manager for AI Agents</b><br>
+   Every install runs a security scan · Skills & MCP Servers across 86 Agents (26 Verified)<br>
   Zero-dependency CLI · No signup · Offline-first
 </p>
 
@@ -156,7 +156,7 @@ No other CLI combines both. npx skills has no MCP support. ags has a separate MC
 - **Any source** — local folder, GitHub/GitLab/SSH URL, npm package
 - **86 agents** — opencode, claude-code, cursor, copilot, aider, and more
 - **No registry required** — works fully without a marketplace; community-driven [registry](https://github.com/rolecraft-sh/registry) optional
-- **Security scoring** — static analysis: detects prompt injection, command injection, obfuscated code, credential harvesting. Scores 0–100. Blocks dangerous skills (use `--yes` to override)
+- **Security scoring** — static analysis on every install: detects prompt injection, command injection, obfuscated code, credential harvesting. Scores 0–100. Blocks dangerous skills (use `--yes` to override). 341 malicious skills were found on community hubs in Feb 2026 — rolecraft scans every skill before it touches your machine
 - **CI-ready** — lockfile-based re-install (`rolecraft ci`), `--yes` flag, `--dry-run`
 - **Shell completions** — bash, zsh, fish auto-completion
 - **TUI search** — interactive arrow-key skill browser with preview
