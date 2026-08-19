@@ -4,6 +4,8 @@ import assert from 'node:assert/strict'
 let completionsModule
 
 const addedCommands = [
+  'agents',
+  'rollback',
   'check',
   'watch',
   'convert',

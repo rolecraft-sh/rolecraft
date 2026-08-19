@@ -11,9 +11,11 @@ const COMMANDS = [
   'verify',
   'ci',
   'completions',
+  'agents',
   'agents-xml',
   'doctor',
   'upgrade',
+  'rollback',
   'check',
   'watch',
   'convert',
@@ -159,7 +161,9 @@ _rolecraft() {
       ;;
     list) COMPREPLY=($(compgen -W "--json" -- "$cur")) ;;
     remove|update|watch|convert) COMPREPLY=($(compgen -W "--dry-run" -- "$cur")) ;;
+    rollback) COMPREPLY=($(compgen -W "--list --dry-run" -- "$cur")) ;;
     init|verify|ci|help|version) COMPREPLY=() ;;
+    agents) COMPREPLY=($(compgen -W "--json" -- "$cur")) ;;
     agents-xml) COMPREPLY=($(compgen -W "--write" -- "$cur")) ;;
     doctor) COMPREPLY=($(compgen -W "--json --network --deep" -- "$cur")) ;;
     diff) COMPREPLY=($(compgen -W "--json --brief --context --no-color" -- "$cur")) ;;
@@ -201,7 +205,9 @@ _rolecraft() {
     'verify:Verify skill integrity'
     'ci:CI mode install'
     'completions:Generate completions'
+    'agents:Show agent capability manifest'
     'upgrade:Upgrade rolecraft'
+    'rollback:Restore a skill to previous version'
     'check:Check for updates'
     'watch:Watch skills'
     'convert:Convert skill format'
@@ -259,6 +265,8 @@ for cmd in install bundle use setup upgrade check
 end
 complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a install -d 'Install a skill'
 complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a list -d 'List installed skills'
+complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a agents -d 'Show agent capability manifest'
+complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a rollback -d 'Restore a skill to previous version'
 complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a help -d 'Show help'
 `
 }

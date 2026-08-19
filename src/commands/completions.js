@@ -11,9 +11,11 @@ const COMMANDS = [
   'verify',
   'ci',
   'completions',
+  'agents',
   'agents-xml',
   'doctor',
   'upgrade',
+  'rollback',
   'check',
   'watch',
   'convert',
@@ -160,7 +162,9 @@ _rolecraft() {
       ;;
     list) COMPREPLY=($(compgen -W "--json" -- "$cur")) ;;
     remove|update|watch|convert) COMPREPLY=($(compgen -W "--dry-run" -- "$cur")) ;;
+    rollback) COMPREPLY=($(compgen -W "--list --dry-run" -- "$cur")) ;;
     init|verify|ci|help|version) COMPREPLY=() ;;
+    agents) COMPREPLY=($(compgen -W "--json" -- "$cur")) ;;
     agents-xml) COMPREPLY=($(compgen -W "--write" -- "$cur")) ;;
     doctor) COMPREPLY=($(compgen -W "--json --network --deep" -- "$cur")) ;;
     diff) COMPREPLY=($(compgen -W "--json --brief --context --no-color" -- "$cur")) ;;
@@ -210,7 +214,9 @@ _rolecraft() {
     'verify:Verify installed skill integrity'
     'ci:Install all skills from lockfile'
     'completions:Generate shell completion scripts'
+    'agents:Show agent capability manifest'
     'upgrade:Upgrade rolecraft to latest version'
+    'rollback:Restore a skill to previous version'
     'check:Check for available skill updates'
     'watch:Watch skills and auto-sync changes'
     'convert:Convert another skill format to SKILL.md'
@@ -373,7 +379,9 @@ complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a search    -d 'Se
 complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a verify    -d 'Verify skill integrity'
 complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a ci        -d 'CI mode install'
 complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a completions -d 'Generate completions'
+complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a agents   -d 'Show agent capability manifest'
 complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a upgrade    -d 'Upgrade to latest version'
+complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a rollback -d 'Restore a skill to previous version'
 complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a check      -d 'Check for skill updates'
 complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a watch      -d 'Watch skills and auto-sync'
 complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a convert    -d 'Convert a skill format'
