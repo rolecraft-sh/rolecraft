@@ -294,11 +294,12 @@ export function scanMcpServer(resolved) {
   return { score: Math.max(0, score), issues }
 }
 
-export function formatSecurityReport({ score, issues }) {
+export function formatSecurityReport({ score, issues }, skillName) {
   const label = classifyScore(score)
   const emoji = label === 'safe' ? '✅' : label === 'review' ? '⚠️' : '❌'
+  const header = skillName ? ` ${skillName}` : ''
   const lines = [
-    `\n${emoji} Security scan: ${score}/100 — ${label.toUpperCase()}`,
+    `\n${emoji}${header} Security scan: ${score}/100 — ${label.toUpperCase()}`,
   ]
 
   if (issues.length > 0) {

@@ -80,12 +80,20 @@ function parseFlagValue(args, flag) {
 }
 
 /**
- * Parse --skill react-rules,other-skill into an array of skill names.
+ * Parse --skill names into an array of skill names.
+ * Supports: --skill a,b  OR  --skill a --skill b  OR  --skill a,b --skill c
  * Returns undefined when the flag is absent.
  */
 function parseSkillOption(args) {
-  const val = parseFlagValue(args, '--skill')
-  return val ? val.split(',').map((s) => s.trim()) : undefined
+  const skills = []
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--skill' && args[i + 1] && !args[i + 1].startsWith('-')) {
+      const vals = args[i + 1].split(',').map((s) => s.trim())
+      skills.push(...vals)
+      i++
+    }
+  }
+  return skills.length > 0 ? skills : undefined
 }
 
 /**

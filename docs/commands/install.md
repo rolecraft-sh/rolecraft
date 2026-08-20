@@ -65,7 +65,22 @@ the tarball, finds `SKILL.md` recursively, installs it, and cleans up.
 | Flag                      | Description                                            |
 | ------------------------- | ------------------------------------------------------ |
 | `--list`                  | List available skills from the source without installing |
-| `--skill <names>`         | Install specific skills by name (comma-separated)      |
+| `--skill <names>`         | Install specific skills by name (comma-separated or repeated flag) |
+
+The `--skill` flag accepts skill names in two formats:
+
+```bash
+# Comma-separated
+rolecraft install source --skill "grill-me,tdd"
+
+# Repeated flag
+rolecraft install source --skill grill-me --skill tdd
+
+# Mixed
+rolecraft install source --skill grill-me,tdd --skill ask-matt
+```
+
+Skill names are matched against the skill `name` or `slug` (case-insensitive).
 
 Without these flags and with more than one skill found, you will be prompted
 interactively to select which skills to install.
@@ -114,6 +129,9 @@ rolecraft install mattpocock/skills --list
 
 # Install specific skills by name (comma-separated)
 rolecraft install mattpocock/skills --skill "grill-me,tdd"
+
+# Install specific skills (repeated flag)
+rolecraft install mattpocock/skills --skill grill-me --skill tdd
 
 # Install from npm
 rolecraft install npm:some-skill-package
@@ -206,8 +224,11 @@ Found 15 skill(s)
 ### `--skill` usage example
 
 ```bash
-# Install only specific skills by name (comma-separated)
+# Install specific skills (comma-separated)
 rolecraft install mattpocock/skills --skill "grill-me,tdd"
+
+# Install specific skills (repeated flag)
+rolecraft install mattpocock/skills --skill grill-me --skill tdd
 
 # Install a single skill
 rolecraft install mattpocock/skills --skill diagnose-bugs

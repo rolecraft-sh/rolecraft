@@ -204,7 +204,12 @@ export async function installCommand(source, options) {
   for (const skillResult of result.results) {
     if (skillResult.security) {
       const { formatSecurityReport } = await import('../utils/security.js')
-      console.log(formatSecurityReport(skillResult.security))
+      console.log(
+        formatSecurityReport(
+          skillResult.security,
+          skillResult.name || skillResult.slug,
+        ),
+      )
     }
   }
 

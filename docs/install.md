@@ -114,6 +114,23 @@ Combine flags to install to multiple agents at once:
 rolecraft install ./my-skill --claude --cursor --devin
 ```
 
+### Selecting specific skills from multi-skill sources
+
+When a source contains multiple skills (e.g. `rolecraft-sh/skills`), use `--skill` to pick specific ones:
+
+```bash
+# Comma-separated
+rolecraft install rolecraft-sh/skills --skill "task-decomposer,grill-me" --global
+
+# Repeated flag
+rolecraft install rolecraft-sh/skills --skill task-decomposer --skill grill-me --global
+
+# Interactive selection (no --skill flag)
+rolecraft install rolecraft-sh/skills --global
+```
+
+Matched by skill `name` or `slug` (case-insensitive). Use `--list` to see available skills.
+
 ### Install mode flags
 
 | Flag                  | Description                                |
