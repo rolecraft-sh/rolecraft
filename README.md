@@ -311,7 +311,7 @@ All API functions return plain objects (no side-effects). Available exports:
 | AGENTS.md XML generation             | ✅               | ❌              | ❌                  |
 | Self-upgrade command                 | ✅               | ❌              | ❌                  |
 | **Publish to registry**              | ✅               | ❌              | ❌                  |
-| File size                            | 432.8 kB          | ~465 KB         | ~84 KB              |
+| File size                            | 432.8 kB         | ~465 KB         | ~84 KB              |
 
 [See full table →](docs/comparison.md)
 
@@ -425,6 +425,33 @@ All contributions are tracked automatically by GitHub — the list below stays i
 <a href="https://github.com/rolecraft-sh/rolecraft/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=rolecraft-sh/rolecraft" alt="Contributors" />
 </a>
+
+### What contributors say
+
+> _We're asking our contributors what they think. If you've contributed to RoleCraft and want to share your experience, we'd love to hear from you._
+
+<table style="width:100%; border-collapse:collapse; margin-top:1rem;">
+  <tr>
+    <td style="width:80px; vertical-align:top; padding-right:1rem;">
+      <a href="https://github.com/yukidev630">
+        <img src="https://github.com/yukidev630.png?size=60" alt="yukidev630" height="60" width="60" style="border-radius: 50%; border: 2px solid #31d583;">
+      </a>
+    </td>
+    <td style="vertical-align:top;">
+      <span style="font-weight:bold">yukidev630</span>: <span style="font-style:italic">Contributing was straightforward, and it was easy to understand where to make the change. I had a great experience contributing to RoleCraft.</span>
+    </td>
+  </tr>
+  <tr>
+    <td style="width:80px; vertical-align:top; padding-right:1rem;">
+      <a href="https://github.com/BenjaminAyivoh1">
+        <img src="https://github.com/BenjaminAyivoh1.png?size=60" alt="BenjaminAyivoh1" height="60" width="60" style="border-radius: 50%; border: 2px solid #31d583;">
+      </a>
+    </td>
+    <td style="vertical-align:top;">
+      <span style="font-weight:bold">BenjaminAyivoh1</span>: <span style="font-style:italic">Contributing to RoleCraft was a great experience, especially as one of my first open-source contributions. The issue was clearly defined, and the maintainers were responsive throughout the process, which made it easy to understand the project and contribute confidently</span>
+    </td>
+  </tr>
+</table>
 
 ---
 
