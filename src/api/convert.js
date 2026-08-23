@@ -1,12 +1,12 @@
 import { readFile, writeFile, readdir, mkdir } from 'node:fs/promises'
 import { join, basename } from 'node:path'
-import { homedir } from 'node:os'
 import {
   detectFormat,
   skillToMdc,
   mdcToSkill,
   parseFrontmatter,
 } from '../utils/converter.js'
+import { expandTilde } from '../utils/paths.js'
 
 function findSkillFile(dir, entries) {
   for (const e of entries) {
@@ -22,9 +22,7 @@ function findMdcFiles(dir, entries) {
 }
 
 export async function convertApi(source, options = {}) {
-  const expanded = source.startsWith('~')
-    ? join(homedir(), source.slice(1))
-    : source
+  const expanded = expandTilde(source)
   const outDir = options.output || process.cwd()
   const converted = []
 

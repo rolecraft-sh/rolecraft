@@ -18,6 +18,7 @@ import {
 } from '../utils/lockfile.js'
 import { detectAgents } from '../commands/setup.js'
 import { parseFrontmatter, splitSections } from '../utils/converter.js'
+import { expandTilde } from '../utils/paths.js'
 import agents from '../agents.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -199,9 +200,7 @@ function validateMcpServers(detected) {
             arg.startsWith('./') ||
             arg.startsWith('~')
           ) {
-            const resolvedPath = arg.startsWith('~')
-              ? join(homedir(), arg.slice(1))
-              : arg
+            const resolvedPath = expandTilde(arg)
             try {
               accessSync(resolvedPath, constants.F_OK)
             } catch {

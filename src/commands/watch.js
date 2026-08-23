@@ -1,9 +1,9 @@
 import { watch } from 'node:fs'
-import { homedir } from 'node:os'
 import { readLock, getProjectLockPath } from '../utils/lockfile.js'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 import { createDebouncer, WATCH_DEBOUNCE_MS } from '../utils/debounce.js'
+import { expandTilde } from '../utils/paths.js'
 import agents from '../agents.js'
 
 const agentNameToTarget = Object.fromEntries(
@@ -60,7 +60,7 @@ export async function watchCommand(slug, cwd = process.cwd(), options = {}) {
     console.log(`\n📋 [dry-run] Would watch ${watchSlugs.length} skill(s):\n`)
     for (const s of watchSlugs) {
       const entry = mergedSkills[s]
-      const sourcePath = entry.source.replace(/^~/, homedir())
+      const sourcePath = expandTilde(entry.source)
       console.log(`   • ${s} → ${sourcePath}`)
     }
     console.log()
@@ -94,7 +94,7 @@ export async function watchCommand(slug, cwd = process.cwd(), options = {}) {
       continue
     }
 
-    const sourcePath = entry.source.replace(/^~/, homedir())
+    const sourcePath = expandTilde(entry.source)
 
     const handler = (_eventType, filename) => {
       if (!filename || filename.startsWith('.')) return

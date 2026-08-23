@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import { createInterface } from 'node:readline'
 import { stdin as input, stdout as output } from 'node:process'
 import { apiInstallSkills } from '../api/install.js'
+import { expandTilde } from '../utils/paths.js'
 
 function askQuestion(query) {
   const rl = createInterface({ input, output })
@@ -39,9 +40,7 @@ async function resolveBundleFile(arg) {
     arg.startsWith('/') ||
     arg.startsWith('~')
   if (isFilePath) {
-    const resolvedPath = arg.startsWith('~')
-      ? join(process.env.HOME || '/tmp', arg.slice(1))
-      : arg
+    const resolvedPath = expandTilde(arg, process.env.HOME || '/tmp')
     for (const candidate of [resolvedPath, join(process.cwd(), arg)]) {
       try {
         await readFile(candidate, 'utf-8')
