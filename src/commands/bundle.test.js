@@ -245,6 +245,10 @@ describe('bundle command', () => {
       `import { apiInstallSkills } from '${join(__dirname, '../api/install.js')}'`,
     )
     modSrc = modSrc.replace(
+      `import { expandTilde } from '../utils/paths.js'`,
+      `import { expandTilde } from '${join(__dirname, '../utils/paths.js')}'`,
+    )
+    modSrc = modSrc.replace(
       `import { createInterface } from 'node:readline'`,
       [
         `const _bAns = ['my-test-bundle', '']`,
@@ -277,6 +281,10 @@ describe('bundle command', () => {
     modSrc = modSrc.replace(
       `import { apiInstallSkills } from '../api/install.js'`,
       `import { apiInstallSkills } from '${join(__dirname, '../api/install.js')}'`,
+    )
+    modSrc = modSrc.replace(
+      `import { expandTilde } from '../utils/paths.js'`,
+      `import { expandTilde } from '${join(__dirname, '../utils/paths.js')}'`,
     )
     modSrc = modSrc.replace(
       `import { createInterface } from 'node:readline'`,

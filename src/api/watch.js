@@ -1,9 +1,9 @@
 import { watch } from 'node:fs'
-import { homedir } from 'node:os'
 import { readLock, getProjectLockPath } from '../utils/lockfile.js'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 import { createDebouncer, WATCH_DEBOUNCE_MS } from '../utils/debounce.js'
+import { expandTilde } from '../utils/paths.js'
 import agents from '../agents.js'
 
 const agentNameToTarget = Object.fromEntries(
@@ -64,7 +64,7 @@ export async function watchApi(slug, cwd = process.cwd(), options = {}) {
     const entry = mergedSkills[s]
     if (entry.sourceType !== 'local') continue
 
-    const sourcePath = entry.source.replace(/^~/, homedir())
+    const sourcePath = expandTilde(entry.source)
 
     const handler = (_eventType, filename) => {
       if (!filename || filename.startsWith('.')) return

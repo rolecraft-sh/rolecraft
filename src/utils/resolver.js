@@ -2,13 +2,14 @@ import { readFile, readdir, stat, rm } from 'node:fs/promises'
 import { createWriteStream } from 'node:fs'
 import { Writable } from 'node:stream'
 import { join, dirname, basename } from 'node:path'
-import { tmpdir, homedir } from 'node:os'
+import { tmpdir } from 'node:os'
 import { execSync as defaultExecSync, spawnSync } from 'node:child_process'
 import { mkdtempSync } from 'node:fs'
 import { get as defaultHttpsGet } from 'node:https'
 import { computeContentHash } from './lockfile.js'
 import { parseFrontmatter } from './converter.js'
 import { UserError } from './errors.js'
+import { expandTilde } from './paths.js'
 
 const SCAN_MAX_DEPTH = 3
 
@@ -217,7 +218,7 @@ async function scanForSkill(dir, maxDepth = SCAN_MAX_DEPTH) {
 }
 
 async function resolveLocalInternal(source) {
-  const expanded = source.replace(/^~/, homedir())
+  const expanded = expandTilde(source)
 
   let skillDir
   try {

@@ -7,7 +7,7 @@ import {
   readdir,
 } from 'node:fs/promises'
 import { join, dirname, relative } from 'node:path'
-import { homedir, tmpdir } from 'node:os'
+import { tmpdir } from 'node:os'
 import {
   execSync as defaultExecSync,
   spawnSync as defaultSpawnSync,
@@ -16,6 +16,7 @@ import agents from '../agents.js'
 import { addServerToMcpLock, removeServerFromMcpLock } from './mcp-lock.js'
 import { parseFrontmatter } from './converter.js'
 import { UserError } from './errors.js'
+import { expandTilde } from './paths.js'
 
 let _runExec = defaultExecSync
 let runSpawnSync = defaultSpawnSync
@@ -347,9 +348,7 @@ export async function resolveMcpSource(source) {
     source.startsWith('.') ||
     source.startsWith('~')
   ) {
-    const resolvedPath = source.startsWith('~')
-      ? join(homedir(), source.slice(1))
-      : source
+    const resolvedPath = expandTilde(source)
     return {
       command: 'node',
       args: [resolvedPath],
