@@ -240,6 +240,12 @@ const AGENTS_DATA = [
     label: '~/.pi/agent/skills/',
   },
   {
+    flag: 'omp',
+    name: 'oh-my-pi',
+    getDir: () => home('.omp', 'agent', 'skills'),
+    label: '~/.omp/agent/skills/',
+  },
+  {
     flag: 'autohand-code',
     name: 'autohand-code',
     getDir: () => home('.autohand', 'skills'),
@@ -543,6 +549,7 @@ const MCP_SUPPORTED = [
   'devin',
   'copilot',
   'continue',
+  'omp',
 ]
 
 const MCP_PATHS = {

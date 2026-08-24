@@ -8,7 +8,7 @@
 |---|---|---|---|
 | **Runtime** | Zero-dep Node ESM | 1 dep (Node) | 2 deps (TypeScript) |
 | **File size** | 432.8 kB | ~465 KB | ~84 KB |
-| **Agent targets** | **86** | 72 | 15+ |
+| **Agent targets** | **87** | 72 | 15+ |
 | **Skill marketplace** | rolecraft registry | skills.sh (90K+) | agentskill.sh (100K+) |
 | **Publish your own** | ✅ | ❌ | ❌ |
 | **MCP management** | ✅ | ❌ | ❌ |

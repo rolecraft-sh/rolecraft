@@ -15,8 +15,8 @@
       "id": "rolecraft",
       "name": "RoleCraft",
       "subtitle": "The package manager for AI agents",
-      "description": "Install, test, publish, and manage skills & MCP servers across 86+ agents. Zero-dependency CLI.",
-      "longDescription": "RoleCraft is a zero-dependency Node.js CLI that serves as the package manager for AI agent skills. Install skills from any source, test them, publish to a central registry, and manage MCP servers — all from a single tool. Compatible with 86+ AI coding agents including Claude Code, Cursor, Codex, OpenCode, Windsurf, and more.",
+      "description": "Install, test, publish, and manage skills & MCP servers across 87 agents. Zero-dependency CLI.",
+      "longDescription": "RoleCraft is a zero-dependency Node.js CLI that serves as the package manager for AI agent skills. Install skills from any source, test them, publish to a central registry, and manage MCP servers — all from a single tool. Compatible with 87 AI coding agents including Claude Code, Cursor, Codex, OpenCode, Windsurf, Oh My Pi, and more.",
       "icon": "https://raw.githubusercontent.com/rolecraft-sh/rolecraft/main/assets/rolecraft_logo.png",
       "iconEmoji": "📦",
       "iconStyle": {
@@ -37,7 +37,7 @@
         "Install skills from GitHub, URLs, or local paths",
         "Central skill registry with schema validation",
         "MCP server management — install, verify, and run",
-        "Compatible with 86+ AI agents (Claude Code, Cursor, Codex, OpenCode...)",
+        "Compatible with 87 AI agents (Claude Code, Cursor, Codex, OpenCode, Oh My Pi...)",
         "GitHub Action for CI/CD integration",
         "Skill testing and verification built-in",
         "Profile system for team collaboration"

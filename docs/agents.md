@@ -41,6 +41,7 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | codebuddy | `~/.codebuddy/skills/` | experimental | - |
 | mux | `~/.mux/skills/` | experimental | - |
 | pi | `~/.pi/agent/skills/` | experimental | - |
+| oh-my-pi | `~/.omp/agent/skills/` | verified | mcpServers |
 | autohand-code | `~/.autohand/skills/` | experimental | - |
 | rovo-dev | `~/.rovodev/skills/` | experimental | - |
 | firebender | `~/.firebender/skills/` | experimental | - |
@@ -93,9 +94,9 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 
 > **Support levels:** `verified` — actively tested and maintained; `community` — community-contributed, maintained on best-effort; `legacy` — previous generation, no active development; `experimental` — known to exist, not formally tested.
 
-> **MCP support:** 7 agent(s) support MCP server configuration. Format: `mcpServers`, `servers`, `experimental.mcpServers`
+> **MCP support:** 8 agent(s) support MCP server configuration. Format: `mcpServers`, `servers`, `experimental.mcpServers`
 
-> **Agent count:** 86 total — 26 verified, 0 community, 0 legacy, 60 experimental.
+> **Agent count:** 87 total — 27 verified, 0 community, 0 legacy, 60 experimental.
 
 ## Notes
 
@@ -119,6 +120,7 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 - **openhands:** Also reads project .agents/skills; legacy .openhands/skills and .openhands/microagents still supported
 - **junie:** Also reads project .junie/skills; auto-imports .cursor/.claude/.codex skill folders
 - **qwen-code:** Also reads project .qwen/skills
+- **oh-my-pi:** pi fork by can1357; native skills at ~/.omp/agent/skills (user) and .omp/skills (project); also reads ~/.claude/skills, ~/.agents/skills and .github/skills; MCP via standard mcpServers format
 - **forge:** ForgeCode by tailcallhq; also reads ~/forge/skills and ~/.agents/skills; project dir has highest precedence
 - **jazz:** jazz-ai (lvndry/jazz, not an AWS product); also reads project ./skills
 - **lingma:** Also reads project .lingma/skills; renamed to Qoder CN on 2026-05-20

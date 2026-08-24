@@ -147,6 +147,20 @@ const MANIFEST_DATA = {
     notes:
       'Confirmed from source code loaders; also reads workspace .claude/skills',
   },
+  'oh-my-pi': {
+    skillInstallScope: 'global ~/.omp/agent/skills',
+    mcpSupport: {
+      supported: true,
+      format: MCP_CONFIG_FORMATS.STANDARD,
+      configPath: '~/.omp/agent/mcp.json',
+    },
+    instructionFormat: INSTRUCTION_FORMATS.SKILL_MD,
+    supportLevel: SUPPORT_LEVELS.VERIFIED,
+    docUrl: 'https://omp.sh/docs/skills',
+    lastVerified: '2026-08-24',
+    notes:
+      'pi fork by can1357; native skills at ~/.omp/agent/skills (user) and .omp/skills (project); also reads ~/.claude/skills, ~/.agents/skills and .github/skills; MCP via standard mcpServers format',
+  },
   // Agents sharing .agents/skills directory
   'gemini-cli': {
     skillInstallScope: 'global ~/.gemini/skills',

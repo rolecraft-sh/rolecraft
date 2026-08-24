@@ -8,7 +8,7 @@ If you're using [Vercel's `skills` CLI](https://github.com/vercel-labs/skills) a
 |---|---|---|
 | Dependencies | **0** (zero-dep) | 1 (`supports-color`) |
 | Package size | **432.8 kB** | ~465 KB |
-| Agent targets | **86** | 72 |
+| Agent targets | **87** | 72 |
 | Telemetry | **None** | Anonymous telemetry |
 | Offline installs | **Fully supported** | Requires network |
 | Shell completions | bash, zsh, fish | Not available |
@@ -52,7 +52,7 @@ rm ~/.skills-lock.json
 ## What rolecraft does differently
 
 ### More agent targets
-rolecraft supports **86 agents** vs Vercel's 72. This includes newer agents like `augment`, `kilo`, `openhands`, `junie`, `factory`, `command-code`, and more.
+rolecraft supports **87 agents** vs Vercel's 72. This includes newer agents like `augment`, `kilo`, `openhands`, `junie`, `factory`, `command-code`, `oh-my-pi (omp)`, and more.
 
 ### Any source, not just GitHub
 Install from local folders, GitLab, Bitbucket, SSH URLs, or even npm packages — not just GitHub repos.

@@ -22,7 +22,7 @@ Scans your system and reports on:
 - **Lockfile schema** — validates global lockfile format
 - **Global & project lockfiles** — skill count per scope
 - **Disk usage** — total size of installed skills
-- **Agent detection** — finds installed agents among 86 supported, per-agent skill count and directory permissions
+- **Agent detection** — finds installed agents among 87 supported, per-agent skill count and directory permissions
 - **Orphaned skill dirs** — directories not tracked in any lockfile
 - **Skill integrity** — verifies skill directories exist, content hashes match, and checks for broken symlinks
 - **MCP servers** — counts configured MCP servers across detected agents
@@ -57,7 +57,7 @@ $ rolecraft doctor
    ✅ Global lockfile                        3 skill(s) tracked
    ⚠️  Project lockfile                       no project skills
    ✅ Disk usage                             3 skill(s), 12.5 KB total
-   ✅ Agent detection                        14/86 supported agents detected
+   ✅ Agent detection                        14/87 supported agents detected
      ✅  └ opencode                          2 skill(s) [rwx]
      ✅  └ claude-code                       1 skill(s) [rwx]
    ✅ Orphaned skill dirs                    none
@@ -74,7 +74,7 @@ $ rolecraft doctor --json
   "status": "degraded",
   "checks": {
     "Node.js version": { "status": "pass", "detail": "v22.0.0" },
-    "Agent detection": { "status": "pass", "detail": "14/86 supported agents detected" },
+    "Agent detection": { "status": "pass", "detail": "14/87 supported agents detected" },
     "Skill integrity": { "status": "warn", "detail": "3 checked, 1 missing director(ies)" },
     "MCP servers": { "status": "warn", "detail": "none configured" }
   },

@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>The Security-First Skill Manager for AI Agents</b><br>
-   Every install runs a security scan · Skills & MCP Servers across 86 Agents (26 Verified)<br>
+   Every install runs a security scan · Skills & MCP Servers across 87 Agents (27 Verified)<br>
   Zero-dependency CLI · No signup · Offline-first
 </p>
 
@@ -31,7 +31,7 @@
 </p>
 
 <p align="center">
-  Works with <b>86 AI agents</b>. See the <a href="docs/agents.md">full agent table →</a>
+  Works with <b>87 AI agents</b>. See the <a href="docs/agents.md">full agent table →</a>
 </p>
 
 <p align="center">
@@ -98,7 +98,7 @@ rolecraft convert ./my-skill
 rolecraft convert --help
 ```
 
-**Requirements:** Node.js >= 20 · 432.8 kB · zero dependencies · 86 agents · [Getting Started →](docs/guides/getting-started.md) · [Full install guide →](docs/install.md)
+**Requirements:** Node.js >= 20 · 432.8 kB · zero dependencies · 87 agents · [Getting Started →](docs/guides/getting-started.md) · [Full install guide →](docs/install.md)
 
 > **Why zero dependencies?** Every dependency is a supply-chain risk. rolecraft uses only Node.js built-ins (`fs`, `path`, `crypto`, `https`) — no `node_modules` surprises.
 
@@ -154,7 +154,7 @@ No other CLI combines both. npx skills has no MCP support. ags has a separate MC
 - **Zero dependencies** — 432.8 kB, only Node.js built-ins
 - **MCP + Skills in one command** — install skills and their MCP servers together
 - **Any source** — local folder, GitHub/GitLab/SSH URL, npm package
-- **86 agents** — opencode, claude-code, cursor, copilot, aider, and more
+- **87 agents** — opencode, claude-code, cursor, copilot, aider, oh-my-pi (omp), and more
 - **No registry required** — works fully without a marketplace; community-driven [registry](https://github.com/rolecraft-sh/registry) optional
 - **Security scoring** — static analysis on every install: detects prompt injection, command injection, obfuscated code, credential harvesting. Scores 0–100. Blocks dangerous skills (use `--yes` to override). 341 malicious skills were found on community hubs in Feb 2026 — rolecraft scans every skill before it touches your machine
 - **CI-ready** — lockfile-based re-install (`rolecraft ci`), `--yes` flag, `--dry-run`
@@ -294,7 +294,7 @@ All API functions return plain objects (no side-effects). Available exports:
 | GitLab / SSH git URL                 | ✅               | ✅              | ❌                  |
 | npm package source                   | ✅               | ✅              | ❌                  |
 | **MCP server management**            | ✅               | ❌              | ❌                  |
-| Agent targets                        | **86**           | 72              | 15+                 |
+| Agent targets                        | **87**           | 72              | 15+                 |
 | **Registry / marketplace**           | ✅               | ✅ (skills.sh)  | ⚠️ (registry only)  |
 | Bundle install + create              | ✅               | ❌              | ✅ (skillset only)  |
 | Interactive TUI search + install     | ✅               | ✅              | ❌                  |
@@ -374,13 +374,13 @@ rolecraft install ./my-skill --cursor --devin --copilot --gemini --cody
 A: No. No account, no API key, no marketplace. Point rolecraft at any folder or repo and it works.
 
 **Q: Can I use rolecraft with multiple AI agents?**
-A: Yes. 86 agents supported. Use `--cursor`, `--claude`, `--devin` flags or `--all` for every agent.
+A: Yes. 87 agents supported. Use `--cursor`, `--claude`, `--devin` flags or `--all` for every agent.
 
 **Q: Does rolecraft send telemetry?**
 A: No. Zero data leaves your machine. The security scan runs locally. No phone home.
 
 **Q: How is this different from `npx skills` (Vercel)?**
-A: rolecraft has zero dependencies, MCP server management, 86 agents (vs 72), `doctor`, `watch`, `bundle`, `agents-xml`, and shell completions. [Full comparison →](docs/comparison.md)
+A: rolecraft has zero dependencies, MCP server management, 87 agents (vs 72), `doctor`, `watch`, `bundle`, `agents-xml`, and shell completions. [Full comparison →](docs/comparison.md)
 
 **Q: Can I use it in CI/CD?**
 A: Yes. `rolecraft ci --yes` re-installs all skills from lockfile, non-interactive. Perfect for pipelines.

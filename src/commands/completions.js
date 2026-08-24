@@ -284,7 +284,8 @@ _rolecraft() {
              '--openclaw[Also install to ~/.openclaw/skills/]' \\
              '--codebuddy[Also install to ~/.codebuddy/skills/]' \\
              '--mux[Also install to ~/.mux/skills/]' \\
-             '--pi[Also install to ~/.pi/agent/skills/]' \\
+              '--pi[Also install to ~/.pi/agent/skills/]' \\
+              '--omp[Also install to ~/.omp/agent/skills/]' \\
              '--autohand-code[Also install to ~/.autohand/skills/]' \\
              '--rovo[Also install to ~/.rovodev/skills/]' \\
              '--firebender[Also install to ~/.firebender/skills/]' \\
@@ -435,7 +436,8 @@ for cmd in install bundle use setup upgrade check
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l openclaw        -d 'Install to ~/.openclaw/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l codebuddy       -d 'Install to ~/.codebuddy/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l mux             -d 'Install to ~/.mux/skills/'
-  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l pi              -d 'Install to ~/.pi/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l pi              -d 'Install to ~/.pi/agent/skills/'
+  complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l omp             -d 'Install to ~/.omp/agent/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l autohand-code   -d 'Install to ~/.autohand/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l rovo            -d 'Install to ~/.rovodev/skills/'
   complete -f -c rolecraft -n "__fish_rolecraft_using_command $cmd" -l firebender      -d 'Install to ~/.firebender/skills/'

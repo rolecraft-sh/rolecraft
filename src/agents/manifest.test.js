@@ -50,6 +50,20 @@ describe('agent manifest', () => {
     assert.ok(cc.docUrl)
   })
 
+  it('includes oh-my-pi as verified with MCP and native paths', () => {
+    const manifest = getAgentManifest()
+    const omp = manifest.find((a) => a.name === 'oh-my-pi')
+    assert.ok(omp)
+    assert.equal(omp.flag, 'omp')
+    assert.equal(omp.supportLevel, SUPPORT_LEVELS.VERIFIED)
+    assert.equal(omp.skillInstallScope, 'global ~/.omp/agent/skills')
+    assert.equal(omp.mcpSupport.supported, true)
+    assert.equal(omp.mcpSupport.format, 'mcpServers')
+    assert.equal(omp.instructionFormat, 'skill-md')
+    assert.ok(omp.docUrl)
+    assert.ok(omp.lastVerified)
+  })
+
   it('flags shared-directory agents with aliasFor', () => {
     const shared = getAgentManifest().filter((a) => a.aliasFor)
     assert.ok(shared.length > 0)

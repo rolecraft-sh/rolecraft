@@ -404,6 +404,20 @@ describe('installer', () => {
     assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 
+  it('installs skill to omp directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['omp'])
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'omp')
+    const skillDir = join(
+      process.env.HOME,
+      '.omp',
+      'agent',
+      'skills',
+      'test-my-skill',
+    )
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
   it('installs skill to autohand-code directory', async () => {
     const results = await installerModule.installSkill(resolvedSkill, [
       'autohand-code',

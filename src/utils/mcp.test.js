@@ -45,6 +45,7 @@ describe('mcp', () => {
         'devin',
         'copilot',
         'continue',
+        'omp',
       ]
       assert.equal(agents.length, supported.length)
       for (const flag of supported) {
