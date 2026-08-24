@@ -1,6 +1,6 @@
 {
   "name": "rolecraft",
-  "version": "2.3.2",
+  "version": "2.4.0",
   "description": "The package manager for AI agents — install, test, publish, and manage skills & MCP servers across 87 agents. Zero-dependency CLI for claude-code, cursor, opencode, omp, and more.",
   "type": "module",
   "bin": {

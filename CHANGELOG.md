@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.4.0] - 2026-08-24
+
+### Added
+- add oh-my-pi (omp) agent support (#251)
+- add contributor testimonials to README (#246)
+- support multiple --skill flags and add skill name to security reports (#245)
+- prune old pages deployments in docs workflow (#244)
+- add agents and rollback shell completions (#242)
+- reposition as security-first skill manager (#241)
+- colorize succeed and fail markers (#226)
+- add GitHub Release creation to publish workflow (#228)
+- tabular CLI output with shared zero-dep tui module (#224)
+
+### Changed
+- bump github/codeql-action to 4.37.7 (#250)
+- centralize tilde expansion (#249)
+- extract scanner depth and lockfile version constants (#227)
+- share slug normalization (#163)
+- update changelog and version for v2.3.2 (#223)
+
+### Documentation
+- fix 18 audit issues across docs, README, and CLI help (#231)
+- replace contributor table with auto-updating image (#230)
+- add Lukakatche to contributors list (#225)
 ## [v2.3.2] - 2026-08-17
 
 ### Fixed
