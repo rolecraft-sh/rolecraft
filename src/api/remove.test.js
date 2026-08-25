@@ -173,4 +173,25 @@ describe('api remove', () => {
 
     assert.equal(existsSync(skillDir), false)
   })
+
+  it('resolves project-relative agents against the given cwd', async () => {
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'test/proj-agent': { agents: ['devin'] },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
+    const skillDir = join(tempDir, '.devin', 'skills', 'test-proj-agent')
+    await mkdir(skillDir, { recursive: true })
+
+    const result = await apiRemove('test/proj-agent', tempDir)
+
+    assert.equal(existsSync(skillDir), false)
+    assert.deepEqual(result.removed, [{ scope: 'global', path: skillDir }])
+  })
 })

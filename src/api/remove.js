@@ -1,5 +1,5 @@
 import { rm } from 'node:fs/promises'
-import { join } from 'node:path'
+import { isAbsolute, join, relative } from 'node:path'
 import {
   readLock,
   removeSkillFromLock,
@@ -23,6 +23,16 @@ function findActualSlug(slug, lock) {
   })
 }
 
+function rebaseToCwd(dir, cwd) {
+  const rel = relative(process.cwd(), dir)
+
+  if (!rel || rel.startsWith('..') || isAbsolute(rel)) {
+    return dir
+  }
+
+  return join(cwd, rel)
+}
+
 function getTargetBaseDir(target, cwd) {
   if (target === 'project') {
     return join(cwd, '.agents', 'skills')
@@ -32,7 +42,9 @@ function getTargetBaseDir(target, cwd) {
     getAgentByFlag(target) ||
     agents.find((candidate) => candidate.name === target)
 
-  return agent ? agent.getDir() : getAgentsDir()
+  const baseDir = agent ? agent.getDir() : getAgentsDir()
+
+  return rebaseToCwd(baseDir, cwd)
 }
 
 function resolveRemovalDirs(slug, entry, scope, cwd, seenDirs) {
