@@ -84,4 +84,11 @@ describe('mcp lockfile', () => {
     assert.equal(lock.servers.github, undefined)
     assert.deepEqual(await readMcpLock(lockPath), lock)
   })
+
+  it('returns the default lock without writing for a missing server', async () => {
+    const lock = await removeServerFromMcpLock('github', 'cursor', lockPath)
+
+    assert.deepEqual(lock, { version: 1, servers: {} })
+    await assert.rejects(readFile(lockPath, 'utf-8'), { code: 'ENOENT' })
+  })
 })
