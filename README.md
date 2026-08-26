@@ -432,23 +432,39 @@ All contributions are tracked automatically by GitHub — the list below stays i
 
 <table style="width:100%; border-collapse:collapse; margin-top:1rem;">
   <tr>
-    <td style="width:80px; vertical-align:top; padding-right:1rem;">
+    <td style="width:130px; vertical-align:top; text-align:center; padding-right:1rem;">
       <a href="https://github.com/yukidev630">
-        <img src="https://github.com/yukidev630.png?size=60" alt="yukidev630" height="60" width="60" style="border-radius: 50%; border: 2px solid #31d583;">
+        <img src="https://github.com/yukidev630.png?size=120" alt="yukidev630" height="100" width="100" style="border-radius: 50%; border: 2px solid #31d583;">
       </a>
+      <br>
+      <span style="font-weight:bold">yukidev630</span>
     </td>
-    <td style="vertical-align:top;">
-      <span style="font-weight:bold">yukidev630</span>: <span style="font-style:italic">Contributing was straightforward, and it was easy to understand where to make the change. I had a great experience contributing to RoleCraft.</span>
+    <td style="vertical-align:middle;">
+      <em>Contributing was straightforward, and it was easy to understand where to make the change. I had a great experience contributing to RoleCraft.</em>
     </td>
   </tr>
   <tr>
-    <td style="width:80px; vertical-align:top; padding-right:1rem;">
+    <td style="width:130px; vertical-align:top; text-align:center; padding-right:1rem;">
       <a href="https://github.com/BenjaminAyivoh1">
-        <img src="https://github.com/BenjaminAyivoh1.png?size=60" alt="BenjaminAyivoh1" height="60" width="60" style="border-radius: 50%; border: 2px solid #31d583;">
+        <img src="https://github.com/BenjaminAyivoh1.png?size=120" alt="BenjaminAyivoh1" height="100" width="100" style="border-radius: 50%; border: 2px solid #31d583;">
       </a>
+      <br>
+      <span style="font-weight:bold">BenjaminAyivoh1</span>
     </td>
-    <td style="vertical-align:top;">
-      <span style="font-weight:bold">BenjaminAyivoh1</span>: <span style="font-style:italic">Contributing to RoleCraft was a great experience, especially as one of my first open-source contributions. The issue was clearly defined, and the maintainers were responsive throughout the process, which made it easy to understand the project and contribute confidently</span>
+    <td style="vertical-align:middle;">
+      <em>Contributing to RoleCraft was a great experience, especially as one of my first open-source contributions. The issue was clearly defined, and the maintainers were responsive throughout the process, which made it easy to understand the project and contribute confidently</em>
+    </td>
+  </tr>
+  <tr>
+    <td style="width:130px; vertical-align:top; text-align:center; padding-right:1rem;">
+      <a href="https://github.com/linhaixin45-cmyk">
+        <img src="https://github.com/linhaixin45-cmyk.png?size=120" alt="linhaixin45-cmyk" height="100" width="100" style="border-radius: 50%; border: 2px solid #31d583;">
+      </a>
+      <br>
+      <span style="font-weight:bold">linhaixin45-cmyk</span>
+    </td>
+    <td style="vertical-align:middle;">
+      <em>Contributing to RoleCraft was straightforward because the issue clearly explained the problem, expected behavior, and relevant code paths, and the test suite made the fix easy to verify. The maintainer's quick, thoughtful review also made the experience welcoming.</em>
     </td>
   </tr>
 </table>
