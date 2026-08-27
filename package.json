@@ -109,9 +109,9 @@
     "benchmark": "node benchmark/install-speed.js && node scripts/benchmark-visual.js",
     "benchmark:visual": "node scripts/benchmark-visual.js",
     "generate:agents-docs": "node scripts/generate-agents-docs.js",
-    "generate:readme": "node scripts/generate-readme.js",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs && node scripts/generate-sitemap.mjs",
+    "generate:docs": "node scripts/generate-agents-docs.js && node scripts/generate-docs.js",
+    "docs:dev": "npm run generate:docs && vitepress dev docs",
+    "docs:build": "npm run generate:docs && vitepress build docs && node scripts/generate-sitemap.mjs",
     "docs:preview": "vitepress preview docs"
   },
   "engines": {

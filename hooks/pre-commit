@@ -1,5 +1,6 @@
 #!/bin/sh
-# .git/hooks/pre-commit — runs lint + tests before allowing a commit
+# .git/hooks/pre-commit — regenerates agent docs + manifest matrix, re-stages
+# changes, then runs lint + tests before allowing a commit
 # Installed by: npm install / npm run setup-hooks / node scripts/setup-hooks.mjs
 
 set -e
@@ -9,6 +10,13 @@ PKG=$(node -p "require('./package.json').name" 2>/dev/null || echo "")
 if [ "$PKG" != "rolecraft" ]; then
   exit 0
 fi
+
+# Regenerate agent docs + the manifest token matrix. If a new agent, feature, or
+# published file changed the counts/sizes, this updates every markdown location
+# so the committed docs always match the manifest. Re-stage any produced changes.
+echo "→ pre-commit: regenerating agent docs + manifest matrix"
+npm run --silent generate:docs
+git add -A
 
 # Run lint (syntax + biome). Skip if biome not installed.
 if [ -x node_modules/.bin/biome ]; then

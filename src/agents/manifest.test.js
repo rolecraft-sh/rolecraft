@@ -13,10 +13,10 @@ import {
 } from './manifest.js'
 import { generateAgentsDocs } from '../../scripts/generate-agents-docs.js'
 import {
-  generateReadme,
-  generateComparison,
-  generateBenchmark,
-} from '../../scripts/generate-readme.js'
+  getTokenValues,
+  parseMatrix,
+  applyMatrix,
+} from '../../scripts/generate-docs.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -139,36 +139,85 @@ describe('agent manifest', () => {
     assert.equal(current, generated)
   })
 
-  it('README.md matches generated content from manifest tokens', () => {
-    const filePath = join(__dirname, '..', '..', 'README.md')
-    const current = readFileSync(filePath, 'utf-8')
-    const generated = generateReadme()
-    if (current !== generated) {
-      console.error('README.md is out of sync with manifest data.')
-      console.error('Run: node scripts/generate-readme.js')
-    }
-    assert.equal(current, generated)
+  it('matrix token values match the manifest and npm pack', () => {
+    const manifest = getAgentManifest()
+    const tokens = getTokenValues()
+    assert.equal(tokens.agent_count, String(manifest.length))
+    const groups = getAgentsBySupportLevel()
+    assert.equal(
+      tokens.verified_count,
+      String(groups[SUPPORT_LEVELS.VERIFIED].length),
+    )
+    assert.equal(
+      tokens.experimental_count,
+      String(groups[SUPPORT_LEVELS.EXPERIMENTAL].length),
+    )
+    assert.equal(tokens.mcp_agent_count, String(getAgentsWithMcp().length))
+    assert.match(tokens.unpacked_size, /^[\d.]+ kB$/)
   })
 
-  it('docs/comparison.md matches generated content from manifest tokens', () => {
-    const filePath = join(__dirname, '..', '..', 'docs', 'comparison.md')
-    const current = readFileSync(filePath, 'utf-8')
-    const generated = generateComparison()
-    if (current !== generated) {
-      console.error('docs/comparison.md is out of sync with manifest data.')
-      console.error('Run: node scripts/generate-readme.js')
+  it('manifest matrix documents every tracked location with current values', () => {
+    const matrixPath = join(__dirname, '..', '..', 'MANIFEST-MATRIX.md')
+    const md = readFileSync(matrixPath, 'utf-8')
+    const rows = parseMatrix(md)
+    assert.ok(rows.length > 0, 'matrix should have tracked rows')
+
+    const tokens = getTokenValues()
+    for (const row of rows) {
+      // every documented value must match the current manifest-derived value
+      assert.equal(
+        row.value,
+        tokens[row.token],
+        `stale value for ${row.token} @ ${row.file}:${row.line}`,
+      )
+      // the location must actually contain that value
+      const filePath = join(__dirname, '..', '..', row.file)
+      const lines = readFileSync(filePath, 'utf-8').split('\n')
+      const line = lines[row.line - 1]
+      assert.ok(line, `missing line ${row.line} in ${row.file}`)
+      if (/[\d.]+ kB/.test(row.value)) {
+        assert.ok(
+          line.includes(row.value),
+          `${row.token} value not on ${row.file}:${row.line}`,
+        )
+      } else {
+        const re = new RegExp(`(?<!\\w)${row.value}(?!\\w)`)
+        assert.match(
+          line,
+          re,
+          `${row.token} value not on ${row.file}:${row.line}`,
+        )
+      }
     }
-    assert.equal(current, generated)
   })
 
-  it('benchmark/RESULTS.md matches generated content from manifest tokens', () => {
-    const filePath = join(__dirname, '..', '..', 'benchmark', 'RESULTS.md')
-    const current = readFileSync(filePath, 'utf-8')
-    const generated = generateBenchmark()
-    if (current !== generated) {
-      console.error('benchmark/RESULTS.md is out of sync with manifest data.')
-      console.error('Run: node scripts/generate-readme.js')
+  it('applying the matrix while in sync is a no-op', () => {
+    const matrixPath = join(__dirname, '..', '..', 'MANIFEST-MATRIX.md')
+    const md = readFileSync(matrixPath, 'utf-8')
+    const { changes } = applyMatrix(md, getTokenValues(), true)
+    assert.equal(changes.length, 0)
+  })
+
+  it('applying the matrix updates a changed token point-accurately', () => {
+    const matrixPath = join(__dirname, '..', '..', 'MANIFEST-MATRIX.md')
+    const md = readFileSync(matrixPath, 'utf-8')
+    const rows = parseMatrix(md)
+    const tokens = getTokenValues()
+    tokens.agent_count = '999'
+    const { changes, updatedRows } = applyMatrix(md, tokens, true)
+    assert.ok(changes.length > 0)
+    assert.equal(
+      updatedRows.filter((r) => r.token === 'agent_count' && r.value === '999')
+        .length,
+      rows.filter((r) => r.token === 'agent_count').length,
+    )
+    // unrelated tokens stay untouched
+    for (const row of rows.filter((r) => r.token !== 'agent_count')) {
+      assert.equal(
+        updatedRows.find((u) => u.token === row.token && u.line === row.line)
+          .value,
+        row.value,
+      )
     }
-    assert.equal(current, generated)
   })
 })
