@@ -13,21 +13,35 @@ let _packageSizeTokens = null
 
 function getPackageSizeTokens() {
   if (_packageSizeTokens) return _packageSizeTokens
-  try {
-    const output = execSync('npm pack --dry-run 2>&1', {
-      encoding: 'utf-8',
-      cwd: ROOT,
-    })
-    const packageMatch = output.match(/package size:\s*([\d.]+)\s*kB/)
-    const unpackedMatch = output.match(/unpacked size:\s*([\d.]+)\s*kB/)
-    _packageSizeTokens = {
-      package_size: packageMatch ? `${packageMatch[1]} kB` : '?',
-      unpacked_size: unpackedMatch ? `${unpackedMatch[1]} kB` : '?',
+  // Use `npm pack --dry-run --json`: sizes are emitted as clean JSON on stdout
+  // (the noisy tarball listing goes to stderr), avoiding the intermittent
+  // truncation flakiness of piping the merged `npm pack` output. Retry once for
+  // transient failures and throw on persistent failure rather than writing a
+  // "?" into the docs (which would silently corrupt them).
+  const kB = (bytes) => `${(bytes / 1000).toFixed(1)} kB`
+  let lastError = null
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const output = execSync('npm pack --dry-run --json 2>/dev/null', {
+        encoding: 'utf-8',
+        cwd: ROOT,
+      })
+      const [entry] = JSON.parse(output)
+      if (entry && typeof entry.size === 'number' && entry.unpackedSize) {
+        _packageSizeTokens = {
+          package_size: kB(entry.size),
+          unpacked_size: kB(entry.unpackedSize),
+        }
+        return _packageSizeTokens
+      }
+      lastError = new Error('npm pack --dry-run --json output missing sizes')
+    } catch (error) {
+      lastError = error
     }
-  } catch {
-    _packageSizeTokens = { package_size: '?', unpacked_size: '?' }
   }
-  return _packageSizeTokens
+  throw new Error(
+    `Could not determine package sizes. Run \`npm pack --dry-run --json\` manually to debug. ${lastError?.message ?? ''}`,
+  )
 }
 
 /**
