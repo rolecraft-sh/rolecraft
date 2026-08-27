@@ -1,0 +1,31 @@
+name: Welcome first-time contributors
+
+on:
+  issues:
+    types: [opened]
+  pull_request_target:
+    types: [opened]
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  welcome:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/first-interaction@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          issue-message: |
+            👋 Thanks for opening your first issue in RoleCraft!
+
+            A maintainer will take a look shortly — clear repro steps and expected behavior make reviews much faster.
+
+            If RoleCraft makes your AI-agent workflow easier along the way, a ⭐ helps others discover the project.
+          pr-message: |
+            🎉 Thanks for opening your first pull request in RoleCraft!
+
+            A maintainer will review it soon — it helps if `npm run lint` and `npm test` pass locally.
+
+            If you enjoyed contributing, a ⭐ helps others discover the project.
