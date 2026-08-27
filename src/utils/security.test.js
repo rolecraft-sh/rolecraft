@@ -1,6 +1,7 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 import {
+  computeScore,
   scanSkill,
   scanMcpServer,
   classifyScore,
@@ -36,6 +37,30 @@ describe('security', () => {
     it('returns danger for below 70', () => {
       assert.equal(classifyScore(69), 'danger')
       assert.equal(classifyScore(0), 'danger')
+    })
+  })
+
+  describe('computeScore', () => {
+    it('deducts weights for mixed issue severities', () => {
+      const issues = [
+        { severity: 'critical' },
+        { severity: 'high' },
+        { severity: 'medium' },
+        { severity: 'medium' },
+        { severity: 'low' },
+        { severity: 'low' },
+        { severity: 'low' },
+      ]
+
+      assert.equal(computeScore(issues), 61)
+    })
+
+    it('clamps scores at zero', () => {
+      const issues = Array.from({ length: 6 }, () => ({
+        severity: 'critical',
+      }))
+
+      assert.equal(computeScore(issues), 0)
     })
   })
 

@@ -159,6 +159,20 @@ const PATTERNS = [
   },
 ]
 
+export function computeScore(issues) {
+  const deductions = {}
+  for (const issue of issues) {
+    deductions[issue.severity] = (deductions[issue.severity] || 0) + 1
+  }
+
+  let score = 100
+  for (const [severity, count] of Object.entries(deductions)) {
+    score -= count * (WEIGHTS[severity] || 0)
+  }
+
+  return Math.max(0, score)
+}
+
 export function scanSkill(resolved) {
   const issues = []
   const seen = new Set()
@@ -209,17 +223,7 @@ export function scanSkill(resolved) {
     })
   }
 
-  const deductions = {}
-  for (const issue of issues) {
-    deductions[issue.severity] = (deductions[issue.severity] || 0) + 1
-  }
-
-  let score = 100
-  for (const [severity, count] of Object.entries(deductions)) {
-    score -= count * (WEIGHTS[severity] || 0)
-  }
-
-  return { score: Math.max(0, score), issues }
+  return { score: computeScore(issues), issues }
 }
 
 export function classifyScore(score, issues = []) {
@@ -281,17 +285,7 @@ export function scanMcpServer(resolved) {
     })
   }
 
-  const deductions = {}
-  for (const issue of issues) {
-    deductions[issue.severity] = (deductions[issue.severity] || 0) + 1
-  }
-
-  let score = 100
-  for (const [severity, count] of Object.entries(deductions)) {
-    score -= count * (WEIGHTS[severity] || 0)
-  }
-
-  return { score: Math.max(0, score), issues }
+  return { score: computeScore(issues), issues }
 }
 
 export function formatSecurityReport({ score, issues }, skillName) {
