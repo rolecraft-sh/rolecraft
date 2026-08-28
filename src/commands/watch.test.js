@@ -74,6 +74,20 @@ async function rmRetry(path, opts, maxRetries = 5) {
   await rm(path, opts)
 }
 
+async function waitForLog(
+  logs,
+  predicate,
+  timeoutMs = 5000,
+  pollIntervalMs = 50,
+) {
+  const start = Date.now()
+  while (Date.now() - start < timeoutMs) {
+    if (logs.some(predicate)) return true
+    await new Promise((r) => setTimeout(r, pollIntervalMs))
+  }
+  return logs.some(predicate)
+}
+
 after(async () => {
   await rmRetry(tempDir, { recursive: true, force: true })
   process.env.HOME = origHome
@@ -300,13 +314,10 @@ describe('watch command', () => {
       await writeFile(join(tempDir, 'source-local', 'TEST.md'), 'change 1')
       await writeFile(join(tempDir, 'source-local', 'TEST.md'), 'change 2')
 
-      // Wait for debounce (300ms) plus buffer
-      await new Promise((r) => setTimeout(r, 600))
+      // Poll until 'synced' log is emitted (or timeout after 5s)
+      await waitForLog(logs, (l) => l.includes('synced'))
 
       result.close()
-
-      // Give pending async operations time to settle before cleanup
-      await new Promise((r) => setTimeout(r, 100))
 
       assert.ok(
         logs.some((l) => l.includes('syncing')),
@@ -361,7 +372,8 @@ describe('watch command', () => {
       await rm(join(dir, 'broken-source', 'SKILL.md'), { force: true })
       await writeFile(join(dir, 'broken-source', 'OTHER.md'), 'change')
 
-      await new Promise((r) => setTimeout(r, 600))
+      // Poll until 'sync failed' log is emitted (or timeout after 5s)
+      await waitForLog(logs, (l) => l.includes('sync failed'))
 
       result.close()
 
