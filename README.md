@@ -51,7 +51,7 @@
 ---
 
 <p align="center">
-  <b>⚡ Zero dependencies</b> · <b>📦 418.7 kB</b> · <b>🤖 27 verified agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 Security scoring</b> · <b>📝 Skill testing</b> · <b>🔧 Init templates</b> · <b>🌐 Offline-first</b>
+  <b>⚡ Zero dependencies</b> · <b>📦 413.7 kB</b> · <b>🤖 27 verified agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 Security scoring</b> · <b>📝 Skill testing</b> · <b>🔧 Init templates</b> · <b>🌐 Offline-first</b>
 </p>
 
 <p align="center">
@@ -98,7 +98,7 @@ rolecraft convert ./my-skill
 rolecraft convert --help
 ```
 
-**Requirements:** Node.js >= 20 · 418.7 kB · zero dependencies · 87 agents · [Getting Started →](docs/guides/getting-started.md) · [Full install guide →](docs/install.md)
+**Requirements:** Node.js >= 20 · 413.7 kB · zero dependencies · 87 agents · [Getting Started →](docs/guides/getting-started.md) · [Full install guide →](docs/install.md)
 
 > **Why zero dependencies?** Every dependency is a supply-chain risk. rolecraft uses only Node.js built-ins (`fs`, `path`, `crypto`, `https`) — no `node_modules` surprises.
 
@@ -151,7 +151,7 @@ No other CLI combines both. npx skills has no MCP support. ags has a separate MC
 
 ## Features
 
-- **Zero dependencies** — 418.7 kB, only Node.js built-ins
+- **Zero dependencies** — 413.7 kB, only Node.js built-ins
 - **MCP + Skills in one command** — install skills and their MCP servers together
 - **Any source** — local folder, GitHub/GitLab/SSH URL, npm package
 - **87 agents** — opencode, claude-code, cursor, copilot, aider, oh-my-pi (omp), and more
@@ -311,7 +311,7 @@ All API functions return plain objects (no side-effects). Available exports:
 | AGENTS.md XML generation             | ✅               | ❌              | ❌                  |
 | Self-upgrade command                 | ✅               | ❌              | ❌                  |
 | **Publish to registry**              | ✅               | ❌              | ❌                  |
-| File size                            | 418.7 kB         | ~465 KB         | ~84 KB              |
+| File size                            | 413.7 kB         | ~465 KB         | ~84 KB              |
 
 [See full table →](docs/comparison.md)
 

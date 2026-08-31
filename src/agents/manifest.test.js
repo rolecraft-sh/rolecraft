@@ -114,6 +114,62 @@ describe('agent manifest', () => {
     assert.equal(result.issues.length, 0)
   })
 
+  it('validateManifest catches duplicate registry keys', () => {
+    const [agent] = getAgentManifest()
+    const result = validateManifest([agent, { ...agent }])
+
+    assert.equal(result.valid, false)
+    assert.ok(result.issues.some((i) => i.issue.includes('duplicate flag')))
+    assert.ok(result.issues.some((i) => i.issue.includes('duplicate name')))
+  })
+
+  it('validateManifest requires verified-agent metadata', () => {
+    const result = validateManifest([
+      {
+        flag: 'example',
+        name: 'example',
+        label: '~/.example/skills/',
+        supportLevel: SUPPORT_LEVELS.VERIFIED,
+      },
+    ])
+
+    assert.equal(result.valid, false)
+    assert.ok(
+      result.issues.some((i) =>
+        i.issue.includes('missing lastVerified for verified agent'),
+      ),
+    )
+    assert.ok(
+      result.issues.some((i) =>
+        i.issue.includes('missing docUrl for verified agent'),
+      ),
+    )
+    assert.ok(
+      result.issues.some((i) =>
+        i.issue.includes('missing skillInstallScope for verified agent'),
+      ),
+    )
+    assert.ok(
+      result.issues.some((i) =>
+        i.issue.includes('missing instructionFormat for verified agent'),
+      ),
+    )
+  })
+
+  it('validateManifest requires MCP-enabled agents to declare a format', () => {
+    const result = validateManifest([
+      {
+        flag: 'example',
+        name: 'example',
+        label: '~/.example/skills/',
+        mcpSupport: { supported: true },
+      },
+    ])
+
+    assert.equal(result.valid, false)
+    assert.ok(result.issues.some((i) => i.issue.includes('missing MCP format')))
+  })
+
   it('docs/agents.md matches generated content from manifest', () => {
     const docsPath = join(__dirname, '..', '..', 'docs', 'agents.md')
     const current = readFileSync(docsPath, 'utf-8')

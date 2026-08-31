@@ -39,4 +39,4 @@
 | Local skill install  | ✅ **10.23 ms**   | ✅ 3894 ms (381x slower)  | ❌ not supported   |
 | GitHub skill install | ✅ **1.6 s**      | ✅ 10.9 s (6.9x slower)   | ❌ fails (bug)     |
 | Zero dependencies    | ✅ **0**          | ❌ 1 dep                  | ❌ 2 deps          |
-| Package size         | **418.7 kB**      | ~465 KB                   | ~84 KB             |
+| Package size         | **413.7 kB**      | ~465 KB                   | ~84 KB             |

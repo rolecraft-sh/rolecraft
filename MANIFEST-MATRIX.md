@@ -32,37 +32,37 @@ manifest and run the script — it updates every location automatically.
 
 | token | path | current_value |
 | --- | --- | --- |
-| unpacked_size | benchmark/RESULTS.md:42 | 418.7 kB |
+| unpacked_size | benchmark/RESULTS.md:42 | 413.7 kB |
 | agent_count | docs/commands/agents.md:47 | 87 |
 | agent_count | docs/commands/agents.md:71 | 87 |
 | agent_count | docs/commands/agents.md:79 | 87 |
 | agent_count | docs/commands/doctor.md:25 | 87 |
 | agent_count | docs/commands/doctor.md:60 | 87 |
 | agent_count | docs/commands/doctor.md:77 | 87 |
-| unpacked_size | docs/comparison.md:10 | 418.7 kB |
+| unpacked_size | docs/comparison.md:10 | 413.7 kB |
 | agent_count | docs/comparison.md:11 | 87 |
 | agent_count | docs/guides/getting-started.md:18 | 87 |
 | verified_count | docs/guides/getting-started.md:18 | 27 |
 | agent_count | docs/index.md:7 | 87 |
 | verified_count | docs/index.md:7 | 27 |
-| unpacked_size | docs/index.md:26 | 418.7 kB |
+| unpacked_size | docs/index.md:26 | 413.7 kB |
 | agent_count | docs/index.md:38 | 87 |
 | verified_count | docs/index.md:38 | 27 |
-| unpacked_size | docs/migration-from-skills.md:10 | 418.7 kB |
+| unpacked_size | docs/migration-from-skills.md:10 | 413.7 kB |
 | agent_count | docs/migration-from-skills.md:11 | 87 |
 | agent_count | docs/migration-from-skills.md:55 | 87 |
 | agent_count | docs/reference.md:161 | 87 |
 | agent_count | README.md:9 | 87 |
 | verified_count | README.md:9 | 27 |
 | agent_count | README.md:34 | 87 |
-| unpacked_size | README.md:54 | 418.7 kB |
+| unpacked_size | README.md:54 | 413.7 kB |
 | verified_count | README.md:54 | 27 |
-| unpacked_size | README.md:101 | 418.7 kB |
+| unpacked_size | README.md:101 | 413.7 kB |
 | agent_count | README.md:101 | 87 |
-| unpacked_size | README.md:154 | 418.7 kB |
+| unpacked_size | README.md:154 | 413.7 kB |
 | agent_count | README.md:157 | 87 |
 | agent_count | README.md:297 | 87 |
-| unpacked_size | README.md:314 | 418.7 kB |
+| unpacked_size | README.md:314 | 413.7 kB |
 | agent_count | README.md:377 | 87 |
 | agent_count | README.md:383 | 87 |
 | agent_count | SKILL.md:5 | 87 |
