@@ -10,6 +10,10 @@ export async function checkCommand() {
     return
   }
 
+  // Count statuses for summary
+  const skippedCount = skills.filter((s) => s.status === 'skipped').length
+  const erroredCount = skills.filter((s) => s.status === 'error').length
+
   console.log(`\nChecking ${skills.length} skill(s) for updates:\n`)
 
   const rows = []
@@ -35,5 +39,8 @@ export async function checkCommand() {
     updatesAvailable > 0
       ? `\n${updatesAvailable} update(s) available — run \`rolecraft update <slug>\`\n`
       : '\nAll skills are up to date.\n',
+  )
+  console.log(
+    `Checked ${skills.length} skill(s): ${updatesAvailable} update(s) available, ${skippedCount} skipped (no source), ${erroredCount} could not be checked.`,
   )
 }

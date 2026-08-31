@@ -110,13 +110,26 @@ describe('check command', () => {
     assert.ok(logs.some((l) => l.includes('up to date')))
   })
 
-  it('reports update available when hash differs', async () => {
+  it('shows skipped/errors counters correctly', async () => {
+    const { logs, restore } = capture()
+    try {
+      await checkModule.checkCommand()
+    } finally {
+      restore()
+    }
+    assert.ok(logs.some((l) => l.includes('skipped (no source)')))
+    assert.ok(logs.some((l) => l.includes('could not be checked')))
+  })
+
+  it('reports skill with update available from local hash diff', async () => {
     const skillDir = join(tempDir, 'update-skill')
     mkdirSync(skillDir, { recursive: true })
-    writeFileSync(
-      join(skillDir, 'SKILL.md'),
-      '# slug: test/update\nname: update-skill\nNewer content',
-    )
+    const skillContent = '# slug: test/update\nname: update-skill\nSome content'
+    writeFileSync(join(skillDir, 'SKILL.md'), skillContent)
+
+    const { computeContentHash } = await import('../utils/lockfile.js')
+    const fileContents = { 'SKILL.md': skillContent }
+    computeContentHash(fileContents)
 
     await writeFile(
       join(tempDir, '.agents', '.skill-lock.json'),
@@ -127,7 +140,7 @@ describe('check command', () => {
             slug: 'test/update',
             source: skillDir,
             sourceType: 'local',
-            contentSha: 'oldhashthatdoesnotmatch',
+            contentSha: 'old-hash-that-does-not-match',
           },
         },
         dismissed: {},
