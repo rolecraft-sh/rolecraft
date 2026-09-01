@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.4.1] - 2026-09-01
+
+### Added
+- colorize rolecraft help output (#271)
+- add skipped and errored counters to check command summary (#270)
+- reactivate manifest token matrix for docs (#264)
+
+### Fixed
+- remove skills from recorded agent directories (#259)
+
+### Changed
+- merge agent manifest registry (#269)
+- replace fixed timeouts with log polling in watch command test (#268)
+- bump github/codeql-action/init from 4.37.7 to 4.37.8 (#267)
+- bump github/codeql-action/analyze from 4.37.7 to 4.37.8 (#266)
+- bump actions/first-interaction from 1 to 3 (#265)
+- derive completion agent flags (#262)
+- extract shared security score helper (#263)
+- welcome first-time contributors with soft star note (#261)
+- cover MCP lockfile utilities (#258)
+- update changelog and version for v2.4.0 (#257)
+
+### Documentation
+- use GitHub-whitelisted align attributes in contributors table
+- center contributor avatars vertically and reduce to 80px
+- add linhaixin45-cmyk testimonial with larger avatar layout (#260)
 ## [v2.4.0] - 2026-08-24
 
 ### Added
