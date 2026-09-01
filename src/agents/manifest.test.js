@@ -267,6 +267,7 @@ describe('agent manifest', () => {
       'docs/commands/agents.md',
       'docs/commands/doctor.md',
       'docs/comparison.md',
+      'docs/agents.md',
     ]
     const value = getTokenValues().agent_count
     const pattern = new RegExp(`(?<!\\w)${value}(?!\\w)`)
