@@ -247,6 +247,43 @@ describe('agent manifest', () => {
     }
   })
 
+  it('tracks every published agent-count claim in the manifest matrix', () => {
+    const matrixPath = join(__dirname, '..', '..', 'MANIFEST-MATRIX.md')
+    const rows = parseMatrix(readFileSync(matrixPath, 'utf-8'))
+    const tracked = new Set(
+      rows
+        .filter((row) => row.token === 'agent_count')
+        .map((row) => `${row.file}:${row.line}`),
+    )
+    const files = [
+      'README.md',
+      'SKILL.md',
+      'apps.json',
+      'package.json',
+      'docs/index.md',
+      'docs/reference.md',
+      'docs/guides/getting-started.md',
+      'docs/migration-from-skills.md',
+      'docs/commands/agents.md',
+      'docs/commands/doctor.md',
+      'docs/comparison.md',
+      'docs/agents.md',
+    ]
+    const value = getTokenValues().agent_count
+    const pattern = new RegExp(`(?<!\\w)${value}(?!\\w)`)
+
+    for (const file of files) {
+      const content = readFileSync(join(__dirname, '..', '..', file), 'utf-8')
+      for (const [index, line] of content.split('\n').entries()) {
+        if (!pattern.test(line)) continue
+        assert.ok(
+          tracked.has(`${file}:${index + 1}`),
+          `untracked agent count in ${file}:${index + 1}`,
+        )
+      }
+    }
+  })
+
   it('applying the matrix while in sync is a no-op', () => {
     const matrixPath = join(__dirname, '..', '..', 'MANIFEST-MATRIX.md')
     const md = readFileSync(matrixPath, 'utf-8')
