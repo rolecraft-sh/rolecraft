@@ -126,53 +126,54 @@ function buildInstallScope(flags, agents) {
 
 function usage() {
   const agentFlags = agents.map(
-    (a) => `  --${a.flag.padEnd(15)} Also install to ${a.label}`,
+    (a) => `  --${a.flag.padEnd(15)}   Also install to ${a.label}`,
   )
 
   console.log(`
-rolecraft — Install AI agent skills like roles & behaviors
+RoleCraft —  The Security-First Skill Manager for AI Agents
+\x1b[32mv${pkg.version}\x1b[0m
 
 Zero dependencies, no marketplace required.
 Works with ${agents.length} agents: ${agents.map((a) => a.name).join(', ')}, and all spec-compliant agents.
 
-Usage:
-  rolecraft install <source>        Install a skill (local path, owner/repo, npm:package, or registry slug)
-  rolecraft publish <source>        Publish a skill to the rolecraft Registry
-  rolecraft bundle <source> [...]   Install skills from a file or inline sources
-  rolecraft bundle create [<name>]  Create a new bundle file
-  rolecraft use <source>            Preview a skill without installing
-  rolecraft list                    List installed skills (--json, --agent <name>)
-  rolecraft remove <slug>           Remove a skill
-  rolecraft update <slug>           Re-install a skill (update to latest)
-  rolecraft rollback <slug>         Restore a skill to previous version
-  rolecraft setup [<source>]        Detect agents and optionally install a skill
-  rolecraft init [<name>]           Scaffold a new SKILL.md (--template, --list)
-  rolecraft search <query>          Search for skills on GitHub
-  rolecraft search <query> --skills-sh  Search skills.sh (experimental)
-  rolecraft search <query> --registry  Search the rolecraft Registry
-  rolecraft check                   Check for available skill updates
-  rolecraft verify                  Verify installed skill integrity
-  rolecraft ci                      Install all skills from lockfile
-  rolecraft completions <shell>     Generate shell completions (bash|zsh|fish)
-  rolecraft doctor                  Run system health check (--json, --network, --deep)
-  rolecraft watch [<slug>]          Watch skills for changes and auto-sync
-  rolecraft profile                 Manage agent configuration profiles
-  rolecraft mcp install <source>    Install an MCP server (npm:, gh:, or local path)
-  rolecraft mcp list                List configured MCP servers
-  rolecraft mcp search <query>      Search for MCP servers (--npm, --interactive)
-  rolecraft mcp check               Check for MCP server updates
-  rolecraft mcp update <name>       Update an MCP server
-  rolecraft mcp remove <name>       Remove an MCP server
-  rolecraft agents                  Show agent capability manifest
-  rolecraft agents --json            Output manifest as JSON
-  rolecraft agents-xml              Generate skills XML for AGENTS.md
-  rolecraft agents-xml --write      Write skills XML to AGENTS.md
-  rolecraft upgrade                 Upgrade rolecraft to the latest version
-  rolecraft convert <source>        Convert a skill between SKILL.md and .mdc formats
-  rolecraft diff <skill-a> <skill-b>  Compare two skills section-by-section
-  rolecraft compose <a> <b> [...]     Compose multiple skills
-  rolecraft test <skill-path>       Test a skill quality
-  rolecraft help                    Show this help
+\x1b[32mUsage: \x1b[0m
+  \x1b[32mrolecraft install \x1b[0m<source>            Install a skill (local path, owner/repo, npm:package, or registry slug)
+  \x1b[32mrolecraft publish \x1b[0m<source>            Publish a skill to the rolecraft Registry
+  \x1b[32mrolecraft bundle \x1b[0m<source> [...]       Install skills from a file or inline sources
+  \x1b[32mrolecraft bundle create \x1b[0m[<name>]      Create a new bundle file
+  \x1b[32mrolecraft use \x1b[0m<source>                Preview a skill without installing
+  \x1b[32mrolecraft list \x1b[0m                       List installed skills (--json, --agent <name>)
+  \x1b[32mrolecraft remove \x1b[0m<slug>               Remove a skill
+  \x1b[32mrolecraft update \x1b[0m<slug>               Re-install a skill (update to latest)
+  \x1b[32mrolecraft rollback \x1b[0m<slug>             Restore a skill to previous version
+  \x1b[32mrolecraft setup \x1b[0m[<source>]            Detect agents and optionally install a skill
+  \x1b[32mrolecraft init \x1b[0m[<name>]               Scaffold a new SKILL.md (--template, --list)
+  \x1b[32mrolecraft search \x1b[0m<query>              Search for skills on GitHub
+  \x1b[32mrolecraft search \x1b[0m<query> --skills-sh  Search skills.sh (experimental)
+  \x1b[32mrolecraft search \x1b[0m<query> --registry   Search the rolecraft Registry
+  \x1b[32mrolecraft check \x1b[0m                      Check for available skill updates
+  \x1b[32mrolecraft verify \x1b[0m                     Verify installed skill integrity
+  \x1b[32mrolecraft ci \x1b[0m                         Install all skills from lockfile
+  \x1b[32mrolecraft completions \x1b[0m<shell>         Generate shell completions (bash|zsh|fish)
+  \x1b[32mrolecraft doctor \x1b[0m                     Run system health check (--json, --network, --deep)
+  \x1b[32mrolecraft watch \x1b[0m[<slug>]              Watch skills for changes and auto-sync
+  \x1b[32mrolecraft profile \x1b[0m                    Manage agent configuration profiles
+  \x1b[32mrolecraft mcp install \x1b[0m<source>        Install an MCP server (npm:, gh:, or local path)
+  \x1b[32mrolecraft mcp list \x1b[0m                   List configured MCP servers
+  \x1b[32mrolecraft mcp search \x1b[0m<query>          Search for MCP servers (--npm, --interactive)
+  \x1b[32mrolecraft mcp check \x1b[0m                  Check for MCP server updates
+  \x1b[32mrolecraft mcp update \x1b[0m<name>           Update an MCP server
+  \x1b[32mrolecraft mcp remove \x1b[0m<name>           Remove an MCP server
+  \x1b[32mrolecraft agents \x1b[0m                     Show agent capability manifest
+  \x1b[32mrolecraft agents \x1b[0m --json              Output manifest as JSON
+  \x1b[32mrolecraft agents-xml \x1b[0m                 Generate skills XML for AGENTS.md
+  \x1b[32mrolecraft agents-xml \x1b[0m --write         Write skills XML to AGENTS.md
+  \x1b[32mrolecraft upgrade \x1b[0m                    Upgrade rolecraft to the latest version
+  \x1b[32mrolecraft convert \x1b[0m<source>            Convert a skill between SKILL.md and .mdc formats
+  \x1b[32mrolecraft diff \x1b[0m<skill-a> <skill-b>    Compare two skills section-by-section
+  \x1b[32mrolecraft compose \x1b[0m<a> <b> [...]       Compose multiple skills
+  \x1b[32mrolecraft test \x1b[0m<skill-path>           Test a skill quality
+  \x1b[32mrolecraft help \x1b[0m                       Show this help
 
 Options:
   --yes, -y      Non-interactive: accept all defaults (install, setup, mcp, profile)
@@ -196,46 +197,46 @@ Options for compose:
   --no-color     Disable colored output
 
 Options for test:
-  --all          Test all installed skills
-  --json         Output structured JSON
-  --verbose      Show detailed results
-  --no-color     Disable colored output
-  --no-emoji     Use ASCII fallback for emojis
+  --all           Test all installed skills
+  --json          Output structured JSON
+  --verbose       Show detailed results
+  --no-color      Disable colored output
+  --no-emoji      Use ASCII fallback for emojis
   --min-score <n> Fail if score is below threshold
-  --only <names> Run specific checks (comma-separated)
+  --only <names>  Run specific checks (comma-separated)
 
 Options for use:
-  --list         List available skills from a source without previewing
+  --list          List available skills from a source without previewing
   --skill <names> Preview specific skills by name (comma-separated)
 
 Options for list:
   --agent, -a <name> Filter skills by installed agent
 
 Options for search:
-  --interactive  Interactive TUI picker
-  --skills-sh    Search skills.sh instead of GitHub
-  --registry     Search the rolecraft Registry
+  --interactive Interactive TUI picker
+  --skills-sh   Search skills.sh instead of GitHub
+  --registry    Search the rolecraft Registry
 
 Options for init:
-  --list              List available templates
-  --template <name>   Scaffold from a named template (basic, code-review, git-workflow, testing, security, react)
+  --list            List available templates
+  --template <name> Scaffold from a named template (basic, code-review, git-workflow, testing, security, react)
 
 Options for setup:
-  --list         List available skills from a source without installing
+  --list          List available skills from a source without installing
   --skill <names> Install specific skills by name (comma-separated)
 
 Options for install:
-  --yes, -y      Non-interactive: accept all defaults and skip prompts
-  --global       Install to ~/.agents/skills/
-  --project      Install to ./.agents/skills/ (default)
+  --yes, -y           Non-interactive: accept all defaults and skip prompts
+  --global            Install to ~/.agents/skills/
+  --project           Install to ./.agents/skills/ (default)
 ${agentFlags.join('\n')}
-  --all              Install to all locations
-  --no-mcp           Skip MCP server installation from skill
-  --frozen-lockfile  Fail if skill already installed
-  --symlink          Install as symlink instead of copy
-  --copy             Install as copy (default)
-  --list             List available skills from a source without installing
-  --skill <names>    Install specific skills by name (comma-separated, e.g. "skill1,skill2")
+  --all               Install to all locations
+  --no-mcp            Skip MCP server installation from skill
+  --frozen-lockfile   Fail if skill already installed
+  --symlink           Install as symlink instead of copy
+  --copy              Install as copy (default)
+  --list              List available skills from a source without installing
+  --skill <names>     Install specific skills by name (comma-separated, e.g. "skill1,skill2")
 
 Options for publish:
   --dry-run      Preview what would be published without creating a PR
@@ -244,7 +245,7 @@ Options for publish:
   --slug <slug>  Override the skill slug from SKILL.md frontmatter
   --name <name>  Override the skill name from SKILL.md frontmatter
 
-Examples:
+\x1b[33mExamples:
   rolecraft publish ./my-skill
   rolecraft publish ./my-skill --dry-run
   rolecraft publish ./my-skill --repo owner/repo
@@ -258,7 +259,7 @@ Examples:
   rolecraft bundle owner/skill1 owner/skill2 --dry-run
   rolecraft bundle create my-collection
   rolecraft list
-  rolecraft remove task-decomposer
+  rolecraft remove task-decomposer\x1b[0m
 `)
 }
 
