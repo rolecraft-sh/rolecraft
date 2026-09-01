@@ -7,7 +7,7 @@
 | | rolecraft | skills (Vercel) | @agentskill.sh/cli |
 |---|---|---|---|
 | **Runtime** | Zero-dep Node ESM | 1 dep (Node) | 2 deps (TypeScript) |
-| **File size** | 414.0 kB | ~465 KB | ~84 KB |
+| **File size** | 414.8 kB | ~465 KB | ~84 KB |
 | **Agent targets** | **87** | 72 | 15+ |
 | **Skill marketplace** | rolecraft registry | skills.sh (90K+) | agentskill.sh (100K+) |
 | **Publish your own** | ✅ | ❌ | ❌ |
