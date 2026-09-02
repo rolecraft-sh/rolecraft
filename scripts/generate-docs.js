@@ -12,49 +12,13 @@ const MATRIX_FILE = join(ROOT, 'MANIFEST-MATRIX.md')
 let _packageSizeTokens = null
 let _testCount = null
 
-const TEST_COUNT_CACHE = join(ROOT, '.test-count-cache.json')
-
 /**
- * Read cached test count written by `npm test` post-run hook.
- * Returns null if cache is missing or stale.
- */
-function readTestCountCache() {
-  try {
-    const raw = readFileSync(TEST_COUNT_CACHE, 'utf-8')
-    const cache = JSON.parse(raw)
-    if (typeof cache.count === 'number' && cache.count > 0) {
-      return cache.count
-    }
-  } catch {}
-  return null
-}
-
-/**
- * Write the test count to a cache file so generate-docs can read it
- * without re-running tests. Called by the test script post-run hook.
- */
-export function writeTestCountCache(count) {
-  writeFileSync(
-    TEST_COUNT_CACHE,
-    `${JSON.stringify({ count, timestamp: Date.now() })}\n`,
-  )
-}
-
-/**
- * Count total test cases. Tries cache first (written by `npm test`),
- * then falls back to regex counting of it()/test() calls in test files.
+ * Count total test cases by scanning it()/test() calls in test files.
+ * Uses word-boundary anchors to avoid false positives (e.g. submit(), wait()).
+ * Strips single-line comments before matching.
  */
 function getTestCount() {
   if (_testCount !== null) return _testCount
-
-  // 1. Try cached value from previous test run
-  const cached = readTestCountCache()
-  if (cached !== null) {
-    _testCount = cached
-    return _testCount
-  }
-
-  // 2. Fallback: count it()/test() calls with word-boundary anchors
   let count = 0
   function countTestsInDir(dir) {
     try {
@@ -72,7 +36,6 @@ function getTestCount() {
           (entry.name.endsWith('.test.js') || entry.name.endsWith('.test.mjs'))
         ) {
           const content = readFileSync(fullPath, 'utf-8')
-          // Remove single-line comments to avoid false positives
           const stripped = content.replace(/\/\/.*$/gm, '')
           const itMatches = stripped.match(/\bit\b\s*\(/g)
           const testMatches = stripped.match(/\btest\b\s*\(/g)
