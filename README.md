@@ -15,7 +15,7 @@
   <a href="https://www.npmjs.com/package/rolecraft"><img src="https://img.shields.io/npm/v/rolecraft?logo=npm&label=&color=cb3837" alt="npm"></a>
   <a href="https://www.npmjs.com/package/rolecraft"><img src="https://img.shields.io/npm/dm/rolecraft?logo=npm&label=&color=cb3837" alt="npm downloads"></a>
    <a href="https://github.com/rolecraft-sh/rolecraft/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/rolecraft-sh/rolecraft/test.yml?logo=githubactions&label=tests" alt="Tests"></a>
-   <a href="https://github.com/rolecraft-sh/rolecraft/actions/workflows/test.yml"><img src="https://img.shields.io/badge/coverage-86%25-brightgreen?logo=node.js&logoColor=white" alt="Coverage"></a>
+   <a href="https://codecov.io/gh/rolecraft-sh/rolecraft"><img src="https://codecov.io/gh/rolecraft-sh/rolecraft/graph/badge.svg" alt="Coverage"></a>
    <a href="https://github.com/rolecraft-sh/rolecraft/actions/workflows/codeql.yml"><img src="https://img.shields.io/github/actions/workflow/status/rolecraft-sh/rolecraft/codeql.yml?logo=github&label=CodeQL" alt="CodeQL"></a>
    <a href="https://github.com/rolecraft-sh/rolecraft/blob/main/.github/dependabot.yml"><img src="https://img.shields.io/badge/dependabot-enabled-025e8c?logo=Dependabot" alt="Dependabot"></a>
    <a href="https://github.com/marketplace/actions/rolecraft-action"><img src="https://img.shields.io/badge/GitHub%20Action-rolecraft--action-blue?logo=github" alt="GitHub Action"></a>
@@ -398,7 +398,7 @@ npm install                # sets up the pre-commit hook automatically
 npm link                   # rolecraft CLI runs from local checkout
 npm run lint               # syntax + Biome (format & unused-variable checks)
 npm run lint:fix           # auto-fix formatting and unused imports
-npm run test:coverage      # tests with coverage report (86%+ lines)
+npm run test:coverage      # tests with coverage report
 npm run docs:dev           # local docs preview (VitePress)
 npm test                   # 1004+ tests, 0 fails expected
 ```

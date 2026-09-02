@@ -39,33 +39,14 @@ jobs:
       - name: Run tests
         run: node --test --test-concurrency=1
 
-      - name: Run test coverage
-        run: npm run test:coverage 2>&1 | tee coverage-output.txt
+      - name: Generate coverage report
+        run: node --test --test-concurrency=1 --experimental-test-coverage --test-reporter=lcov > coverage.lcov
         continue-on-error: true
 
-      - name: Upload coverage report
+      - name: Upload coverage to Codecov
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: codecov/codecov-action@v5
         with:
-          name: coverage-report
-          path: coverage-output.txt
-          retention-days: 7
-
-      - name: Coverage summary
-        if: always()
-        run: |
-          echo "## Test Coverage" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ -f coverage-output.txt ]; then
-            # Extract the all files summary line
-            COVERAGE_LINE=$(grep '^ℹ all files' coverage-output.txt | tail -1)
-            if [ -n "$COVERAGE_LINE" ]; then
-              echo "$COVERAGE_LINE" >> $GITHUB_STEP_SUMMARY
-              echo "" >> $GITHUB_STEP_SUMMARY
-              echo "Full coverage report available in the **coverage-report** artifact." >> $GITHUB_STEP_SUMMARY
-            else
-              echo "Coverage data not found in output." >> $GITHUB_STEP_SUMMARY
-            fi
-          else
-            echo "No coverage output file found." >> $GITHUB_STEP_SUMMARY
-          fi
+          files: coverage.lcov
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
