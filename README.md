@@ -15,7 +15,6 @@
   <a href="https://www.npmjs.com/package/rolecraft"><img src="https://img.shields.io/npm/v/rolecraft?logo=npm&label=&color=cb3837" alt="npm"></a>
   <a href="https://www.npmjs.com/package/rolecraft"><img src="https://img.shields.io/npm/dm/rolecraft?logo=npm&label=&color=cb3837" alt="npm downloads"></a>
    <a href="https://github.com/rolecraft-sh/rolecraft/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/rolecraft-sh/rolecraft/test.yml?logo=githubactions&label=tests" alt="Tests"></a>
-   <a href="https://github.com/rolecraft-sh/rolecraft/actions/workflows/test.yml"><img src="https://img.shields.io/badge/coverage-86%25-brightgreen?logo=node.js&logoColor=white" alt="Coverage"></a>
    <a href="https://github.com/rolecraft-sh/rolecraft/actions/workflows/codeql.yml"><img src="https://img.shields.io/github/actions/workflow/status/rolecraft-sh/rolecraft/codeql.yml?logo=github&label=CodeQL" alt="CodeQL"></a>
    <a href="https://github.com/rolecraft-sh/rolecraft/blob/main/.github/dependabot.yml"><img src="https://img.shields.io/badge/dependabot-enabled-025e8c?logo=Dependabot" alt="Dependabot"></a>
    <a href="https://github.com/marketplace/actions/rolecraft-action"><img src="https://img.shields.io/badge/GitHub%20Action-rolecraft--action-blue?logo=github" alt="GitHub Action"></a>
@@ -52,7 +51,7 @@
 ---
 
 <p align="center">
-  <b>⚡ Zero dependencies</b> · <b>📦 415.1 kB</b> · <b>🤖 27 verified agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 Security scoring</b> · <b>📝 Skill testing</b> · <b>🔧 Init templates</b> · <b>🌐 Offline-first</b>
+  <b>⚡ Zero dependencies</b> · <b>📦 414.9 kB</b> · <b>🤖 27 verified agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 Security scoring</b> · <b>📝 Skill testing</b> · <b>🔧 Init templates</b> · <b>🌐 Offline-first</b>
 </p>
 
 <p align="center">
@@ -99,7 +98,7 @@ rolecraft convert ./my-skill
 rolecraft convert --help
 ```
 
-**Requirements:** Node.js >= 20 · 415.1 kB · zero dependencies · 87 agents · [Getting Started →](docs/guides/getting-started.md) · [Full install guide →](docs/install.md)
+**Requirements:** Node.js >= 20 · 414.9 kB · zero dependencies · 87 agents · [Getting Started →](docs/guides/getting-started.md) · [Full install guide →](docs/install.md)
 
 > **Why zero dependencies?** Every dependency is a supply-chain risk. rolecraft uses only Node.js built-ins (`fs`, `path`, `crypto`, `https`) — no `node_modules` surprises.
 
@@ -152,7 +151,7 @@ No other CLI combines both. npx skills has no MCP support. ags has a separate MC
 
 ## Features
 
-- **Zero dependencies** — 415.1 kB, only Node.js built-ins
+- **Zero dependencies** — 414.9 kB, only Node.js built-ins
 - **MCP + Skills in one command** — install skills and their MCP servers together
 - **Any source** — local folder, GitHub/GitLab/SSH URL, npm package
 - **87 agents** — opencode, claude-code, cursor, copilot, aider, oh-my-pi (omp), and more
@@ -312,7 +311,7 @@ All API functions return plain objects (no side-effects). Available exports:
 | AGENTS.md XML generation             | ✅               | ❌              | ❌                  |
 | Self-upgrade command                 | ✅               | ❌              | ❌                  |
 | **Publish to registry**              | ✅               | ❌              | ❌                  |
-| File size                            | 415.1 kB         | ~465 KB         | ~84 KB              |
+| File size                            | 414.9 kB         | ~465 KB         | ~84 KB              |
 
 [See full table →](docs/comparison.md)
 
@@ -398,7 +397,7 @@ npm install                # sets up the pre-commit hook automatically
 npm link                   # rolecraft CLI runs from local checkout
 npm run lint               # syntax + Biome (format & unused-variable checks)
 npm run lint:fix           # auto-fix formatting and unused imports
-npm run test:coverage      # tests with coverage report (86%+ lines)
+npm run test:coverage      # tests with coverage report
 npm run docs:dev           # local docs preview (VitePress)
 npm test                   # 1004+ tests, 0 fails expected
 ```
