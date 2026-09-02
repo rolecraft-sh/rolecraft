@@ -25,6 +25,7 @@ manifest and run the script — it updates every location automatically.
 | `legacy_count` | `src/agents/manifest.js` → legacy agent count |
 | `experimental_count` | `src/agents/manifest.js` → experimental agent count |
 | `mcp_agent_count` | `src/agents/manifest.js` → agents with MCP support |
+| `test_count` | `src/**/*.test.js` + `bin/**/*.test.js` → total test cases |
 | `unpacked_size` | `npm pack --dry-run` → unpacked size (kB) |
 | `package_size` | `npm pack --dry-run` → package size (kB) |
 
@@ -70,6 +71,7 @@ manifest and run the script — it updates every location automatically.
 | unpacked_size | README.md:315 | 415.1 kB |
 | agent_count | README.md:378 | 87 |
 | agent_count | README.md:384 | 87 |
+| test_count | README.md:403 | 1093 |
 | agent_count | SKILL.md:5 | 87 |
 | verified_count | SKILL.md:5 | 27 |
 | agent_count | SKILL.md:10 | 87 |

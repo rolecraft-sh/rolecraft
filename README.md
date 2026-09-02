@@ -400,7 +400,7 @@ npm run lint               # syntax + Biome (format & unused-variable checks)
 npm run lint:fix           # auto-fix formatting and unused imports
 npm run test:coverage      # tests with coverage report (86%+ lines)
 npm run docs:dev           # local docs preview (VitePress)
-npm test                   # 1078+ tests, 0 fails expected
+npm test                   # 1093+ tests, 0 fails expected
 ```
 
 A `pre-commit` hook runs lint automatically on every commit and rejects commits that don't pass. Zero-runtime-dependency policy is preserved — Biome and VitePress are devDependencies only.

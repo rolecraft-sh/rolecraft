@@ -7,3 +7,4 @@ opencode.json
 docs/.vitepress/dist
 docs/.vitepress/cache
 docs/.vitepress/.temp
+test-count-cache.json
