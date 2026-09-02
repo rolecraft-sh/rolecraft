@@ -28,4 +28,4 @@ jobs:
         run: npm ci
 
       - name: Run E2E tests
-        run: node --test src/e2e.test.js
+        run: npm run test:e2e

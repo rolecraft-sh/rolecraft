@@ -46,6 +46,7 @@ function getTestCount() {
   }
   countTestsInDir(join(ROOT, 'src'))
   countTestsInDir(join(ROOT, 'bin'))
+  countTestsInDir(join(ROOT, 'e2e'))
   _testCount = count
   return _testCount
 }

@@ -102,7 +102,8 @@
   "scripts": {
     "lint": "node --check bin/rolecraft.js src/**/*.js && biome check",
     "lint:fix": "biome check --write",
-    "test": "node --test --test-concurrency=1",
+    "test": "node --test --test-concurrency=1 $(find src bin -name '*.test.js')",
+    "test:e2e": "node --test e2e/e2e.test.js",
     "test:coverage": "node --experimental-test-coverage --test --test-coverage-exclude=\"**/*.test.js\" --test-coverage-include=\"src/**\" --test-coverage-include=\"bin/**\"",
     "setup-hooks": "node scripts/setup-hooks.mjs",
     "postinstall": "node scripts/setup-hooks.mjs || true",

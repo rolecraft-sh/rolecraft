@@ -50,7 +50,7 @@ describe('E2E: install → lockfile → verify → doctor', () => {
   })
 
   it('Step 1: install skill to global scope', async () => {
-    const { installCommand } = await import('./commands/install.js')
+    const { installCommand } = await import('../src/commands/install.js')
     const skillDir = join(tempDir, 'my-e2e-skill')
 
     const { logs, restore } = capture()
@@ -68,7 +68,7 @@ describe('E2E: install → lockfile → verify → doctor', () => {
   })
 
   it('Step 2: verify lockfile contains the skill', async () => {
-    const { readLock } = await import('./utils/lockfile.js')
+    const { readLock } = await import('../src/utils/lockfile.js')
     const lock = await readLock()
 
     assert.ok(lock.skills[skillSlug], 'lockfile should contain the skill')
@@ -78,7 +78,9 @@ describe('E2E: install → lockfile → verify → doctor', () => {
   })
 
   it('Step 3: verify skill directory exists on disk', async () => {
-    const { getAgentsDir, normalizeSlug } = await import('./utils/lockfile.js')
+    const { getAgentsDir, normalizeSlug } = await import(
+      '../src/utils/lockfile.js'
+    )
     const normSlug = normalizeSlug(skillSlug)
     const skillDir = join(getAgentsDir(), normSlug)
 
@@ -89,7 +91,7 @@ describe('E2E: install → lockfile → verify → doctor', () => {
   })
 
   it('Step 4: verify command reports skill as verified', async () => {
-    const { verifyCommand } = await import('./commands/verify.js')
+    const { verifyCommand } = await import('../src/commands/verify.js')
 
     const { logs, restore } = capture()
     await verifyCommand()
@@ -102,7 +104,7 @@ describe('E2E: install → lockfile → verify → doctor', () => {
   })
 
   it('Step 5: doctor reports skill integrity as pass', async () => {
-    const { doctorCommand } = await import('./commands/doctor.js')
+    const { doctorCommand } = await import('../src/commands/doctor.js')
 
     const { logs, restore } = capture()
     await doctorCommand()
@@ -119,7 +121,7 @@ describe('E2E: install → lockfile → verify → doctor', () => {
   })
 
   it('Step 6: doctor shows 1 tracked skill in global lockfile', async () => {
-    const { doctorCommand } = await import('./commands/doctor.js')
+    const { doctorCommand } = await import('../src/commands/doctor.js')
 
     const { logs, restore } = capture()
     await doctorCommand()
@@ -132,14 +134,16 @@ describe('E2E: install → lockfile → verify → doctor', () => {
   })
 
   it('Step 7: verify detects file modification (hash mismatch)', async () => {
-    const { getAgentsDir, normalizeSlug } = await import('./utils/lockfile.js')
+    const { getAgentsDir, normalizeSlug } = await import(
+      '../src/utils/lockfile.js'
+    )
     const normSlug = normalizeSlug(skillSlug)
     const skillDir = join(getAgentsDir(), normSlug)
 
     // Tamper with the file
     writeFileSync(join(skillDir, 'SKILL.md'), '# TAMPERED CONTENT')
 
-    const { verifyCommand } = await import('./commands/verify.js')
+    const { verifyCommand } = await import('../src/commands/verify.js')
     const { logs: errors, restore } = capture('error')
     await verifyCommand()
     restore()
@@ -154,9 +158,11 @@ describe('E2E: install → lockfile → verify → doctor', () => {
   })
 
   it('Step 8: remove skill cleans up lockfile and directory', async () => {
-    const { removeCommand } = await import('./commands/remove.js')
-    const { readLock } = await import('./utils/lockfile.js')
-    const { getAgentsDir, normalizeSlug } = await import('./utils/lockfile.js')
+    const { removeCommand } = await import('../src/commands/remove.js')
+    const { readLock } = await import('../src/utils/lockfile.js')
+    const { getAgentsDir, normalizeSlug } = await import(
+      '../src/utils/lockfile.js'
+    )
 
     const { restore } = capture()
     await removeCommand(skillSlug, { global: true })
@@ -172,7 +178,7 @@ describe('E2E: install → lockfile → verify → doctor', () => {
   })
 
   it('Step 9: doctor shows no skills after removal', async () => {
-    const { doctorCommand } = await import('./commands/doctor.js')
+    const { doctorCommand } = await import('../src/commands/doctor.js')
 
     const { logs, restore } = capture()
     await doctorCommand()
@@ -197,7 +203,7 @@ describe('E2E: install → check → update flow', () => {
   })
 
   it('install skill for update test', async () => {
-    const { installCommand } = await import('./commands/install.js')
+    const { installCommand } = await import('../src/commands/install.js')
     const { logs, restore } = capture()
     await installCommand(join(tempDir, 'update-skill'), {
       global: true,
@@ -208,7 +214,7 @@ describe('E2E: install → check → update flow', () => {
   })
 
   it('check shows the installed skill', async () => {
-    const { checkCommand } = await import('./commands/check.js')
+    const { checkCommand } = await import('../src/commands/check.js')
     const { logs, restore } = capture()
     await checkCommand()
     restore()
@@ -219,7 +225,7 @@ describe('E2E: install → check → update flow', () => {
   })
 
   it('update re-installs the skill', async () => {
-    const { updateCommand } = await import('./commands/update.js')
+    const { updateCommand } = await import('../src/commands/update.js')
     const { logs, restore } = capture()
     await updateCommand(skillSlug, { global: true })
     restore()
@@ -230,7 +236,7 @@ describe('E2E: install → check → update flow', () => {
   })
 
   it('cleanup: remove skill', async () => {
-    const { removeCommand } = await import('./commands/remove.js')
+    const { removeCommand } = await import('../src/commands/remove.js')
     const { logs, restore } = capture()
     await removeCommand(skillSlug, { global: true })
     restore()
@@ -240,7 +246,7 @@ describe('E2E: install → check → update flow', () => {
 
 describe('E2E: doctor JSON output', () => {
   it('doctor --json produces valid JSON with expected structure', async () => {
-    const { doctorCommand } = await import('./commands/doctor.js')
+    const { doctorCommand } = await import('../src/commands/doctor.js')
 
     const { logs, restore } = capture()
     await doctorCommand({ json: true })
@@ -269,7 +275,7 @@ describe('E2E: dry-run does not modify system', () => {
       '# slug: e2e/dryrun\ndryrun-skill\nContent',
     )
 
-    const { installCommand } = await import('./commands/install.js')
+    const { installCommand } = await import('../src/commands/install.js')
     const { logs, restore } = capture()
     await installCommand(dryRunDir, { global: true, dryRun: true })
     restore()
@@ -278,7 +284,7 @@ describe('E2E: dry-run does not modify system', () => {
     assert.ok(!logs.some((l) => l.includes('installed')))
 
     // Verify nothing was actually installed
-    const { readLock } = await import('./utils/lockfile.js')
+    const { readLock } = await import('../src/utils/lockfile.js')
     const lock = await readLock()
     assert.ok(!lock.skills['e2e/dryrun'], 'should not be in lockfile')
   })
