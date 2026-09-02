@@ -28,6 +28,12 @@ jobs:
         with:
           node-version: '24'
 
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run E2E tests
+        run: node --test 'e2e/*.test.js'
+
       - name: Check version not already published
         run: |
           if npm view "rolecraft@${{ github.ref_name }}" version >/dev/null 2>&1; then

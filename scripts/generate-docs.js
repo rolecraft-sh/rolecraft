@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readFileSync, writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync, readdirSync } from 'node:fs'
 import { execSync } from 'node:child_process'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -10,6 +10,46 @@ const ROOT = join(__dirname, '..')
 const MATRIX_FILE = join(ROOT, 'MANIFEST-MATRIX.md')
 
 let _packageSizeTokens = null
+let _testCount = null
+
+/**
+ * Count total test cases by scanning it()/test() calls in test files.
+ * Uses word-boundary anchors to avoid false positives (e.g. submit(), wait()).
+ * Strips single-line comments before matching.
+ */
+function getTestCount() {
+  if (_testCount !== null) return _testCount
+  let count = 0
+  function countTestsInDir(dir) {
+    try {
+      const entries = readdirSync(dir, { withFileTypes: true })
+      for (const entry of entries) {
+        const fullPath = join(dir, entry.name)
+        if (
+          entry.isDirectory() &&
+          entry.name !== 'node_modules' &&
+          entry.name !== '__fixtures__'
+        ) {
+          countTestsInDir(fullPath)
+        } else if (
+          entry.isFile() &&
+          (entry.name.endsWith('.test.js') || entry.name.endsWith('.test.mjs'))
+        ) {
+          const content = readFileSync(fullPath, 'utf-8')
+          const stripped = content.replace(/\/\/.*$/gm, '')
+          const itMatches = stripped.match(/\bit\b\s*\(/g)
+          const testMatches = stripped.match(/\btest\b\s*\(/g)
+          count += (itMatches?.length || 0) + (testMatches?.length || 0)
+        }
+      }
+    } catch {}
+  }
+  countTestsInDir(join(ROOT, 'src'))
+  countTestsInDir(join(ROOT, 'bin'))
+  countTestsInDir(join(ROOT, 'e2e'))
+  _testCount = count
+  return _testCount
+}
 
 function getPackageSizeTokens() {
   if (_packageSizeTokens) return _packageSizeTokens
@@ -62,6 +102,7 @@ export function getTokenValues() {
     legacy_count: String(groups.legacy.length),
     experimental_count: String(groups.experimental.length),
     mcp_agent_count: String(mcpAgents.length),
+    test_count: String(getTestCount()),
     ...getPackageSizeTokens(),
   }
 }
@@ -121,6 +162,7 @@ manifest and run the script — it updates every location automatically.
 | \`legacy_count\` | \`src/agents/manifest.js\` → legacy agent count |
 | \`experimental_count\` | \`src/agents/manifest.js\` → experimental agent count |
 | \`mcp_agent_count\` | \`src/agents/manifest.js\` → agents with MCP support |
+| \`test_count\` | \`src/**/*.test.js\` + \`bin/**/*.test.js\` → total test cases |
 | \`unpacked_size\` | \`npm pack --dry-run\` → unpacked size (kB) |
 | \`package_size\` | \`npm pack --dry-run\` → package size (kB) |
 
