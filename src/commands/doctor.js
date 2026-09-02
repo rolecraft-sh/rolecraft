@@ -55,7 +55,7 @@ export async function doctorCommand(options = {}) {
   if (result.conflicts?.length > 0) {
     console.log('\n🔍 Skill Conflict Analysis\n')
     for (const c of result.conflicts) {
-      console.log(`   ${ICONS.warn} "${c.a}" ve "${c.b}" arasında çelişki:`)
+      console.log(`   ${ICONS.warn} Conflict between "${c.a}" and "${c.b}":`)
       for (const sec of c.sections) {
         const quoteA = sec.a[0] || ''
         const quoteB = sec.b[0] || ''

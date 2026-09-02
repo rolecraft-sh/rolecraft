@@ -35,7 +35,7 @@ manifest and run the script — it updates every location automatically.
 | agent_count | apps.json:18 | 87 |
 | agent_count | apps.json:19 | 87 |
 | agent_count | apps.json:40 | 87 |
-| unpacked_size | benchmark/RESULTS.md:42 | 414.8 kB |
+| unpacked_size | benchmark/RESULTS.md:42 | 415.1 kB |
 | agent_count | docs/agents.md:99 | 87 |
 | agent_count | docs/commands/agents.md:47 | 87 |
 | agent_count | docs/commands/agents.md:71 | 87 |
@@ -43,33 +43,33 @@ manifest and run the script — it updates every location automatically.
 | agent_count | docs/commands/doctor.md:25 | 87 |
 | agent_count | docs/commands/doctor.md:60 | 87 |
 | agent_count | docs/commands/doctor.md:77 | 87 |
-| unpacked_size | docs/comparison.md:10 | 414.8 kB |
+| unpacked_size | docs/comparison.md:10 | 415.1 kB |
 | agent_count | docs/comparison.md:11 | 87 |
 | agent_count | docs/guides/getting-started.md:18 | 87 |
 | verified_count | docs/guides/getting-started.md:18 | 27 |
 | agent_count | docs/index.md:7 | 87 |
 | verified_count | docs/index.md:7 | 27 |
-| unpacked_size | docs/index.md:26 | 414.8 kB |
+| unpacked_size | docs/index.md:26 | 415.1 kB |
 | agent_count | docs/index.md:38 | 87 |
 | verified_count | docs/index.md:38 | 27 |
-| unpacked_size | docs/migration-from-skills.md:10 | 414.8 kB |
+| unpacked_size | docs/migration-from-skills.md:10 | 415.1 kB |
 | agent_count | docs/migration-from-skills.md:11 | 87 |
 | agent_count | docs/migration-from-skills.md:55 | 87 |
 | agent_count | docs/reference.md:161 | 87 |
 | agent_count | package.json:4 | 87 |
 | agent_count | README.md:9 | 87 |
 | verified_count | README.md:9 | 27 |
-| agent_count | README.md:34 | 87 |
-| unpacked_size | README.md:54 | 414.8 kB |
-| verified_count | README.md:54 | 27 |
-| unpacked_size | README.md:101 | 414.8 kB |
-| agent_count | README.md:101 | 87 |
-| unpacked_size | README.md:154 | 414.8 kB |
-| agent_count | README.md:157 | 87 |
-| agent_count | README.md:297 | 87 |
-| unpacked_size | README.md:314 | 414.8 kB |
-| agent_count | README.md:377 | 87 |
-| agent_count | README.md:383 | 87 |
+| agent_count | README.md:35 | 87 |
+| unpacked_size | README.md:55 | 415.1 kB |
+| verified_count | README.md:55 | 27 |
+| unpacked_size | README.md:102 | 415.1 kB |
+| agent_count | README.md:102 | 87 |
+| unpacked_size | README.md:155 | 415.1 kB |
+| agent_count | README.md:158 | 87 |
+| agent_count | README.md:298 | 87 |
+| unpacked_size | README.md:315 | 415.1 kB |
+| agent_count | README.md:378 | 87 |
+| agent_count | README.md:384 | 87 |
 | agent_count | SKILL.md:5 | 87 |
 | verified_count | SKILL.md:5 | 27 |
 | agent_count | SKILL.md:10 | 87 |
