@@ -9,7 +9,7 @@ git clone https://github.com/rolecraft-sh/rolecraft.git
 cd rolecraft
 npm install              # also installs the pre-commit hook automatically
 npm link                 # now `rolecraft` runs from your local checkout
-npm test                 # 828+ tests should pass
+npm test                 # 1004+ tests should pass
 ```
 
 **Requirements:** Node.js >= 20. Dev dependencies (Biome, VitePress) install locally but never ship to users — the runtime stays zero-dependency.
@@ -97,6 +97,49 @@ chore: bump dependencies
 ## Code of Conduct
 
 Be respectful and constructive. Keep discussions focused on the code.
+
+## What Contributors Say
+
+<table width="100%">
+  <tr>
+    <td width="120" align="center">
+      <a href="https://github.com/yukidev630">
+        <img src="https://github.com/yukidev630.png?size=100" alt="yukidev630" height="80" width="80">
+      </a>
+      <br>
+      <strong>yukidev630</strong>
+    </td>
+    <td valign="middle">
+      <em>Contributing was straightforward, and it was easy to understand where to make the change. I had a great experience contributing to RoleCraft.</em>
+    </td>
+  </tr>
+  <tr>
+    <td width="120" align="center">
+      <a href="https://github.com/BenjaminAyivoh1">
+        <img src="https://github.com/BenjaminAyivoh1.png?size=100" alt="BenjaminAyivoh1" height="80" width="80">
+      </a>
+      <br>
+      <strong>BenjaminAyivoh1</strong>
+    </td>
+    <td valign="middle">
+      <em>Contributing to RoleCraft was a great experience, especially as one of my first open-source contributions. The issue was clearly defined, and the maintainers were responsive throughout the process, which made it easy to understand the project and contribute confidently</em>
+    </td>
+  </tr>
+  <tr>
+    <td width="120" align="center">
+      <a href="https://github.com/linhaixin45-cmyk">
+        <img src="https://github.com/linhaixin45-cmyk.png?size=100" alt="linhaixin45-cmyk" height="80" width="80">
+      </a>
+      <br>
+      <strong>linhaixin45-cmyk</strong>
+    </td>
+    <td valign="middle">
+      <em>Contributing to RoleCraft was straightforward because the issue clearly explained the problem, expected behavior, and relevant code paths, and the test suite made the fix easy to verify. The maintainer's quick, thoughtful review also made the experience welcoming.</em>
+    </td>
+  </tr>
+</table>
+
+---
 
 ## Show Your Support
 

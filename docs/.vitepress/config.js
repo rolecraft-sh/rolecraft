@@ -14,11 +14,11 @@ export default defineConfig({
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:site_name', content: 'RoleCraft' }],
     ['meta', { property: 'og:title', content: 'RoleCraft — AI agent skill & MCP manager' }],
-    ['meta', { property: 'og:description', content: 'Install AI agent skills as roles & behaviors — from any source. Zero-dependency CLI for 86+ agents.' }],
+    ['meta', { property: 'og:description', content: 'Install AI agent skills as roles & behaviors — from any source. Zero-dependency CLI for 87 agents.' }],
     ['meta', { property: 'og:url', content: 'https://rolecraft-sh.github.io/rolecraft/' }],
     ['meta', { name: 'twitter:card', content: 'summary' }],
     ['meta', { name: 'twitter:title', content: 'RoleCraft — AI agent skill & MCP manager' }],
-    ['meta', { name: 'twitter:description', content: 'Install AI agent skills as roles & behaviors — from any source. Zero-dependency CLI for 86+ agents.' }],
+    ['meta', { name: 'twitter:description', content: 'Install AI agent skills as roles & behaviors — from any source. Zero-dependency CLI for 87 agents.' }],
     ['style', {}, ':root { --vp-nav-logo-height: 48px; }'],
     ['style', {}, `
       .VPHero .image-src { max-width: 520px !important; max-height: none !important; }
@@ -43,6 +43,7 @@ export default defineConfig({
         { text: 'MCP', link: '/mcp' },
         { text: 'Security', link: '/security' },
         { text: 'Benchmark', link: '/benchmark/RESULTS' },
+        { text: 'FAQ', link: '/faq' },
       ]},
     ],
     sidebar: {
@@ -100,6 +101,7 @@ export default defineConfig({
         { text: 'Agent Discovery', link: '/agents' },
         { text: 'Comparison', link: '/comparison' },
         { text: 'Migration Guide', link: '/migration-from-skills' },
+        { text: 'FAQ', link: '/faq' },
       ],
     },
     search: { provider: 'local' },
