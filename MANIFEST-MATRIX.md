@@ -57,7 +57,7 @@ manifest and run the script — it updates every location automatically.
 | unpacked_size | docs/migration-from-skills.md:10 | 374.6 kB |
 | agent_count | docs/migration-from-skills.md:11 | 87 |
 | agent_count | docs/migration-from-skills.md:55 | 87 |
-| agent_count | docs/reference.md:161 | 87 |
+| agent_count | docs/reference.md:160 | 87 |
 | agent_count | package.json:4 | 87 |
 | agent_count | README.md:9 | 87 |
 | verified_count | README.md:9 | 27 |

@@ -9,8 +9,8 @@
 | **Runtime** | Zero-dep Node ESM | 1 dep (Node) | 2 deps (TypeScript) |
 | **File size** | 374.6 kB | ~465 KB | ~84 KB |
 | **Agent targets** | **87** | 72 | 15+ |
-| **Skill marketplace** | rolecraft registry | skills.sh (90K+) | agentskill.sh (100K+) |
-| **Publish your own** | ✅ | ❌ | ❌ |
+| **Skill marketplace** | skills.sh (90K+) | agentskill.sh (100K+) | — |
+| **Publish your own** | ❌ | ❌ | ❌ |
 | **MCP management** | ✅ | ❌ | ❌ |
 | **Bundle / Compose / Diff** | ✅ | ❌ | ❌ |
 
@@ -54,13 +54,12 @@
 | Skill quality test | ✅ | ❌ | ❌ |
 | Skill conflict detection (`doctor --deep`) | ✅ | ❌ | ❌ |
 | **Node.js API** | ✅ | ❌ | ❌ |
-| **Publish to registry** | ✅ | ❌ | ❌ |
 | Security scanning (0–100) | ✅ | ✅ (Snyk) | ✅ |
 | Telemetry / leaderboard | ❌ | ✅ | ❌ |
 
 ## When to use what
 
-- **rolecraft** — You need MCP management, CI/CD pipelines, skill quality tooling (diff/compose/test), or want to publish skills to a registry. Best for power users and teams.
+- **rolecraft** — You need MCP management, CI/CD pipelines, skill quality tooling (diff/compose/test). Best for power users and teams.
 - **skills (Vercel)** — You just want the simplest one-liner to install skills. Largest marketplace (90K+ via skills.sh). Best for casual users who trust the Vercel ecosystem.
 - **@agentskill.sh/cli** — You want in-agent discovery via `/learn` and skill rating/feedback. Largest marketplace (100K+ via agentskill.sh).
 
