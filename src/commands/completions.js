@@ -24,7 +24,6 @@ const COMMANDS = [
   'diff',
   'compose',
   'test',
-  'publish',
   'profile',
   'help',
   'version',
@@ -71,7 +70,6 @@ const OPTION_FLAGS = [
   '--skill',
   '--json',
   '--skills-sh',
-  '--registry',
   '--network',
   '--deep',
   '--write',
@@ -140,7 +138,6 @@ _rolecraft() {
     diff) COMPREPLY=($(compgen -W "--json --brief --context --no-color" -- "$cur")) ;;
     compose) COMPREPLY=($(compgen -W "--chain --output -o --name --dry-run --force --json --no-color" -- "$cur")) ;;
     test) COMPREPLY=($(compgen -W "--all --json --verbose --no-color --no-emoji --min-score --only" -- "$cur")) ;;
-    publish) COMPREPLY=($(compgen -W "--dry-run --yes -y --repo --slug --name" -- "$cur")) ;;
     profile) COMPREPLY=($(compgen -W "--yes -y --dry-run" -- "$cur")) ;;
     mcp)
       if [[ $COMP_CWORD -eq 2 ]]; then
@@ -150,7 +147,7 @@ _rolecraft() {
       fi
       ;;
     search)
-      COMPREPLY=($(compgen -W "--interactive --skills-sh --registry" -- "$cur"))
+      COMPREPLY=($(compgen -W "--interactive --skills-sh" -- "$cur"))
       ;;
     completions)
       COMPREPLY=($(compgen -W "bash zsh fish" -- "$cur"))
@@ -193,7 +190,6 @@ _rolecraft() {
     'diff:Compare two skills'
     'compose:Compose multiple skills'
     'test:Test skill quality'
-    'publish:Publish a skill to the registry'
     'profile:Manage installation profiles'
     'agents-xml:Generate skills XML for AGENTS.md'
     'doctor:Run system health checks'
@@ -235,10 +231,9 @@ ${zshScopeArguments()}
         diff) _arguments '--json[Output structured JSON]' '--brief[Show only a summary]' '--context[Context lines]:lines:' '--no-color[Disable colors]' ;;
         compose) _arguments '--chain[Use override mode]' '--output[Write to file]:file:_files' '-o[Write to file]:file:_files' '--name[Set output skill name]:name:' '--dry-run[Preview result]' '--force[Overwrite output]' '--json[Output structured JSON]' '--no-color[Disable colors]' ;;
         test) _arguments '--all[Test all installed skills]' '--json[Output structured JSON]' '--verbose[Show details]' '--no-color[Disable colors]' '--no-emoji[Use ASCII fallbacks]' '--min-score[Minimum score]:score:' '--only[Checks to run]:checks:' ;;
-        publish) _arguments '--dry-run[Preview without publishing]' '--yes[Skip confirmation]' '-y[Skip confirmation]' '--repo[Associated repository]:repository:' '--slug[Override slug]:slug:' '--name[Override name]:name:' ;;
         profile) _arguments '--yes[Skip confirmation]' '-y[Skip confirmation]' '--dry-run[Preview without changes]' ;;
         search)
-          _arguments '--interactive[Choose and install from results]' '--skills-sh[Search skills.sh]' '--registry[Search the rolecraft registry]'
+          _arguments '--interactive[Choose and install from results]' '--skills-sh[Search skills.sh]'
           ;;
         completions)
           _arguments '::shell:(bash zsh fish)'
@@ -307,7 +302,6 @@ complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a convert    -d 'C
 complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a diff       -d 'Compare two skills'
 complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a compose    -d 'Compose multiple skills'
 complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a test       -d 'Test skill quality'
-complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a publish    -d 'Publish a skill'
 complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a profile    -d 'Manage profiles'
 complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a agents-xml -d 'Generate skills XML'
 complete -f -c rolecraft -n '__fish_rolecraft_needs_command' -a doctor     -d 'Run health checks'
@@ -347,7 +341,6 @@ end
 
 complete -f -c rolecraft -n '__fish_rolecraft_using_command search' -l interactive -d 'Choose and install from results'
 complete -f -c rolecraft -n '__fish_rolecraft_using_command search' -l skills-sh -d 'Search skills.sh'
-complete -f -c rolecraft -n '__fish_rolecraft_using_command search' -l registry -d 'Search the rolecraft registry'
 
 # command-specific flags
 complete -f -c rolecraft -n '__fish_rolecraft_using_command list' -l json -d 'Output structured JSON'
@@ -377,12 +370,6 @@ complete -f -c rolecraft -n '__fish_rolecraft_using_command test' -l no-color -d
 complete -f -c rolecraft -n '__fish_rolecraft_using_command test' -l no-emoji -d 'Use ASCII fallbacks'
 complete -f -c rolecraft -n '__fish_rolecraft_using_command test' -l min-score -d 'Minimum score'
 complete -f -c rolecraft -n '__fish_rolecraft_using_command test' -l only     -d 'Checks to run'
-complete -f -c rolecraft -n '__fish_rolecraft_using_command publish' -l dry-run -d 'Preview without publishing'
-complete -f -c rolecraft -n '__fish_rolecraft_using_command publish' -l yes     -d 'Skip confirmation'
-complete -f -c rolecraft -n '__fish_rolecraft_using_command publish' -s y       -d 'Skip confirmation'
-complete -f -c rolecraft -n '__fish_rolecraft_using_command publish' -l repo    -d 'Associated repository'
-complete -f -c rolecraft -n '__fish_rolecraft_using_command publish' -l slug    -d 'Override slug'
-complete -f -c rolecraft -n '__fish_rolecraft_using_command publish' -l name    -d 'Override name'
 complete -f -c rolecraft -n '__fish_rolecraft_using_command profile' -l yes -s y -d 'Skip confirmation'
 complete -f -c rolecraft -n '__fish_rolecraft_using_command profile' -l dry-run -d 'Preview without changes'
 

@@ -14,7 +14,6 @@ const addedCommands = [
   'diff',
   'compose',
   'test',
-  'publish',
   'profile',
 ]
 
@@ -25,7 +24,6 @@ const addedLongFlags = [
   'skill',
   'json',
   'skills-sh',
-  'registry',
   'network',
   'deep',
   'write',
@@ -38,8 +36,6 @@ const addedLongFlags = [
   'no-emoji',
   'min-score',
   'only',
-  'repo',
-  'slug',
 ]
 
 before(async () => {

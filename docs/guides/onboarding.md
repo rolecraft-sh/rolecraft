@@ -41,7 +41,7 @@ npx rolecraft setup owner/repo
 **From GitHub** (public repos with `SKILL.md`):
 
 ```bash
-rolecraft setup rolecraft-sh/skills
+rolecraft setup sametcelikbicak/coverage-guard
 rolecraft setup your-org/team-conventions
 ```
 

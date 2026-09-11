@@ -7,7 +7,7 @@ Set Theme "Dracula"
 Set Padding 20
 Set Framerate 12
 
-Type "rolecraft install rolecraft-sh/skills --skill task-decomposer,coverage-guard --global"
+Type "rolecraft install sametcelikbicak/coverage-guard --global"
 Sleep 200ms
 Enter
 Sleep 7000ms
@@ -15,7 +15,7 @@ Sleep 7000ms
 Type "rolecraft list"
 Sleep 200ms
 Enter
-Sleep 5000ms
+Sleep 6000ms
 
 Type "clear"
 Sleep 100ms

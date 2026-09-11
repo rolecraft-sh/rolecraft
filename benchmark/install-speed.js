@@ -5,14 +5,14 @@ import { fileURLToPath } from 'node:url'
 import { execSync } from 'node:child_process'
 import { resolveSource } from '../src/utils/resolver.js'
 import { installSkill } from '../src/utils/installer.js'
-import { getAgentManifest } from '../src/agents.js'
+import { getAgentManifest } from '../src/agents/manifest.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(__dirname, '..')
 const DATA_PATH = resolve(ROOT, 'benchmark/results.json')
 
 const ITERATIONS = 10
-const GITHUB_SOURCE = 'rolecraft-sh/skills'
+const GITHUB_SOURCE = 'sametcelikbicak/coverage-guard'
 
 function createFixture(dir) {
   mkdirSync(dir, { recursive: true })
