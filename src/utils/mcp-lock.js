@@ -1,13 +1,9 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
-import { dirname } from 'node:path'
+import { readFile, writeFile } from 'node:fs/promises'
 import { home } from './paths.js'
+import { ensureParentDir } from './lockfile.js'
 
 export function getMcpLockPath() {
   return home('.agents', '.mcp-lock.json')
-}
-
-async function ensureParentDir(filePath) {
-  await mkdir(dirname(filePath), { recursive: true })
 }
 
 export async function readMcpLock(lockPath = getMcpLockPath()) {

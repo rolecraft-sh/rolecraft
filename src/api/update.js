@@ -4,23 +4,11 @@ import {
   readLock,
   getProjectLockPath,
   normalizeSlug,
+  findActualSlug,
 } from '../utils/lockfile.js'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 import agents from '../agents.js'
-
-function findActualSlug(slug, lock) {
-  if (lock.skills[slug]) return slug
-  const normalized = normalizeSlug(slug)
-  const found = Object.keys(lock.skills).find(
-    (k) => normalizeSlug(k) === normalized,
-  )
-  if (found) return found
-  return Object.keys(lock.skills).find((k) => {
-    const namePart = k.split('/').pop()
-    return namePart === slug || normalizeSlug(namePart) === normalized
-  })
-}
 
 function detectTargets(slug, cwd) {
   const normSlug = normalizeSlug(slug)

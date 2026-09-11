@@ -47,7 +47,7 @@ function runGit(args, opts = {}) {
   return result
 }
 
-function isGitHubRef(source) {
+export function isGitHubRef(source) {
   return (
     /^[\w.-]+\/[\w.-]+$/.test(source) &&
     !source.startsWith('/') &&

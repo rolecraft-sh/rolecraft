@@ -36,7 +36,7 @@ export function getProjectLockPath(cwd) {
   return join(cwd, '.agents', '.skill-lock.json')
 }
 
-async function ensureParentDir(filePath) {
+export async function ensureParentDir(filePath) {
   await mkdir(dirname(filePath), { recursive: true })
 }
 
@@ -178,6 +178,19 @@ export async function removeSkillFromLock(
   await writeLock(lock, lockPath)
 
   return lock
+}
+
+export function findActualSlug(slug, lock) {
+  if (lock.skills[slug]) return slug
+  const normalized = normalizeSlug(slug)
+  const found = Object.keys(lock.skills).find(
+    (k) => normalizeSlug(k) === normalized,
+  )
+  if (found) return found
+  return Object.keys(lock.skills).find((k) => {
+    const namePart = k.split('/').pop()
+    return namePart === slug || normalizeSlug(namePart) === normalized
+  })
 }
 
 export function computeContentHash(fileContents) {
