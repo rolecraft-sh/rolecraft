@@ -1,5 +1,4 @@
 import { accessSync, readdirSync, constants } from 'node:fs'
-import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { createInterface as defaultCreateInterface } from 'node:readline'
 import { stdin as input, stdout as output } from 'node:process'
@@ -13,6 +12,7 @@ import {
 } from '../utils/mcp.js'
 import agents from '../agents.js'
 import { createSpinner } from '../utils/spinner.js'
+import { getAgentsDir } from '../utils/lockfile.js'
 
 let createInterface = defaultCreateInterface
 
@@ -38,10 +38,6 @@ export function detectAgents() {
     }
   }
   return found
-}
-
-function globalAgentsDir() {
-  return join(homedir(), '.agents', 'skills')
 }
 
 function askQuestion(query) {
@@ -130,7 +126,7 @@ export async function setupCommand(source, options = {}) {
     console.log(`   • ${agent.label.padEnd(15)} ${skillCount} skill(s)`)
   }
 
-  const globalCount = countSkills(globalAgentsDir())
+  const globalCount = countSkills(getAgentsDir())
   console.log(`\n   Global (~/.agents/skills/):   ${globalCount} skill(s)`)
   const projectSkillCount = countSkills(projectDir)
   if (projectSkillCount > 0) {

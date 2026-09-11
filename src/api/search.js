@@ -1,17 +1,9 @@
-import { resolveSource } from '../utils/resolver.js'
+import { resolveSource, isGitHubRef } from '../utils/resolver.js'
 
 let runFetch = globalThis.fetch
 
 export function setFetch(fn) {
   runFetch = fn
-}
-
-function isGitHubRef(source) {
-  return (
-    /^[\w.-]+\/[\w.-]+$/.test(source) &&
-    !source.startsWith('/') &&
-    !source.startsWith('.')
-  )
 }
 
 async function searchGitHub(query, filenameFilter = true) {

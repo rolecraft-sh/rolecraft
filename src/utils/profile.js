@@ -1,20 +1,15 @@
-import {
-  mkdir,
-  readFile,
-  writeFile,
-  readdir,
-  rm,
-  access,
-} from 'node:fs/promises'
+import { mkdir, readFile, writeFile, readdir, rm } from 'node:fs/promises'
 import { join, dirname } from 'node:path'
 import { homedir } from 'node:os'
 
-import agents from '../agents.js'
 import { listMcpServers, addMcpServer } from './mcp.js'
 import { readLock, getGlobalLockPath, getProjectLockPath } from './lockfile.js'
 import { resolveSource } from './resolver.js'
 import { installSkill } from './installer.js'
 import { scanSkill, classifyScore } from './security.js'
+import { detectAgents } from '../commands/setup.js'
+
+export { detectAgents }
 
 const PROFILES_DIR = '.agents/profiles'
 
@@ -206,12 +201,7 @@ export async function writeProfile(data) {
   }
   if (data.description) enriched.description = data.description
 
-  const content = Buffer.from(
-    Buffer.from(`${JSON.stringify(enriched, null, 2)}\n`, 'utf-8').toString(
-      'base64',
-    ),
-    'base64',
-  ).toString('utf-8')
+  const content = `${JSON.stringify(enriched, null, 2)}\n`
 
   await ensureProfileDir()
   await writeFile(profilePath(data.name), content, 'utf-8')
@@ -275,19 +265,6 @@ async function readFileIfExists(path) {
   } catch {
     return null
   }
-}
-
-export async function detectAgents() {
-  const found = []
-  for (const agent of agents) {
-    try {
-      await access(agent.getDir())
-      found.push(agent.flag)
-    } catch {
-      // agent not installed
-    }
-  }
-  return found
 }
 
 export async function captureAgentConfig(agentFlag) {
@@ -398,13 +375,13 @@ export async function captureAgentFull(agentFlag) {
 }
 
 export async function captureAllAgents() {
-  const detected = await detectAgents()
+  const detected = detectAgents()
   const agentsData = {}
 
-  for (const flag of detected) {
-    const entry = await captureAgentFull(flag)
+  for (const agent of detected) {
+    const entry = await captureAgentFull(agent.flag)
     if (entry) {
-      agentsData[flag] = entry
+      agentsData[agent.flag] = entry
     }
   }
 
