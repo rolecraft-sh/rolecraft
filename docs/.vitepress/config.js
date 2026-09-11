@@ -78,8 +78,6 @@ export default defineConfig({
             { text: 'install', link: '/commands/install' },
             { text: 'list', link: '/commands/list' },
             { text: 'mcp', link: '/commands/mcp' },
-            { text: 'publish', link: '/commands/publish' },
-            { text: 'registry', link: '/commands/registry' },
             { text: 'remove', link: '/commands/remove' },
             { text: 'rollback', link: '/commands/rollback' },
             { text: 'search', link: '/commands/search' },

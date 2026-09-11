@@ -27,7 +27,7 @@ import { profileCommand } from '../src/commands/profile.js'
 import { testCommand } from '../src/commands/test.js'
 import { diffCommand } from '../src/commands/diff.js'
 import { composeCommand } from '../src/commands/compose.js'
-import { publishCommand } from '../src/commands/publish.js'
+
 import { rollbackCommand } from '../src/commands/rollback.js'
 import agents from '../src/agents.js'
 import { showError, UserError } from '../src/utils/errors.js'
@@ -137,8 +137,7 @@ Zero dependencies, no marketplace required.
 Works with ${agents.length} agents: ${agents.map((a) => a.name).join(', ')}, and all spec-compliant agents.
 
 \x1b[32mUsage: \x1b[0m
-  \x1b[32mrolecraft install \x1b[0m<source>            Install a skill (local path, owner/repo, npm:package, or registry slug)
-  \x1b[32mrolecraft publish \x1b[0m<source>            Publish a skill to the rolecraft Registry
+  \x1b[32mrolecraft install \x1b[0m<source>            Install a skill (local path, owner/repo, npm:package)
   \x1b[32mrolecraft bundle \x1b[0m<source> [...]       Install skills from a file or inline sources
   \x1b[32mrolecraft bundle create \x1b[0m[<name>]      Create a new bundle file
   \x1b[32mrolecraft use \x1b[0m<source>                Preview a skill without installing
@@ -150,7 +149,6 @@ Works with ${agents.length} agents: ${agents.map((a) => a.name).join(', ')}, and
   \x1b[32mrolecraft init \x1b[0m[<name>]               Scaffold a new SKILL.md (--template, --list)
   \x1b[32mrolecraft search \x1b[0m<query>              Search for skills on GitHub
   \x1b[32mrolecraft search \x1b[0m<query> --skills-sh  Search skills.sh (experimental)
-  \x1b[32mrolecraft search \x1b[0m<query> --registry   Search the rolecraft Registry
   \x1b[32mrolecraft check \x1b[0m                      Check for available skill updates
   \x1b[32mrolecraft verify \x1b[0m                     Verify installed skill integrity
   \x1b[32mrolecraft ci \x1b[0m                         Install all skills from lockfile
@@ -215,7 +213,6 @@ Options for list:
 Options for search:
   --interactive Interactive TUI picker
   --skills-sh   Search skills.sh instead of GitHub
-  --registry    Search the rolecraft Registry
 
 Options for init:
   --list            List available templates
@@ -237,20 +234,9 @@ ${agentFlags.join('\n')}
   --copy              Install as copy (default)
   --list              List available skills from a source without installing
   --skill <names>     Install specific skills by name (comma-separated, e.g. "skill1,skill2")
-
-Options for publish:
-  --dry-run      Preview what would be published without creating a PR
-  --yes, -y      Skip confirmation prompt
-  --repo <ref>   GitHub repository (owner/repo) to associate with the skill
-  --slug <slug>  Override the skill slug from SKILL.md frontmatter
-  --name <name>  Override the skill name from SKILL.md frontmatter
-
 \x1b[33mExamples:
-  rolecraft publish ./my-skill
-  rolecraft publish ./my-skill --dry-run
-  rolecraft publish ./my-skill --repo owner/repo
   rolecraft install ./my-skill
-  rolecraft install rolecraft-sh/skills
+  rolecraft install sametcelikbicak/coverage-guard
   rolecraft install npm:lodash
   rolecraft install npm:@scope/package@1.0.0
   rolecraft install ./skills/my-skill --claude --cursor
@@ -420,23 +406,16 @@ const COMMANDS = {
       return
     }
     const flags = parseFlags(args)
-    validateFlags(
-      flags,
-      ['--interactive', '--skills-sh', '--registry'],
-      'search',
-    )
+    validateFlags(flags, ['--interactive', '--skills-sh'], 'search')
     const pos = parsePositionals(args)
     const query = pos[0]
     if (!query) {
-      console.error(
-        'Usage: rolecraft search <query> [--interactive] [--registry]',
-      )
+      console.error('Usage: rolecraft search <query> [--interactive]')
       throw new Error('Missing query argument.')
     }
     return searchCommand(query, {
       interactive: args.includes('--interactive'),
       skillsSh: args.includes('--skills-sh'),
-      registry: args.includes('--registry'),
     })
   },
 
@@ -696,38 +675,6 @@ const COMMANDS = {
       return bundleCommand(sources[0], opts)
     }
     return bundleCommand(sources, opts)
-  },
-
-  async publish(args) {
-    if (isHelp(args)) {
-      usage()
-      return
-    }
-    const flags = parseFlags(args)
-    validateFlags(
-      flags,
-      ['--dry-run', '--yes', '-y', '--repo', '--slug', '--name'],
-      'publish',
-    )
-    const opts = { dryRun: false, yes: false, repo: '', slug: '', name: '' }
-    const pos = []
-    for (let i = 0; i < args.length; i++) {
-      const a = args[i]
-      if (a === '--dry-run') opts.dryRun = true
-      else if (a === '--yes' || a === '-y') opts.yes = true
-      else if (a === '--repo') opts.repo = args[++i] || ''
-      else if (a === '--slug') opts.slug = args[++i] || ''
-      else if (a === '--name') opts.name = args[++i] || ''
-      else if (!a.startsWith('-')) pos.push(a)
-    }
-    const source = pos[0]
-    if (!source) {
-      console.error(
-        'Usage: rolecraft publish <source> [--repo owner/repo] [--dry-run]',
-      )
-      throw new Error('Missing source argument.')
-    }
-    return publishCommand(source, opts)
   },
 
   async profile(args) {

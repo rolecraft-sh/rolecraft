@@ -21,9 +21,7 @@ export async function checkCommand() {
     if (s.status === 'skipped') {
       rows.push([s.slug, `${ICONS.skip} skipped`, s.reason])
     } else if (s.status === 'update_available') {
-      const detail = s.fromRegistry
-        ? `${s.current} → ${s.latest} (registry)`
-        : 'update available'
+      const detail = 'update available'
       rows.push([s.slug, `${ICONS.update} update`, detail])
     } else if (s.status === 'up_to_date') {
       rows.push([s.slug, `${ICONS.ok} up to date`, '-'])

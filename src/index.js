@@ -32,15 +32,6 @@ export { apiTest as test } from './api/test.js'
 export { apiRollback as rollback } from './api/rollback.js'
 export { apiDiff as diff } from './api/diff.js'
 export { apiCompose as compose } from './api/compose.js'
-export {
-  apiRegistryInfo as registryInfo,
-  apiRegistryList as registryList,
-  searchRegistry,
-  resolveSlug as registryResolve,
-  createPublishPR as registryPublish,
-  checkUpdates as registryCheckUpdates,
-  clearCache as registryClearCache,
-} from './api/registry.js'
 export { setupApi as setup } from './api/setup.js'
 export { bundleApi as bundle } from './api/bundle.js'
 export { watchApi as watch } from './api/watch.js'

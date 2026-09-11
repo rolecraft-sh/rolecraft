@@ -5,7 +5,7 @@ rolecraft exposes a programmatic API for use in your own Node.js scripts, tools,
 ## Usage
 
 ```js
-import { install, list, search, doctor, searchRegistry } from 'rolecraft'
+import { install, list, search, doctor } from 'rolecraft'
 
 // install a skill
 const result = await install('./my-skill', { global: true })
@@ -15,9 +15,6 @@ const skills = await list()
 
 // search GitHub for skills
 const results = await search('code-review')
-
-// search the registry for skills
-const registryResults = await searchRegistry('react')
 
 // run health check
 const health = await doctor()
@@ -282,65 +279,6 @@ Delete a saved profile. Returns `{ deleted: true }`.
 ### `profileImport(source)`
 
 Import a profile from file or URL. Returns `{ name, agents: number }`.
-
-### `searchRegistry(query)`
-
-Search the registry index by slug, name, or description.
-
-| Param | Type | Description |
-|-------|------|-------------|
-| `query` | `string` | Search term |
-
-Returns `[{ slug, name, description, repo, author, versions, latest }]`.
-
-### `registryResolve(slug)`
-
-Resolve a registry slug to its full skill metadata.
-
-| Param | Type | Description |
-|-------|------|-------------|
-| `slug` | `string` | Registry slug (e.g. `"react-rules"`) |
-
-Returns `{ slug, name, description, repo, author, versions, latest }`. Throws if not found.
-
-### `registryPublish(entry, token?)`
-
-Fork the registry repo, update index.json, and open a PR.
-
-| Param | Type | Default | Description |
-|-------|------|---------|-------------|
-| `entry` | `object` | — | `{ slug, name, repo, description?, version? }` |
-| `token` | `string` | `GITHUB_TOKEN` env | GitHub personal access token |
-
-Returns `{ url, number }` (PR URL and number).
-
-### `registryCheckUpdates(skills)`
-
-Compare installed skills against registry and detect newer versions.
-
-| Param | Type | Description |
-|-------|------|-------------|
-| `skills` | `array` | `[{ slug, name, version }]` |
-
-Returns `[{ slug, name, current, latest }]`.
-
-### `registryInfo(slug)`
-
-Get detailed info about a single registry skill.
-
-| Param | Type | Description |
-|-------|------|-------------|
-| `slug` | `string` | Registry slug |
-
-Returns the full skill entry. Throws if not found.
-
-### `registryList()`
-
-List all skills in the registry. Returns `[{ slug, name, description, repo, author, versions, latest }]`.
-
-### `registryClearCache()`
-
-Clear the in-memory registry index cache. Next registry call will re-fetch from GitHub.
 
 ### `setup(source, options?)`
 

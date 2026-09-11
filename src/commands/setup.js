@@ -260,7 +260,7 @@ export async function setupCommand(source, options = {}) {
     console.log('  rolecraft setup <source>\n')
     console.log('Examples:')
     console.log('  rolecraft setup ./my-skill')
-    console.log('  rolecraft setup rolecraft-sh/skills')
+    console.log('  rolecraft setup sametcelikbicak/coverage-guard')
     console.log('\nOptions:')
     console.log(
       '  --list        List available skills from a source without installing',

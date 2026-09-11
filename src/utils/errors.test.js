@@ -148,7 +148,7 @@ describe('showError', () => {
     assert.ok(outputLines.some((l) => l.includes('inner failure')))
   })
 
-  it('formats full UserError (message + suggestion + detail + code) from registry-client', () => {
+  it('formats full UserError (message + suggestion + detail + code) with security error', () => {
     showError(
       new UserError('"my-skill" blocked by security scan (score: 45/100).', {
         suggestion: 'Review the flagged issues, fix them, or use --yes.',

@@ -7,7 +7,7 @@
 | | rolecraft | skills (Vercel) | @agentskill.sh/cli |
 |---|---|---|---|
 | **Runtime** | Zero-dep Node ESM | 1 dep (Node) | 2 deps (TypeScript) |
-| **File size** | 394.5 kB | ~465 KB | ~84 KB |
+| **File size** | 374.6 kB | ~465 KB | ~84 KB |
 | **Agent targets** | **87** | 72 | 15+ |
 | **Skill marketplace** | rolecraft registry | skills.sh (90K+) | agentskill.sh (100K+) |
 | **Publish your own** | ✅ | ❌ | ❌ |
@@ -72,7 +72,6 @@ These aren't CLI tools — they're curated SKILL.md repositories. rolecraft can 
 |-----------|--------|----------------------|
 | [skills.sh](https://skills.sh) | 90,000+ | `rolecraft install <owner/repo>` |
 | [agentskill.sh](https://agentskill.sh) | 100,000+ | `rolecraft install <slug>` |
-| [rolecraft Registry](https://github.com/rolecraft-sh/registry) | 66 | `rolecraft install <slug>` |
 | [garden-skills](https://github.com/ConardLi/garden-skills) (ConardLi) | ~5 curated | `rolecraft install ConardLi/garden-skills` |
 | [anthropic/skills](https://github.com/anthropic/skills) | 157K★ repo | `rolecraft install anthropic/skills` |
 

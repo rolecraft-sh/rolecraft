@@ -50,19 +50,19 @@ This returns repositories containing `SKILL.md` files — the standard skill for
 Install to your default agent (project scope):
 
 ```bash
-rolecraft install rolecraft-sh/skills
+rolecraft install sametcelikbicak/coverage-guard
 ```
 
 Or install to specific agents:
 
 ```bash
-rolecraft install rolecraft-sh/skills --cursor --claude
+rolecraft install sametcelikbicak/coverage-guard --cursor --claude
 ```
 
 Or install to **every** agent on your machine:
 
 ```bash
-rolecraft install rolecraft-sh/skills --all
+rolecraft install sametcelikbicak/coverage-guard --all
 ```
 
 ### 4. List installed skills

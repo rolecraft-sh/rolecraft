@@ -1,6 +1,6 @@
 # `rolecraft install`
 
-Install a skill from a local path, GitHub repository, npm package, or registry slug.
+Install a skill from a local path, GitHub repository, or npm package.
 
 Supports **single-skill** and **multi-skill** repositories. If a source contains
 multiple `SKILL.md` files (e.g. under `skills/`), you will be prompted to
@@ -29,22 +29,11 @@ rolecraft install /absolute/path/to/skill
 Shorthand `owner/repo`:
 
 ```bash
-rolecraft install rolecraft-sh/skills
-rolecraft install mattpocock/skills
+rolecraft install sametcelikbicak/coverage-guard
 ```
 
 The CLI clones with `--depth 1`, discovers all `SKILL.md` files (including
 those under `skills/`, `.agents/skills/`, etc.), and lets you choose.
-
-### Registry slug
-
-The [rolecraft Registry](https://github.com/rolecraft-sh/registry) provides short, versioned names for published skills:
-
-```bash
-rolecraft install my-skill
-```
-
-If `my-skill` isn't a local path, GitHub ref, git URL, or npm ref, rolecraft looks it up in the registry and resolves it to the underlying repo URL. See [`registry.md`](./registry.md) for details.
 
 ### npm package
 
@@ -71,13 +60,10 @@ The `--skill` flag accepts skill names in two formats:
 
 ```bash
 # Comma-separated
-rolecraft install source --skill "grill-me,tdd"
+rolecraft install source --skill "skill-a,skill-b"
 
 # Repeated flag
-rolecraft install source --skill grill-me --skill tdd
-
-# Mixed
-rolecraft install source --skill grill-me,tdd --skill ask-matt
+rolecraft install source --skill skill-a --skill skill-b
 ```
 
 Skill names are matched against the skill `name` or `slug` (case-insensitive).
@@ -118,20 +104,8 @@ interactively to select which skills to install.
 # Install from local folder (default: project scope)
 rolecraft install ./my-skill
 
-# Install from GitHub (monorepo)
-rolecraft install rolecraft-sh/skills
-
-# Install from a multi-skill repo (interactive selection)
-rolecraft install mattpocock/skills
-
-# List skills in a repo without installing
-rolecraft install mattpocock/skills --list
-
-# Install specific skills by name (comma-separated)
-rolecraft install mattpocock/skills --skill "grill-me,tdd"
-
-# Install specific skills (repeated flag)
-rolecraft install mattpocock/skills --skill grill-me --skill tdd
+# Install from GitHub
+rolecraft install sametcelikbicak/coverage-guard
 
 # Install from npm
 rolecraft install npm:some-skill-package
@@ -139,9 +113,6 @@ rolecraft install npm:@org/skill-package@1.0.0
 
 # Install for specific agents
 rolecraft install ./my-skill --claude --cursor
-
-# Combine multiple agents
-rolecraft install ./my-skill --claude --cursor --devin
 
 # Global install
 rolecraft install ./my-skill --global
@@ -158,8 +129,7 @@ rolecraft install ./my-skill --frozen-lockfile
 
 ## Multi-skill repositories
 
-When a source contains multiple `SKILL.md` files (e.g., `mattpocock/skills` has
-15+ skills under `skills/engineering/` and `skills/productivity/`), the CLI:
+When a source contains multiple `SKILL.md` files, the CLI:
 
 1. Discovers all skills by scanning `skills/`, `.agents/skills/`, and other
    known container directories, plus a recursive fallback search (max depth 3).
@@ -170,72 +140,6 @@ When a source contains multiple `SKILL.md` files (e.g., `mattpocock/skills` has
 
 Each skill is installed to its own subdirectory (slug-based name) under the
 target agent's skills directory.
-
-### Interactive selection example
-
-```text
-$ rolecraft install mattpocock/skills
-
-Resolving skills...
-Found 15 skill(s)
-
-  1. ask-matt
-      slug: ask-matt
-  2. domain-modeling
-      slug: domain-modeling
-  3. diagnosing-bugs
-      slug: diagnosing-bugs
-  4. grill-me
-      slug: grill-me
-  5. grill-with-docs
-      slug: grill-with-docs
-  6. grilling
-      slug: grilling
-  ...
-
-Enter numbers (space-separated) to select, "all" for all, or press Enter to confirm selection: 4 5
-
-   grill-me selected
-   grill-with-docs selected
-```
-
-### `--list` output example
-
-```text
-$ rolecraft install mattpocock/skills --list
-
-Found 15 skill(s)
-
-  ask-matt
-    Slug:       ask-matt
-    Owner:      mattpocock
-    Description: Ask which skill or flow fits your situation
-    Files:      SKILL.md
-
-  grill-me
-    Slug:       grill-me
-    Owner:      mattpocock
-    Description: Get relentlessly interviewed about a plan or design
-    Files:      SKILL.md
-
-  ...
-```
-
-### `--skill` usage example
-
-```bash
-# Install specific skills (comma-separated)
-rolecraft install mattpocock/skills --skill "grill-me,tdd"
-
-# Install specific skills (repeated flag)
-rolecraft install mattpocock/skills --skill grill-me --skill tdd
-
-# Install a single skill
-rolecraft install mattpocock/skills --skill diagnose-bugs
-
-# Non-interactive: install all skills with --yes
-rolecraft install mattpocock/skills --yes --global
-```
 
 ## Node.js API
 

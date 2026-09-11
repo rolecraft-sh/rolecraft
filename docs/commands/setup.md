@@ -20,7 +20,7 @@ rolecraft setup <source> --skill <names>  # install specific skills
 1. Scans your system for all installed AI agent directories (opencode, cursor, claude-code, copilot, aider, etc.)
 2. When a source is provided: resolves the skill(s), installs to every detected agent, and sets up any MCP servers declared in `SKILL.md`
 
-For sources with multiple skills (e.g. `mattpocock/skills`), you'll be prompted to select which skills to install. Use `--yes` to install all, or `--skill` to pick specific ones.
+For sources with multiple skills, you'll be prompted to select which skills to install. Use `--yes` to install all, or `--skill` to pick specific ones.
 
 This is the fastest way to go from zero to productive — one command configures every AI agent you use.
 
@@ -47,7 +47,7 @@ Shows which agents are installed and how many skills each has.
 
 ```bash
 rolecraft setup ./my-skill
-rolecraft setup rolecraft-sh/skills
+rolecraft setup sametcelikbicak/coverage-guard
 rolecraft setup npm:@org/agent-rules
 ```
 
@@ -57,13 +57,13 @@ Installs the skill to every detected agent automatically. No need to specify `--
 
 ```bash
 # Show skills in a multi-skill source without installing
-rolecraft setup mattpocock/skills --list
+rolecraft setup ./my-multi-skill-repo --list
 
 # Install specific skills
-rolecraft setup mattpocock/skills --skill "typescript-rules,react-rules"
+rolecraft setup ./my-multi-skill-repo --skill "skill-a,skill-b"
 
 # Install all with --yes
-rolecraft setup mattpocock/skills -y
+rolecraft setup ./my-multi-skill-repo -y
 ```
 
 ### With MCP servers

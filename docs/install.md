@@ -116,17 +116,17 @@ rolecraft install ./my-skill --claude --cursor --devin
 
 ### Selecting specific skills from multi-skill sources
 
-When a source contains multiple skills (e.g. `rolecraft-sh/skills`), use `--skill` to pick specific ones:
+When a source contains multiple skills, use `--skill` to pick specific ones:
 
 ```bash
 # Comma-separated
-rolecraft install rolecraft-sh/skills --skill "task-decomposer,grill-me" --global
+rolecraft install ./my-multi-skill-repo --skill "skill-a,skill-b" --global
 
 # Repeated flag
-rolecraft install rolecraft-sh/skills --skill task-decomposer --skill grill-me --global
+rolecraft install ./my-multi-skill-repo --skill skill-a --skill skill-b --global
 
 # Interactive selection (no --skill flag)
-rolecraft install rolecraft-sh/skills --global
+rolecraft install ./my-multi-skill-repo --global
 ```
 
 Matched by skill `name` or `slug` (case-insensitive). Use `--list` to see available skills.
@@ -158,8 +158,7 @@ rolecraft install /absolute/path/to/skill
 Shorthand `owner/repo`:
 
 ```bash
-rolecraft install rolecraft-sh/skills
-rolecraft install mattpocock/skills
+rolecraft install sametcelikbicak/coverage-guard
 ```
 
 The CLI clones with `--depth 1`, finds `SKILL.md` recursively, installs it, and cleans up.
