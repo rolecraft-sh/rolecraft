@@ -21,7 +21,6 @@ Complete reference for all rolecraft commands, flags, and options.
 | `rollback <slug>` | Restore a skill to previous version (from backup history) |
 | `setup [source]` | Detect agents and optionally install a skill |
 | `search <query>` | Search GitHub for skills (`--skills-sh` for skills.sh) |
-| `publish <source>` | Publish a skill to the registry (requires `GITHUB_TOKEN`) |
 | `check` | Check for available updates |
 | `ci` | Re-install all skills from lockfile (CI mode) |
 | `verify` | Check installed skill integrity via content hash |

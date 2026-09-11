@@ -39,7 +39,6 @@ export default defineConfig({
         { text: 'Commands', link: '/commands/agents' },
         { text: 'API', link: '/api' },
         { text: 'Reference', link: '/reference' },
-        { text: 'Registry', link: '/commands/registry' },
         { text: 'MCP', link: '/mcp' },
         { text: 'Security', link: '/security' },
         { text: 'Benchmark', link: '/benchmark/RESULTS' },
