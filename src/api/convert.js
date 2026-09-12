@@ -24,8 +24,6 @@ function findMdcFiles(dir, entries) {
 export async function convertApi(source, options = {}) {
   const expanded = expandTilde(source)
   const outDir = options.output || process.cwd()
-  const converted = []
-
   const entries = await readdir(expanded, { withFileTypes: true }).catch(
     async () => {
       const content = await readFile(expanded, 'utf-8').catch(() => {
@@ -51,7 +49,6 @@ export async function convertApi(source, options = {}) {
     },
   )
 
-  if (!entries) return converted
   if (!Array.isArray(entries)) return entries
 
   const skillFile = findSkillFile(expanded, entries)
