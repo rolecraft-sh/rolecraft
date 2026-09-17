@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.4.2] - 2026-09-17
+
+### Fixed
+- update manifest matrix line number for reference.md (#283)
+- doctor Turkish text bug, add CI coverage, add E2E tests (#274)
+- track all published agent counts (#273)
+
+### Changed
+- backfill supportLevel for 60 unclassified agents (#285)
+- remove unreachable converted=[] dead branch in convertApi (#284)
+- deduplicate shared utils and remove dead code (#281)
+- share bundle loading and installation (#280)
+- bump actions/deploy-pages from 5.0.0 to 5.0.1 (#279)
+- bump actions/upload-artifact from 4 to 7 (#278)
+- bump github/codeql-action/init from 4.37.8 to 4.37.9 (#277)
+- bump github/codeql-action/analyze from 4.37.8 to 4.37.9 (#276)
+- update changelog and version for v2.4.1 (#272)
+
+### Documentation
+- slim down README, move testimonials to CONTRIBUTING, add FAQ page (#275)
+
+### Other
+- cleanup: remove registry/publish, replace skills source, update demos (#282)
 ## [v2.4.1] - 2026-09-01
 
 ### Added
