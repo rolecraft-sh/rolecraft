@@ -11,19 +11,19 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | devin | `./.devin/skills/` | verified | mcpServers |
 | codex | `~/.agents/skills/ or ./.agents/skills/` | verified | - |
 | copilot | `./.github/skills/ or ~/.copilot/skills/` | verified | servers |
-| aider | `~/.aider/skills/ or ./.aider/skills/` | experimental | - |
+| aider | `~/.aider/skills/ or ./.aider/skills/` | legacy | - |
 | cline | `~/.cline/skills/ or ./.cline/skills/` | verified | - |
 | gemini-cli | `~/.gemini/skills/` | verified | - |
-| cody | `~/.cody/skills/ or ./.cody/skills/` | experimental | - |
+| cody | `~/.cody/skills/ or ./.cody/skills/` | legacy | - |
 | continue | `~/.continue/skills/ or ./.continue/skills/` | verified | experimental.mcpServers |
 | warp | `~/.agents/skills/` | verified | - |
 | codeium | `~/.codeium/skills/` | experimental | - |
 | fabric | `~/.fabric/skills/` | experimental | - |
 | goose | `~/.agents/skills/` | verified | - |
 | tabnine | `~/.tabnine/agent/skills/` | verified | - |
-| supermaven | `~/.supermaven/skills/` | experimental | - |
+| supermaven | `~/.supermaven/skills/` | legacy | - |
 | pr-pilot | `~/.pr-pilot/skills/` | experimental | - |
-| loom | `~/.loom/skills/` | experimental | - |
+| loom | `~/.loom/skills/` | legacy | - |
 | roo | `~/.roo/skills/` | verified | - |
 | trae | `~/.trae/skills/` | verified | - |
 | hermes | `~/.hermes/skills/` | experimental | - |
@@ -40,7 +40,7 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | openclaw | `~/.openclaw/skills/` | experimental | - |
 | codebuddy | `~/.codebuddy/skills/` | experimental | - |
 | mux | `~/.mux/skills/` | experimental | - |
-| pi | `~/.pi/agent/skills/` | experimental | - |
+| pi | `~/.pi/agent/skills/` | community | - |
 | oh-my-pi | `~/.omp/agent/skills/` | verified | mcpServers |
 | autohand-code | `~/.autohand/skills/` | experimental | - |
 | rovo-dev | `~/.rovodev/skills/` | experimental | - |
@@ -50,7 +50,7 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | code-arts-doer | `~/.codeartsdoer/skills/` | experimental | - |
 | code-maker | `~/.codemaker/skills/` | experimental | - |
 | code-studio | `~/.codestudio/skills/` | experimental | - |
-| crush | `~/.crush/skills/` | experimental | - |
+| crush | `~/.crush/skills/` | community | - |
 | eve | `./agent/skills/` | experimental | - |
 | forge | `./.forge/skills/` | verified | - |
 | inference-sh | `~/.inferencesh/skills/` | experimental | - |
@@ -62,7 +62,7 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | mcp-jam | `~/.mcpjam/skills/` | experimental | - |
 | moxby | `~/.moxby/skills/` | experimental | - |
 | ona | `~/.ona/skills/` | experimental | - |
-| qoder | `~/.qoder/skills/` | experimental | - |
+| qoder | `~/.qoder/skills/` | community | - |
 | reasonix | `~/.reasonix/skills/` | experimental | - |
 | terra-mind | `~/.terramind/skills/` | experimental | - |
 | tiny-cloud | `~/.tinycloud/skills/` | experimental | - |
@@ -72,7 +72,7 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | kimi-code | `~/.kimi-code/skills/` | experimental | - |
 | zcode | `~/.zcode/skills/` | experimental | - |
 | astrbot | `~/.astrbot/data/skills/` | experimental | - |
-| qoder-cn | `~/.qoder-cn/skills/` | experimental | - |
+| qoder-cn | `~/.qoder-cn/skills/` | community | - |
 | trae-cn | `~/.trae-cn/skills/` | experimental | - |
 | zenflow | `~/.zenflow/skills/` | experimental | - |
 | neovate | `~/.neovate/skills/` | experimental | - |
@@ -96,7 +96,7 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 
 > **MCP support:** 8 agent(s) support MCP server configuration. Format: `mcpServers`, `servers`, `experimental.mcpServers`
 
-> **Agent count:** 87 total — 27 verified, 0 community, 0 legacy, 60 experimental.
+> **Agent count:** 87 total — 27 verified, 4 community, 4 legacy, 52 experimental.
 
 ## Notes
 
