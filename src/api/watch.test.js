@@ -274,4 +274,38 @@ describe('watchApi', () => {
     assert.ok(!events.some((e) => e.type === 'syncing'))
     assert.ok(!events.some((e) => e.type === 'synced'))
   })
+
+  it('routes async watcher errors through onEvent instead of throwing', async () => {
+    const events = []
+    const result = await watchModule.watchApi('local-skill', tempDir, {
+      onEvent: (e) => events.push(e),
+    })
+
+    try {
+      const boom = Object.assign(new Error('simulated ENOSPC'), {
+        code: 'ENOSPC',
+      })
+      assert.doesNotThrow(() => result.watchers[0].emit('error', boom))
+
+      const errorEvent = events.find((e) => e.type === 'error')
+      assert.ok(errorEvent, 'expected an error event')
+      assert.equal(errorEvent.slug, 'local-skill')
+      assert.equal(errorEvent.path, join(tempDir, 'source-local'))
+      assert.equal(errorEvent.error, boom)
+    } finally {
+      result.close()
+    }
+  })
+
+  it('does not emit watcher errors after close()', async () => {
+    const events = []
+    const result = await watchModule.watchApi('local-skill', tempDir, {
+      onEvent: (e) => events.push(e),
+    })
+    const watcher = result.watchers[0]
+    result.close()
+
+    assert.doesNotThrow(() => watcher.emit('error', new Error('late')))
+    assert.ok(!events.some((e) => e.type === 'error'))
+  })
 })

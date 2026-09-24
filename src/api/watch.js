@@ -124,6 +124,10 @@ export async function watchApi(slug, cwd = process.cwd(), options = {}) {
 
     try {
       const w = watch(sourcePath, { recursive: true }, handler)
+      w.on('error', (error) => {
+        if (closed) return
+        emit({ type: 'error', slug: s, path: sourcePath, error })
+      })
       watchers.push(w)
       emit({ type: 'watching', slug: s, path: sourcePath })
     } catch (error) {

@@ -324,7 +324,7 @@ Throws a `UserError` with code `WATCH_SKILL_NOT_FOUND` when `slug` is not instal
 | `start` | `slugs` | Before watchers are set up |
 | `skip` | `slug`, `sourceType` | A non-local skill was requested |
 | `watching` | `slug`, `path` | A watcher started |
-| `error` | `slug`, `path`, `error` | A watcher could not start |
+| `error` | `slug`, `path`, `error` | A watcher could not start, or reported an error later |
 | `syncing` | `slug`, `filename`, `startedAt` | A change triggered a re-install |
 | `synced` | `slug`, `ok`, `startedAt` | The re-install finished (`ok: false` on failure) |
 
