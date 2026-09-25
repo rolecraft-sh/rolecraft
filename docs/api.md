@@ -311,8 +311,22 @@ Watch installed local skills for file changes and auto-sync.
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `dryRun` | `boolean` | `false` | Preview only |
+| `onEvent` | `(event) => void` | none | Called for setup and sync events (see below) |
 
-Returns `{ watchers: FSWatcher[], skills: string[] }`. The caller is responsible for managing the watcher lifecycle.
+Returns `{ watchers: FSWatcher[], skills: string[], installedCount: number, close: () => void }`. Call `close()` to cancel pending syncs and close every watcher; it is safe to call more than once. With `dryRun`, returns `{ dryRun: true, skills: [{ slug, source, path }] }` instead.
+
+Throws a `UserError` with code `WATCH_SKILL_NOT_FOUND` when `slug` is not installed.
+
+`onEvent` receives objects with a `type` field:
+
+| `type` | Extra fields | When |
+|--------|--------------|------|
+| `start` | `slugs` | Before watchers are set up |
+| `skip` | `slug`, `sourceType` | A non-local skill was requested |
+| `watching` | `slug`, `path` | A watcher started |
+| `error` | `slug`, `path`, `error` | A watcher could not start, or reported an error later |
+| `syncing` | `slug`, `filename`, `startedAt` | A change triggered a re-install |
+| `synced` | `slug`, `ok`, `startedAt` | The re-install finished (`ok: false` on failure) |
 
 ### `convert(source, options?)`
 
