@@ -37,7 +37,7 @@ manifest and run the script — it updates every location automatically.
 | agent_count | apps.json:19 | 87 |
 | agent_count | apps.json:40 | 87 |
 | unpacked_size | benchmark/RESULTS.md:42 | 376.2 kB |
-| test_count | CONTRIBUTING.md:12 | 987 |
+| test_count | CONTRIBUTING.md:12 | 1000 |
 | agent_count | docs/agents.md:99 | 87 |
 | agent_count | docs/commands/agents.md:47 | 87 |
 | agent_count | docs/commands/agents.md:71 | 87 |
@@ -65,7 +65,7 @@ manifest and run the script — it updates every location automatically.
 | verified_count | README.md:54 | 27 |
 | unpacked_size | README.md:88 | 376.2 kB |
 | agent_count | README.md:90 | 87 |
-| test_count | README.md:162 | 987 |
+| test_count | README.md:162 | 1000 |
 | agent_count | SKILL.md:5 | 87 |
 | verified_count | SKILL.md:5 | 27 |
 | agent_count | SKILL.md:10 | 87 |

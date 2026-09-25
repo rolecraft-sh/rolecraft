@@ -159,7 +159,7 @@ git clone https://github.com/rolecraft-sh/rolecraft.git && cd rolecraft
 npm install                # sets up the pre-commit hook automatically
 npm link                   # rolecraft CLI runs from local checkout
 npm run lint               # syntax + Biome checks
-npm test                   # 987+ tests, 0 fails expected
+npm test                   # 1000+ tests, 0 fails expected
 ```
 
 A `pre-commit` hook runs lint automatically on every commit. Zero-runtime-dependency policy is preserved — Biome and VitePress are devDependencies only.
