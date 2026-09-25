@@ -1,11 +1,12 @@
 import { mkdir, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import {
   getTemplateNames,
   getTemplate,
   generateSkill,
 } from '../utils/templates/index.js'
 import { normalizeSlug } from '../utils/lockfile.js'
+import { initApi } from '../api/init.js'
 
 export async function initCommand(name, options = {}) {
   // Handle --list
@@ -19,15 +20,15 @@ export async function initCommand(name, options = {}) {
     return
   }
 
-  const skillName = name || 'my-skill'
-  const slug = skillName.includes('/') ? skillName : skillName
-  const displayName = slug.includes('/') ? slug.split('/')[1] : slug
-  const dirName = normalizeSlug(slug)
-  const dir = join(process.cwd(), dirName)
-  const owner = slug.includes('/') ? slug.split('/')[0] : 'local'
-
   // Handle --template
   if (options.template) {
+    const skillName = name || 'my-skill'
+    const slug = skillName.includes('/') ? skillName : skillName
+    const displayName = slug.includes('/') ? slug.split('/')[1] : slug
+    const dirName = normalizeSlug(slug)
+    const dir = join(process.cwd(), dirName)
+    const owner = slug.includes('/') ? slug.split('/')[0] : 'local'
+
     const opts = {
       name: displayName,
       slug,
@@ -53,23 +54,12 @@ export async function initCommand(name, options = {}) {
   }
 
   // Default: basic scaffold (backward compatible)
-  await mkdir(dir, { recursive: true })
-
-  const content = `---
-name: ${displayName}
-slug: ${slug}
-owner: ${owner}
-description: Describe what this skill does
----
-
-Write your skill instructions here.
-`
-
-  await writeFile(join(dir, 'SKILL.md'), content)
+  const result = await initApi(name)
+  const dir = dirname(result.path)
 
   console.log(`\n✅ Created skill scaffold at: ${dir}/SKILL.md`)
-  console.log(`   Slug: ${slug}`)
-  console.log(`   Name: ${displayName}\n`)
+  console.log(`   Slug: ${result.slug}`)
+  console.log(`   Name: ${result.name}\n`)
   console.log('Next steps:')
   console.log(`  1. Edit ${dir}/SKILL.md with your skill details`)
   console.log(`  2. rolecraft install ${dir}`)
