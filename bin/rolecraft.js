@@ -506,13 +506,13 @@ const COMMANDS = {
     validateFlags(flags, ['--dry-run'], 'watch')
     const pos = parsePositionals(args)
     const slug = pos[0]
-    const { watchers, close: closeWatchers } = await watchCommand(slug, process.cwd(), {
+    const { watchers, close } = await watchCommand(slug, process.cwd(), {
       dryRun: args.includes('--dry-run'),
     })
     if (watchers.length === 0) return
     process.on('SIGINT', () => {
       console.log('\nStopping watch...')
-      closeWatchers()
+      close() // cancels pending debounce
       process.exit(0)
     })
     await new Promise(() => {})
