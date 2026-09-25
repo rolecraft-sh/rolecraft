@@ -8,3 +8,7 @@ updates:
       prefix: "chore"
       include: "scope"
     open-pull-requests-limit: 5
+    groups:
+      codeql-action:
+        patterns:
+          - "github/codeql-action*"
