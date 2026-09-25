@@ -36,7 +36,7 @@ manifest and run the script — it updates every location automatically.
 | agent_count | apps.json:18 | 87 |
 | agent_count | apps.json:19 | 87 |
 | agent_count | apps.json:40 | 87 |
-| unpacked_size | benchmark/RESULTS.md:42 | 376.2 kB |
+| unpacked_size | benchmark/RESULTS.md:42 | 373.1 kB |
 | test_count | CONTRIBUTING.md:12 | 1000 |
 | agent_count | docs/agents.md:99 | 87 |
 | agent_count | docs/commands/agents.md:47 | 87 |
@@ -45,25 +45,25 @@ manifest and run the script — it updates every location automatically.
 | agent_count | docs/commands/doctor.md:25 | 87 |
 | agent_count | docs/commands/doctor.md:60 | 87 |
 | agent_count | docs/commands/doctor.md:77 | 87 |
-| unpacked_size | docs/comparison.md:10 | 376.2 kB |
+| unpacked_size | docs/comparison.md:10 | 373.1 kB |
 | agent_count | docs/comparison.md:11 | 87 |
 | agent_count | docs/guides/getting-started.md:18 | 87 |
 | verified_count | docs/guides/getting-started.md:18 | 27 |
 | agent_count | docs/index.md:7 | 87 |
 | verified_count | docs/index.md:7 | 27 |
-| unpacked_size | docs/index.md:26 | 376.2 kB |
+| unpacked_size | docs/index.md:26 | 373.1 kB |
 | agent_count | docs/index.md:38 | 87 |
 | verified_count | docs/index.md:38 | 27 |
-| unpacked_size | docs/migration-from-skills.md:10 | 376.2 kB |
+| unpacked_size | docs/migration-from-skills.md:10 | 373.1 kB |
 | agent_count | docs/migration-from-skills.md:11 | 87 |
 | agent_count | docs/migration-from-skills.md:55 | 87 |
 | agent_count | docs/reference.md:160 | 87 |
 | agent_count | package.json:4 | 87 |
 | agent_count | README.md:9 | 87 |
 | verified_count | README.md:9 | 27 |
-| unpacked_size | README.md:54 | 376.2 kB |
+| unpacked_size | README.md:54 | 373.1 kB |
 | verified_count | README.md:54 | 27 |
-| unpacked_size | README.md:88 | 376.2 kB |
+| unpacked_size | README.md:88 | 373.1 kB |
 | agent_count | README.md:90 | 87 |
 | test_count | README.md:162 | 1000 |
 | agent_count | SKILL.md:5 | 87 |
