@@ -5,6 +5,7 @@ import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { apiRemove } from './remove.js'
+import { UserError } from '../utils/errors.js'
 
 let tempDir, origHome
 
@@ -31,8 +32,16 @@ after(async () => {
 })
 
 describe('api remove', () => {
-  it('throws when skill not found', async () => {
-    await assert.rejects(apiRemove('nonexistent', tempDir), /not found/)
+  it('throws UserError with REMOVE_SKILL_NOT_FOUND for unknown slug', async () => {
+    await assert.rejects(
+      () => apiRemove('nonexistent', tempDir),
+      (err) => {
+        assert.ok(err instanceof UserError)
+        assert.equal(err.userCode, 'REMOVE_SKILL_NOT_FOUND')
+        assert.match(err.message, /not found/)
+        return true
+      },
+    )
   })
 
   it('shows dryRun plan', async () => {

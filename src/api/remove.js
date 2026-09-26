@@ -10,6 +10,7 @@ import {
 } from '../utils/lockfile.js'
 import { assertSafeSlug } from '../utils/installer.js'
 import agents, { getAgentByFlag } from '../agents.js'
+import { UserError } from '../utils/errors.js'
 
 function rebaseToCwd(dir, cwd) {
   const rel = relative(process.cwd(), dir)
@@ -65,7 +66,10 @@ export async function apiRemove(slug, cwd = process.cwd(), options = {}) {
   const projectFound = findActualSlug(slug, projectLock)
 
   if (!globalFound && !projectFound) {
-    throw new Error(`Skill "${slug}" not found.`)
+    throw new UserError(`Skill "${slug}" not found.`, {
+      suggestion: 'Run `rolecraft list` to see installed skills.',
+      code: 'REMOVE_SKILL_NOT_FOUND',
+    })
   }
 
   const actualSlug = globalFound || projectFound

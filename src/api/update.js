@@ -9,6 +9,7 @@ import {
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 import agents from '../agents.js'
+import { UserError } from '../utils/errors.js'
 
 function detectTargets(slug, cwd) {
   const normSlug = normalizeSlug(slug)
@@ -45,7 +46,10 @@ export async function apiUpdate(slug, cwd = process.cwd(), options = {}) {
     source = projectLock.skills[projectFound].source
     sourceType = projectLock.skills[projectFound].sourceType
   } else {
-    throw new Error(`Skill "${slug}" not found.`)
+    throw new UserError(`Skill "${slug}" not found.`, {
+      suggestion: 'Run `rolecraft list` to see installed skills.',
+      code: 'UPDATE_SKILL_NOT_FOUND',
+    })
   }
 
   const targets = detectTargets(actualSlug, cwd)

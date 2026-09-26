@@ -5,6 +5,7 @@ import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { apiUpdate } from './update.js'
+import { UserError } from '../utils/errors.js'
 
 let tempDir
 let originalHome
@@ -79,6 +80,18 @@ describe('api update', () => {
     await assert.rejects(
       () => apiUpdate('missing', tempDir),
       /Skill "missing" not found\./,
+    )
+  })
+
+  it('throws UserError with UPDATE_SKILL_NOT_FOUND for unknown slug', async () => {
+    await assert.rejects(
+      () => apiUpdate('nonexistent', tempDir),
+      (err) => {
+        assert.ok(err instanceof UserError)
+        assert.equal(err.userCode, 'UPDATE_SKILL_NOT_FOUND')
+        assert.match(err.message, /not found/)
+        return true
+      },
     )
   })
 })
