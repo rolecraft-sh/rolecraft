@@ -24,32 +24,32 @@ function findMdcFiles(dir, entries) {
 export async function convertApi(source, options = {}) {
   const expanded = expandTilde(source)
   const outDir = options.output || process.cwd()
-  const entries = await readdir(expanded, { withFileTypes: true }).catch(
-    async () => {
-      const content = await readFile(expanded, 'utf-8').catch(() => {
-        throw new Error(`Source not found: ${expanded}`)
-      })
 
-      const format = detectFormat(expanded)
-      if (!format) {
-        if (content.includes('slug:')) {
-          return await convertSingleFile(expanded, 'skill', outDir, options)
-        } else if (
-          content.includes('alwaysApply:') ||
-          content.includes('globs:')
-        ) {
-          return await convertSingleFile(expanded, 'mdc', outDir, options)
-        } else {
-          throw new Error(
-            `Cannot detect format. Name file SKILL.md (skill) or use .mdc extension.`,
-          )
-        }
+  let entries
+  try {
+    entries = await readdir(expanded, { withFileTypes: true })
+  } catch {
+    const content = await readFile(expanded, 'utf-8').catch(() => {
+      throw new Error(`Source not found: ${expanded}`)
+    })
+
+    const format = detectFormat(expanded)
+    if (!format) {
+      if (content.includes('slug:')) {
+        return [await convertSingleFile(expanded, 'skill', outDir, options)]
+      } else if (
+        content.includes('alwaysApply:') ||
+        content.includes('globs:')
+      ) {
+        return [await convertSingleFile(expanded, 'mdc', outDir, options)]
+      } else {
+        throw new Error(
+          `Cannot detect format. Name file SKILL.md (skill) or use .mdc extension.`,
+        )
       }
-      return [await convertSingleFile(expanded, format, outDir, options)]
-    },
-  )
-
-  if (!Array.isArray(entries)) return entries
+    }
+    return [await convertSingleFile(expanded, format, outDir, options)]
+  }
 
   const skillFile = findSkillFile(expanded, entries)
   if (skillFile) {
