@@ -1,4 +1,4 @@
-import { describe, it, before, after } from 'node:test'
+import { describe, it, before, beforeEach, after } from 'node:test'
 import assert from 'node:assert/strict'
 import { mkdtempSync, existsSync } from 'node:fs'
 import { mkdir, rm, writeFile, readFile } from 'node:fs/promises'
@@ -40,6 +40,12 @@ before(() => {
   process.chdir(projectDir)
 })
 
+beforeEach(async () => {
+  await rm(join(homeDir, '.agents'), { recursive: true, force: true })
+  await rm(join(projectDir, '.agents'), { recursive: true, force: true })
+  await rm(join(projectDir, 'AGENTS.md'), { force: true })
+})
+
 after(async () => {
   process.chdir(originalCwd)
   process.env.HOME = originalHome
@@ -48,15 +54,14 @@ after(async () => {
 })
 
 describe('agentsXmlApi', () => {
-  it('returns an empty xml with no written key when no skills are installed', async () => {
+  it('returns an empty xml with written false when no skills are installed', async () => {
     const result = await agentsXmlApi()
-    assert.deepEqual(result, { xml: '' })
-    assert.equal('written' in result, false)
+    assert.deepEqual(result, { xml: '', written: false })
   })
 
   it('does not create AGENTS.md when writeToFile is true but there are no skills', async () => {
     const result = await agentsXmlApi(true)
-    assert.deepEqual(result, { xml: '' })
+    assert.deepEqual(result, { xml: '', written: false })
     assert.ok(!existsSync(join(projectDir, 'AGENTS.md')))
   })
 
@@ -95,6 +100,38 @@ describe('agentsXmlApi', () => {
     assert.match(
       result.xml,
       /<name>Bar Skill<\/name>\s*<description>Does bar things<\/description>\s*<location>project<\/location>/,
+    )
+  })
+
+  it('derives location from the entry agents, not from the lockfile it came from', async () => {
+    await writeLock(homeDir, {
+      'acme/proj-in-global': {
+        slug: 'acme/proj-in-global',
+        agents: ['project'],
+        source: 'acme/proj-in-global',
+        sourceType: 'github',
+        installedAt: new Date().toISOString(),
+      },
+    })
+    await writeLock(projectDir, {
+      'acme/global-in-project': {
+        slug: 'acme/global-in-project',
+        agents: ['claude'],
+        source: 'acme/global-in-project',
+        sourceType: 'github',
+        installedAt: new Date().toISOString(),
+      },
+    })
+
+    const result = await agentsXmlApi()
+
+    assert.match(
+      result.xml,
+      /<name>acme\/proj-in-global<\/name>\s*<description><\/description>\s*<location>project<\/location>/,
+    )
+    assert.match(
+      result.xml,
+      /<name>acme\/global-in-project<\/name>\s*<description><\/description>\s*<location>global<\/location>/,
     )
   })
 
@@ -138,7 +175,6 @@ describe('agentsXmlApi', () => {
       },
     })
     await writeSkillDir(homeDir, 'acme-foo', 'Foo Skill', 'Does foo things')
-    await writeLock(projectDir, {})
 
     await writeFile(
       join(projectDir, 'AGENTS.md'),
@@ -158,7 +194,16 @@ describe('agentsXmlApi', () => {
   })
 
   it('creates AGENTS.md when it does not already exist', async () => {
-    await rm(join(projectDir, 'AGENTS.md'), { force: true })
+    await writeLock(homeDir, {
+      'acme/foo': {
+        slug: 'acme/foo',
+        agents: ['claude'],
+        source: 'acme/foo',
+        sourceType: 'github',
+        installedAt: new Date().toISOString(),
+      },
+    })
+    await writeSkillDir(homeDir, 'acme-foo', 'Foo Skill', 'Does foo things')
 
     const result = await agentsXmlApi(true)
 

@@ -27,9 +27,11 @@ export async function setupApi(source, options = {}) {
     }
   }
 
+  const requestedSkills = options.skill ? [].concat(options.skill) : []
+
   let selectedSkills
-  if (options.skill && options.skill.length > 0) {
-    const skillNames = options.skill.map((n) => n.toLowerCase())
+  if (requestedSkills.length > 0) {
+    const skillNames = requestedSkills.map((n) => n.toLowerCase())
     selectedSkills = allSkills.filter(
       (s) =>
         skillNames.includes(s.name.toLowerCase()) ||
@@ -37,7 +39,7 @@ export async function setupApi(source, options = {}) {
     )
     if (selectedSkills.length === 0) {
       throw new Error(
-        `No matching skills found for: ${options.skill.join(', ')}`,
+        `No matching skills found for: ${requestedSkills.join(', ')}`,
       )
     }
   } else if (allSkills.length === 1 || options.yes) {

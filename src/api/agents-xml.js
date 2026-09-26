@@ -105,7 +105,7 @@ export async function agentsXmlApi(writeToFile = false) {
   const xml = await generateXml(allSkills)
 
   if (!xml) {
-    return { xml: '' }
+    return { xml: '', written: false }
   }
 
   if (writeToFile) {

@@ -87,4 +87,24 @@ describe('setupApi', () => {
       /No matching skills found for: nonexistent/,
     )
   })
+
+  it('accepts a single skill name given as a string', async () => {
+    const result = await setupApi(skillDir, {
+      skill: 'my-skill',
+      dryRun: true,
+    })
+
+    assert.equal(result.dryRun, true)
+    assert.deepEqual(
+      result.skills.map((s) => s.slug),
+      ['my-skill'],
+    )
+  })
+
+  it('rejects when a string --skill matches no skill in the source', async () => {
+    await assert.rejects(
+      () => setupApi(skillDir, { skill: 'nonexistent' }),
+      /No matching skills found for: nonexistent/,
+    )
+  })
 })
