@@ -42,6 +42,10 @@ export async function upgradeApi(options = {}) {
     isUpToDate,
   }
 
+  if (typeof options.onCheck === 'function') {
+    options.onCheck({ ...result })
+  }
+
   if (options.dryRun) {
     result.dryRun = true
     return result
