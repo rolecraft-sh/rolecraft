@@ -573,6 +573,14 @@ Content
       }
     }
 
+    function redirectResponse(location) {
+      return {
+        ok: false,
+        status: 302,
+        headers: new Headers(location ? { location } : {}),
+      }
+    }
+
     function restoreFetch() {
       if (origFetch) globalThis.fetch = origFetch
     }
@@ -737,6 +745,139 @@ Content
         /Could not process npm package/,
       )
       restoreFetch()
+    })
+
+    it('rejects npm tarball redirects to hosts outside the allow list', async () => {
+      await freshImport()
+      mockHttps(resolverModule)
+      const originalFetch = globalThis.fetch
+      const calls = []
+      let tarInvoked = false
+      resolverModule.setSpawnSync((cmd) => {
+        if (cmd === 'tar') tarInvoked = true
+        return { status: 0, stdout: '', stderr: '' }
+      })
+      globalThis.fetch = async (url, options) => {
+        calls.push({ url, options })
+        return redirectResponse('https://evil.example.com/package.tgz')
+      }
+
+      try {
+        await assert.rejects(
+          () => resolverModule.resolveSource('npm:test-pkg'),
+          /Could not process npm package/,
+        )
+        assert.equal(tarInvoked, false)
+        assert.deepEqual(
+          calls.map((call) => call.url),
+          ['https://registry.npmjs.org/test-pkg/-/test-pkg-1.0.0.tgz'],
+        )
+        assert.equal(calls[0].options.redirect, 'manual')
+      } finally {
+        globalThis.fetch = originalFetch
+      }
+    })
+
+    it('follows npm tarball redirects that stay on the allowed host', async () => {
+      await freshImport()
+      mockHttps(resolverModule)
+      const originalFetch = globalThis.fetch
+      const calls = []
+      globalThis.fetch = async (url, options) => {
+        calls.push({ url, options })
+        if (calls.length === 1)
+          return redirectResponse('/redirected/package.tgz')
+        if (calls.length === 2) return redirectResponse('/final/package.tgz')
+        const readable = Readable.from([Buffer.from('fake-tarball')])
+        return {
+          ok: true,
+          status: 200,
+          headers: new Headers(),
+          body: Readable.toWeb(readable),
+        }
+      }
+      resolverModule.setSpawnSync((cmd, args) => {
+        if (cmd === 'tar' && args[0] === '-xzf') {
+          const extractDir = args[3]
+          const packageDir = join(extractDir, 'package')
+          mkdirSync(packageDir, { recursive: true })
+          writeFileSync(
+            join(packageDir, 'SKILL.md'),
+            '# slug: test/npm-skill\nname: npm-skill\nContent',
+          )
+        }
+        return { status: 0, stdout: '', stderr: '' }
+      })
+
+      try {
+        const result = await resolverModule.resolveSource('npm:test-pkg')
+        assert.equal(result.name, 'npm-skill')
+        assert.deepEqual(
+          calls.map((call) => call.url),
+          [
+            'https://registry.npmjs.org/test-pkg/-/test-pkg-1.0.0.tgz',
+            'https://registry.npmjs.org/redirected/package.tgz',
+            'https://registry.npmjs.org/final/package.tgz',
+          ],
+        )
+        assert.ok(calls.every((call) => call.options.redirect === 'manual'))
+      } finally {
+        globalThis.fetch = originalFetch
+      }
+    })
+
+    it('rejects unsafe, malformed, and unbounded npm tarball redirects before extraction', async () => {
+      const cases = [
+        [
+          'http://registry.npmjs.org/package.tgz',
+          /Could not process npm package/,
+        ],
+        [
+          'https://registry.npmjs.org:8443/package.tgz',
+          /Could not process npm package/,
+        ],
+        ['http://[::1', /Could not process npm package/],
+        [null, /Could not process npm package/],
+      ]
+
+      for (const [location, expected] of cases) {
+        await freshImport()
+        mockHttps(resolverModule)
+        const originalFetch = globalThis.fetch
+        let tarInvoked = false
+        resolverModule.setSpawnSync((cmd) => {
+          if (cmd === 'tar') tarInvoked = true
+          return { status: 0, stdout: '', stderr: '' }
+        })
+        globalThis.fetch = async () => redirectResponse(location)
+        try {
+          await assert.rejects(
+            () => resolverModule.resolveSource('npm:test-pkg'),
+            expected,
+          )
+          assert.equal(tarInvoked, false)
+        } finally {
+          globalThis.fetch = originalFetch
+        }
+      }
+
+      await freshImport()
+      mockHttps(resolverModule)
+      const originalFetch = globalThis.fetch
+      let calls = 0
+      globalThis.fetch = async () => {
+        calls++
+        return redirectResponse('/loop/package.tgz')
+      }
+      try {
+        await assert.rejects(
+          () => resolverModule.resolveSource('npm:test-pkg'),
+          /Could not process npm package/,
+        )
+        assert.equal(calls, 4)
+      } finally {
+        globalThis.fetch = originalFetch
+      }
     })
 
     it('throws when dist-tags.latest is missing', async () => {

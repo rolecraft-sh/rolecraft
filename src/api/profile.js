@@ -9,6 +9,7 @@ import {
   validateProfile,
 } from '../utils/profile.js'
 import { UserError } from '../utils/errors.js'
+import { fetchWithValidatedRedirects } from '../utils/fetch-redirects.js'
 
 export async function apiProfileSave(name, options = {}) {
   let agentsData
@@ -155,61 +156,41 @@ function assertAllowedProfileHost(url) {
   }
 }
 
-const isRedirect = (status) => status >= 300 && status < 400
-
-/**
- * Fetch a profile body, following redirects by hand.
- *
- * `redirect: 'follow'` would let any allowed host bounce the request to an
- * arbitrary origin, so the allow-list has to be re-checked on every hop rather
- * than only on the URL the user supplied.
- */
-async function fetchProfileBody(url) {
-  let current = url
-
-  for (let hop = 0; hop <= MAX_PROFILE_REDIRECTS; hop++) {
-    assertAllowedProfileHost(current)
-
-    const res = await fetch(current, { redirect: 'manual' })
-
-    if (!isRedirect(res.status)) {
-      if (!res.ok) {
-        throw new UserError(`Failed to fetch ${current}: ${res.status}`, {
-          code: 'PROFILE_FETCH_FAILED',
-        })
-      }
-      return res.text()
-    }
-
-    const location = res.headers.get('location')
-    if (!location) {
-      throw new UserError(
-        `Redirect from ${current} did not include a Location header.`,
-        { code: 'PROFILE_REDIRECT_INVALID' },
-      )
-    }
-
-    // Relative redirects are resolved against the URL that produced them.
-    let next
-    try {
-      next = new URL(location, current)
-    } catch {
-      throw new UserError(
-        `Redirect from ${current} pointed at an invalid URL: ${location}`,
-        { code: 'PROFILE_REDIRECT_INVALID' },
-      )
-    }
-
-    current = next.toString()
+function profileRedirectError(kind, context) {
+  if (kind === 'missing-location') {
+    return new UserError(
+      `Redirect from ${context.current} did not include a Location header.`,
+      { code: 'PROFILE_REDIRECT_INVALID' },
+    )
   }
-
-  throw new UserError(
-    `Too many redirects while importing profile from ${url} (limit ${MAX_PROFILE_REDIRECTS}).`,
+  if (kind === 'invalid-location') {
+    return new UserError(
+      `Redirect from ${context.current} pointed at an invalid URL: ${context.location}`,
+      { code: 'PROFILE_REDIRECT_INVALID' },
+    )
+  }
+  return new UserError(
+    `Too many redirects while importing profile from ${context.initial} (limit ${context.maxRedirects}).`,
     {
       suggestion: 'Use a direct link to the raw profile file.',
       code: 'PROFILE_REDIRECT_LIMIT',
     },
   )
+}
+
+async function fetchProfileBody(url) {
+  const { response, url: finalUrl } = await fetchWithValidatedRedirects(url, {
+    assertAllowed: assertAllowedProfileHost,
+    maxRedirects: MAX_PROFILE_REDIRECTS,
+    createError: profileRedirectError,
+  })
+
+  if (!response.ok) {
+    throw new UserError(`Failed to fetch ${finalUrl}: ${response.status}`, {
+      code: 'PROFILE_FETCH_FAILED',
+    })
+  }
+  return response.text()
 }
 
 export async function apiProfileImport(path) {

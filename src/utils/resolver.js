@@ -10,6 +10,7 @@ import { computeContentHash } from './lockfile.js'
 import { parseFrontmatter } from './converter.js'
 import { UserError } from './errors.js'
 import { expandTilde } from './paths.js'
+import { fetchWithValidatedRedirects } from './fetch-redirects.js'
 
 const SCAN_MAX_DEPTH = 3
 
@@ -448,14 +449,22 @@ function fetchJson(url) {
 }
 
 async function downloadFile(url, dest) {
-  const parsed = new URL(url)
-  const dlHost = parsed.hostname
-  if (dlHost !== 'registry.npmjs.org') {
-    throw new Error(`Download not allowed from ${dlHost}`)
+  const assertAllowed = (candidate) => {
+    const { hostname, protocol, port, username, password } = new URL(candidate)
+    if (hostname !== 'registry.npmjs.org') {
+      throw new Error(`Download not allowed from ${hostname}`)
+    }
+    if (protocol !== 'https:' || port || username || password) {
+      throw new Error(`Download URL is not allowed: ${candidate}`)
+    }
   }
-  const dlUrl = `https://${dlHost}${parsed.pathname}${parsed.search}`
+  const parsed = new URL(url)
+  const dlUrl = `https://${parsed.hostname}${parsed.pathname}${parsed.search}`
 
-  const response = await fetch(dlUrl)
+  const { response } = await fetchWithValidatedRedirects(dlUrl, {
+    assertAllowed,
+    maxRedirects: 3,
+  })
   if (!response.ok) {
     throw new Error(`Failed to download: HTTP ${response.status}`)
   }
