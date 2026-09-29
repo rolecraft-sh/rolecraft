@@ -63,3 +63,16 @@ GitHub Actions:
 - Re-signs the tag on the new commit (uses the SSH or GPG key from secrets)
 - Creates a release PR
 - After the PR is merged, the package is published to npm
+
+## Contributors
+
+Every changelog entry is credited to the author of the commit it came from:
+
+```
+- fix: align header logo with sidebar nav icons by @makifbaysal in [#65](https://github.com/rolecraft-sh/rolecraft/pull/65)
+```
+
+`release-prep.sh` resolves the GitHub login from the commit author email — inline for `12345+login@users.noreply.github.com`, via the API for real addresses — and skips anyone whose login ends in `[bot]`, so Dependabot bumps are listed without a name.
+
+The @mention is load-bearing, not decoration. GitHub builds the release's **Contributors** avatar list from the @mentions in the release body, and the release body is the changelog section verbatim. A changelog that never mentions anyone produces a release with no Contributors section at all. Writing a `### Contributors` list by hand would be redundant — the mention is the only thing that has to be there.
+

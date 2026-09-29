@@ -14,10 +14,81 @@ echo "Previous tag: $PREVIOUS_TAG"
 echo "Current tag:  $NEW_TAG"
 
 if [ -n "$PREVIOUS_TAG" ]; then
-  COMMITS=$(git log "$PREVIOUS_TAG..$NEW_TAG" --oneline --no-decorate --no-merges 2>/dev/null || true)
+  LOG_RANGE=("$PREVIOUS_TAG..$NEW_TAG")
 else
-  COMMITS=$(git log --oneline --no-decorate --no-merges "$NEW_TAG" 2>/dev/null || true)
+  LOG_RANGE=("$NEW_TAG")
 fi
+
+# sha <TAB> author email <TAB> subject
+COMMITS=$(git log "${LOG_RANGE[@]}" --no-merges --format='%h%x09%aE%x09%s' 2>/dev/null || true)
+
+# ---------------------------------------------------------------------------
+# Contributor attribution
+#
+# GitHub renders a Contributors section with an avatar list from the @mentions
+# in a release body, so crediting each entry with its author is what actually
+# surfaces contributors on the release page. Without a mention the section
+# simply does not render.
+#
+# Bots are skipped: a Dependabot bump is not a contribution, and listing one
+# avatar next to a human's reads as noise.
+# ---------------------------------------------------------------------------
+
+REPO="${GITHUB_REPOSITORY:-$(git config --get remote.origin.url | sed -E 's#.*github\.com[:/]([^/]+/[^/.]+).*#\1#')}"
+LOGIN_CACHE=$(mktemp)
+trap 'rm -f "$LOGIN_CACHE"' EXIT
+
+# GitHub logins are not in the commit message, so recover them from the author
+# email where possible and only fall back to the API for real addresses.
+# Results are cached because a release repeats the same author many times.
+resolve_login() {
+  local email="$1" sha="$2"
+
+  local cached
+  cached=$(grep -F "$email" "$LOGIN_CACHE" 2>/dev/null | head -1 | cut -f2)
+  if [ -n "$cached" ]; then
+    printf '%s' "$cached"
+    return
+  fi
+
+  local login=""
+  if [[ "$email" =~ ^[0-9]+\+([A-Za-z0-9_-]+)@users\.noreply\.github\.com$ ]]; then
+    # `12345+login@users.noreply.github.com` carries the login inline.
+    login="${BASH_REMATCH[1]}"
+  elif [[ "$email" =~ ^([A-Za-z0-9_-]+(\[[a-z]+\])?)@users\.noreply\.github\.com$ ]]; then
+    login="${BASH_REMATCH[1]}"
+  elif [ -n "$REPO" ]; then
+    login=$(gh api "repos/$REPO/commits/$sha" --jq '.author.login // empty' 2>/dev/null || true)
+  fi
+
+  if [ -n "$login" ]; then
+    printf '%s\t%s\n' "$email" "$login" >> "$LOGIN_CACHE"
+  fi
+
+  printf '%s' "$login"
+}
+
+# " by @login", or empty when the author is a bot or unresolvable.
+attribution() {
+  local email="$1" sha="$2" login
+
+  login=$(resolve_login "$email" "$sha")
+  [ -z "$login" ] && return 0
+
+  case "$login" in
+  *"[bot]"*) return 0 ;;
+  esac
+
+  printf ' by @%s' "$login"
+}
+
+# " in [#123](url)", or empty when the subject names no PR.
+pr_credit() {
+  local msg="$1"
+
+  [[ "$msg" =~ \(#([0-9]+)\) ]] || return 0
+  printf ' in [#%s](https://github.com/%s/pull/%s)' "${BASH_REMATCH[1]}" "$REPO" "${BASH_REMATCH[1]}"
+}
 
 DATE=$(date +%Y-%m-%d)
 
@@ -28,24 +99,29 @@ REMOVED=""
 DOCS=""
 OTHER=""
 
-while IFS= read -r line; do
-  [ -z "$line" ] && continue
-  MSG=$(echo "$line" | sed 's/^[a-f0-9]\{7,\} //')
+while IFS=$'\t' read -r SHA EMAIL MSG; do
+  [ -z "$MSG" ] && continue
+
+  CREDITS="$(attribution "$EMAIL" "$SHA")$(pr_credit "$MSG")"
+
+  # The PR is credited once, at the end of the line, so the reference the
+  # subject already carries is dropped from the line itself.
+  CLEAN=$(echo "$MSG" | sed -E 's/^[^:]*:\s*//; s/ \(#[0-9]+\)$//')
 
   if echo "$MSG" | grep -qiE '^(feat|feature)(\(.*\))?:' || echo "$MSG" | grep -qiE '^added'; then
-    CLEAN=$(echo "$MSG" | sed -E 's/^[^:]*:\s*//')
-    ADDED="$ADDED\n- $CLEAN"
+    ADDED="$ADDED\n- $CLEAN$CREDITS"
   elif echo "$MSG" | grep -qiE '^fix(\(.*\))?:' || echo "$MSG" | grep -qiE '^fixed'; then
-    CLEAN=$(echo "$MSG" | sed -E 's/^[^:]*:\s*//')
-    FIXED="$FIXED\n- $CLEAN"
+    FIXED="$FIXED\n- $CLEAN$CREDITS"
   elif echo "$MSG" | grep -qiE '^docs?(\(.*\))?:'; then
-    CLEAN=$(echo "$MSG" | sed -E 's/^[^:]*:\s*//')
-    DOCS="$DOCS\n- $CLEAN"
+    DOCS="$DOCS\n- $CLEAN$CREDITS"
   elif echo "$MSG" | grep -qiE '^(chore|refactor|perf|test|ci|style)(\(.*\))?:'; then
-    CLEAN=$(echo "$MSG" | sed -E 's/^[^:]*:\s*//')
-    CHANGED="$CHANGED\n- $CLEAN"
+    CHANGED="$CHANGED\n- $CLEAN$CREDITS"
   else
-    OTHER="$OTHER\n- $MSG"
+    # Uncategorized entries keep their whole subject rather than dropping the
+    # conventional-commit prefix, so the PR reference is stripped here too or
+    # the same number ends up on the line twice.
+    FULL=$(echo "$MSG" | sed -E 's/ \(#[0-9]+\)$//')
+    OTHER="$OTHER\n- $FULL$CREDITS"
   fi
 done <<< "$COMMITS"
 
