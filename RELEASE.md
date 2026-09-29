@@ -76,12 +76,3 @@ Every changelog entry is credited to the author of the commit it came from:
 
 The @mention is load-bearing, not decoration. GitHub builds the release's **Contributors** avatar list from the @mentions in the release body, and the release body is the changelog section verbatim. A changelog that never mentions anyone produces a release with no Contributors section at all. Writing a `### Contributors` list by hand would be redundant — the mention is the only thing that has to be there.
 
-## Backfilling Older Releases
-
-`scripts/backfill-release-contributors.mjs` applies the same attribution to already-published releases, matching each changelog line back to its commit through the `(#123)` reference that squash-merge subjects carry. It is idempotent, and it refuses to touch anything until you ask it to:
-
-```bash
-node scripts/backfill-release-contributors.mjs --dry-run   # print what would change
-node scripts/backfill-release-contributors.mjs             # rewrite the releases
-```
-
