@@ -81,6 +81,8 @@ docs: update installation guide
 chore: bump dependencies
 ```
 
+Once your PR is merged, its title becomes a line in the next release's changelog credited to you, and you appear in that release's Contributors list. Nothing extra to do — squash-merge is the default here, and GitHub records you as the commit author.
+
 ## Open a Pull Request
 
 1. Push your branch and open a PR against `main`
