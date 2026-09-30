@@ -10,7 +10,7 @@ import {
 } from 'node:fs/promises'
 import { join, dirname } from 'node:path'
 import { createHash } from 'node:crypto'
-import { getAgentByFlag } from '../agents.js'
+import AGENTS_DATA, { getAgentByFlag } from '../agents.js'
 import { home } from './paths.js'
 import { UserError } from './errors.js'
 
@@ -33,7 +33,7 @@ export function getAgentsDir() {
  * Falls back to ~/.agents/skills for unknown flags.
  */
 export function getDirForAgent(flag) {
-  const agent = getAgentByFlag(flag)
+  const agent = getAgentByFlag(flag) || AGENTS_DATA.find((a) => a.name === flag)
 
   if (agent) {
     return agent.getDir()

@@ -16,6 +16,7 @@ import {
   getGlobalLockPath,
   getProjectLockPath,
   computeFileHashes,
+  getDirForAgent,
   normalizeSlug,
   readLock,
 } from './lockfile.js'
@@ -143,8 +144,17 @@ export async function removeLatestBackup(slug) {
   await rm(backups[0].path, { force: true }).catch(() => {})
 }
 
+function getTargetSkillDir(target, cwd) {
+  return target === 'project'
+    ? join(cwd, '.agents', 'skills')
+    : getDirForAgent(target)
+}
+
 async function assertNoSlugCollision(slug, targets, cwd = process.cwd()) {
   const normalizedSlug = normalizeSlug(slug)
+  const targetSkillDirs = new Set(
+    targets.map((target) => getTargetSkillDir(target, cwd)),
+  )
   const lockPaths = new Set(
     targets.map((target) =>
       target === 'project' ? getProjectLockPath(cwd) : getGlobalLockPath(),
@@ -153,13 +163,19 @@ async function assertNoSlugCollision(slug, targets, cwd = process.cwd()) {
 
   for (const lockPath of lockPaths) {
     const lock = await readLock(lockPath)
-    const existingSlug = Object.keys(lock.skills || {}).find(
-      (entry) => entry !== slug && normalizeSlug(entry) === normalizedSlug,
-    )
 
-    if (existingSlug) {
+    for (const [entry, value] of Object.entries(lock.skills || {})) {
+      if (entry === slug || normalizeSlug(entry) !== normalizedSlug) continue
+
+      const existingAgentNames = value?.agents
+      const overlapsTarget = existingAgentNames?.some((agentName) =>
+        targetSkillDirs.has(getTargetSkillDir(agentName, cwd)),
+      )
+
+      if (existingAgentNames?.length && !overlapsTarget) continue
+
       throw new UserError(
-        `Cannot install "${slug}": it conflicts with existing slug "${existingSlug}" because both map to the same install directory.`,
+        `Cannot install "${slug}": it conflicts with existing slug "${entry}" because both map to the same install directory.`,
         {
           suggestion: 'Remove the existing skill before installing this slug.',
           code: 'SLUG_COLLISION',

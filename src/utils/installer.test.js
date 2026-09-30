@@ -616,6 +616,175 @@ describe('installer', () => {
     assert.equal(results.length, 0)
   })
 
+  it('allows normalized slug collisions for disjoint agent directories', async () => {
+    const collidingSkill = {
+      ...resolvedSkill,
+      slug: 'collision/skill',
+      sourcePath: 'collision/source',
+    }
+
+    writeFileSync(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'collision-skill': {
+            slug: 'collision-skill',
+            agents: ['claude-code'],
+            source: 'collision/source',
+            sourceType: 'local',
+            installedAt: new Date().toISOString(),
+          },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
+
+    const results = await installerModule.installSkill(collidingSkill, [
+      'cursor',
+    ])
+
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'cursor')
+    assert.ok(existsSync(join(tempDir, '.cursor', 'skills', 'collision-skill')))
+  })
+
+  it('rejects normalized slug collisions for overlapping agent directories', async () => {
+    const collidingSkill = {
+      ...resolvedSkill,
+      slug: 'overlap/skill',
+      sourcePath: 'overlap/source',
+    }
+
+    writeFileSync(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'overlap-skill': {
+            slug: 'overlap-skill',
+            agents: ['cursor'],
+            source: 'overlap/source',
+            sourceType: 'local',
+            installedAt: new Date().toISOString(),
+          },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
+
+    await assert.rejects(
+      () => installerModule.installSkill(collidingSkill, ['cursor']),
+      (err) => err.userCode === 'SLUG_COLLISION',
+    )
+  })
+
+  it('rejects normalized slug collisions for agent aliases sharing a directory', async () => {
+    const collidingSkill = {
+      ...resolvedSkill,
+      slug: 'alias/skill',
+      sourcePath: 'alias/source',
+    }
+
+    writeFileSync(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'alias-skill': {
+            slug: 'alias-skill',
+            agents: ['zed'],
+            source: 'alias/source',
+            sourceType: 'local',
+            installedAt: new Date().toISOString(),
+          },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
+
+    await assert.rejects(
+      () => installerModule.installSkill(collidingSkill, ['codex']),
+      (err) => err.userCode === 'SLUG_COLLISION',
+    )
+  })
+
+  it('rejects normalized slug collisions when existing lock agents are missing', async () => {
+    const collidingSkill = {
+      ...resolvedSkill,
+      slug: 'legacy/skill',
+      sourcePath: 'legacy/source',
+    }
+
+    writeFileSync(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'legacy-skill': {
+            slug: 'legacy-skill',
+            source: 'legacy/source',
+            sourceType: 'local',
+            installedAt: new Date().toISOString(),
+          },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
+
+    await assert.rejects(
+      () => installerModule.installSkill(collidingSkill, ['codex']),
+      (err) => err.userCode === 'SLUG_COLLISION',
+    )
+  })
+
+  it('rejects normalized project slug collisions outside the home directory', async () => {
+    const projectDir = mkdtempSync(join(tmpdir(), 'rolecraft-project-'))
+    const collidingSkill = {
+      ...resolvedSkill,
+      slug: 'project/skill',
+      sourcePath: 'project/source',
+    }
+
+    try {
+      mkdirSync(join(projectDir, '.agents'), { recursive: true })
+      writeFileSync(
+        join(projectDir, '.agents', '.skill-lock.json'),
+        JSON.stringify({
+          version: 3,
+          skills: {
+            'project-skill': {
+              slug: 'project-skill',
+              agents: ['project'],
+              source: 'project/source',
+              sourceType: 'local',
+              installedAt: new Date().toISOString(),
+            },
+          },
+          dismissed: {},
+          lastSelectedAgents: [],
+        }),
+      )
+
+      await assert.rejects(
+        () =>
+          installerModule.installSkill(
+            collidingSkill,
+            ['project'],
+            'copy',
+            projectDir,
+          ),
+        (err) => err.userCode === 'SLUG_COLLISION',
+      )
+    } finally {
+      await rm(projectDir, { recursive: true, force: true })
+    }
+  })
+
   it('handles missing source files gracefully', async () => {
     const badResolved = {
       ...resolvedSkill,
