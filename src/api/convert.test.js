@@ -82,24 +82,40 @@ describe('convertApi', () => {
     assert.ok(result.every((r) => r.format === 'mdc-to-skill'))
   })
 
-  it('dry-run returns a plan without writing the file', async () => {
-    const skillPath = join(tempDir, 'dry-SKILL.md')
-    await writeFile(skillPath, '---\nname: dry\nslug: dry\n---\nBody\n')
+  for (const { title, file, content, expectedOut } of [
+    {
+      title: 'dry-run returns a plan without writing the file',
+      file: 'dry-SKILL.md',
+      content: '---\nname: dry\nslug: dry\n---\nBody\n',
+      expectedOut: 'dry.mdc',
+    },
+    {
+      title: 'dry-run returns a plan for an .mdc file without writing SKILL.md',
+      file: 'dry-rule.mdc',
+      content: '---\ndescription: Dry rule\nalwaysApply: false\n---\nBody\n',
+      expectedOut: 'SKILL.md',
+    },
+  ]) {
+    it(title, async () => {
+      const srcPath = join(tempDir, file)
+      const outDir = join(tempDir, `out-${file}`)
+      await writeFile(srcPath, content)
 
-    const result = await convertApi(skillPath, {
-      dryRun: true,
-      output: tempDir,
-    })
-
-    assert.deepEqual(result, [
-      {
+      const result = await convertApi(srcPath, {
         dryRun: true,
-        from: skillPath,
-        to: join(tempDir, 'dry.mdc'),
-      },
-    ])
-    assert.ok(!existsSync(join(tempDir, 'dry.mdc')))
-  })
+        output: outDir,
+      })
+
+      assert.deepEqual(result, [
+        {
+          dryRun: true,
+          from: srcPath,
+          to: join(outDir, expectedOut),
+        },
+      ])
+      assert.ok(!existsSync(join(outDir, expectedOut)))
+    })
+  }
 
   it('detects skill format by content when the filename is ambiguous', async () => {
     const ambiguousPath = join(tempDir, 'rules.txt')
