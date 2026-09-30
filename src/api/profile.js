@@ -9,6 +9,7 @@ import {
   validateProfile,
 } from '../utils/profile.js'
 import { UserError } from '../utils/errors.js'
+import { fetchFollowingRedirects } from '../utils/http-fetch.js'
 
 export async function apiProfileSave(name, options = {}) {
   let agentsData
@@ -155,61 +156,31 @@ function assertAllowedProfileHost(url) {
   }
 }
 
-const isRedirect = (status) => status >= 300 && status < 400
-
 /**
  * Fetch a profile body, following redirects by hand.
  *
  * `redirect: 'follow'` would let any allowed host bounce the request to an
  * arbitrary origin, so the allow-list has to be re-checked on every hop rather
- * than only on the URL the user supplied.
+ * than only on the URL the user supplied. The loop itself lives in
+ * `utils/http-fetch.js` so the npm tarball download can share it instead of
+ * growing a second copy.
  */
 async function fetchProfileBody(url) {
-  let current = url
+  const { response, url: finalUrl } = await fetchFollowingRedirects(url, {
+    assertAllowed: assertAllowedProfileHost,
+    maxRedirects: MAX_PROFILE_REDIRECTS,
+    subject: `importing profile from ${url}`,
+    codeBase: 'PROFILE_REDIRECT',
+    suggestion: 'Use a direct link to the raw profile file.',
+  })
 
-  for (let hop = 0; hop <= MAX_PROFILE_REDIRECTS; hop++) {
-    assertAllowedProfileHost(current)
-
-    const res = await fetch(current, { redirect: 'manual' })
-
-    if (!isRedirect(res.status)) {
-      if (!res.ok) {
-        throw new UserError(`Failed to fetch ${current}: ${res.status}`, {
-          code: 'PROFILE_FETCH_FAILED',
-        })
-      }
-      return res.text()
-    }
-
-    const location = res.headers.get('location')
-    if (!location) {
-      throw new UserError(
-        `Redirect from ${current} did not include a Location header.`,
-        { code: 'PROFILE_REDIRECT_INVALID' },
-      )
-    }
-
-    // Relative redirects are resolved against the URL that produced them.
-    let next
-    try {
-      next = new URL(location, current)
-    } catch {
-      throw new UserError(
-        `Redirect from ${current} pointed at an invalid URL: ${location}`,
-        { code: 'PROFILE_REDIRECT_INVALID' },
-      )
-    }
-
-    current = next.toString()
+  if (!response.ok) {
+    throw new UserError(`Failed to fetch ${finalUrl}: ${response.status}`, {
+      code: 'PROFILE_FETCH_FAILED',
+    })
   }
 
-  throw new UserError(
-    `Too many redirects while importing profile from ${url} (limit ${MAX_PROFILE_REDIRECTS}).`,
-    {
-      suggestion: 'Use a direct link to the raw profile file.',
-      code: 'PROFILE_REDIRECT_LIMIT',
-    },
-  )
+  return response.text()
 }
 
 export async function apiProfileImport(path) {

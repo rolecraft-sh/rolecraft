@@ -140,6 +140,42 @@ describe('apiRollback', () => {
     assert.ok(result.targets.includes('cursor'))
   })
 
+  it('dry-run leaves the lockfile byte-identical', async () => {
+    const drySlug = 'dry-run-untouched'
+    await setupLockfile({
+      [drySlug]: {
+        slug: drySlug,
+        contentSha: 'current-sha',
+        fileHashes: { 'SKILL.md': 'current-hash' },
+        source: 'owner/repo@current',
+        agents: ['cursor'],
+        installedAt: '2026-09-01T00:00:00.000Z',
+        history: [
+          {
+            contentSha: 'older-sha',
+            fileHashes: { 'SKILL.md': 'older-hash' },
+            source: 'owner/repo@older',
+            installedAt: '2026-07-01T00:00:00.000Z',
+          },
+          {
+            contentSha: 'previous-sha',
+            fileHashes: { 'SKILL.md': 'previous-hash' },
+            source: 'owner/repo@previous',
+            installedAt: '2026-08-01T00:00:00.000Z',
+          },
+        ],
+      },
+    })
+    await setupBackup(drySlug, backupContent, 'backup-001')
+    const lockPath = join(tempDir, '.agents', '.skill-lock.json')
+    const before = await readFile(lockPath, 'utf-8')
+
+    const result = await rollbackModule.apiRollback(drySlug, { dryRun: true })
+
+    assert.equal(await readFile(lockPath, 'utf-8'), before)
+    assert.equal(result.prevContentSha, 'previous-sha')
+  })
+
   it('restores files from the most recent backup', async () => {
     // Set up a fresh skill with history + backup
     const freshSlug = 'fresh-rollback'

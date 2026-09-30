@@ -1,4 +1,4 @@
-import { describe, it, before, after } from 'node:test'
+import { describe, it, before, after, afterEach } from 'node:test'
 import assert from 'node:assert/strict'
 import { mkdtempSync, mkdirSync, writeFileSync, symlinkSync } from 'node:fs'
 import { rm } from 'node:fs/promises'
@@ -573,6 +573,14 @@ Content
       }
     }
 
+    function redirectResponse(location) {
+      return {
+        ok: false,
+        status: 302,
+        headers: new Headers(location ? { location } : {}),
+      }
+    }
+
     function restoreFetch() {
       if (origFetch) globalThis.fetch = origFetch
     }
@@ -739,6 +747,143 @@ Content
       restoreFetch()
     })
 
+    it('rejects npm tarball redirects to hosts outside the allow list', async () => {
+      await freshImport()
+      mockHttps(resolverModule)
+      const originalFetch = globalThis.fetch
+      const calls = []
+      let tarInvoked = false
+      resolverModule.setSpawnSync((cmd) => {
+        if (cmd === 'tar') tarInvoked = true
+        return { status: 0, stdout: '', stderr: '' }
+      })
+      globalThis.fetch = async (url, options) => {
+        calls.push({ url, options })
+        return redirectResponse('https://evil.example.com/package.tgz')
+      }
+
+      try {
+        await assert.rejects(
+          () => resolverModule.resolveSource('npm:test-pkg'),
+          (err) =>
+            err.userCode === 'NPM_TARBALL_HOST_NOT_ALLOWED' &&
+            // The refusal names the host that was actually refused, rather than
+            // hiding it behind "the package may be corrupted".
+            err.message.includes('evil.example.com'),
+        )
+        assert.equal(tarInvoked, false)
+        assert.deepEqual(
+          calls.map((call) => call.url),
+          ['https://registry.npmjs.org/test-pkg/-/test-pkg-1.0.0.tgz'],
+        )
+        assert.equal(calls[0].options.redirect, 'manual')
+      } finally {
+        globalThis.fetch = originalFetch
+      }
+    })
+
+    it('follows npm tarball redirects that stay on the allowed host', async () => {
+      await freshImport()
+      mockHttps(resolverModule)
+      const originalFetch = globalThis.fetch
+      const calls = []
+      globalThis.fetch = async (url, options) => {
+        calls.push({ url, options })
+        if (calls.length === 1)
+          return redirectResponse('/redirected/package.tgz')
+        if (calls.length === 2) return redirectResponse('/final/package.tgz')
+        const readable = Readable.from([Buffer.from('fake-tarball')])
+        return {
+          ok: true,
+          status: 200,
+          headers: new Headers(),
+          body: Readable.toWeb(readable),
+        }
+      }
+      resolverModule.setSpawnSync((cmd, args) => {
+        if (cmd === 'tar' && args[0] === '-xzf') {
+          const extractDir = args[3]
+          const packageDir = join(extractDir, 'package')
+          mkdirSync(packageDir, { recursive: true })
+          writeFileSync(
+            join(packageDir, 'SKILL.md'),
+            '# slug: test/npm-skill\nname: npm-skill\nContent',
+          )
+        }
+        return { status: 0, stdout: '', stderr: '' }
+      })
+
+      try {
+        const result = await resolverModule.resolveSource('npm:test-pkg')
+        assert.equal(result.name, 'npm-skill')
+        assert.deepEqual(
+          calls.map((call) => call.url),
+          [
+            'https://registry.npmjs.org/test-pkg/-/test-pkg-1.0.0.tgz',
+            'https://registry.npmjs.org/redirected/package.tgz',
+            'https://registry.npmjs.org/final/package.tgz',
+          ],
+        )
+        assert.ok(calls.every((call) => call.options.redirect === 'manual'))
+      } finally {
+        globalThis.fetch = originalFetch
+      }
+    })
+
+    it('rejects unsafe, malformed, and unbounded npm tarball redirects before extraction', async () => {
+      const cases = [
+        [
+          'http://registry.npmjs.org/package.tgz',
+          'NPM_TARBALL_HOST_NOT_ALLOWED',
+        ],
+        [
+          'https://registry.npmjs.org:8443/package.tgz',
+          'NPM_TARBALL_HOST_NOT_ALLOWED',
+        ],
+        ['http://[::1', 'NPM_TARBALL_REDIRECT_INVALID'],
+        [null, 'NPM_TARBALL_REDIRECT_INVALID'],
+      ]
+
+      for (const [location, userCode] of cases) {
+        await freshImport()
+        mockHttps(resolverModule)
+        const originalFetch = globalThis.fetch
+        let tarInvoked = false
+        resolverModule.setSpawnSync((cmd) => {
+          if (cmd === 'tar') tarInvoked = true
+          return { status: 0, stdout: '', stderr: '' }
+        })
+        globalThis.fetch = async () => redirectResponse(location)
+        try {
+          await assert.rejects(
+            () => resolverModule.resolveSource('npm:test-pkg'),
+            (err) => err.userCode === userCode,
+          )
+          assert.equal(tarInvoked, false)
+        } finally {
+          globalThis.fetch = originalFetch
+        }
+      }
+
+      await freshImport()
+      mockHttps(resolverModule)
+      const originalFetch = globalThis.fetch
+      let calls = 0
+      globalThis.fetch = async () => {
+        calls++
+        return redirectResponse('/loop/package.tgz')
+      }
+      try {
+        await assert.rejects(
+          () => resolverModule.resolveSource('npm:test-pkg'),
+          (err) => err.userCode === 'NPM_TARBALL_REDIRECT_LIMIT',
+        )
+        assert.equal(calls, 4)
+      } finally {
+        globalThis.fetch = originalFetch
+      }
+    })
+
     it('throws when dist-tags.latest is missing', async () => {
       await freshImport()
       resolverModule.setHttpsGet((...args) => {
@@ -820,6 +965,285 @@ Content
         )
         assert.equal(result.name, 'scoped-version-skill')
         assert.equal(result.sourceType, 'npm')
+      })
+    })
+    describe('tarball redirects', () => {
+      const TARBALL = 'https://registry.npmjs.org/test-pkg/-/test-pkg-1.0.0.tgz'
+      const EVIL = 'https://evil.example.com/payload.tgz'
+
+      let savedFetch = null
+      let tarCalls = []
+
+      function tarballResponse() {
+        return {
+          ok: true,
+          status: 200,
+          headers: new Headers(),
+          body: Readable.toWeb(Readable.from([Buffer.from('fake-tarball')])),
+        }
+      }
+
+      function redirectTo(location) {
+        return {
+          ok: false,
+          status: 302,
+          headers: new Headers(location ? { location } : {}),
+          body: Readable.toWeb(Readable.from([])),
+        }
+      }
+
+      const isRedirectStatus = (status) => status >= 300 && status < 400
+
+      // Response-shaped objects keyed by URL, recording every request actually
+      // made so a test can prove an off-host hop was never even attempted.
+      function stubFetch(routes) {
+        const calls = []
+        savedFetch = globalThis.fetch
+
+        const respond = async (url) => {
+          const handler = routes[url]
+          if (!handler) throw new Error(`unexpected fetch to ${url}`)
+          return handler()
+        }
+
+        globalThis.fetch = async (url, options) => {
+          calls.push({ url, options })
+
+          // Stands in for the behaviour that made this exploitable: a fetch that
+          // is not told to stop follows Location itself, so a caller which drops
+          // the guard quietly ends up downloading from the redirect target. Only
+          // `redirect: 'manual'` hands that decision back to the caller.
+          let target = url
+          let res = await respond(target)
+
+          for (
+            let hop = 0;
+            hop < 10 &&
+            options?.redirect !== 'manual' &&
+            isRedirectStatus(res.status) &&
+            res.headers.get('location');
+            hop++
+          ) {
+            target = new URL(res.headers.get('location'), target).toString()
+            calls.push({ url: target, options })
+            res = await respond(target)
+          }
+
+          return res
+        }
+
+        return calls
+      }
+
+      // Records every tar invocation. A refused download must never reach
+      // extraction, and `tar -tf` would still mean a body was written.
+      function stubTar() {
+        tarCalls = []
+        resolverModule.setSpawnSync((cmd, args) => {
+          if (cmd === 'tar') tarCalls.push(args.slice())
+          if (cmd === 'tar' && args[0] === '-xzf') {
+            const packageDir = join(args[3], 'package')
+            mkdirSync(packageDir, { recursive: true })
+            writeFileSync(
+              join(packageDir, 'SKILL.md'),
+              '# slug: s/redirected\nname: redirected\nContent',
+            )
+          }
+          return { status: 0, stdout: '', stderr: '' }
+        })
+      }
+
+      afterEach(() => {
+        if (savedFetch) globalThis.fetch = savedFetch
+        savedFetch = null
+      })
+
+      it('refuses a tarball redirect to a host outside the registry', async () => {
+        await freshImport()
+        mockHttps(resolverModule)
+        stubTar()
+
+        const calls = stubFetch({
+          [TARBALL]: () => redirectTo(EVIL),
+          [EVIL]: () => tarballResponse(),
+        })
+
+        await assert.rejects(
+          () => resolverModule.resolveSource('npm:test-pkg'),
+          (err) => {
+            assert.equal(err.userCode, 'NPM_TARBALL_HOST_NOT_ALLOWED')
+            assert.match(
+              err.message,
+              /Download not allowed from https:\/\/evil\.example\.com/,
+            )
+            return true
+          },
+        )
+
+        // The off-host URL must never have been requested, and nothing extracted.
+        assert.deepEqual(
+          calls.map((c) => c.url),
+          [TARBALL],
+        )
+        assert.deepEqual(tarCalls, [])
+      })
+
+      it('refuses a protocol-relative redirect that leaves the registry', async () => {
+        // "//evil.example.com/x" is a well-formed relative redirect that resolves
+        // to an attacker origin. A guard that read the hostname off the literal
+        // Location string, or resolved it without a base, would let this through.
+        await freshImport()
+        mockHttps(resolverModule)
+        stubTar()
+
+        const calls = stubFetch({
+          [TARBALL]: () => redirectTo('//evil.example.com/payload.tgz'),
+        })
+
+        await assert.rejects(
+          () => resolverModule.resolveSource('npm:test-pkg'),
+          /Download not allowed from https:\/\/evil\.example\.com/,
+        )
+        assert.equal(calls.length, 1)
+        assert.deepEqual(tarCalls, [])
+      })
+
+      it('refuses a redirect that downgrades the registry to http', async () => {
+        await freshImport()
+        mockHttps(resolverModule)
+        stubTar()
+
+        const calls = stubFetch({
+          [TARBALL]: () =>
+            redirectTo('http://registry.npmjs.org/test-pkg/-/other.tgz'),
+        })
+
+        await assert.rejects(
+          () => resolverModule.resolveSource('npm:test-pkg'),
+          /Download not allowed from http:\/\/registry\.npmjs\.org/,
+        )
+        assert.equal(calls.length, 1)
+        assert.deepEqual(tarCalls, [])
+      })
+
+      it('follows a redirect that stays on the registry', async () => {
+        await freshImport()
+        mockHttps(resolverModule)
+        stubTar()
+
+        const mirrored = 'https://registry.npmjs.org/test-pkg/-/mirror.tgz'
+        const calls = stubFetch({
+          [TARBALL]: () => redirectTo(mirrored),
+          [mirrored]: () => tarballResponse(),
+        })
+
+        const result = await resolverModule.resolveSource('npm:test-pkg')
+
+        assert.equal(result.name, 'redirected')
+        assert.deepEqual(
+          calls.map((c) => c.url),
+          [TARBALL, mirrored],
+        )
+        // The guard only means anything if fetch is told not to follow itself.
+        assert.deepEqual(
+          calls.map((c) => c.options.redirect),
+          ['manual', 'manual'],
+        )
+      })
+
+      it('resolves a relative redirect against the registry URL', async () => {
+        await freshImport()
+        mockHttps(resolverModule)
+        stubTar()
+
+        const relative = 'https://registry.npmjs.org/test-pkg/-/rel.tgz'
+        const calls = stubFetch({
+          [TARBALL]: () => redirectTo('./rel.tgz'),
+          [relative]: () => tarballResponse(),
+        })
+
+        const result = await resolverModule.resolveSource('npm:test-pkg')
+
+        assert.equal(result.name, 'redirected')
+        assert.deepEqual(
+          calls.map((c) => c.url),
+          [TARBALL, relative],
+        )
+      })
+
+      it('stops after too many tarball redirects', async () => {
+        await freshImport()
+        mockHttps(resolverModule)
+        stubTar()
+
+        // Every hop stays on the registry, so only the bound can stop this.
+        const loop = 'https://registry.npmjs.org/test-pkg/-/loop'
+        const calls = stubFetch({
+          [TARBALL]: () => redirectTo(loop),
+          [loop]: () => redirectTo(loop),
+        })
+
+        await assert.rejects(
+          () => resolverModule.resolveSource('npm:test-pkg'),
+          /Too many redirects while downloading test-pkg@1\.0\.0/,
+        )
+        // Three redirects are allowed, so four requests, and no fifth is made.
+        assert.equal(calls.length, 4)
+        assert.deepEqual(tarCalls, [])
+      })
+
+      it('rejects a tarball redirect with no Location header', async () => {
+        await freshImport()
+        mockHttps(resolverModule)
+        stubTar()
+
+        const calls = stubFetch({ [TARBALL]: () => redirectTo(null) })
+
+        await assert.rejects(
+          () => resolverModule.resolveSource('npm:test-pkg'),
+          /did not include a Location header/,
+        )
+        assert.equal(calls.length, 1)
+        assert.deepEqual(tarCalls, [])
+      })
+
+      it('rejects a tarball redirect to a malformed URL', async () => {
+        await freshImport()
+        mockHttps(resolverModule)
+        stubTar()
+
+        const calls = stubFetch({ [TARBALL]: () => redirectTo('http://[::1') })
+
+        await assert.rejects(
+          () => resolverModule.resolveSource('npm:test-pkg'),
+          /pointed at an invalid URL/,
+        )
+        assert.equal(calls.length, 1)
+        assert.deepEqual(tarCalls, [])
+      })
+
+      it('still wraps a non-redirect download failure as before', async () => {
+        // Passing refused hosts through must not swallow the generic wrapper
+        // that genuine extraction failures rely on.
+        await freshImport()
+        mockHttps(resolverModule)
+        stubTar()
+
+        const saved = globalThis.fetch
+        globalThis.fetch = async () => ({ ok: false, status: 500 })
+        try {
+          await assert.rejects(
+            () => resolverModule.resolveSource('npm:test-pkg'),
+            (err) => {
+              assert.equal(err.userCode, 'NPM_DOWNLOAD_FAILED')
+              assert.match(err.message, /Could not process npm package/)
+              assert.match(err.detail, /HTTP 500/)
+              return true
+            },
+          )
+        } finally {
+          globalThis.fetch = saved
+        }
       })
     })
   })

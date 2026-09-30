@@ -785,6 +785,66 @@ describe('installer', () => {
     }
   })
 
+  it('rejects normalized slug collisions against the global lockfile', async () => {
+    const collidingSkill = {
+      ...resolvedSkill,
+      slug: 'global/skill',
+      sourcePath: 'global/source',
+    }
+
+    writeFileSync(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'global-skill': {
+            slug: 'global-skill',
+            agents: ['agents'],
+            source: 'global/source',
+            sourceType: 'local',
+            installedAt: new Date().toISOString(),
+          },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
+
+    await assert.rejects(
+      () => installerModule.installSkill(collidingSkill, ['agents']),
+      (err) =>
+        err.userCode === 'SLUG_COLLISION' &&
+        err.message.includes('Cannot install "global/skill"'),
+    )
+  })
+
+  it('allows the same slug from a different source in the global lockfile', async () => {
+    writeFileSync(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: {
+          'test/my-skill': {
+            slug: 'test/my-skill',
+            agents: ['agents'],
+            source: 'old/source',
+            sourceType: 'local',
+            installedAt: new Date().toISOString(),
+          },
+        },
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
+
+    const results = await installerModule.installSkill(resolvedSkill, [
+      'agents',
+    ])
+
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'agents')
+  })
+
   it('handles missing source files gracefully', async () => {
     const badResolved = {
       ...resolvedSkill,
