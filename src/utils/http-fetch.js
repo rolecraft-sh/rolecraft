@@ -46,6 +46,12 @@ export async function fetchFollowingRedirects(url, options = {}) {
       return { response: res, url: current }
     }
 
+    // The body of a redirect is never read. Cancel it before issuing the next
+    // request, or each hop holds its socket open until it is collected.
+    try {
+      await res.body?.cancel()
+    } catch {}
+
     const location = res.headers.get('location')
     if (!location) {
       throw new UserError(

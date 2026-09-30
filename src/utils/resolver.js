@@ -461,9 +461,19 @@ const NPM_REGISTRY_HOST = 'registry.npmjs.org'
 const MAX_TARBALL_REDIRECTS = 3
 
 function assertAllowedTarballHost(url) {
-  const { hostname, protocol } = new URL(url)
+  const { hostname, protocol, port, username, password } = new URL(url)
 
   if (hostname !== NPM_REGISTRY_HOST || protocol !== 'https:') {
+    throw new UserError(`Download not allowed from ${url}`, {
+      suggestion: `npm tarballs are only fetched over https from ${NPM_REGISTRY_HOST}.`,
+      code: 'NPM_TARBALL_HOST_NOT_ALLOWED',
+    })
+  }
+
+  // A non-default port or inline credentials means the request is not the
+  // registry's own tarball endpoint even though the hostname matches, and
+  // neither survives the hop-by-hop check being worth anything.
+  if (port || username || password) {
     throw new UserError(`Download not allowed from ${url}`, {
       suggestion: `npm tarballs are only fetched over https from ${NPM_REGISTRY_HOST}.`,
       code: 'NPM_TARBALL_HOST_NOT_ALLOWED',
