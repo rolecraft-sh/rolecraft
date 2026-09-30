@@ -278,6 +278,17 @@ export function scanMcpServer(resolved) {
   }
 
   if (resolved.sourceType === 'npm') {
+    const hasScannableContents = Object.values(
+      resolved.fileContents || {},
+    ).some((content) => typeof content === 'string')
+    if (!hasScannableContents) {
+      issues.push({
+        severity: 'high',
+        category: 'unscanned_source',
+        description:
+          'npm package contents were not available for security scanning',
+      })
+    }
     issues.push({
       severity: 'low',
       category: 'source_type',

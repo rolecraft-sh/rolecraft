@@ -325,7 +325,7 @@ describe('askScope', () => {
     )
 
     const { logs, restore } = capture('log')
-    await installModule.installCommand(mcpSkill, { claude: true })
+    await installModule.installCommand(mcpSkill, { claude: true, yes: true })
     restore()
 
     assert.ok(logs.some((l) => l.includes('installed')))

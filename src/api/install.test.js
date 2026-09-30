@@ -218,6 +218,36 @@ describe('api install', () => {
     assert.equal(result.mcpResults[0].server, 'test-server')
   })
 
+  it('requires explicit approval for unscanned npm MCP servers', async () => {
+    const skillDir = join(tempDir, 'test-skills', 'mcp-review')
+    await mkdir(skillDir, { recursive: true })
+    await writeFile(
+      join(skillDir, 'SKILL.md'),
+      createSkill({
+        name: 'mcp-review',
+        slug: 'test/mcp-review',
+        mcpServers: [
+          {
+            name: 'unscanned-server',
+            source: 'npm:unscanned-mcp-package',
+          },
+        ],
+      }),
+    )
+
+    await assert.rejects(
+      apiInstallSkills(skillDir, {
+        cwd: tempDir,
+        scope: { project: true },
+      }),
+      (error) => {
+        assert.equal(error.userCode, 'MCP_SECURITY_REVIEW')
+        assert.match(error.message, /needs security review/)
+        return true
+      },
+    )
+  })
+
   it('rejects when no matching skills found', async () => {
     const skillDir = join(tempDir, 'test-skills', 'filter-test')
     await mkdir(skillDir, { recursive: true })
