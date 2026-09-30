@@ -10,6 +10,7 @@ import { computeContentHash } from './lockfile.js'
 import { parseFrontmatter } from './converter.js'
 import { UserError } from './errors.js'
 import { expandTilde } from './paths.js'
+import { fetchFollowingRedirects } from './http-fetch.js'
 
 const SCAN_MAX_DEPTH = 3
 
@@ -447,15 +448,45 @@ function fetchJson(url) {
   })
 }
 
-async function downloadFile(url, dest) {
-  const parsed = new URL(url)
-  const dlHost = parsed.hostname
-  if (dlHost !== 'registry.npmjs.org') {
-    throw new Error(`Download not allowed from ${dlHost}`)
-  }
-  const dlUrl = `https://${dlHost}${parsed.pathname}${parsed.search}`
+/**
+ * The only host allowed to serve an npm tarball, and the only scheme. The
+ * registry is the sole publisher of a package's own tarball, so nothing else
+ * needs to be reachable here.
+ */
+const NPM_REGISTRY_HOST = 'registry.npmjs.org'
 
-  const response = await fetch(dlUrl)
+/**
+ * Maximum number of redirect hops to follow while fetching a tarball.
+ */
+const MAX_TARBALL_REDIRECTS = 3
+
+function assertAllowedTarballHost(url) {
+  const { hostname, protocol } = new URL(url)
+
+  if (hostname !== NPM_REGISTRY_HOST || protocol !== 'https:') {
+    throw new UserError(`Download not allowed from ${url}`, {
+      suggestion: `npm tarballs are only fetched over https from ${NPM_REGISTRY_HOST}.`,
+      code: 'NPM_TARBALL_HOST_NOT_ALLOWED',
+    })
+  }
+}
+
+async function downloadFile(url, dest, pkgLabel) {
+  const parsed = new URL(url)
+  const dlUrl = `https://${parsed.hostname}${parsed.pathname}${parsed.search}`
+
+  // The host is re-checked on every hop, not just on the URL the registry
+  // metadata handed us. `redirect: 'follow'` would let the registry answer with
+  // a 30x and have the tarball fetched from wherever that points, which is the
+  // same allow-list bypass fixed for profile imports in #351.
+  const { response } = await fetchFollowingRedirects(dlUrl, {
+    assertAllowed: assertAllowedTarballHost,
+    maxRedirects: MAX_TARBALL_REDIRECTS,
+    subject: `downloading ${pkgLabel}`,
+    codeBase: 'NPM_TARBALL_REDIRECT',
+    suggestion: 'The npm registry returned an unexpected chain of redirects.',
+  })
+
   if (!response.ok) {
     throw new Error(`Failed to download: HTTP ${response.status}`)
   }
@@ -506,7 +537,7 @@ async function resolveNpmInternal(source) {
   const tarballPath = join(tmpDir, 'package.tgz')
 
   try {
-    await downloadFile(tarballUrl, tarballPath)
+    await downloadFile(tarballUrl, tarballPath, `${pkgName}@${ver}`)
 
     // Validate tarball entries before extraction (prevent path traversal)
     const listResult = runSpawn('tar', ['-tf', tarballPath], {
@@ -534,6 +565,14 @@ async function resolveNpmInternal(source) {
       throw new Error(`tar extraction failed with code ${tarResult.status}`)
   } catch (e) {
     await rm(tmpDir, { recursive: true, force: true }).catch(() => {})
+    // A refused host is a policy decision, not a corrupt package. The generic
+    // wrapper below would hide the reason and the suggestion behind "the package
+    // may be corrupted", so the download guard's own errors are passed through
+    // with the reason intact. Everything else, including a genuinely truncated
+    // or corrupt download, still gets the wrapper.
+    if (e instanceof UserError && e.userCode.startsWith('NPM_TARBALL_')) {
+      throw e
+    }
     throw new UserError(`Could not process npm package "${pkgName}@${ver}".`, {
       suggestion:
         'The package may be corrupted. Try again or use a different version.',
