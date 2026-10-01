@@ -186,6 +186,34 @@ describe('doctor command', () => {
     assert.ok(logs.some((l) => l.includes('Summary:')))
   })
 
+  it('ends with a star CTA pointing at the repo', async () => {
+    const { logs, restore } = capture()
+    try {
+      await doctorModule.doctorCommand()
+    } finally {
+      restore()
+    }
+    const cta = logs.findIndex((l) =>
+      l.includes('github.com/rolecraft-sh/rolecraft'),
+    )
+    assert.ok(cta > -1, `no star CTA in output. Logs: ${logs.join('|')}`)
+    assert.ok(
+      cta > logs.findIndex((l) => l.includes('Summary:')),
+      'star CTA should come after the summary',
+    )
+  })
+
+  it('keeps json output free of the star CTA', async () => {
+    const { logs, restore } = capture()
+    try {
+      await doctorModule.doctorCommand({ json: true })
+    } finally {
+      restore()
+    }
+    JSON.parse(logs.join(''))
+    assert.ok(!logs.join('').includes('github.com/rolecraft-sh/rolecraft'))
+  })
+
   it('detects agent when its skill directory exists', async () => {
     await mkdir(join(tempDir, '.agents', 'skills'), { recursive: true })
 
