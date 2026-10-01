@@ -38,25 +38,70 @@ export async function ensureParentDir(filePath) {
 let tmpCounter = 0
 
 /**
+ * Rename failures that another process holding the file would clear on its own.
+ *
+ * `EACCES` is here for historical reasons and does not really belong: unlike
+ * `EPERM` and `EBUSY` it does not clear on retry, so a genuinely read-only
+ * destination still burns the whole window. Removing it is a separate change
+ * from surfacing the failure honestly.
+ */
+const TRANSIENT_RENAME_CODES = new Set(['EPERM', 'EBUSY', 'EACCES'])
+
+function isTransientRenameError(error) {
+  return TRANSIENT_RENAME_CODES.has(error.code)
+}
+
+/**
+ * The error a user sees once the retries are exhausted.
+ *
+ * Built as its own function so the contract it promises, the destination lock
+ * file in the message plus a code, a suggestion and the raw errno kept for
+ * `--verbose`, can be asserted on any platform. Reproducing the real failure
+ * needs a Windows file lock, so asserting only through the loop would leave
+ * this untested on Linux CI.
+ */
+function contentionError(to, cause) {
+  return new UserError(
+    `Could not replace ${to}, another process held it open for the whole retry window.`,
+    {
+      code: 'LOCK_WRITE_CONTENDED',
+      suggestion:
+        'Wait a moment and run the command again. If it keeps failing, ' +
+        'close whatever else is touching that folder, such as a backup, ' +
+        'sync or antivirus client.',
+      detail: cause.message,
+    },
+  )
+}
+
+/**
  * Rename with a short retry for transient contention.
  *
  * POSIX guarantees rename() is atomic, but Windows rejects a replace with
  * EPERM/EBUSY while the destination is momentarily open — concurrent
  * `rolecraft` processes locking the same file is enough to trigger it. These
  * clear on their own, so retry briefly before surfacing the error.
+ *
+ * Once the retries run out the raw errno stops being useful. It names the temp
+ * file rather than the lock the caller was trying to update, and its
+ * pid-and-counter suffix reads as a process id to anyone who did not write it.
+ * So the failure is re-raised as a UserError naming the destination, with the
+ * errno kept in `detail` for `--verbose` rather than lost.
  */
 async function renameWithRetry(from, to, attempts = 10) {
   for (let attempt = 1; ; attempt++) {
     try {
       return await rename(from, to)
     } catch (error) {
-      const transient =
-        error.code === 'EPERM' ||
-        error.code === 'EBUSY' ||
-        error.code === 'EACCES'
+      const transient = isTransientRenameError(error)
 
-      if (!transient || attempt === attempts) {
-        throw error
+      // A failure that is not transient contention keeps its own code. A
+      // missing directory or an ENOSPC is a different problem from "another
+      // process had it open" and must not be reported as the latter.
+      if (!transient) throw error
+
+      if (attempt === attempts) {
+        throw contentionError(to, error)
       }
 
       await new Promise((resolve) => setTimeout(resolve, 5 * attempt))
@@ -306,4 +351,10 @@ export async function updateLockFile(lockPath, { read, write, mutate }) {
   })
 }
 
-export const __testing = { acquireLock, lockSentinelPath }
+export const __testing = {
+  acquireLock,
+  contentionError,
+  isTransientRenameError,
+  lockSentinelPath,
+  renameWithRetry,
+}
