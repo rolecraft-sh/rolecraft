@@ -25,6 +25,12 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const pkg = JSON.parse(
   readFileSync(join(__dirname, '..', '..', 'package.json'), 'utf-8'),
 )
+// package.json is the single source of truth for the floor, so the check
+// below cannot drift from what npm enforces at install time.
+const MIN_NODE_MAJOR = Number.parseInt(
+  (pkg.engines?.node ?? '>=20').replace(/[^\d]/g, ''),
+  10,
+)
 
 function dirSize(dirPath) {
   try {
@@ -340,8 +346,12 @@ export async function apiDoctor(cwd = process.cwd(), options = {}) {
 
   checked('Node.js version', 'pass', `v${process.versions.node}`)
   const [major] = process.versions.node.split('.').map(Number)
-  if (major < 20) {
-    checked('Node.js compatibility', 'error', '>= 20 required, please upgrade')
+  if (major < MIN_NODE_MAJOR) {
+    checked(
+      'Node.js compatibility',
+      'error',
+      `>= ${MIN_NODE_MAJOR} required, please upgrade`,
+    )
   }
 
   try {

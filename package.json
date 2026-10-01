@@ -116,7 +116,7 @@
     "docs:preview": "vitepress preview docs"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.5",

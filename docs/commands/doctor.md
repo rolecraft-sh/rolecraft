@@ -15,7 +15,7 @@ rolecraft doctor --deep          # skill conflict detection
 
 Scans your system and reports on:
 
-- **Node.js version** — verifies >= 20, shows runtime path
+- **Node.js version** — verifies >= 22, shows runtime path
 - **Platform** — OS and kernel release
 - **Git / npm availability** — needed for GitHub and npm sources
 - **~/.agents directory** — existence and permissions

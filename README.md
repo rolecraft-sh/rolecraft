@@ -51,7 +51,7 @@
 
 
 <p align="center">
-  <b>⚡ Zero dependencies</b> · <b>📦 403.6 kB</b> · <b>🤖 27 verified agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 Security scoring</b> · <b>📝 Skill testing</b> · <b>🔧 Init templates</b> · <b>🌐 Offline-first</b>
+  <b>⚡ Zero dependencies</b> · <b>📦 403.9 kB</b> · <b>🤖 27 verified agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 Security scoring</b> · <b>📝 Skill testing</b> · <b>🔧 Init templates</b> · <b>🌐 Offline-first</b>
 </p>
 
 ---
@@ -75,7 +75,7 @@ rolecraft install ./postgres-rules --cursor
 rolecraft setup user/repo
 ```
 
-**Requirements:** Node.js >= 20
+**Requirements:** Node.js >= 22
 
 > **Why zero dependencies?** Every dependency is a supply-chain risk. rolecraft uses only Node.js built-ins (`fs`, `path`, `crypto`, `https`) — no `node_modules` surprises.
 
@@ -85,7 +85,7 @@ rolecraft setup user/repo
 
 ## Features
 
-- **Zero dependencies** — 403.6 kB, only Node.js built-ins
+- **Zero dependencies** — 403.9 kB, only Node.js built-ins
 - **Any source** — local folder, GitHub/GitLab/SSH URL, npm package
 - **87 agents** — opencode, claude-code, cursor, copilot, aider, oh-my-pi, and more
 - **No registry required** — works fully without a marketplace
@@ -159,7 +159,7 @@ git clone https://github.com/rolecraft-sh/rolecraft.git && cd rolecraft
 npm install                # sets up the pre-commit hook automatically
 npm link                   # rolecraft CLI runs from local checkout
 npm run lint               # syntax + Biome checks
-npm test                   # 1168+ tests, 0 fails expected
+npm test                   # 1169+ tests, 0 fails expected
 ```
 
 A `pre-commit` hook runs lint automatically on every commit. Zero-runtime-dependency policy is preserved — Biome and VitePress are devDependencies only.
