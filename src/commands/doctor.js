@@ -66,6 +66,9 @@ export async function doctorCommand(options = {}) {
 
   const { passed, warnings, errors, total } = result.summary
   console.log(
-    `\n📋 Summary: ${passed}/${total} passed · ${warnings} warnings · ${errors} errors\n`,
+    `\n📋 Summary: ${passed}/${total} passed · ${warnings} warnings · ${errors} errors`,
+  )
+  console.log(
+    `⭐ If rolecraft just made your setup easier, a star helps others find it: https://github.com/rolecraft-sh/rolecraft\n`,
   )
 }

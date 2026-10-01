@@ -33,7 +33,7 @@ Or run without installing:
 npx rolecraft install <source>
 ```
 
-> **Requirements:** Node.js >= 20. That's it. No other dependencies.
+> **Requirements:** Node.js >= 22. That's it. No other dependencies.
 
 ### 2. Find a skill
 

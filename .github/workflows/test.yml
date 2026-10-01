@@ -18,7 +18,15 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        node-version: [20, 22, 24]
+        # Floor is 22 (see package.json engines), so 22 is the oldest line we
+        # test. Node 20 is gone: EOL 2026-04-30, and its test runner has an
+        # unfixed deserialization bug (nodejs/node#64061) that fails macOS
+        # jobs regardless of the code under test — the fix landed in v24.20.0
+        # (#64706) and v20 would never receive it.
+        # 24 is the current LTS and the reference line for the extra jobs
+        # below. 26 is Current and becomes LTS on 2026-10-28, so testing it
+        # now is how we find breakage before it becomes the recommended line.
+        node-version: [22, 24, 26]
 
     steps:
       - name: Checkout repository

@@ -24,7 +24,7 @@ yarn global add rolecraft
 bun add -g rolecraft
 ```
 
-> **Requirements:** Node.js >= 20
+> **Requirements:** Node.js >= 22
 
 ## Install scope
 

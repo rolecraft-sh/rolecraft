@@ -16,6 +16,7 @@ import {
   getTokenValues,
   parseMatrix,
   applyMatrix,
+  renderMatrix,
 } from '../../scripts/generate-docs.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -218,19 +219,35 @@ describe('agent manifest', () => {
     const rows = parseMatrix(md)
     assert.ok(rows.length > 0, 'matrix should have tracked rows')
 
+    // Generated values are only authoritative on main. `test_count` and
+    // `unpacked_size` change on almost every merge, so requiring a feature
+    // branch to carry main's current numbers made every open PR permanently
+    // stale and conflicted in the seven tracked markdown files. The values are
+    // refreshed on main after merge by .github/workflows/docs-sync.yml, and
+    // that is where they are checked.
+    //
+    // Everywhere else this asserts structure only: every token still has a
+    // tracked location, and that location still carries a well-formed value.
+    // A deleted row or a hand-mangled value still fails here; "main moved
+    // since you branched" does not.
+    const isMain = process.env.GITHUB_REF_NAME === 'main'
     const tokens = getTokenValues()
     for (const row of rows) {
-      // every documented value must match the current manifest-derived value
-      assert.equal(
-        row.value,
-        tokens[row.token],
-        `stale value for ${row.token} @ ${row.file}:${row.line}`,
-      )
-      // the location must actually contain that value
+      // the location must actually exist
       const filePath = join(__dirname, '..', '..', row.file)
       const lines = readFileSync(filePath, 'utf-8').split('\n')
       const line = lines[row.line - 1]
       assert.ok(line, `missing line ${row.line} in ${row.file}`)
+
+      if (isMain) {
+        // every documented value must match the current manifest-derived value
+        assert.equal(
+          row.value,
+          tokens[row.token],
+          `stale value for ${row.token} @ ${row.file}:${row.line}`,
+        )
+      }
+
       if (/[\d.]+ kB/.test(row.value)) {
         assert.ok(
           line.includes(row.value),
@@ -285,6 +302,11 @@ describe('agent manifest', () => {
   })
 
   it('applying the matrix while in sync is a no-op', () => {
+    // Same reasoning as 'documents every tracked location with current values':
+    // "in sync" is only a meaningful claim about main. On a feature branch the
+    // committed matrix is expected to lag, and asserting it does not would
+    // force every branch to carry main's numbers.
+    if (process.env.GITHUB_REF_NAME !== 'main') return
     const matrixPath = join(__dirname, '..', '..', 'MANIFEST-MATRIX.md')
     const md = readFileSync(matrixPath, 'utf-8')
     const { changes } = applyMatrix(md, getTokenValues(), true)
@@ -292,12 +314,21 @@ describe('agent manifest', () => {
   })
 
   it('applying the matrix updates a changed token point-accurately', () => {
-    const matrixPath = join(__dirname, '..', '..', 'MANIFEST-MATRIX.md')
-    const md = readFileSync(matrixPath, 'utf-8')
-    const rows = parseMatrix(md)
+    // The baseline is rebuilt from the tracked locations with freshly computed
+    // values, so this does not depend on what the committed matrix currently
+    // says. Reading the file directly made this test fail on any branch whose
+    // generated values lagged main — which is the normal state of a feature
+    // branch, since generated values are only authoritative on main.
+    const structure = parseMatrix(
+      readFileSync(join(__dirname, '..', '..', 'MANIFEST-MATRIX.md'), 'utf-8'),
+    )
     const tokens = getTokenValues()
-    tokens.agent_count = '999'
-    const { changes, updatedRows } = applyMatrix(md, tokens, true)
+    const md = renderMatrix(
+      structure.map((row) => ({ ...row, value: tokens[row.token] })),
+    )
+    const rows = parseMatrix(md)
+    const changed = { ...tokens, agent_count: '999' }
+    const { changes, updatedRows } = applyMatrix(md, changed, true)
     assert.ok(changes.length > 0)
     assert.equal(
       updatedRows.filter((r) => r.token === 'agent_count' && r.value === '999')

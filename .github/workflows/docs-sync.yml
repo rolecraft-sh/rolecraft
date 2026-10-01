@@ -1,0 +1,60 @@
+name: Docs sync
+
+# Generated values in the markdown docs (test_count, unpacked_size, package_size
+# and the agent counts) change on nearly every merge. Feature branches
+# deliberately do not carry them — requiring them to made every open PR stale by
+# definition, so MAINIFEST-MATRIX.md, README.md, CONTRIBUTING.md,
+# benchmark/RESULTS.md and four docs/*.md conflicted on each merge.
+#
+# Instead, main owns them: this workflow recomputes after every merge and
+# commits the result. src/agents/manifest.test.js asserts the values are exact
+# on main and only asserts structure elsewhere, so a broken value still fails a
+# PR while "main moved since you branched" does not.
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Never race two runs: if a merge lands while one is in flight, let the newer
+# run win instead of pushing two commits for the same state.
+concurrency:
+  group: docs-sync-main
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    name: Regenerate docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Regenerate docs and manifest matrix
+        run: npm run --silent generate:docs
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet; then
+            echo "Generated values already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: regenerate docs and manifest matrix"
+          git push

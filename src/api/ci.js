@@ -12,9 +12,16 @@ export async function apiCi(cwd = process.cwd()) {
     readMcpLock(),
   ])
 
-  const allSkills = { ...globalLock.skills }
+  const allSkills = Object.fromEntries(
+    Object.entries(globalLock.skills).map(([slug, entry]) => [
+      slug,
+      { entry, targets: ['agents'] },
+    ]),
+  )
   for (const [slug, entry] of Object.entries(projectLock.skills)) {
-    if (!allSkills[slug]) allSkills[slug] = entry
+    if (!allSkills[slug]) {
+      allSkills[slug] = { entry, targets: ['project'] }
+    }
   }
 
   const skillEntries = Object.entries(allSkills)
@@ -23,7 +30,7 @@ export async function apiCi(cwd = process.cwd()) {
   const installed = []
   const failed = []
 
-  for (const [slug, entry] of skillEntries) {
+  for (const [slug, { entry, targets }] of skillEntries) {
     if (!entry.source) {
       failed.push({ slug, reason: 'missing source in lockfile' })
       continue
@@ -43,8 +50,7 @@ export async function apiCi(cwd = process.cwd()) {
         continue
       }
 
-      const targets = entry.sourceType === 'local' ? ['project'] : ['agents']
-      const results = await installSkill(resolved, targets)
+      const results = await installSkill(resolved, targets, 'copy', cwd)
       installed.push({ slug, source: entry.source, results })
     } catch (err) {
       failed.push({ slug, source: entry.source, reason: err?.message })

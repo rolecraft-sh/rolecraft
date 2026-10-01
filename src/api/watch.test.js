@@ -1,6 +1,6 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
 import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
@@ -307,5 +307,54 @@ describe('watchApi', () => {
 
     assert.doesNotThrow(() => watcher.emit('error', new Error('late')))
     assert.ok(!events.some((e) => e.type === 'error'))
+  })
+
+  it('reinstalls a local skill under the watch cwd, not process.cwd()', async () => {
+    const projectDir = mkdtempSync(
+      join(tmpdir(), 'rolecraft-watch-api-cwd-project-'),
+    )
+    const sourceDir = join(projectDir, 'source-project-local')
+    writeSkill(sourceDir, 'project-local-skill')
+    await writeLockFile(projectDir, {
+      'project-local-skill': {
+        name: 'Project Local Skill',
+        source: sourceDir,
+        sourceType: 'local',
+        installedAt: new Date().toISOString(),
+        agents: [],
+      },
+    })
+
+    const events = []
+    const result = await watchModule.watchApi(
+      'project-local-skill',
+      projectDir,
+      { onEvent: (e) => events.push(e) },
+    )
+
+    try {
+      await writeFile(join(sourceDir, 'CHANGE.md'), 'change')
+      await waitFor(events, (e) => e.type === 'synced')
+    } finally {
+      result.close()
+    }
+
+    const synced = events.find((e) => e.type === 'synced')
+    assert.ok(synced, 'expected a synced event')
+    assert.equal(synced.ok, true)
+    assert.ok(
+      existsSync(
+        join(
+          projectDir,
+          '.agents',
+          'skills',
+          'project-local-skill',
+          'SKILL.md',
+        ),
+      ),
+      'reinstall should land under the watch cwd, not process.cwd()',
+    )
+
+    await rmRetry(projectDir)
   })
 })

@@ -45,15 +45,27 @@ let tmpCounter = 0
  * `rolecraft` processes locking the same file is enough to trigger it. These
  * clear on their own, so retry briefly before surfacing the error.
  */
-async function renameWithRetry(from, to, attempts = 10) {
+async function renameWithRetry(from, to, attempts = 10, renameFile = rename) {
   for (let attempt = 1; ; attempt++) {
     try {
-      return await rename(from, to)
+      return await renameFile(from, to)
     } catch (error) {
       const transient =
         error.code === 'EPERM' ||
         error.code === 'EBUSY' ||
         error.code === 'EACCES'
+
+      if (
+        attempt === attempts &&
+        (error.code === 'EPERM' || error.code === 'EBUSY')
+      ) {
+        throw new UserError(`Could not replace lock file "${to}".`, {
+          suggestion:
+            'Close any process that may be holding the lock file, then try again.',
+          detail: error.message,
+          code: 'LOCK_WRITE_FAILED',
+        })
+      }
 
       if (!transient || attempt === attempts) {
         throw error
@@ -306,4 +318,4 @@ export async function updateLockFile(lockPath, { read, write, mutate }) {
   })
 }
 
-export const __testing = { acquireLock, lockSentinelPath }
+export const __testing = { acquireLock, lockSentinelPath, renameWithRetry }

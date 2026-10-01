@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import { createHash } from 'node:crypto'
 import AGENTS_DATA, { getAgentByFlag } from '../agents.js'
 import { home } from './paths.js'
+import { UserError } from './errors.js'
 import {
   ensureParentDir,
   updateLockFile,
@@ -44,18 +45,79 @@ export function getProjectLockPath(cwd) {
   return join(cwd, '.agents', '.skill-lock.json')
 }
 
-export async function readLock(lockPath = getGlobalLockPath()) {
-  try {
-    const raw = await readFile(lockPath, 'utf-8')
-    return JSON.parse(raw)
-  } catch {
-    return {
-      version: LOCKFILE_VERSION,
-      skills: {},
-      dismissed: {},
-      lastSelectedAgents: [],
-    }
+/**
+ * The lock a missing file reads as.
+ *
+ * A missing lock is normal, so it gets the empty shape. A damaged one does
+ * not, and must never reach a caller as an empty lock: see readLock.
+ */
+function emptyLock() {
+  return {
+    version: LOCKFILE_VERSION,
+    skills: {},
+    dismissed: {},
+    lastSelectedAgents: [],
   }
+}
+
+/**
+ * Reject a parsed lock that a caller could not use.
+ *
+ * `readLock` used to hand back whatever JSON.parse returned, so a file
+ * holding `null`, `{}` or `{"version":3}` travelled on until the first
+ * `lock.skills[...]` raised a raw TypeError with no suggestion. Callers
+ * only ever index `skills`, so that is the shape that has to hold.
+ */
+function assertUsableLock(lock) {
+  if (lock === null || typeof lock !== 'object' || Array.isArray(lock)) {
+    return false
+  }
+  const { skills } = lock
+  if (skills === null || typeof skills !== 'object' || Array.isArray(skills)) {
+    return false
+  }
+  return true
+}
+
+function corruptLockError(lockPath, reason) {
+  return new UserError(`Skill lockfile is corrupted: ${lockPath}`, {
+    suggestion:
+      'Restore the lockfile from version control or delete it to rebuild an ' +
+      'empty one, then run the command again.',
+    detail: reason,
+    code: 'LOCKFILE_CORRUPT',
+  })
+}
+
+export async function readLock(lockPath = getGlobalLockPath()) {
+  let raw
+  try {
+    raw = await readFile(lockPath, 'utf-8')
+  } catch (err) {
+    // A lock that is not there yet is the normal case.
+    if (err && err.code === 'ENOENT') {
+      return emptyLock()
+    }
+    throw err
+  }
+
+  let lock
+  try {
+    lock = JSON.parse(raw)
+  } catch (err) {
+    // Swallowing a parse error and returning an empty lock destroys the
+    // original bytes on the next write, with nothing to tell the user.
+    throw corruptLockError(lockPath, err.message)
+  }
+
+  if (!assertUsableLock(lock)) {
+    throw corruptLockError(
+      lockPath,
+      'parsed JSON has no usable "skills" object',
+    )
+  }
+
+  return lock
 }
 
 /**
@@ -88,18 +150,23 @@ async function readLockForUpdate(lockPath) {
     // JSON.parse(null) coerces to the string "null" and returns null rather
     // than throwing, so a missing file has to be handled explicitly.
     lock = raw === null ? null : JSON.parse(raw)
-  } catch {
-    lock = null
+  } catch (err) {
+    throw corruptLockError(lockPath, err.message)
   }
 
-  if (!lock || typeof lock !== 'object') {
-    // Matches readLock: an unreadable file reads as an empty lock.
-    lock = {
-      version: LOCKFILE_VERSION,
-      skills: {},
-      dismissed: {},
-      lastSelectedAgents: [],
-    }
+  // A missing lock reads as empty, matching readLock. A damaged one is
+  // reported instead of silently reset: this path exists to update a lock
+  // in place, so treating corruption as "no lock" would overwrite whatever
+  // the user still has on disk.
+  if (lock === null) {
+    return emptyLock()
+  }
+
+  if (!assertUsableLock(lock)) {
+    throw corruptLockError(
+      lockPath,
+      'parsed JSON has no usable "skills" object',
+    )
   }
 
   return lock

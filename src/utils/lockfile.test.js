@@ -12,6 +12,7 @@ import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import agents from '../agents.js'
+import { UserError } from './errors.js'
 
 let tempDir, lockModule, origHome
 
@@ -747,6 +748,61 @@ describe('lockfile', () => {
     it('popHistory returns null when no history', async () => {
       const result = await lockModule.popHistory('nonexistent-slug')
       assert.equal(result, null)
+    })
+  })
+
+  // Issue #324: a damaged lock must be reported, not silently replaced.
+  // Before the fix readLock swallowed every read and parse error and handed
+  // back an empty lock, so the next write destroyed the original bytes; and
+  // it returned whatever JSON.parse produced, so `null`, `{}` and
+  // `{"version":3}` reached callers and raised a raw TypeError on
+  // `lock.skills[...]`.
+  describe('readLock with a damaged lockfile (#324)', () => {
+    const lockPath = () => join(tempDir, '.agents', '.skill-lock.json')
+
+    const MALFORMED = [
+      ['unparseable JSON', '{ "version": 3, "skills": {'],
+      ['null', 'null'],
+      ['an object with no skills key', '{"version":3}'],
+      ['an empty object', '{}'],
+      ['a JSON array', '[1,2,3]'],
+      ['a non-object skills value', '{"version":3,"skills":"nope"}'],
+    ]
+
+    for (const [label, body] of MALFORMED) {
+      it(`throws a UserError for ${label}`, async () => {
+        await writeFile(lockPath(), body, 'utf-8')
+        await assert.rejects(
+          () => lockModule.readLock(),
+          (err) => {
+            assert.ok(err instanceof UserError, 'expected a UserError')
+            assert.match(err.message, /lockfile is corrupted/i)
+            assert.ok(err.suggestion, 'a UserError here should say what to do')
+            return true
+          },
+        )
+      })
+
+      it(`leaves the file untouched for ${label}`, async () => {
+        await writeFile(lockPath(), body, 'utf-8')
+        await lockModule.readLock().catch(() => {})
+        // The bytes that were there must survive a failed read, or the
+        // next write silently overwrites whatever the user had.
+        assert.equal(readFileSync(lockPath(), 'utf-8'), body)
+      })
+    }
+
+    it('still reads a missing lock as empty', async () => {
+      await rm(lockPath(), { force: true })
+      const lock = await lockModule.readLock()
+      assert.deepEqual(lock.skills, {})
+    })
+
+    it('still reads a valid empty lock', async () => {
+      await writeFile(lockPath(), '{"version":3,"skills":{}}', 'utf-8')
+      const lock = await lockModule.readLock()
+      assert.deepEqual(lock.skills, {})
+      assert.equal(lock.skills['a/b'], undefined) // no crash
     })
   })
 })

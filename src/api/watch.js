@@ -11,7 +11,7 @@ const agentNameToTarget = Object.fromEntries(
   agents.map((a) => [a.name, a.flag]),
 )
 
-async function reinstallSkill(slug, skills, _cwd) {
+async function reinstallSkill(slug, skills, cwd) {
   const entry = skills[slug]
   if (entry?.sourceType !== 'local') return false
 
@@ -22,7 +22,7 @@ async function reinstallSkill(slug, skills, _cwd) {
       .filter(Boolean)
     if (targets.length === 0) targets.push('project')
 
-    await installSkill(resolved, targets)
+    await installSkill(resolved, targets, 'copy', cwd)
     return true
   } catch {
     return false

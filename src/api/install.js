@@ -169,6 +169,7 @@ export async function apiInstallSkills(source, options = {}) {
       resolved,
       targets,
       options.symlink ? 'symlink' : 'copy',
+      cwd,
     )
     results.push({
       name: resolved.name,

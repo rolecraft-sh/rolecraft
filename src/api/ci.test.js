@@ -90,7 +90,7 @@ describe('api ci', () => {
 
   it('installs a local skill from the lockfile into the project', async () => {
     const source = await writeLocalSkill('ci-skill')
-    await writeGlobalLock({
+    await writeProjectLock(workDir, {
       'ci-skill': { source, sourceType: 'local' },
     })
 
@@ -187,5 +187,106 @@ describe('api ci', () => {
         args: ['-y', '@test/db@1.0.0'],
       })
     }
+  })
+
+  it('keeps a GitHub skill from a project lock inside the project', async () => {
+    const { execFileSync, spawnSync } = await import('node:child_process')
+    const { setSpawnSync } = await import('../utils/resolver.js')
+    const source = await writeLocalSkill('github-skill')
+    const projectDir = join(tempDir, 'github-project')
+    const remote = 'fixture-owner/skills'
+    const cloneUrl = new URL(remote, 'https://github.com/')
+    cloneUrl.pathname += '.git'
+
+    await writeFile(
+      join(source, 'SKILL.md'),
+      [
+        '---',
+        'name: GitHub Fixture',
+        'slug: github-fixture',
+        'description: A local test fixture',
+        '---',
+        '',
+        '# GitHub Fixture',
+        '',
+      ].join(String.fromCharCode(10)),
+    )
+    execFileSync('git', ['init', source], { stdio: 'ignore' })
+    execFileSync('git', ['-C', source, 'add', 'SKILL.md'], {
+      stdio: 'ignore',
+    })
+    execFileSync(
+      'git',
+      [
+        '-C',
+        source,
+        '-c',
+        'user.name=Test',
+        '-c',
+        'user.email=test@example.com',
+        'commit',
+        '-m',
+        'fixture',
+      ],
+      { stdio: 'ignore' },
+    )
+
+    setSpawnSync((command, args, options) => {
+      if (
+        command === 'git' &&
+        args[0] === 'clone' &&
+        args[3] === cloneUrl.href
+      ) {
+        return spawnSync(
+          command,
+          ['clone', '--depth', '1', source, args[4]],
+          options,
+        )
+      }
+      return spawnSync(command, args, options)
+    })
+
+    try {
+      await writeProjectLock(projectDir, {
+        'github-fixture': { source: remote, sourceType: 'github' },
+      })
+      const result = await apiCi(projectDir)
+
+      assert.equal(result.allPassed, true)
+      assert.ok(
+        existsSync(
+          join(projectDir, '.agents', 'skills', 'github-fixture', 'SKILL.md'),
+        ),
+      )
+      assert.equal(
+        existsSync(
+          join(homeDir, '.agents', 'skills', 'github-fixture', 'SKILL.md'),
+        ),
+        false,
+      )
+    } finally {
+      setSpawnSync(spawnSync)
+    }
+  })
+
+  it('installs project skills under the requested cwd even when process.cwd() differs', async () => {
+    const source = await writeLocalSkill('cwd-mismatch-skill')
+    await writeProjectLock(workDir, {
+      'cwd-mismatch-skill': { source, sourceType: 'local' },
+    })
+
+    const decoyDir = join(tempDir, 'decoy')
+    await mkdir(decoyDir, { recursive: true })
+    process.chdir(decoyDir)
+
+    const result = await apiCi(workDir)
+
+    assert.equal(result.allPassed, true)
+    assert.ok(
+      existsSync(
+        join(workDir, '.agents', 'skills', 'cwd-mismatch-skill', 'SKILL.md'),
+      ),
+      'skill should install under the requested project cwd, not process.cwd()',
+    )
   })
 })

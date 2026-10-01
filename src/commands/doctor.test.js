@@ -1,6 +1,6 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync } from 'node:fs'
+import { mkdtempSync, readFileSync } from 'node:fs'
 import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
@@ -68,6 +68,42 @@ describe('doctor command', () => {
     }
     assert.ok(logs.some((l) => l.includes('Node.js version')))
     assert.ok(logs.some((l) => l.includes(`v${process.versions.node}`)))
+  })
+
+  it('errors below the supported node floor and accepts it at the floor', async () => {
+    const floor = Number.parseInt(
+      JSON.parse(
+        readFileSync(new URL('../../package.json', import.meta.url), 'utf-8'),
+      ).engines.node.replace(/[^\d]/g, ''),
+      10,
+    )
+    const withVersion = async (version) => {
+      const real = process.versions.node
+      Object.defineProperty(process.versions, 'node', {
+        value: version,
+        configurable: true,
+      })
+      const { logs, restore } = capture()
+      try {
+        await doctorModule.doctorCommand()
+        return logs.filter((l) => l.includes('Node.js compatibility'))
+      } finally {
+        restore()
+        Object.defineProperty(process.versions, 'node', {
+          value: real,
+          configurable: true,
+        })
+      }
+    }
+
+    const tooOld = await withVersion(`${floor - 1}.0.0`)
+    assert.ok(
+      tooOld.some((l) => l.includes(`>= ${floor} required`)),
+      `expected a compatibility error naming >= ${floor}, got ${JSON.stringify(tooOld)}`,
+    )
+
+    const atFloor = await withVersion(`${floor}.0.0`)
+    assert.deepEqual(atFloor, [])
   })
 
   it('reports rolecraft version', async () => {
@@ -148,6 +184,34 @@ describe('doctor command', () => {
       restore()
     }
     assert.ok(logs.some((l) => l.includes('Summary:')))
+  })
+
+  it('ends with a star CTA pointing at the repo', async () => {
+    const { logs, restore } = capture()
+    try {
+      await doctorModule.doctorCommand()
+    } finally {
+      restore()
+    }
+    const cta = logs.findIndex((l) =>
+      l.includes('github.com/rolecraft-sh/rolecraft'),
+    )
+    assert.ok(cta > -1, `no star CTA in output. Logs: ${logs.join('|')}`)
+    assert.ok(
+      cta > logs.findIndex((l) => l.includes('Summary:')),
+      'star CTA should come after the summary',
+    )
+  })
+
+  it('keeps json output free of the star CTA', async () => {
+    const { logs, restore } = capture()
+    try {
+      await doctorModule.doctorCommand({ json: true })
+    } finally {
+      restore()
+    }
+    JSON.parse(logs.join(''))
+    assert.ok(!logs.join('').includes('github.com/rolecraft-sh/rolecraft'))
   })
 
   it('detects agent when its skill directory exists', async () => {

@@ -1,6 +1,6 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
@@ -285,5 +285,39 @@ describe('api install', () => {
     })
 
     assert.equal(result.results.length, 1)
+  })
+
+  it('installs a project skill under options.cwd even when process.cwd() differs', async () => {
+    const projectDir = join(tempDir, 'cwd-project')
+    await mkdir(projectDir, { recursive: true })
+    const decoyDir = join(tempDir, 'cwd-decoy')
+    await mkdir(decoyDir, { recursive: true })
+
+    const skillDir = join(tempDir, 'test-skills', 'cwd-mismatch-skill')
+    await mkdir(skillDir, { recursive: true })
+    const skillFile = createSkill({
+      name: 'cwd-mismatch-skill',
+      slug: 'cwd-mismatch-skill',
+    })
+    await writeFile(join(skillDir, 'SKILL.md'), skillFile)
+
+    const beforeTestCwd = process.cwd()
+    process.chdir(decoyDir)
+    try {
+      await apiInstallSkills(skillDir, {
+        cwd: projectDir,
+        scope: { project: true },
+        yes: true,
+      })
+    } finally {
+      process.chdir(beforeTestCwd)
+    }
+
+    assert.ok(
+      existsSync(
+        join(projectDir, '.agents', 'skills', 'cwd-mismatch-skill', 'SKILL.md'),
+      ),
+      'skill should install under options.cwd, not process.cwd()',
+    )
   })
 })
