@@ -18,7 +18,12 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        node-version: [20, 22, 24]
+        # Node 20 reached EOL on 2026-04-30 and its test runner has an
+        # unfixed deserialization bug (nodejs/node#64061) that fails
+        # macOS jobs regardless of the code under test. The fix landed in
+        # v24.20.0 (#64706); the v22 backport is pending (#65807) and v20
+        # will never receive one, so testing it only buys a flaky job.
+        node-version: [22, 24]
 
     steps:
       - name: Checkout repository
