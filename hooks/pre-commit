@@ -1,6 +1,5 @@
 #!/bin/sh
-# .git/hooks/pre-commit — regenerates agent docs + manifest matrix, re-stages
-# changes, then runs lint + tests before allowing a commit
+# hooks/pre-commit — runs lint before allowing a commit
 # Installed by: npm install / npm run setup-hooks / node scripts/setup-hooks.mjs
 
 set -e
@@ -11,12 +10,19 @@ if [ "$PKG" != "rolecraft" ]; then
   exit 0
 fi
 
-# Regenerate agent docs + the manifest token matrix. If a new agent, feature, or
-# published file changed the counts/sizes, this updates every markdown location
-# so the committed docs always match the manifest. Re-stage any produced changes.
-echo "→ pre-commit: regenerating agent docs + manifest matrix"
-npm run --silent generate:docs
-git add -A
+# NOTE: this hook deliberately does NOT run `npm run generate:docs`.
+#
+# It used to, followed by `git add -A`. That put a freshly generated
+# test_count / unpacked_size into every branch, and both values change on
+# nearly every merge — so every open PR was stale by definition and
+# MAINIFEST-MATRIX.md, README.md, CONTRIBUTING.md, benchmark/RESULTS.md and
+# four docs/*.md conflicted on each one. Generated values are now owned by
+# .github/workflows/docs-sync.yml, which refreshes them on main after merge.
+# Feature branches must not carry them.
+#
+# If you add an agent or change the published file set, run
+# `npm run generate:docs` yourself and commit the result, or let the
+# post-merge workflow pick it up.
 
 # Run lint (syntax + biome). Skip if biome not installed.
 if [ -x node_modules/.bin/biome ]; then
