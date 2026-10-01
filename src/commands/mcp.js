@@ -29,8 +29,8 @@ function requiresConfirmation(source) {
   return info.type === 'github'
 }
 
-// S-12: npm/local/uvx/etc. sources get a near-max security score (the scanner
-// only flags "published by anyone" as low), so surface the real risk directly.
+// S-12: remind users that non-GitHub sources execute arbitrary code.
+// Unscanned npm sources also require explicit approval at the API security gate.
 function warnMcpArbitraryCode(source, options) {
   if (options.yes) return
   const info = classifyMcpSource(source)

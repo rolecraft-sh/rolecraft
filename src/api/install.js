@@ -1,6 +1,11 @@
 import { resolveSource, resolveSkills } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
-import { scanSkill, scanMcpServer, classifyScore } from '../utils/security.js'
+import {
+  scanSkill,
+  scanMcpServer,
+  classifyScore,
+  requiresMcpApproval,
+} from '../utils/security.js'
 import {
   parseMcpServersFromSkill,
   resolveMcpSource,
@@ -192,7 +197,7 @@ export async function apiInstallSkills(source, options = {}) {
           // Security scan for MCP servers
           const mcpSecurity = scanMcpServer(resolvedMcp)
           const mcpLevel = classifyScore(mcpSecurity.score, mcpSecurity.issues)
-          if (mcpLevel !== 'safe' && !options.yes) {
+          if (requiresMcpApproval(mcpSecurity) && !options.yes) {
             const issues = mcpSecurity.issues
               .filter((i) => i.severity === 'critical' || i.severity === 'high')
               .map(

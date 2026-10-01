@@ -32,6 +32,7 @@ describe('mcp command', () => {
       withTempDir(async () => {
         const { logs, restore } = capture('log')
         await mcpModule.mcpInstallCommand('npm:@test/my-server', {
+          yes: true,
           agents: ['agents'],
           name: 'my-server',
         })
@@ -50,6 +51,7 @@ describe('mcp command', () => {
       withTempDir(async () => {
         const { logs, restore } = capture('log')
         await mcpModule.mcpInstallCommand('npm:@test/db', {
+          yes: true,
           agents: ['cursor', 'claude'],
           name: 'db-mcp',
         })
@@ -87,6 +89,7 @@ describe('mcp command', () => {
       withTempDir(async () => {
         const { logs, restore } = capture('log')
         await mcpModule.mcpInstallCommand('npm:@test/foo', {
+          yes: true,
           agents: ['agents', 'nonexistent'],
           name: 'foo',
         })
@@ -100,10 +103,13 @@ describe('mcp command', () => {
       'warns that MCP servers execute arbitrary code for npm sources',
       withTempDir(async () => {
         const { logs, restore } = capture('log')
-        await mcpModule.mcpInstallCommand('npm:@test/warn', {
-          agents: ['agents'],
-          name: 'warn-test',
-        })
+        await assert.rejects(
+          mcpModule.mcpInstallCommand('npm:@test/warn', {
+            agents: ['agents'],
+            name: 'warn-test',
+          }),
+          { userCode: 'MCP_SECURITY_REVIEW' },
+        )
         restore()
 
         assert.ok(
@@ -304,6 +310,7 @@ describe('mcp command', () => {
         await mcpModule.mcpCommand([
           'install',
           'npm:@test/dispatch',
+          '--yes',
           '--agents',
           'agents',
           '--name',
@@ -418,6 +425,7 @@ describe('mcp command', () => {
         await mcpModule.mcpCommand([
           'install',
           'npm:@test/name-flag',
+          '--yes',
           '--agents',
           'agents',
           '--name',
@@ -432,7 +440,12 @@ describe('mcp command', () => {
       'parses --all flag',
       withTempDir(async () => {
         const { logs, restore } = capture('log')
-        await mcpModule.mcpCommand(['install', 'npm:@test/all-flag', '--all'])
+        await mcpModule.mcpCommand([
+          'install',
+          'npm:@test/all-flag',
+          '--all',
+          '--yes',
+        ])
         restore()
         assert.ok(logs.some((l) => l.includes('Installed MCP server')))
       }),

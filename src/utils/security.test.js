@@ -506,6 +506,18 @@ describe('security', () => {
       assert.equal(classifyScore(result.score, result.issues), 'review')
     })
 
+    it('does not flag npm contents as unscanned when source files are available', () => {
+      const result = scanMcpServer({
+        sourceType: 'npm',
+        fileContents: { 'index.js': 'console.log("hello")' },
+      })
+      assert.equal(result.score, 99)
+      assert.equal(
+        result.issues.some((issue) => issue.category === 'unscanned_source'),
+        false,
+      )
+    })
+
     it('handles missing fileContents gracefully', () => {
       const result = scanMcpServer({
         sourceType: 'local',

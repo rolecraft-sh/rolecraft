@@ -219,3 +219,7 @@ mcp_servers:
 ```
 
 If you only want the skill without MCP servers, pass `--no-mcp` during installation.
+
+### Security approval for npm sources
+
+npm package contents are not currently fetched for scanning. Both `rolecraft mcp install npm:…` and a skill with an embedded npm MCP server require `--yes` after you review and trust the source (API: `yes: true`). Without approval they report `MCP_SECURITY_REVIEW`. `rolecraft ci` fails unscanned npm entries from the global MCP lock instead of silently reinstalling them; it has no `--yes` override. Scanned `gh:` sources keep their existing REVIEW/DANGER policy.

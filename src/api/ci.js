@@ -3,7 +3,12 @@ import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 import { readMcpLock } from '../utils/mcp-lock.js'
 import { resolveMcpSource, addMcpServer } from '../utils/mcp.js'
-import { scanSkill, scanMcpServer, classifyScore } from '../utils/security.js'
+import {
+  scanSkill,
+  scanMcpServer,
+  classifyScore,
+  requiresMcpApproval,
+} from '../utils/security.js'
 
 export async function apiCi(cwd = process.cwd()) {
   const [globalLock, projectLock, mcpLock] = await Promise.all([
@@ -71,11 +76,14 @@ export async function apiCi(cwd = process.cwd()) {
       // Security scan for MCP servers
       const mcpSecurity = scanMcpServer(resolved)
       const mcpLevel = classifyScore(mcpSecurity.score, mcpSecurity.issues)
-      if (mcpLevel === 'danger') {
+      if (requiresMcpApproval(mcpSecurity)) {
         mcpFailed.push({
           name,
           source: entry.source,
-          reason: `blocked by MCP security scan (score: ${mcpSecurity.score}/100)`,
+          reason:
+            mcpLevel === 'danger'
+              ? `blocked by MCP security scan (score: ${mcpSecurity.score}/100)`
+              : `MCP server needs security review (score: ${mcpSecurity.score}/100); unscanned sources cannot be restored in CI`,
         })
         continue
       }

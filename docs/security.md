@@ -192,4 +192,6 @@ This is intended for CI pipelines and fully trusted sources only.
 
 ## MCP Server Scanning
 
-MCP servers referenced in a skill's frontmatter (`mcpServers`) are scanned with the same engine before installation. A server flagged DANGER blocks the whole skill install (`rolecraft install`/`rolecraft ci`), with `--yes` as the only bypass — it always prints a warning. See `MCP_SECURITY_DANGER` in the error output for the flagged issues.
+MCP servers are scanned before direct installation, skill-embedded installation, and restoration from the global MCP lockfile. DANGER findings block installation (`MCP_SECURITY_DANGER`). npm sources currently provide no package contents to scan, so they receive an `unscanned_source` finding and score 89/REVIEW, not SAFE. Direct and skill-embedded installs require explicit approval with `--yes` (API: `yes: true`); otherwise they report `MCP_SECURITY_REVIEW`. `rolecraft ci` has no approval override and reports unscanned npm entries in `mcpFailed` without writing agent configuration. A lockfile entry is not evidence of a completed security scan.
+
+Scanned `gh:` sources retain their existing policy: REVIEW alone does not block installation; DANGER still does. This npm-source fix does not expand the blocking policy for scanned GitHub content.

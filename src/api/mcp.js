@@ -6,7 +6,12 @@ import {
   getSupportedMcpAgents,
   resolveMcpSource,
 } from '../utils/mcp.js'
-import { scanMcpServer } from '../utils/security.js'
+import {
+  scanMcpServer,
+  classifyScore,
+  requiresMcpApproval,
+} from '../utils/security.js'
+import { UserError } from '../utils/errors.js'
 
 let runFetch = globalThis.fetch
 
@@ -27,18 +32,20 @@ export async function apiMcpInstall(source, options = {}) {
   const resolved = await resolveMcpSource(source)
   const scanResult = scanMcpServer(resolved)
 
-  if (scanResult.issues.length > 0) {
-    const level =
-      scanResult.score >= 90
-        ? 'safe'
-        : scanResult.score >= 70
-          ? 'review'
-          : 'danger'
-    if (level === 'danger' && !options.yes) {
-      throw new Error(
-        `Security score low (${scanResult.score}). Use yes:true to force.`,
-      )
-    }
+  if (requiresMcpApproval(scanResult) && !options.yes) {
+    const blocked =
+      classifyScore(scanResult.score, scanResult.issues) === 'danger'
+    throw new UserError(
+      blocked
+        ? `MCP server blocked by security scan (score: ${scanResult.score}/100).`
+        : `MCP server needs security review (score: ${scanResult.score}/100).`,
+      {
+        suggestion:
+          'Review the flagged issues, then use --yes (API: yes:true) to approve the install.',
+        detail: scanResult.issues.map((issue) => issue.description).join('\n'),
+        code: blocked ? 'MCP_SECURITY_DANGER' : 'MCP_SECURITY_REVIEW',
+      },
+    )
   }
 
   const targets =

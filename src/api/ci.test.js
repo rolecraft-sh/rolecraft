@@ -159,7 +159,7 @@ describe('api ci', () => {
 
   it('restores MCP servers from the MCP lockfile for each agent', async () => {
     await writeMcpLock({
-      db: { source: 'npm:@test/db@1.0.0', agents: ['agents', 'cursor'] },
+      db: { source: './db.js', agents: ['agents', 'cursor'] },
       nosrc: { agents: ['agents'] },
     })
 
@@ -171,7 +171,7 @@ describe('api ci', () => {
     assert.deepEqual(result.mcpInstalled, [
       {
         name: 'db',
-        source: 'npm:@test/db@1.0.0',
+        source: './db.js',
         agents: ['agents', 'cursor'],
       },
     ])
@@ -183,8 +183,8 @@ describe('api ci', () => {
         readFileSync(join(homeDir, dir, 'mcp.json'), 'utf-8'),
       )
       assert.deepEqual(config.mcpServers.db, {
-        command: 'npx',
-        args: ['-y', '@test/db@1.0.0'],
+        command: 'node',
+        args: ['./db.js'],
       })
     }
   })
@@ -289,4 +289,21 @@ describe('api ci', () => {
       'skill should install under the requested project cwd, not process.cwd()',
     )
   })
+})
+
+it('does not restore unscanned npm entries or mutate agent config or locks', async () => {
+  await writeMcpLock({
+    db: { source: 'npm:@test/db@1.0.0', agents: ['agents', 'cursor'] },
+  })
+  const lockPath = join(homeDir, '.agents', '.mcp-lock.json')
+  const before = readFileSync(lockPath, 'utf-8')
+  const result = await apiCi(workDir)
+  assert.equal(result.allPassed, false)
+  assert.deepEqual(result.mcpInstalled, [])
+  assert.equal(result.mcpFailed.length, 1)
+  assert.match(result.mcpFailed[0].reason, /needs security review/)
+  for (const dir of ['.agents', '.cursor']) {
+    assert.equal(existsSync(join(homeDir, dir, 'mcp.json')), false)
+  }
+  assert.equal(readFileSync(lockPath, 'utf-8'), before)
 })

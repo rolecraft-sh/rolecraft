@@ -235,6 +235,14 @@ export function classifyScore(score, issues = []) {
   return 'danger'
 }
 
+// Preserve scanned-source policy while requiring approval for unscanned npm.
+export function requiresMcpApproval({ score, issues }) {
+  return (
+    classifyScore(score, issues) === 'danger' ||
+    issues.some((issue) => issue.category === 'unscanned_source')
+  )
+}
+
 export function scanMcpServer(resolved) {
   const issues = []
 
