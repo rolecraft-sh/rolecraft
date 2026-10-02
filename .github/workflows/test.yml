@@ -54,6 +54,19 @@ jobs:
       - name: Run tests
         run: node --test --test-concurrency=1
 
+      # release-prep.sh rewrites CHANGELOG.md and package.json for every release,
+      # and until now it only ever ran after a signed tag was pushed, so a bug in
+      # it surfaced as a broken release instead of a failing check (#369). It
+      # needs its own step because node --test skips dot-directories, so the
+      # fixture cannot live under src/ and still be discovered.
+      #
+      # Gated to Node 24 so it runs on both ubuntu-latest and macos-latest: the
+      # script leans on sed/grep, and those differ between GNU and BSD
+      # userlands. A single-OS run would not catch that class of bug.
+      - name: Test release-prep script
+        if: matrix.node-version == 24
+        run: node --test .github/scripts/release-prep.test.js
+
       - name: Run test coverage
         if: matrix.node-version == 24
         run: npm run test:coverage 2>&1 | tee coverage-output.txt

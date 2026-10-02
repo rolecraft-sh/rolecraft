@@ -52,13 +52,17 @@ resolve_login() {
   fi
 
   local login=""
-  if [[ "$email" =~ ^[0-9]+\+([A-Za-z0-9_-]+)@users\.noreply\.github\.com$ ]]; then
-    # `12345+login@users.noreply.github.com` carries the login inline.
+  if [[ "$email" =~ ^[0-9]+\+([A-Za-z0-9_-]+(\[[a-z]+\])?)@users\.noreply\.github\.com$ ]]; then
+    # `12345+login@users.noreply.github.com` carries the login inline. The
+    # optional `[bot]` suffix is matched here rather than left to the API so a
+    # bot is recognised without a network round-trip.
     login="${BASH_REMATCH[1]}"
   elif [[ "$email" =~ ^([A-Za-z0-9_-]+(\[[a-z]+\])?)@users\.noreply\.github\.com$ ]]; then
     login="${BASH_REMATCH[1]}"
   elif [ -n "$REPO" ]; then
-    login=$(gh api "repos/$REPO/commits/$sha" --jq '.author.login // empty' 2>/dev/null || true)
+    # `gh api` prints its error body to stdout, so a failed lookup has to clear
+    # the variable rather than let the JSON become the login.
+    login=$(gh api "repos/$REPO/commits/$sha" --jq '.author.login // empty' 2>/dev/null) || login=""
   fi
 
   if [ -n "$login" ]; then
@@ -106,7 +110,9 @@ while IFS=$'\t' read -r SHA EMAIL MSG; do
 
   # The PR is credited once, at the end of the line, so the reference the
   # subject already carries is dropped from the line itself.
-  CLEAN=$(echo "$MSG" | sed -E 's/^[^:]*:\s*//; s/ \(#[0-9]+\)$//')
+  # `[[:space:]]` rather than `\s`, which BSD sed does not support and which
+  # would leave a stray leading space on macOS runners.
+  CLEAN=$(echo "$MSG" | sed -E 's/^[^:]*:[[:space:]]*//; s/ \(#[0-9]+\)$//')
 
   if echo "$MSG" | grep -qiE '^(feat|feature)(\(.*\))?:' || echo "$MSG" | grep -qiE '^added'; then
     ADDED="$ADDED\n- $CLEAN$CREDITS"
