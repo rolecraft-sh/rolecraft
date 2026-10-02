@@ -2,6 +2,67 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.5.0] - 2026-10-02
+
+### Added
+- move star CTA from bot welcome to doctor output by @sametcelikbicak in [#384](https://github.com/rolecraft-sh/rolecraft/pull/384)
+- credit every changelog entry to its author by @sametcelikbicak in [#357](https://github.com/rolecraft-sh/rolecraft/pull/357)
+
+### Fixed
+- cover release-prep.sh with a fixture test and fix its portability bugs by @sametcelikbicak in [#395](https://github.com/rolecraft-sh/rolecraft/pull/395)
+- prevent watch from syncing its own install output by @PandaHUN777 in [#381](https://github.com/rolecraft-sh/rolecraft/pull/381)
+- download-and-execute rule catches curl -fsSL and skips | shasum by @Bdysj in [#374](https://github.com/rolecraft-sh/rolecraft/pull/374)
+- make docs-sync open a PR instead of pushing to protected main by @sametcelikbicak in [#391](https://github.com/rolecraft-sh/rolecraft/pull/391)
+- require review for unscanned npm MCP servers by @YIKUAIBANZI in [#379](https://github.com/rolecraft-sh/rolecraft/pull/379)
+- stop generated doc values from conflicting on every merge by @sametcelikbicak in [#387](https://github.com/rolecraft-sh/rolecraft/pull/387)
+- keep project CI skills in project scope by @PandaHUN777 in [#378](https://github.com/rolecraft-sh/rolecraft/pull/378)
+- clarify lock rename contention by @PandaHUN777 in [#377](https://github.com/rolecraft-sh/rolecraft/pull/377)
+- thread cwd through ci, install and watch installSkill calls by @biggdawg320 in [#380](https://github.com/rolecraft-sh/rolecraft/pull/380)
+- reject corrupt lockfiles safely by @tnalbant in [#376](https://github.com/rolecraft-sh/rolecraft/pull/376)
+- security-scan MCP servers before profile apply writes them by @Bdysj in [#368](https://github.com/rolecraft-sh/rolecraft/pull/368)
+- validate lockfile slugs in verify and agents-xml by @HarshRajSinghania in [#371](https://github.com/rolecraft-sh/rolecraft/pull/371)
+- resolve rollback targets by agent name as well as flag by @Bdysj in [#364](https://github.com/rolecraft-sh/rolecraft/pull/364)
+- remove temp clone dir when git URL resolution fails by @Bdysj in [#363](https://github.com/rolecraft-sh/rolecraft/pull/363)
+- make MCP lock updates atomic and stop them losing each other by @muraa-p in [#362](https://github.com/rolecraft-sh/rolecraft/pull/362)
+- re-check the npm tarball host allow-list on every redirect hop by @muraa-p in [#361](https://github.com/rolecraft-sh/rolecraft/pull/361)
+- skip lockfile writes in rollback dry-run by @Bdysj in [#358](https://github.com/rolecraft-sh/rolecraft/pull/358)
+- validate npm tarball redirects by @Yurii201811 in [#356](https://github.com/rolecraft-sh/rolecraft/pull/356)
+- scope slug collisions to target agents by @kocaemre in [#348](https://github.com/rolecraft-sh/rolecraft/pull/348)
+- serialise lockfile read-modify-write to stop lost updates by @muraa-p in [#355](https://github.com/rolecraft-sh/rolecraft/pull/355)
+- re-check the profile import host allow-list on every redirect by @muraa-p in [#351](https://github.com/rolecraft-sh/rolecraft/pull/351)
+- write lock file atomically via temp file and rename by @muraa-p in [#349](https://github.com/rolecraft-sh/rolecraft/pull/349)
+- normalize agents xml test path by @premiuslol in [#341](https://github.com/rolecraft-sh/rolecraft/pull/341)
+- honor cwd in apiUpdate installations by @PandaHUN777 in [#338](https://github.com/rolecraft-sh/rolecraft/pull/338)
+- prevent normalized slug collisions by @PandaHUN777 in [#340](https://github.com/rolecraft-sh/rolecraft/pull/340)
+- use UserError for skill-not-found in remove and update APIs by @amandeavor in [#298](https://github.com/rolecraft-sh/rolecraft/pull/298)
+
+### Changed
+- regenerate docs and manifest matrix by @sametcelikbicak in [#394](https://github.com/rolecraft-sh/rolecraft/pull/394)
+- regenerate docs and manifest matrix by @sametcelikbicak in [#393](https://github.com/rolecraft-sh/rolecraft/pull/393)
+- raise minimum supported Node to 22 and test 24 and 26 by @sametcelikbicak in [#383](https://github.com/rolecraft-sh/rolecraft/pull/383)
+- cover convertApi dry-run for .mdc files by @chanchalagarwal3580 in [#372](https://github.com/rolecraft-sh/rolecraft/pull/372)
+- point biome.json at the locked Biome version by @sametcelikbicak in [#373](https://github.com/rolecraft-sh/rolecraft/pull/373)
+- run test matrix on macos-latest by @miteshanshu in [#365](https://github.com/rolecraft-sh/rolecraft/pull/365)
+- cover global scope of assertNoSlugCollision by @miteshanshu in [#360](https://github.com/rolecraft-sh/rolecraft/pull/360)
+- add unit tests for init and use APIs by @PandaHUN777 in [#359](https://github.com/rolecraft-sh/rolecraft/pull/359)
+- add unit tests for api mcp, profile, ci and upgrade by @readyagentsdev in [#320](https://github.com/rolecraft-sh/rolecraft/pull/320)
+- group npm dependabot updates by @premiuslol in [#321](https://github.com/rolecraft-sh/rolecraft/pull/321)
+- test on Node 20, 22, and 24 by @PandaHUN777 in [#319](https://github.com/rolecraft-sh/rolecraft/pull/319)
+- add unit tests for api setup, convert, agents-xml and completions by @vatsalyrai in [#318](https://github.com/rolecraft-sh/rolecraft/pull/318)
+- make upgrade command reuse upgrade api by @premiuslol in [#315](https://github.com/rolecraft-sh/rolecraft/pull/315)
+- bump @biomejs/biome from 2.5.5 to 2.5.14 in [#314](https://github.com/rolecraft-sh/rolecraft/pull/314)
+- make init command reuse initApi by @vatsalyrai in [#313](https://github.com/rolecraft-sh/rolecraft/pull/313)
+- add npm dependabot updates by @premiuslol in [#312](https://github.com/rolecraft-sh/rolecraft/pull/312)
+- use watch close on SIGINT by @premiuslol in [#311](https://github.com/rolecraft-sh/rolecraft/pull/311)
+- bump codeql-action to 4.38.2 and group its dependabot updates by @sametcelikbicak in [#303](https://github.com/rolecraft-sh/rolecraft/pull/303)
+- reuse agents xml API in command by @vansh-nagar in [#300](https://github.com/rolecraft-sh/rolecraft/pull/300)
+- cover update search verify and doctor APIs by @vansh-nagar in [#299](https://github.com/rolecraft-sh/rolecraft/pull/299)
+- make watch command reuse the watch API by @vatsalyrai in [#290](https://github.com/rolecraft-sh/rolecraft/pull/290)
+- bump codeql-action init and analyze to 4.38.0 by @sametcelikbicak in [#289](https://github.com/rolecraft-sh/rolecraft/pull/289)
+- update changelog and version for v2.4.2 by @sametcelikbicak in [#286](https://github.com/rolecraft-sh/rolecraft/pull/286)
+
+### Documentation
+- explain convert API dry-run and destination resolution by @chanchalagarwal3580 in [#389](https://github.com/rolecraft-sh/rolecraft/pull/389)
 ## [v2.4.2] - 2026-09-17
 
 ### Fixed
