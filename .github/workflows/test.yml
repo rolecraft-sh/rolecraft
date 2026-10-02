@@ -16,17 +16,29 @@ jobs:
     name: Test (Node ${{ matrix.node-version }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
+      # One failing job must not cancel the rest. A Node test-runner bug that
+      # hits a single matrix leg would otherwise mark every leg red and hide which
+      # one actually failed.
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
-        # Floor is 22 (see package.json engines), so 22 is the oldest line we
-        # test. Node 20 is gone: EOL 2026-04-30, and its test runner has an
-        # unfixed deserialization bug (nodejs/node#64061) that fails macOS
-        # jobs regardless of the code under test — the fix landed in v24.20.0
-        # (#64706) and v20 would never receive it.
-        # 24 is the current LTS and the reference line for the extra jobs
-        # below. 26 is Current and becomes LTS on 2026-10-28, so testing it
-        # now is how we find breakage before it becomes the recommended line.
-        node-version: [22, 24, 26]
+        # 24 is the oldest line tested, and the current LTS.
+        # 26 is Current and becomes LTS on 2026-10-28, so testing it now is how
+        # we find breakage before it becomes the recommended line.
+        #
+        # Node 22 and 20 are deliberately absent, and this is not a support
+        # statement: package.json still declares `node: >=22`, so users on 22
+        # are supported and the CLI runs there fine. What breaks on 22 is our
+        # own test harness, not our code - nodejs/node#64061 intermittently
+        # kills `node --test` with "Unable to deserialize cloned data" and
+        # reports a fully passing file as failed. The fix (nodejs/node#64706)
+        # shipped in v24.x and was never backported to v22.x.
+        #
+        # Testing it anyway would mean a check that cannot be trusted: a red
+        # that blocks merges when it happens, and a red that teaches reviewers
+        # to ignore reds when it does not. Add 22 back once v22.x carries
+        # #64706.
+        node-version: [24, 26]
 
     steps:
       - name: Checkout repository

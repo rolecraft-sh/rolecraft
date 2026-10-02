@@ -196,7 +196,7 @@ describe('agent manifest', () => {
     assert.equal(current, generated)
   })
 
-  it('matrix token values match the manifest and npm pack', () => {
+  it('matrix token values match the agent manifest', () => {
     const manifest = getAgentManifest()
     const tokens = getTokenValues()
     assert.equal(tokens.agent_count, String(manifest.length))
@@ -210,7 +210,6 @@ describe('agent manifest', () => {
       String(groups[SUPPORT_LEVELS.EXPERIMENTAL].length),
     )
     assert.equal(tokens.mcp_agent_count, String(getAgentsWithMcp().length))
-    assert.match(tokens.unpacked_size, /^[\d.]+ kB$/)
   })
 
   it('manifest matrix documents every tracked location with current values', () => {
@@ -219,18 +218,18 @@ describe('agent manifest', () => {
     const rows = parseMatrix(md)
     assert.ok(rows.length > 0, 'matrix should have tracked rows')
 
-    // Generated values are only authoritative on main. `test_count` and
-    // `unpacked_size` change on almost every merge, so requiring a feature
-    // branch to carry main's current numbers made every open PR permanently
-    // stale and conflicted in the seven tracked markdown files. The values are
-    // refreshed on main after merge by .github/workflows/docs-sync.yml, and
-    // that is where they are checked.
+    // Every tracked value must match the current manifest here, on every branch
+    // and in CI.
     //
-    // Everywhere else this asserts structure only: every token still has a
-    // tracked location, and that location still carries a well-formed value.
-    // A deleted row or a hand-mangled value still fails here; "main moved
-    // since you branched" does not.
-    const isMain = process.env.GITHUB_REF_NAME === 'main'
+    // This used to be checked on `main` only, with .github/workflows/docs-sync.yml
+    // repairing the values after each merge. That made `main` red on every code
+    // change, and the repair PR had to pass this same flaky gate, so a single
+    // flake could deadlock `main` indefinitely. Checking pre-merge instead means
+    // the values are correct before the merge, and no repair step is needed.
+    //
+    // It is affordable because the only tokens left are agent counts, which
+    // change only when an agent is added. The pre-commit hook stays lenient:
+    // `npm pack` and file sizes are not reproducible on every machine.
     const tokens = getTokenValues()
     for (const row of rows) {
       // the location must actually exist
@@ -239,28 +238,20 @@ describe('agent manifest', () => {
       const line = lines[row.line - 1]
       assert.ok(line, `missing line ${row.line} in ${row.file}`)
 
-      if (isMain) {
-        // every documented value must match the current manifest-derived value
-        assert.equal(
-          row.value,
-          tokens[row.token],
-          `stale value for ${row.token} @ ${row.file}:${row.line}`,
-        )
-      }
+      // every documented value must match the current manifest-derived value
+      assert.equal(
+        row.value,
+        tokens[row.token],
+        `stale value for ${row.token} @ ${row.file}:${row.line}`,
+      )
 
-      if (/[\d.]+ kB/.test(row.value)) {
-        assert.ok(
-          line.includes(row.value),
-          `${row.token} value not on ${row.file}:${row.line}`,
-        )
-      } else {
-        const re = new RegExp(`(?<!\\w)${row.value}(?!\\w)`)
-        assert.match(
-          line,
-          re,
-          `${row.token} value not on ${row.file}:${row.line}`,
-        )
-      }
+      // and that value must still be present at the location it is tracked at
+      const re = new RegExp(`(?<!\\w)${row.value}(?!\\w)`)
+      assert.match(
+        line,
+        re,
+        `${row.token} value not on ${row.file}:${row.line}`,
+      )
     }
   })
 
@@ -303,10 +294,7 @@ describe('agent manifest', () => {
 
   it('applying the matrix while in sync is a no-op', () => {
     // Same reasoning as 'documents every tracked location with current values':
-    // "in sync" is only a meaningful claim about main. On a feature branch the
-    // committed matrix is expected to lag, and asserting it does not would
-    // force every branch to carry main's numbers.
-    if (process.env.GITHUB_REF_NAME !== 'main') return
+    // "in sync" must hold on every branch, not just on main.
     const matrixPath = join(__dirname, '..', '..', 'MANIFEST-MATRIX.md')
     const md = readFileSync(matrixPath, 'utf-8')
     const { changes } = applyMatrix(md, getTokenValues(), true)

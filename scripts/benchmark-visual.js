@@ -44,13 +44,8 @@ const DEFAULT = {
     agentskill: 'failed',
     githubRatio: 6.94,
   },
-  packageSize: {
-    rolecraft: '432.8 kB',
-    vercel: '~465 KB',
-    agentskill: '~84 KB',
-  },
   deps: { rolecraft: 0, vercel: 1, agentskill: 2 },
-  agents: { rolecraft: 86, vercel: 72, agentskill: '15+' },
+  agents: { rolecraft: 87, vercel: 72, agentskill: '15+' },
 }
 
 const raw = existsSync(DATA_PATH)
@@ -71,13 +66,11 @@ const fmt = (n) => Number(n).toLocaleString('en-US')
 
 const BAR_X = 185
 const BAR_W = 500
-const SIZE_BAR_W = 280
 
 const W = 800
-const H = 820
+const H = 660
 const MAX_LOCAL = 4500
 const MAX_GITHUB = 14000
-const MAX_SIZE = 470
 
 const barW = (val, max) => Math.max((val / max) * BAR_W, 4)
 
@@ -124,34 +117,22 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" 
 
   <text x="40" y="415" font-family="system-ui,sans-serif" font-size="12" fill="${COLORS.muted}">@agentskill.sh/cli: failed — install does not complete successfully</text>
 
-  <text x="40" y="450" font-family="system-ui,sans-serif" font-size="16" fill="${COLORS.text}" font-weight="700">📦 Package Size</text>
-  <text x="40" y="497" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.rolecraft}" font-weight="600">rolecraft</text>
-  <rect x="${BAR_X}" y="484" width="${Math.max((parseFloat(data.packageSize.rolecraft) / MAX_SIZE) * SIZE_BAR_W, 14)}" height="24" rx="3" fill="${COLORS.rolecraft}" opacity="0.9"/>
-  <text x="${BAR_X + Math.max((parseFloat(data.packageSize.rolecraft) / MAX_SIZE) * SIZE_BAR_W, 14) + 8}" y="500" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.muted}">${esc(data.packageSize.rolecraft)}</text>
 
-  <text x="40" y="535" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.vercel}" font-weight="600">Vercel skills</text>
-  <rect x="${BAR_X}" y="522" width="${(parseFloat(data.packageSize.vercel.replace(/[~]/g, '')) / MAX_SIZE) * SIZE_BAR_W}" height="24" rx="3" fill="${COLORS.vercel}" opacity="0.9"/>
-  <text x="${BAR_X + (parseFloat(data.packageSize.vercel.replace(/[~]/g, '')) / MAX_SIZE) * SIZE_BAR_W + 8}" y="538" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.muted}" font-weight="600">${esc(data.packageSize.vercel)}</text>
+  <text x="40" y="460" font-family="system-ui,sans-serif" font-size="12" fill="${COLORS.muted}">Dependencies: rolecraft ${data.deps.rolecraft} · Vercel ${data.deps.vercel} · @agentskill.sh/cli ${data.deps.agentskill}</text>
 
-  <text x="40" y="573" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.agentskill}" font-weight="600">@agentskill.sh/cli</text>
-  <rect x="${BAR_X}" y="560" width="${Math.max((parseFloat(data.packageSize.agentskill.replace(/[~]/g, '')) / MAX_SIZE) * SIZE_BAR_W, 14)}" height="24" rx="3" fill="${COLORS.agentskill}" opacity="0.9"/>
-  <text x="${BAR_X + Math.max((parseFloat(data.packageSize.agentskill.replace(/[~]/g, '')) / MAX_SIZE) * SIZE_BAR_W, 14) + 8}" y="576" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.muted}" font-weight="600">${esc(data.packageSize.agentskill)}</text>
+  <line x1="40" y1="500" x2="760" y2="500" stroke="${COLORS.border}" stroke-width="1"/>
 
-  <text x="40" y="620" font-family="system-ui,sans-serif" font-size="12" fill="${COLORS.muted}">Dependencies: rolecraft ${data.deps.rolecraft} · Vercel ${data.deps.vercel} · @agentskill.sh/cli ${data.deps.agentskill}</text>
+  <text x="40" y="525" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.text}" font-weight="600">Agent Support</text>
+  <rect x="40" y="540" width="200" height="24" rx="4" fill="${COLORS.rolecraft}"/>
+  <text x="50" y="556" font-family="system-ui,sans-serif" font-size="12" fill="#fff" font-weight="600">rolecraft: ${data.agents.rolecraft}+ agents</text>
+  <rect x="260" y="540" width="200" height="24" rx="4" fill="${COLORS.vercel}"/>
+  <text x="270" y="556" font-family="system-ui,sans-serif" font-size="12" fill="#fff" font-weight="600">Vercel skills: ${data.agents.vercel} agents</text>
+  <rect x="480" y="540" width="200" height="24" rx="4" fill="${COLORS.agentskill}"/>
+  <text x="490" y="556" font-family="system-ui,sans-serif" font-size="12" fill="#fff" font-weight="600">@agentskill.sh/cli: ${esc(String(data.agents.agentskill))}</text>
 
-  <line x1="40" y1="660" x2="760" y2="660" stroke="${COLORS.border}" stroke-width="1"/>
-
-  <text x="40" y="685" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.text}" font-weight="600">Agent Support</text>
-  <rect x="40" y="700" width="200" height="24" rx="4" fill="${COLORS.rolecraft}"/>
-  <text x="50" y="716" font-family="system-ui,sans-serif" font-size="12" fill="#fff" font-weight="600">rolecraft: ${data.agents.rolecraft}+ agents</text>
-  <rect x="260" y="700" width="200" height="24" rx="4" fill="${COLORS.vercel}"/>
-  <text x="270" y="716" font-family="system-ui,sans-serif" font-size="12" fill="#fff" font-weight="600">Vercel skills: ${data.agents.vercel} agents</text>
-  <rect x="480" y="700" width="200" height="24" rx="4" fill="${COLORS.agentskill}"/>
-  <text x="490" y="716" font-family="system-ui,sans-serif" font-size="12" fill="#fff" font-weight="600">@agentskill.sh/cli: ${esc(String(data.agents.agentskill))}</text>
-
-  <text x="40" y="755" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.text}" font-weight="600">Unique Features</text>
-  <text x="40" y="778" font-family="system-ui,sans-serif" font-size="12" fill="${COLORS.text}">✅ publish to registry   ✅ MCP server mgmt     ✅ bundle + create     ✅ watch (auto-sync)</text>
-  <text x="40" y="798" font-family="system-ui,sans-serif" font-size="12" fill="${COLORS.text}">✅ profile              ✅ compose             ✅ test                ✅ doctor</text>
+  <text x="40" y="595" font-family="system-ui,sans-serif" font-size="13" fill="${COLORS.text}" font-weight="600">Unique Features</text>
+  <text x="40" y="618" font-family="system-ui,sans-serif" font-size="12" fill="${COLORS.text}">✅ publish to registry   ✅ MCP server mgmt     ✅ bundle + create     ✅ watch (auto-sync)</text>
+  <text x="40" y="638" font-family="system-ui,sans-serif" font-size="12" fill="${COLORS.text}">✅ profile              ✅ compose             ✅ test                ✅ doctor</text>
 </svg>`
 
 writeFileSync(resolve(ROOT, 'benchmark/comparison.svg'), svg)

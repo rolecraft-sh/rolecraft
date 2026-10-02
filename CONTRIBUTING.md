@@ -9,7 +9,7 @@ git clone https://github.com/rolecraft-sh/rolecraft.git
 cd rolecraft
 npm install              # also installs the pre-commit hook automatically
 npm link                 # now `rolecraft` runs from your local checkout
-npm test                 # 1192+ tests should pass
+npm test                 # full suite, 0 fails expected
 ```
 
 **Requirements:** Node.js >= 22. Dev dependencies (Biome, VitePress) install locally but never ship to users — the runtime stays zero-dependency.

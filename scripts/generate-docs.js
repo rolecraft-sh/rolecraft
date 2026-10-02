@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-import { readFileSync, writeFileSync, readdirSync } from 'node:fs'
-import { execSync } from 'node:child_process'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { getAgentManifest } from '../src/agents/manifest.js'
@@ -9,84 +8,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..')
 const MATRIX_FILE = join(ROOT, 'MANIFEST-MATRIX.md')
 
-let _packageSizeTokens = null
-let _testCount = null
-
 /**
- * Count total test cases by scanning it()/test() calls in test files.
- * Uses word-boundary anchors to avoid false positives (e.g. submit(), wait()).
- * Strips single-line comments before matching.
- */
-function getTestCount() {
-  if (_testCount !== null) return _testCount
-  let count = 0
-  function countTestsInDir(dir) {
-    try {
-      const entries = readdirSync(dir, { withFileTypes: true })
-      for (const entry of entries) {
-        const fullPath = join(dir, entry.name)
-        if (
-          entry.isDirectory() &&
-          entry.name !== 'node_modules' &&
-          entry.name !== '__fixtures__'
-        ) {
-          countTestsInDir(fullPath)
-        } else if (
-          entry.isFile() &&
-          (entry.name.endsWith('.test.js') || entry.name.endsWith('.test.mjs'))
-        ) {
-          const content = readFileSync(fullPath, 'utf-8')
-          const stripped = content.replace(/\/\/.*$/gm, '')
-          const itMatches = stripped.match(/\bit\b\s*\(/g)
-          const testMatches = stripped.match(/\btest\b\s*\(/g)
-          count += (itMatches?.length || 0) + (testMatches?.length || 0)
-        }
-      }
-    } catch {}
-  }
-  countTestsInDir(join(ROOT, 'src'))
-  countTestsInDir(join(ROOT, 'bin'))
-  countTestsInDir(join(ROOT, 'e2e'))
-  _testCount = count
-  return _testCount
-}
-
-function getPackageSizeTokens() {
-  if (_packageSizeTokens) return _packageSizeTokens
-  // Use `npm pack --dry-run --json`: sizes are emitted as clean JSON on stdout
-  // (the noisy tarball listing goes to stderr), avoiding the intermittent
-  // truncation flakiness of piping the merged `npm pack` output. Retry once for
-  // transient failures and throw on persistent failure rather than writing a
-  // "?" into the docs (which would silently corrupt them).
-  const kB = (bytes) => `${(bytes / 1000).toFixed(1)} kB`
-  let lastError = null
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      const output = execSync('npm pack --dry-run --json 2>/dev/null', {
-        encoding: 'utf-8',
-        cwd: ROOT,
-      })
-      const [entry] = JSON.parse(output)
-      if (entry && typeof entry.size === 'number' && entry.unpackedSize) {
-        _packageSizeTokens = {
-          package_size: kB(entry.size),
-          unpacked_size: kB(entry.unpackedSize),
-        }
-        return _packageSizeTokens
-      }
-      lastError = new Error('npm pack --dry-run --json output missing sizes')
-    } catch (error) {
-      lastError = error
-    }
-  }
-  throw new Error(
-    `Could not determine package sizes. Run \`npm pack --dry-run --json\` manually to debug. ${lastError?.message ?? ''}`,
-  )
-}
-
-/**
- * Compute the current (fresh) value for every known token from the manifest
- * and npm package sizes. Used to update docs locations tracked in the matrix.
+ * Compute the current (fresh) value for every known token from the agent
+ * manifest. Used to update docs locations tracked in the matrix.
  */
 export function getTokenValues() {
   const manifest = getAgentManifest()
@@ -102,8 +26,6 @@ export function getTokenValues() {
     legacy_count: String(groups.legacy.length),
     experimental_count: String(groups.experimental.length),
     mcp_agent_count: String(mcpAgents.length),
-    test_count: String(getTestCount()),
-    ...getPackageSizeTokens(),
   }
 }
 
@@ -162,9 +84,6 @@ manifest and run the script — it updates every location automatically.
 | \`legacy_count\` | \`src/agents/manifest.js\` → legacy agent count |
 | \`experimental_count\` | \`src/agents/manifest.js\` → experimental agent count |
 | \`mcp_agent_count\` | \`src/agents/manifest.js\` → agents with MCP support |
-| \`test_count\` | \`src/**/*.test.js\` + \`bin/**/*.test.js\` → total test cases |
-| \`unpacked_size\` | \`npm pack --dry-run\` → unpacked size (kB) |
-| \`package_size\` | \`npm pack --dry-run\` → package size (kB) |
 
 ## Matrix
 
@@ -178,49 +97,85 @@ manifest and run the script — it updates every location automatically.
 }
 
 /**
- * Replace value on a specific source line (1-indexed) with newValue.
- * Verifies the line actually contains the expected old value to avoid silently
- * corrupting docs when line numbers go stale. Returns the new file content.
+ * Replace value at a recorded source line (1-indexed) with newValue.
+ *
+ * The recorded line is a hint, not a guarantee. Two things routinely move it:
+ * `generate:docs` regenerates docs/agents.md before this runs, which inserts a
+ * row per agent and shifts every tracked line below it, and apps.json's count
+ * is written by that same first step, so the old value is already gone by the
+ * time we get here. Both used to abort the whole run, which is why adding an
+ * agent needed a hand edit.
+ *
+ * So: try the recorded line, then search outward nearest-first for one still
+ * holding the old value, and treat a line already carrying the new value as
+ * done. Returns the new content and the line actually written, so the matrix
+ * can record where the value ended up rather than keeping a stale number.
  */
 function replaceInLine(content, lineNum, oldValue, newValue, token, file) {
   const lines = content.split('\n')
-  const idx = lineNum - 1
-  if (!lines[idx]) {
-    throw new Error(
-      `[${token}] ${file}:${lineNum} — line not found. Update the matrix.`,
-    )
-  }
-  const target = lines[idx]
 
   // Unit-style values ("434.5 kB") are matched as literal substrings (word
   // boundaries don't apply to decimals/units); numeric counts are matched as
   // whole words so we never touch a neighboring number (e.g. 87 vs 27).
   const isUnitValue = /[\d.]+ kB/.test(oldValue)
-  const countOccurrences = () => {
-    if (isUnitValue) return target.split(oldValue).length - 1
-    const re = new RegExp(`(?<!\\w)${escapeRegex(oldValue)}(?!\\w)`, 'g')
-    return (target.match(re) || []).length
-  }
-  const replaceFirst = () => {
-    if (isUnitValue) return target.replace(oldValue, newValue)
-    const re = new RegExp(`(?<!\\w)${escapeRegex(oldValue)}(?!\\w)`)
-    return target.replace(re, newValue)
+  const valueRe = (v, flags) =>
+    isUnitValue ? null : new RegExp(`(?<!\\w)${escapeRegex(v)}(?!\\w)`, flags)
+  const countIn = (line) =>
+    isUnitValue
+      ? line.split(oldValue).length - 1
+      : (line.match(valueRe(oldValue, 'g')) || []).length
+  const hasIn = (line, v) =>
+    isUnitValue ? line.includes(v) : valueRe(v, '').test(line)
+
+  const write = (idx) => {
+    const occurrences = countIn(lines[idx])
+    if (occurrences === 0) return false
+    if (occurrences > 1) {
+      throw new Error(
+        `[${token}] ${file}:${idx + 1} — "${oldValue}" occurs ${occurrences} times on this line. Specify a more precise location in the matrix.`,
+      )
+    }
+    lines[idx] = isUnitValue
+      ? lines[idx].replace(oldValue, newValue)
+      : lines[idx].replace(valueRe(oldValue, ''), newValue)
+    return true
   }
 
-  const occurrences = countOccurrences()
-  if (occurrences === 0) {
+  const start = lineNum - 1
+  if (start < 0 || start >= lines.length) {
     throw new Error(
-      `[${token}] ${file}:${lineNum} — expected value not found (old: ${oldValue}). Line number may be stale; update MANIFEST-MATRIX.md.`,
-    )
-  }
-  if (occurrences > 1) {
-    throw new Error(
-      `[${token}] ${file}:${lineNum} — "${oldValue}" occurs ${occurrences} times on this line. Specify a more precise location in the matrix.`,
+      `[${token}] ${file}:${lineNum} — line out of range. Update the matrix.`,
     )
   }
 
-  lines[idx] = replaceFirst()
-  return lines.join('\n')
+  // Already current — a sibling generator wrote the fresh value first.
+  if (countIn(lines[start]) === 0 && hasIn(lines[start], newValue)) {
+    return { content, line: lineNum }
+  }
+
+  if (write(start)) return { content: lines.join('\n'), line: lineNum }
+
+  const WINDOW = 200
+  for (let d = 1; d <= WINDOW; d++) {
+    for (const idx of [start - d, start + d]) {
+      if (idx < 0 || idx >= lines.length) continue
+      if (write(idx)) return { content: lines.join('\n'), line: idx + 1 }
+    }
+  }
+
+  // Nothing still holds the old value anywhere near the recorded line, so this
+  // location was both shifted and already rewritten. Find where the new value
+  // ended up and record that instead.
+  for (let d = 1; d <= WINDOW; d++) {
+    for (const idx of [start - d, start + d]) {
+      if (idx < 0 || idx >= lines.length) continue
+      if (hasIn(lines[idx], newValue)) return { content, line: idx + 1 }
+    }
+  }
+
+  throw new Error(
+    `[${token}] ${file}:${lineNum} — could not find "${oldValue}" or "${newValue}" within ±${WINDOW} lines. Update the matrix.`,
+  )
 }
 
 function escapeRegex(str) {
@@ -256,8 +211,9 @@ export function applyMatrix(matrixMd, tokenValues, dryRun = false) {
           `[${row.token}] unknown token. Add it to getTokenValues().`,
         )
       }
+      let recordedLine = row.line
       if (newValue !== row.value) {
-        const updated = replaceInLine(
+        const result = replaceInLine(
           content,
           row.line,
           row.value,
@@ -265,15 +221,21 @@ export function applyMatrix(matrixMd, tokenValues, dryRun = false) {
           row.token,
           file,
         )
-        if (updated !== content) {
-          content = updated
+        // Take the line even when nothing was written: a row can be already up
+        // to date yet sitting at a new offset, and recording the stale number
+        // would re-resolve it on every future run.
+        recordedLine = result.line
+        if (result.content !== content) {
+          content = result.content
           modified = true
           changes.push(
-            `${file}:${row.line}  ${row.token}: ${row.value} → ${newValue}`,
+            `${file}:${recordedLine}  ${row.token}: ${row.value} → ${newValue}`,
           )
         }
       }
-      updatedRows.push({ ...row, value: newValue })
+      // Record where the value actually lives, not where it used to: rows
+      // shifted by a regeneration would otherwise be re-resolved every run.
+      updatedRows.push({ ...row, line: recordedLine, value: newValue })
     }
 
     if (modified && !dryRun) {
