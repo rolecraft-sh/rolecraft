@@ -46,7 +46,7 @@ rules: |
 rolecraft ci
 ```
 
-The lockfile (`~/.agents/.skill-lock.json`) pins exact sources and content hashes. Same install every time.
+The lockfile (`~/.agents/.skill-lock.json`) records each skill's source and content hash. `rolecraft ci` re-resolves every source and records a hash for the installed copy, so `rolecraft verify` can tell you whether what is on disk still matches. It does not pin sources: anything that moves by design — an npm `dist-tags.latest`, a git branch head — resolves to whatever is current at run time, so two runs are not guaranteed to produce identical bytes.
 
 ```yaml
 # GitHub Actions workflow
@@ -146,7 +146,7 @@ MCP server declarations are preserved in both directions.
 
 **Problem:** Anyone can publish a skill. Skills run with access to your codebase, environment variables, and file system. Malicious skills can exfiltrate data, inject commands, or override agent behavior.
 
-**Solution:** Every install triggers a static security scan scoring 0–100.
+**Solution:** Every install path statically analyses the skill and scores it 0–100. The scanner matches file contents against patterns — it does not read what a skill means, so a natural-language instruction that avoids every pattern still scores 100. See [what this does not catch](../security.md#what-this-does-not-catch).
 
 ```
 ❌ Security scan: 58/100 — DANGER

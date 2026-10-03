@@ -4,7 +4,7 @@ layout: home
 hero:
   name: "RoleCraft"
   text: "The Security-First Skill Manager for AI Agents"
-  tagline: Every install runs a security scan · Skills & MCP Servers across 87 Agents (27 Verified)
+  tagline: Security scoring before install · Skills & MCP Servers across 87 Agents (27 Verified)
   image:
     src: /rolecraft-demo.gif
     alt: RoleCraft Demo

@@ -6,8 +6,8 @@
 
 <p align="center">
   <b>The Security-First Skill Manager for AI Agents</b><br>
-   Every install runs a security scan · Skills & MCP Servers across 87 Agents (27 Verified)<br>
-  Zero-dependency CLI · No signup · Offline-first
+   Static security scoring before any skill is installed · Skills & MCP Servers across 87 Agents (27 Verified)<br>
+  Zero-dependency CLI · No signup · No marketplace required
 </p>
 
 <p align="center">
@@ -51,7 +51,7 @@
 
 
 <p align="center">
-  <b>⚡ Zero dependencies</b> · <b>🤖 27 verified agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 Security scoring</b> · <b>📝 Skill testing</b> · <b>🔧 Init templates</b> · <b>🌐 Offline-first</b>
+  <b>⚡ Zero dependencies</b> · <b>🤖 27 verified agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 Security scoring</b> · <b>📝 Skill testing</b> · <b>🔧 Init templates</b> · <b>🌐 No marketplace required</b>
 </p>
 
 ---
@@ -89,7 +89,7 @@ rolecraft setup user/repo
 - **Any source** — local folder, GitHub/GitLab/SSH URL, npm package
 - **87 agents** — opencode, claude-code, cursor, copilot, aider, oh-my-pi, and more
 - **No registry required** — works fully without a marketplace
-- **Security scoring** — static analysis on every install: prompt injection, command injection, obfuscated code, credential harvesting. Scores 0–100
+- **Security scoring** — static analysis before every install: prompt injection, command injection, obfuscated code, credential harvesting. Scores 0–100. It is a regex linter, not a policy engine — [what it does not catch](docs/security.md#what-this-does-not-catch)
 - **CI-ready** — lockfile-based re-install (`rolecraft ci`), `--yes` flag, `--dry-run`
 - **MCP + Skills** — install skills and their MCP servers in a single command
 - **Shell completions** — bash, zsh, fish auto-completion
@@ -101,18 +101,33 @@ rolecraft setup user/repo
 
 ## Security
 
-Every install is automatically scanned with static analysis that detects prompt injection, command injection, obfuscated code, and credential harvesting. Scores 0–100:
+A skill is statically analysed before it is written into an agent's skill directory. The scan looks for prompt injection, command injection, obfuscated code and credential harvesting, and scores 0–100:
 
 - **90+** → SAFE, install proceeds
 - **70–89** → REVIEW, prompts for confirmation
 - **<70** → DANGER, blocked unless `--yes`
+- **any critical finding** → DANGER regardless of score
+
+The scan runs on every install path: `install`, `bundle`, `update`, `setup`, `search --interactive`, `watch` auto-sync, `ci` and `profile apply`. It does not run under `--dry-run`, and `setup` does not scan the MCP servers a skill declares.
 
 ```bash
-rolecraft install ./my-skill              # auto-scanned
+rolecraft install ./my-skill              # scanned before install
 rolecraft install ./my-skill --yes        # force install even if DANGER
 ```
 
+The scanner matches file contents against patterns. It does not interpret what a skill means, so a natural-language instruction that avoids every pattern will score 100. Read [what this does not catch](docs/security.md#what-this-does-not-catch) before relying on a score as an approval.
+
 [→ Full security documentation](docs/security.md)
+
+## Known limitations
+
+Stated here so nothing below has to be discovered by surprise:
+
+- **`rolecraft ci` verifies content, it does not pin sources.** It re-resolves every `source` in the lockfile and compares content hashes. Sources that move by design — an npm `dist-tags.latest`, a git branch head — are not pinned, so two runs can legitimately differ. There is no `--frozen` mode.
+- **A security score is not a trust decision.** It reports whether a dangerous *pattern* was found in the resolved files. It says nothing about whether the upstream source is trustworthy, and it does not read natural-language instructions.
+- **`--dry-run` does not scan**, so it cannot tell you whether an install would be refused.
+- **`rolecraft setup` does not scan MCP servers** declared inside a skill. `install` does.
+- **MCP servers installed from `uvx:`, `pipx:`, `go:`, `deno:`, `cargo:` or a local path are not scanned** — their contents are never fetched, so they report as SAFE.
 
 ---
 
