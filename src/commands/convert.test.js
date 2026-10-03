@@ -81,7 +81,7 @@ describe('convert command', () => {
     assert.ok(logs.some((l) => l.includes('Converted')))
   })
 
-  it('converts a directory containing .mdc files', async () => {
+  it('refuses a directory whose .mdc files all target SKILL.md', async () => {
     const mdcDir = join(tempDir, 'rules')
     await mkdir(mdcDir, { recursive: true })
     await writeFile(
@@ -98,11 +98,12 @@ describe('convert command', () => {
       logs.push(String(args[0]))
     })
 
-    await commandModule.convertCommand(mdcDir, { output: tempDir })
+    await assert.rejects(
+      () => commandModule.convertCommand(mdcDir, { output: tempDir }),
+      /Two sources would write the same file/,
+    )
 
-    const out1 = join(tempDir, 'SKILL.md')
-    const content = readFileSync(out1, 'utf-8')
-    assert.ok(content.includes('Content 1') || content.includes('Content 2'))
+    assert.deepEqual(logs, [])
   })
 
   it('dry-run shows plan without writing', async () => {

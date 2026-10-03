@@ -64,8 +64,9 @@ describe('convertApi', () => {
     assert.ok(existsSync(join(tempDir, 'dir-skill.mdc')))
   })
 
-  it('converts a directory containing multiple .mdc files', async () => {
+  it('rejects a directory whose .mdc files all target SKILL.md', async () => {
     const mdcDir = join(tempDir, 'rules')
+    const outDir = join(tempDir, 'collide-out')
     await mkdir(mdcDir, { recursive: true })
     await writeFile(
       join(mdcDir, 'rule1.mdc'),
@@ -76,10 +77,49 @@ describe('convertApi', () => {
       '---\ndescription: Rule 2\nalwaysApply: false\n---\nContent 2\n',
     )
 
-    const result = await convertApi(mdcDir, { output: tempDir })
+    await assert.rejects(
+      () => convertApi(mdcDir, { output: outDir }),
+      /Two sources would write the same file/,
+    )
 
-    assert.equal(result.length, 2)
-    assert.ok(result.every((r) => r.format === 'mdc-to-skill'))
+    assert.equal(existsSync(join(outDir, 'SKILL.md')), false)
+  })
+
+  it('normalizes slashes in the slug so dry-run and write agree', async () => {
+    const srcPath = join(tempDir, 'scoped', 'SKILL.md')
+    await mkdir(join(tempDir, 'scoped'), { recursive: true })
+    await writeFile(
+      srcPath,
+      '---\nname: scoped\nslug: acme/scoped\n---\nBody\n',
+    )
+
+    const planned = await convertApi(srcPath, {
+      dryRun: true,
+      output: join(tempDir, 'plan'),
+    })
+
+    const done = await convertApi(srcPath, { output: join(tempDir, 'real') })
+
+    assert.equal(planned[0].to, join(tempDir, 'plan', 'acme-scoped.mdc'))
+    assert.equal(done[0].to, join(tempDir, 'real', 'acme-scoped.mdc'))
+  })
+
+  it('writes nothing when a later source in the set is empty', async () => {
+    const mdcDir = join(tempDir, 'partial')
+    const outDir = join(tempDir, 'partial-out')
+    await mkdir(mdcDir, { recursive: true })
+    await writeFile(
+      join(mdcDir, 'rule1.mdc'),
+      '---\ndescription: Rule 1\nalwaysApply: false\n---\nContent 1\n',
+    )
+    await writeFile(join(mdcDir, 'rule2.mdc'), '')
+
+    await assert.rejects(
+      () => convertApi(mdcDir, { output: outDir }),
+      /Source is empty/,
+    )
+
+    assert.equal(existsSync(join(outDir, 'SKILL.md')), false)
   })
 
   for (const { title, file, content, expectedOut } of [
