@@ -348,14 +348,17 @@ const COMMANDS = {
       return
     }
     const flags = parseFlags(args)
-    validateFlags(flags, ['--dry-run'], 'update')
+    validateFlags(flags, ['--dry-run', '--yes', '-y'], 'update')
     const pos = parsePositionals(args)
     const slug = pos[0]
     if (!slug) {
       console.error('Usage: rolecraft update <slug>')
       throw new Error('Missing slug argument.')
     }
-    return updateCommand(slug, { dryRun: args.includes('--dry-run') })
+    return updateCommand(slug, {
+      dryRun: args.includes('--dry-run'),
+      yes: args.includes('--yes') || args.includes('-y'),
+    })
   },
 
   async use(args) {
@@ -406,7 +409,11 @@ const COMMANDS = {
       return
     }
     const flags = parseFlags(args)
-    validateFlags(flags, ['--interactive', '--skills-sh'], 'search')
+    validateFlags(
+      flags,
+      ['--interactive', '--skills-sh', '--yes', '-y'],
+      'search',
+    )
     const pos = parsePositionals(args)
     const query = pos[0]
     if (!query) {
@@ -416,6 +423,7 @@ const COMMANDS = {
     return searchCommand(query, {
       interactive: args.includes('--interactive'),
       skillsSh: args.includes('--skills-sh'),
+      yes: args.includes('--yes') || args.includes('-y'),
     })
   },
 

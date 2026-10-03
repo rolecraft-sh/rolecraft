@@ -10,7 +10,7 @@ export async function updateCommand(slug, options = {}) {
     return
   }
 
-  const result = await apiUpdate(slug, process.cwd())
+  const result = await apiUpdate(slug, process.cwd(), { yes: options.yes })
   console.log(`\n🔄 Updating skill: ${result.slug}`)
   console.log(`   Source: ${result.source} (${result.sourceType})`)
   console.log(`   Targets: ${result.targets.join(', ')}\n`)

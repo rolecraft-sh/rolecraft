@@ -1,5 +1,6 @@
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
+import { assertSkillScanAllowed } from '../utils/scan-gate.js'
 import { apiSearch } from '../api/search.js'
 import { pickItem, renderTable, theme } from '../utils/tui.js'
 
@@ -30,7 +31,7 @@ function searchItemCard(item, selected) {
   ]
 }
 
-async function pickAndInstall(items) {
+async function pickAndInstall(items, options = {}) {
   const selectedIndex = await pickItem(items, {
     format: searchItemCard,
     question: `Which skill to install? [1-${items.length}, q to quit]: `,
@@ -49,11 +50,13 @@ async function pickAndInstall(items) {
   console.log('\n📦 Installing "%s"...', source)
   try {
     const resolved = await resolveSource(source)
+    assertSkillScanAllowed(resolved, options)
     const targets = ['project']
     await installSkill(resolved, targets)
     console.log(`✅ Installed "${resolved.name}" to ./.agents/skills/`)
   } catch (err) {
     console.error('❌ Failed to install: %s', err?.message)
+    if (err?.userCode) process.exitCode = 1
   }
 }
 
@@ -127,7 +130,7 @@ export async function searchCommand(query, options = {}) {
   console.log(`\n🔍 Search results for "${query}":\n`)
 
   if (options.interactive) {
-    await pickAndInstall(items)
+    await pickAndInstall(items, options)
   } else {
     const rows = items.map((r) => [
       r.full_name,

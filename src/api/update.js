@@ -3,6 +3,7 @@ import { isAbsolute, join, resolve } from 'node:path'
 import agents from '../agents.js'
 import { UserError } from '../utils/errors.js'
 import { installSkill } from '../utils/installer.js'
+import { assertSkillScanAllowed } from '../utils/scan-gate.js'
 import {
   findActualSlug,
   getProjectLockPath,
@@ -68,6 +69,9 @@ export async function apiUpdate(slug, cwd = process.cwd(), options = {}) {
 
   const resolved = await resolveSource(targetSource)
   resolved.sourcePath = source
+
+  assertSkillScanAllowed(resolved, options)
+
   const results = await installSkill(resolved, targets, 'copy', cwd)
 
   return { slug: actualSlug, source, sourceType, targets, results }

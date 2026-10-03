@@ -18,6 +18,11 @@ function printEvent(event) {
     case 'error':
       console.error(`   ✗ ${event.slug}: cannot watch (${event.error.message})`)
       break
+    case 'blocked':
+      console.error(
+        `   ⛔ ${event.slug}: sync refused (${event.error.message})`,
+      )
+      break
     case 'syncing':
       console.log(
         `  [${event.startedAt.toLocaleTimeString()}] ${event.slug}: ${event.filename} changed, syncing...`,

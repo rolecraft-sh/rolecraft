@@ -4,6 +4,7 @@ import { createInterface as defaultCreateInterface } from 'node:readline'
 import { stdin as input, stdout as output } from 'node:process'
 import { resolveSkills } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
+import { assertSkillScanAllowed } from '../utils/scan-gate.js'
 import {
   parseMcpServersFromSkill,
   resolveMcpSource,
@@ -196,6 +197,8 @@ export async function setupCommand(source, options = {}) {
       console.log(`   Slug:     ${resolved.slug}`)
       console.log(`   Owner:    ${resolved.owner}`)
       console.log(`   Files:    ${resolved.files.join(', ')}`)
+
+      assertSkillScanAllowed(resolved, options)
 
       const results = await installSkill(resolved, targets)
 

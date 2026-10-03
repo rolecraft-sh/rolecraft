@@ -6,12 +6,7 @@ import {
   getSupportedMcpAgents,
   resolveMcpSource,
 } from '../utils/mcp.js'
-import {
-  scanMcpServer,
-  classifyScore,
-  requiresMcpApproval,
-} from '../utils/security.js'
-import { UserError } from '../utils/errors.js'
+import { assertMcpScanAllowed } from '../utils/scan-gate.js'
 
 let runFetch = globalThis.fetch
 
@@ -30,23 +25,8 @@ async function fetchNpmLatestVersion(packageName) {
 
 export async function apiMcpInstall(source, options = {}) {
   const resolved = await resolveMcpSource(source)
-  const scanResult = scanMcpServer(resolved)
 
-  if (requiresMcpApproval(scanResult) && !options.yes) {
-    const blocked =
-      classifyScore(scanResult.score, scanResult.issues) === 'danger'
-    throw new UserError(
-      blocked
-        ? `MCP server blocked by security scan (score: ${scanResult.score}/100).`
-        : `MCP server needs security review (score: ${scanResult.score}/100).`,
-      {
-        suggestion:
-          'Review the flagged issues, then use --yes (API: yes:true) to approve the install.',
-        detail: scanResult.issues.map((issue) => issue.description).join('\n'),
-        code: blocked ? 'MCP_SECURITY_DANGER' : 'MCP_SECURITY_REVIEW',
-      },
-    )
-  }
+  const scanResult = assertMcpScanAllowed(resolved, options)
 
   const targets =
     options.agents && options.agents.length > 0
@@ -92,6 +72,9 @@ export async function apiMcpList(options = {}) {
 
 export async function apiMcpUpdate(source, options = {}) {
   const resolved = await resolveMcpSource(source)
+
+  assertMcpScanAllowed(resolved, options)
+
   const targets =
     options.agents && options.agents.length > 0
       ? options.agents

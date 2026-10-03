@@ -154,6 +154,7 @@ describe('api mcp install/list/update/remove', () => {
     const result = await apiMcpUpdate('npm:@test/server@2.0.0', {
       agents: ['agents'],
       name: 'srv',
+      yes: true,
     })
 
     assert.deepEqual(result, {

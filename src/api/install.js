@@ -1,7 +1,7 @@
 import { resolveSource, resolveSkills } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
+import { assertSkillScanAllowed } from '../utils/scan-gate.js'
 import {
-  scanSkill,
   scanMcpServer,
   classifyScore,
   requiresMcpApproval,
@@ -112,63 +112,7 @@ export async function apiInstallSkills(source, options = {}) {
       sourceType: skill.sourceType || 'local',
     }
 
-    const security = scanSkill(resolved)
-    const level = classifyScore(security.score, security.issues)
-
-    if (level === 'danger' && !options.yes) {
-      const issues = security.issues
-        .filter((i) => i.severity === 'critical' || i.severity === 'high')
-        .map(
-          (i) =>
-            `  🔴 [${i.severity}] ${i.description}${i.file ? ` (${i.file})` : ''}`,
-        )
-        .join('\n')
-      throw new UserError(
-        `"${resolved.name}" blocked by security scan (score: ${security.score}/100).`,
-        {
-          suggestion:
-            'Review the flagged issues, fix them, or use --yes to force install (not recommended for untrusted skills).',
-          detail: `Flagged issues:\n${issues}`,
-          code: 'SECURITY_DANGER',
-        },
-      )
-    }
-
-    if (level === 'review' && !options.yes) {
-      const issues = security.issues
-        .filter((i) => i.severity !== 'low')
-        .map(
-          (i) =>
-            `  🟡 [${i.severity}] ${i.description}${i.file ? ` (${i.file})` : ''}`,
-        )
-        .join('\n')
-      throw new UserError(
-        `"${resolved.name}" needs security review (score: ${security.score}/100).`,
-        {
-          suggestion:
-            'Review the flagged issues, or use --yes to skip the review.',
-          detail: `Flagged issues:\n${issues}`,
-          code: 'SECURITY_REVIEW',
-        },
-      )
-    }
-
-    // --yes forces past danger/review but never silently: warn the user
-    // so a forced install of a flagged skill leaves a visible trail.
-    if (options.yes && (level === 'danger' || level === 'review')) {
-      const issues = security.issues
-        .filter((i) => i.severity === 'critical' || i.severity === 'high')
-        .map(
-          (i) =>
-            `  🔴 [${i.severity}] ${i.description}${i.file ? ` (${i.file})` : ''}`,
-        )
-        .join('\n')
-      const tag = level === 'danger' ? 'DANGER' : 'REVIEW'
-      console.error(
-        `\n⚠️  [${tag}] --yes forcing install of "${resolved.name}" despite security scan (score: ${security.score}/100).`,
-      )
-      if (issues) console.error(issues)
-    }
+    const security = assertSkillScanAllowed(resolved, options)
 
     const installResults = await installSkill(
       resolved,

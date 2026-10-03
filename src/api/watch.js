@@ -3,6 +3,7 @@ import { isAbsolute, relative, resolve, sep } from 'node:path'
 import { readLock, getProjectLockPath } from '../utils/lockfile.js'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
+import { assertSkillScanAllowed } from '../utils/scan-gate.js'
 import { createDebouncer, WATCH_DEBOUNCE_MS } from '../utils/debounce.js'
 import { expandTilde } from '../utils/paths.js'
 import { UserError } from '../utils/errors.js'
@@ -39,16 +40,31 @@ function isSameOrChildPath(parentPath, candidatePath) {
   )
 }
 
+// Returns { ok, blocked? }. A resolve or install failure is reported as a plain
+// failure, but a security-gate rejection is handed back so the caller can say
+// why the sync was refused instead of logging a bare "sync failed".
 async function reinstallSkill(slug, skills, cwd) {
   const entry = skills[slug]
-  if (entry?.sourceType !== 'local') return false
+  if (entry?.sourceType !== 'local') return { ok: false }
+
+  let resolved
+  try {
+    resolved = await resolveSource(entry.source)
+  } catch {
+    return { ok: false }
+  }
 
   try {
-    const resolved = await resolveSource(entry.source)
+    assertSkillScanAllowed(resolved)
+  } catch (error) {
+    return { ok: false, blocked: error }
+  }
+
+  try {
     await installSkill(resolved, installTargetsFor(entry), 'copy', cwd)
-    return true
+    return { ok: true }
   } catch {
-    return false
+    return { ok: false }
   }
 }
 
@@ -151,8 +167,12 @@ export async function watchApi(slug, cwd = process.cwd(), options = {}) {
         if (closed) return
         const startedAt = new Date()
         emit({ type: 'syncing', slug: s, filename, startedAt })
-        const ok = await reinstallSkill(s, mergedSkills, cwd)
+        const { ok, blocked } = await reinstallSkill(s, mergedSkills, cwd)
         if (closed) return
+        if (blocked) {
+          emit({ type: 'blocked', slug: s, path: sourcePath, error: blocked })
+          return
+        }
         emit({ type: 'synced', slug: s, ok, startedAt })
       })
     }

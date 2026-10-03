@@ -181,6 +181,7 @@ describe('mcp command', () => {
         await mcpModule.mcpUpdateCommand('npm:@test/new', {
           agents: ['agents'],
           name: 'update-me',
+          yes: true,
         })
         restore()
 
@@ -217,6 +218,7 @@ describe('mcp command', () => {
         await mcpModule.mcpUpdateCommand('npm:@test/foo', {
           agents: ['agents', 'nonexistent'],
           name: 'update-foo',
+          yes: true,
         })
         restore()
 
@@ -234,10 +236,16 @@ describe('mcp command', () => {
         })
 
         const { logs, restore } = capture('log')
-        await mcpModule.mcpUpdateCommand('npm:@test/new', {
-          agents: ['agents'],
-          name: 'warn-update',
-        })
+        // npm sources cannot be scanned, so the update now stops at the
+        // security gate after the arbitrary-code warning has printed.
+        await assert.rejects(
+          () =>
+            mcpModule.mcpUpdateCommand('npm:@test/new', {
+              agents: ['agents'],
+              name: 'warn-update',
+            }),
+          /needs security review/,
+        )
         restore()
 
         assert.ok(
@@ -366,6 +374,7 @@ describe('mcp command', () => {
           'agents',
           '--name',
           'upd-dispatch',
+          '--yes',
         ])
         restore()
         assert.ok(logs.some((l) => l.includes('Updated')))
