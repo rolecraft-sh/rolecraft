@@ -3,7 +3,7 @@ import { installSkill } from '../utils/installer.js'
 import { scanSkill } from '../utils/security.js'
 import { classifyScore } from '../utils/security.js'
 import { UserError } from '../utils/errors.js'
-import { detectAgents } from '../commands/setup.js'
+import { detectAgents } from '../utils/agent-detection.js'
 
 export async function setupApi(source, options = {}) {
   const agents = detectAgents()

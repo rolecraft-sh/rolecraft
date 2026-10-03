@@ -16,7 +16,7 @@ import {
   computeContentHash,
   normalizeSlug,
 } from '../utils/lockfile.js'
-import { detectAgents } from '../commands/setup.js'
+import { detectAgents } from '../utils/agent-detection.js'
 import { parseFrontmatter, splitSections } from '../utils/converter.js'
 import { expandTilde } from '../utils/paths.js'
 import agents from '../agents.js'

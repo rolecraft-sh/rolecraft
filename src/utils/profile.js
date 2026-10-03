@@ -7,7 +7,7 @@ import { readLock, getGlobalLockPath, getProjectLockPath } from './lockfile.js'
 import { resolveSource } from './resolver.js'
 import { installSkill } from './installer.js'
 import { scanSkill, scanMcpServerConfig, classifyScore } from './security.js'
-import { detectAgents } from '../commands/setup.js'
+import { detectAgents } from './agent-detection.js'
 
 export { detectAgents }
 
