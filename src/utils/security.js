@@ -279,6 +279,17 @@ export function requiresMcpApproval({ score, issues }) {
 export function scanMcpServer(resolved) {
   const issues = []
 
+  // `unscanned_source` describes "there was nothing here for the scanner to
+  // read", not "the source was npm". Only `npm:` and `gh:` actually fetch the
+  // payload (`resolveMcpSource` in utils/mcp.js); every other source type
+  // resolves to a runner command that fetches at run time, so the pattern scan
+  // below has nothing to match against. Keying this off the source type let
+  // those entries score 100/SAFE with zero issues (#401) — so it keys off
+  // whether any scannable content was actually produced.
+  const hasScannableContents = Object.values(resolved.fileContents || {}).some(
+    (content) => typeof content === 'string',
+  )
+
   if (resolved.fileContents && typeof resolved.fileContents === 'object') {
     const seen = new Set()
     const fileEntries = Object.entries(resolved.fileContents)
@@ -318,18 +329,18 @@ export function scanMcpServer(resolved) {
     }
   }
 
+  if (!hasScannableContents) {
+    const label = resolved.sourceType
+      ? `MCP server (${resolved.sourceType})`
+      : 'MCP server'
+    issues.push({
+      severity: 'high',
+      category: 'unscanned_source',
+      description: `${label} contents were not available for security scanning`,
+    })
+  }
+
   if (resolved.sourceType === 'npm') {
-    const hasScannableContents = Object.values(
-      resolved.fileContents || {},
-    ).some((content) => typeof content === 'string')
-    if (!hasScannableContents) {
-      issues.push({
-        severity: 'high',
-        category: 'unscanned_source',
-        description:
-          'npm package contents were not available for security scanning',
-      })
-    }
     issues.push({
       severity: 'low',
       category: 'source_type',

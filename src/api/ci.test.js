@@ -157,7 +157,10 @@ describe('api ci', () => {
     )
   })
 
-  it('restores MCP servers from the MCP lockfile for each agent', async () => {
+  it('refuses to restore an MCP source the scanner could not read', async () => {
+    // `ci` has no --yes override, so a source that resolves to a runner command
+    // with nothing to inspect (`local`, `uvx:`, `go:`, …) is refused rather than
+    // restored on the strength of a 100/SAFE score it never earned (#401).
     await writeMcpLock({
       db: { source: './db.js', agents: ['agents', 'cursor'] },
       nosrc: { agents: ['agents'] },
@@ -166,26 +169,22 @@ describe('api ci', () => {
     const result = await apiCi(workDir)
 
     assert.equal(result.mcpCount, 2)
-    assert.equal(result.total, 2)
     assert.equal(result.allPassed, false)
-    assert.deepEqual(result.mcpInstalled, [
-      {
-        name: 'db',
-        source: './db.js',
-        agents: ['agents', 'cursor'],
-      },
-    ])
-    assert.deepEqual(result.mcpFailed, [
-      { name: 'nosrc', reason: 'missing source in lockfile' },
-    ])
+    assert.deepEqual(result.mcpInstalled, [])
+    assert.equal(result.mcpFailed.length, 2)
+    assert.ok(
+      result.mcpFailed[0].reason.includes(
+        'unscanned sources cannot be restored',
+      ),
+    )
+    assert.deepEqual(result.mcpFailed[1], {
+      name: 'nosrc',
+      reason: 'missing source in lockfile',
+    })
+    // Nothing was written to either agent's config.
     for (const dir of ['.agents', '.cursor']) {
-      const config = JSON.parse(
-        readFileSync(join(homeDir, dir, 'mcp.json'), 'utf-8'),
-      )
-      assert.deepEqual(config.mcpServers.db, {
-        command: 'node',
-        args: ['./db.js'],
-      })
+      const configPath = join(homeDir, dir, 'mcp.json')
+      assert.equal(existsSync(configPath), false)
     }
   })
 
@@ -266,6 +265,82 @@ describe('api ci', () => {
       )
     } finally {
       setSpawnSync(spawnSync)
+    }
+  })
+
+  it('restores MCP servers from the MCP lockfile for each agent', async () => {
+    // A `gh:` source is a real fetch, so the clone produces contents the scanner
+    // can read and the restore path is reachable without an approval override.
+    const { execFileSync, spawnSync } = await import('node:child_process')
+    const { setSpawnSync: setMcpSpawnSync } = await import('../utils/mcp.js')
+    const remote = 'modelcontextprotocol/db-server'
+    const cloneUrl = new URL(remote, 'https://github.com/')
+    cloneUrl.pathname += '.git'
+
+    const repo = join(tempDir, 'mcp-repo')
+    await mkdir(repo, { recursive: true })
+    await writeFile(
+      join(repo, 'package.json'),
+      JSON.stringify({ name: 'db-server', main: 'index.js' }),
+    )
+    await writeFile(join(repo, 'index.js'), 'export default {}\n')
+    execFileSync('git', ['init', repo], { stdio: 'ignore' })
+    execFileSync('git', ['-C', repo, 'add', '.'], { stdio: 'ignore' })
+    execFileSync(
+      'git',
+      [
+        '-C',
+        repo,
+        '-c',
+        'user.name=Test',
+        '-c',
+        'user.email=test@example.com',
+        'commit',
+        '-m',
+        'fixture',
+      ],
+      { stdio: 'ignore' },
+    )
+
+    setMcpSpawnSync((command, args, options) => {
+      if (
+        command === 'git' &&
+        args[0] === 'clone' &&
+        args[3] === cloneUrl.href
+      ) {
+        return spawnSync(
+          command,
+          ['clone', '--depth', '1', repo, args[4]],
+          options,
+        )
+      }
+      return spawnSync(command, args, options)
+    })
+
+    try {
+      await writeMcpLock({
+        db: { source: `gh:${remote}`, agents: ['agents', 'cursor'] },
+        nosrc: { agents: ['agents'] },
+      })
+
+      const result = await apiCi(workDir)
+
+      assert.equal(result.mcpCount, 2)
+      assert.equal(result.total, 2)
+      assert.deepEqual(result.mcpInstalled, [
+        { name: 'db', source: `gh:${remote}`, agents: ['agents', 'cursor'] },
+      ])
+      assert.deepEqual(result.mcpFailed, [
+        { name: 'nosrc', reason: 'missing source in lockfile' },
+      ])
+      for (const dir of ['.agents', '.cursor']) {
+        const config = JSON.parse(
+          readFileSync(join(homeDir, dir, 'mcp.json'), 'utf-8'),
+        )
+        assert.equal(config.mcpServers.db.command, 'node')
+      }
+    } finally {
+      setMcpSpawnSync(spawnSync)
     }
   })
 

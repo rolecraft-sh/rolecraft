@@ -6,6 +6,7 @@ import {
   scanMcpServer,
   scanMcpServerConfig,
   classifyScore,
+  requiresMcpApproval,
   formatSecurityReport,
 } from './security.js'
 
@@ -555,6 +556,72 @@ describe('security', () => {
   })
 
   describe('scanMcpServer', () => {
+    // #401: `unscanned_source` describes "no scannable content was produced",
+    // which was only ever raised for npm. Every other source type resolves to
+    // a runner command with the payload fetched at run time, so the scanner had
+    // nothing to inspect and the entry must not read as SAFE.
+    const UNSCANNED_SOURCES = ['uvx', 'pipx', 'go', 'deno', 'cargo', 'local']
+
+    for (const sourceType of UNSCANNED_SOURCES) {
+      it(`flags ${sourceType} as unscanned rather than safe`, () => {
+        const result = scanMcpServer({
+          sourceType,
+          command: sourceType,
+          args: ['some-package'],
+        })
+        const unscanned = result.issues.filter(
+          (i) => i.category === 'unscanned_source',
+        )
+        assert.equal(unscanned.length, 1)
+        assert.equal(unscanned[0].severity, 'high')
+        assert.ok(result.score < 100)
+        // The gate reads `requiresMcpApproval`, not the score label, so an
+        // unscanned source is refused without `--yes` even at a high score.
+        assert.equal(requiresMcpApproval(result), true)
+      })
+    }
+
+    it('does not flag gh: when the clone produced contents', () => {
+      const result = scanMcpServer({
+        sourceType: 'github',
+        repo: 'modelcontextprotocol/servers',
+        fileContents: { 'index.js': 'console.log("hello")' },
+      })
+      assert.equal(
+        result.issues.some((i) => i.category === 'unscanned_source'),
+        false,
+      )
+    })
+
+    it('flags gh: when the clone produced no readable contents', () => {
+      const result = scanMcpServer({ sourceType: 'github', repo: 'a/b' })
+      assert.ok(result.issues.some((i) => i.category === 'unscanned_source'))
+      assert.equal(requiresMcpApproval(result), true)
+    })
+
+    it('does not flag a source that did produce contents', () => {
+      const result = scanMcpServer({
+        sourceType: 'uvx',
+        command: 'uvx',
+        args: ['x'],
+        fileContents: { 'server.py': 'print("hi")' },
+      })
+      assert.equal(
+        result.issues.some((i) => i.category === 'unscanned_source'),
+        false,
+      )
+    })
+
+    it('keeps the existing npm finding when npm contents are unavailable', () => {
+      const result = scanMcpServer({
+        sourceType: 'npm',
+        packageName: 'some-server',
+      })
+      assert.equal(result.score, 89)
+      assert.ok(result.issues.some((i) => i.category === 'source_type'))
+      assert.ok(result.issues.some((i) => i.category === 'unscanned_source'))
+    })
+
     it('returns score 100 for clean gh: source', () => {
       const result = scanMcpServer({
         sourceType: 'github',
@@ -651,8 +718,7 @@ describe('security', () => {
         sourceType: 'local',
         path: '/tmp/server.js',
       })
-      assert.equal(result.score, 100)
-      assert.equal(result.issues.length, 0)
+      assert.ok(result.issues.some((i) => i.category === 'unscanned_source'))
     })
 
     it('detects env variable access', () => {
