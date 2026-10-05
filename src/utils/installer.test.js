@@ -857,6 +857,61 @@ describe('installer', () => {
     assert.ok(!existsSync(join(skillDir, 'nonexistent.js')))
   })
 
+  // #325: nested paths arrived once the resolver started keying by relative
+  // path. `installSkill` only mkdir'd `slugDir`, so `writeFile` on a nested
+  // destination failed ENOENT — and the failure was swallowed by the
+  // `Promise.allSettled` at the end of this function.
+  it('writes nested files, creating parent directories', async () => {
+    const nestedResolved = {
+      ...resolvedSkill,
+      skillDir: undefined,
+      files: ['SKILL.md', 'scripts/run.sh', 'references/guide.md'],
+      fileContents: {
+        'SKILL.md': '# slug: test/nested\nname: nested-skill\nContent',
+        'scripts/run.sh': 'echo hi\n',
+        'references/guide.md': '# guide\n',
+      },
+    }
+
+    const results = await installerModule.installSkill(nestedResolved, [
+      'agents',
+    ])
+    assert.equal(results.length, 1)
+
+    const skillDir = join(tempDir, '.agents', 'skills', 'test-my-skill')
+    assert.equal(
+      readFileSync(join(skillDir, 'scripts', 'run.sh'), 'utf-8'),
+      'echo hi\n',
+    )
+    assert.equal(
+      readFileSync(join(skillDir, 'references', 'guide.md'), 'utf-8'),
+      '# guide\n',
+    )
+  })
+
+  // The result list only carries fulfilled targets, so a swallowed write failure
+  // showed up as a silently missing entry rather than a reported one.
+  it('reports the target instead of dropping it on a write failure', async () => {
+    const results = await installerModule.installSkill(
+      {
+        ...resolvedSkill,
+        skillDir: undefined,
+        files: ['SKILL.md'],
+        fileContents: { 'SKILL.md': '# slug: test/ok\nname: ok' },
+      },
+      ['agents'],
+    )
+    assert.deepEqual(
+      results.map((r) => r.target),
+      ['agents'],
+    )
+    assert.ok(
+      existsSync(
+        join(tempDir, '.agents', 'skills', 'test-my-skill', 'SKILL.md'),
+      ),
+    )
+  })
+
   it('installs using fileContents when provided', async () => {
     const fileContentResolved = {
       ...resolvedSkill,

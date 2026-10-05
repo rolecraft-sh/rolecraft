@@ -92,6 +92,62 @@ describe('api verify', () => {
     assert.deepEqual(result.failed[0].dirs[0].changes, ['modified: SKILL.md'])
   })
 
+  // #325: the false-negative this issue was filed for. `contentSha` was computed
+  // over a reduced file set and `verify` read that same reduced set, so a
+  // tampered file in a subdirectory passed verification permanently.
+  it('verifies a skill with nested files', async () => {
+    const projectDir = join(tempDir, 'nested-project')
+    const skillDir = join(projectDir, '.agents', 'skills', 'owner-nested')
+    const files = {
+      'SKILL.md': '# Nested\n',
+      'scripts/run.sh': 'echo hi\n',
+    }
+    await mkdir(join(skillDir, 'scripts'), { recursive: true })
+    await writeFile(join(skillDir, 'SKILL.md'), files['SKILL.md'])
+    await writeFile(
+      join(skillDir, 'scripts', 'run.sh'),
+      files['scripts/run.sh'],
+    )
+    await writeLock(projectDir, {
+      'owner/nested': {
+        agents: ['project'],
+        contentSha: computeContentHash(files),
+        fileHashes: computeFileHashes(files),
+      },
+    })
+
+    const result = await apiVerify(projectDir)
+
+    assert.equal(result.allPassed, true)
+    assert.equal(result.totalVerified, 1)
+  })
+
+  it('fails verification when a nested file is modified', async () => {
+    const projectDir = join(tempDir, 'nested-tampered')
+    const skillDir = join(projectDir, '.agents', 'skills', 'owner-tampered')
+    const expected = {
+      'SKILL.md': '# Nested\n',
+      'scripts/run.sh': 'echo hi\n',
+    }
+    await mkdir(join(skillDir, 'scripts'), { recursive: true })
+    await writeFile(join(skillDir, 'SKILL.md'), expected['SKILL.md'])
+    await writeFile(join(skillDir, 'scripts', 'run.sh'), 'echo tampered\n')
+    await writeLock(projectDir, {
+      'owner/tampered': {
+        agents: ['project'],
+        contentSha: computeContentHash(expected),
+        fileHashes: computeFileHashes(expected),
+      },
+    })
+
+    const result = await apiVerify(projectDir)
+
+    assert.equal(result.allPassed, false)
+    assert.deepEqual(result.failed[0].dirs[0].changes, [
+      'modified: scripts/run.sh',
+    ])
+  })
+
   it('fails frozen verification when a lock entry has no source', async () => {
     const projectDir = join(tempDir, 'frozen-project')
     await writeLock(projectDir, {

@@ -281,6 +281,11 @@ export async function installSkill(
         const destination = join(slugDir, file)
 
         if (Object.hasOwn(resolved.fileContents || {}, file)) {
+          // Files are keyed by their path relative to the skill root, so a
+          // nested one names a directory that does not exist yet. Without this
+          // the write fails ENOENT and `Promise.allSettled` below reports the
+          // target as failed with no reason (#325).
+          await mkdir(dirname(destination), { recursive: true })
           await writeFile(destination, resolved.fileContents[file])
         } else if (resolved.skillDir) {
           const source = join(resolved.skillDir, file)

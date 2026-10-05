@@ -38,6 +38,95 @@ async function freshImport() {
 }
 
 describe('resolver', () => {
+  // #325: `readFileContents` read recursively but keyed `fileContents` by
+  // basename, so nested files either collided with a top-level file of the same
+  // name or were dropped outright. `contentSha` was then computed over a reduced
+  // set and `verify` compared against the same reduced set — a permanent
+  // false-negative for any skill with subdirectories.
+  describe('nested skill files', () => {
+    function writeNestedSkill(name) {
+      const dir = join(tempDir, name)
+      mkdirSync(join(dir, 'scripts'), { recursive: true })
+      mkdirSync(join(dir, 'references', 'deep'), { recursive: true })
+      writeFileSync(
+        join(dir, 'SKILL.md'),
+        `# slug: test/${name}\nname: ${name}`,
+      )
+      writeFileSync(join(dir, 'scripts', 'run.sh'), 'echo hi\n')
+      writeFileSync(join(dir, 'references', 'guide.md'), '# guide\n')
+      writeFileSync(join(dir, 'references', 'deep', 'more.md'), '# more\n')
+      return dir
+    }
+
+    it('keys fileContents by path relative to the skill root', async () => {
+      await freshImport()
+      const dir = writeNestedSkill('nested-relative')
+
+      const result = await resolverModule.resolveSource(dir)
+
+      assert.deepEqual(Object.keys(result.fileContents).sort(), [
+        'SKILL.md',
+        'references/deep/more.md',
+        'references/guide.md',
+        'scripts/run.sh',
+      ])
+      assert.equal(result.fileContents['scripts/run.sh'], 'echo hi\n')
+    })
+
+    it('includes nested files in contentSha', async () => {
+      await freshImport()
+      const { computeContentHash } = await import('./lockfile.js')
+      const dir = writeNestedSkill('nested-sha')
+
+      const result = await resolverModule.resolveSource(dir)
+
+      // The hash must cover the full set, so it differs from one computed over
+      // SKILL.md alone — that difference is the bug.
+      const reduced = computeContentHash({
+        'SKILL.md': result.fileContents['SKILL.md'],
+      })
+      assert.notEqual(result.contentSha, reduced)
+      assert.equal(result.contentSha, computeContentHash(result.fileContents))
+    })
+
+    it('changes contentSha when a nested file changes', async () => {
+      await freshImport()
+      const dir = writeNestedSkill('nested-tamper')
+      const before = await resolverModule.resolveSource(dir)
+
+      writeFileSync(join(dir, 'scripts', 'run.sh'), 'echo tampered\n')
+      const after = await resolverModule.resolveSource(dir)
+
+      assert.notEqual(before.contentSha, after.contentSha)
+    })
+
+    it('excludes .git at any depth rather than only at the root', async () => {
+      await freshImport()
+      const dir = writeNestedSkill('nested-git')
+      mkdirSync(join(dir, 'sub', '.git'), { recursive: true })
+      writeFileSync(join(dir, 'sub', '.git', 'HEAD'), 'ref: refs/heads/main\n')
+
+      const result = await resolverModule.resolveSource(dir)
+
+      assert.equal(
+        Object.keys(result.fileContents).some((f) => f.includes('.git')),
+        false,
+        'a nested .git directory must not enter fileContents',
+      )
+    })
+
+    it('uses POSIX separators so the hash does not diverge per platform', async () => {
+      await freshImport()
+      const dir = writeNestedSkill('nested-separators')
+
+      const result = await resolverModule.resolveSource(dir)
+
+      assert.equal(
+        Object.keys(result.fileContents).some((f) => f.includes('\\')),
+        false,
+      )
+    })
+  })
   before(() => {
     tempDir = mkdtempSync(join(tmpdir(), 'rolecraft-resolver-test-'))
   })

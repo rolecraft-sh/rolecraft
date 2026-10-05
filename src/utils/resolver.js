@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os'
 import { execSync as defaultExecSync, spawnSync } from 'node:child_process'
 import { mkdtempSync } from 'node:fs'
 import { get as defaultHttpsGet } from 'node:https'
-import { computeContentHash } from './lockfile.js'
+import { computeContentHash, readSkillFiles } from './lockfile.js'
 import { parseFrontmatter } from './converter.js'
 import { UserError } from './errors.js'
 import { expandTilde } from './paths.js'
@@ -98,27 +98,8 @@ function parseMetadata(content) {
   return { name, slug, owner, description, category, mcpServers }
 }
 
-async function readFileContents(skillDir) {
-  let entries
-  try {
-    entries = await readdir(skillDir, { withFileTypes: true, recursive: true })
-  } catch {
-    return {}
-  }
-  const files = entries
-    .filter((e) => e.isFile() && !e.name.startsWith('.git'))
-    .map((e) => e.name)
-  const fileContents = {}
-  for (const f of files) {
-    try {
-      fileContents[f] = await readFile(join(skillDir, f), 'utf-8')
-    } catch {}
-  }
-  return fileContents
-}
-
 async function enrichSkill(found) {
-  const fileContents = await readFileContents(found.dir)
+  const fileContents = await readSkillFiles(found.dir)
   const files = Object.keys(fileContents)
   return {
     name: found.name,
@@ -246,7 +227,7 @@ async function resolveLocalInternal(source) {
   try {
     const content = await readFile(directPath, 'utf-8')
     const meta = parseMetadata(content)
-    const fileContents = await readFileContents(skillDir)
+    const fileContents = await readSkillFiles(skillDir)
     const files = Object.keys(fileContents)
     return {
       skills: [

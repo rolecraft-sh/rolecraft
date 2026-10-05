@@ -4,8 +4,8 @@ import {
   computeContentHash,
   getAgentsDir,
   normalizeSlug,
+  readSkillFiles,
 } from '../utils/lockfile.js'
-import { readFile, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { createHash } from 'node:crypto'
 import agents from '../agents.js'
@@ -14,16 +14,13 @@ import { UserError } from '../utils/errors.js'
 
 const agentDirMap = Object.fromEntries(agents.map((a) => [a.name, a.getDir]))
 
+// Reads the installed directory with the same helper the resolver hashed it
+// with. These two used to disagree on the file set — the resolver walked
+// recursively, this did not — so any skill with a subdirectory was reported as
+// a mismatch while `contentSha` had never covered those files either (#325).
 async function readFilesFromDir(dir) {
-  try {
-    const entries = await readdir(dir, { withFileTypes: true })
-    const fc = {}
-    for (const e of entries) {
-      if (e.isFile()) fc[e.name] = await readFile(join(dir, e.name), 'utf-8')
-    }
-    return Object.keys(fc).length > 0 ? fc : null
-  } catch {}
-  return null
+  const fc = await readSkillFiles(dir)
+  return Object.keys(fc).length > 0 ? fc : null
 }
 
 function findFileChanges(installedFiles, expectedHashes) {

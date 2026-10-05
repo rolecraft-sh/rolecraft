@@ -1,5 +1,5 @@
-import { readFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { readFile, readdir } from 'node:fs/promises'
+import { join, relative, sep } from 'node:path'
 import { createHash } from 'node:crypto'
 import AGENTS_DATA, { getAgentByFlag } from '../agents.js'
 import { home } from './paths.js'
@@ -377,6 +377,51 @@ export function computeFileHashes(fileContents) {
   }
 
   return hashes
+}
+
+/**
+ * Read a skill directory into the `{ path: content }` map that `contentSha`,
+ * `fileHashes` and the installer's writes are all keyed by.
+ *
+ * Keys are paths relative to the skill root, using POSIX separators at every
+ * depth so the hash is identical on Windows and POSIX. This is the single
+ * definition of "the files that make up a skill": `resolveSource` produces it,
+ * `verify` and `doctor` recompute it from an installed directory, and any
+ * disagreement between them is a false integrity result.
+ *
+ * `.git` and `node_modules` are skipped at any depth, matched on the relative
+ * path rather than the basename — a basename filter misses `sub/.git/HEAD`,
+ * which would otherwise be written into the user's skill directory.
+ *
+ * @returns {Promise<Record<string,string>>} `{}` when the directory is unreadable
+ */
+export async function readSkillFiles(skillDir) {
+  const fileContents = {}
+  try {
+    const entries = await readdir(skillDir, {
+      withFileTypes: true,
+      recursive: true,
+    })
+    for (const entry of entries) {
+      if (!entry.isFile()) continue
+      const fullPath = join(entry.parentPath ?? skillDir, entry.name)
+      const relPath = relative(skillDir, fullPath).split(sep).join('/')
+      // Guard the trust boundary: a slug-derived path must never escape the
+      // skill directory, and an empty key would silently drop the file.
+      if (!relPath || relPath.startsWith('..')) continue
+      if (isIgnoredSkillPath(relPath)) continue
+      try {
+        fileContents[relPath] = await readFile(fullPath, 'utf-8')
+      } catch {}
+    }
+  } catch {}
+  return fileContents
+}
+
+function isIgnoredSkillPath(relPath) {
+  return relPath
+    .split('/')
+    .some((segment) => segment === '.git' || segment === 'node_modules')
 }
 
 /**

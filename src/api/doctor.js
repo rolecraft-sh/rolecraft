@@ -15,6 +15,7 @@ import {
   getAgentsDir,
   computeContentHash,
   normalizeSlug,
+  readSkillFiles,
 } from '../utils/lockfile.js'
 import { detectAgents } from '../utils/agent-detection.js'
 import { parseFrontmatter, splitSections } from '../utils/converter.js'
@@ -512,10 +513,10 @@ export async function apiDoctor(cwd = process.cwd(), options = {}) {
     brokenSymlinks += countBrokenSymlinks(existingDir)
     if (entry.contentSha) {
       try {
-        const files = readdirSync(existingDir).filter((f) => f.endsWith('.md'))
-        const fc = {}
-        for (const f of files)
-          fc[f] = readFileSync(join(existingDir, f), 'utf-8')
+        // Same reader the resolver hashed with. This used to hash only
+        // top-level `*.md`, so it disagreed with `contentSha` for any skill
+        // carrying a nested or non-markdown file (#325, #330).
+        const fc = await readSkillFiles(existingDir)
         const hash = computeContentHash(fc)
         if (hash !== entry.contentSha) hashMismatches++
         verifiedSkills++
