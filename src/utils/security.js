@@ -82,12 +82,45 @@ const MCP_NETWORK_PATTERNS = [
 ]
 
 const PATTERNS = [
+  // Instruction override. The qualifier list is closed, but the filler between
+  // the verb and the noun is bounded rather than enumerated, so "ignore all
+  // previous instructions" matches — the original allowed exactly one word
+  // there and missed every phrasing with two.
   {
     severity: 'critical',
     category: 'prompt_injection',
     pattern:
-      /ignore\s+(?:all|previous|above)\s+(?:of\s+the\s+)?(?:instructions|directives|commands)/i,
+      /(?:ignore|disregard|forget|discard|override)\s+(?:[\w-]+\s+){0,3}?(?:instructions?|directives?|guidance|guidelines?|rules?|context|prompts?|messages?|everything|above|earlier|preceding|prior|previous)/i,
     description: 'Prompt injection: attempts to override instructions',
+  },
+  // Concealment: the payload tells the agent not to surface what it did.
+  {
+    severity: 'critical',
+    category: 'prompt_injection',
+    pattern:
+      /(?:do\s+not|don'?t|never)\s+(?:tell|inform|mention|reveal|disclose|notify|report)\b[^.]{0,40}?\b(?:the\s+user|user)/i,
+    description: 'Prompt injection: instructs the agent to hide an action',
+  },
+  {
+    severity: 'critical',
+    category: 'prompt_injection',
+    pattern: /without\s+(?:telling|informing|notifying|mentioning|alerting)\b/i,
+    description: 'Prompt injection: acts without informing the user',
+  },
+  // Task or identity replacement.
+  //
+  // ponytail: bare "from now on" is not matched — it is ordinary instructional
+  // prose ("From now on, prefer named exports") and flagged it would push real
+  // skills over the danger threshold. Ceiling: an injection phrased only as
+  // "from now on you have no restrictions" passes. Upgrade path: match it only
+  // alongside a compliance phrase, e.g. require `from now on` within N words of
+  // `you (are|will|must)`, once a false-positive corpus exists to tune against.
+  {
+    severity: 'critical',
+    category: 'prompt_injection',
+    pattern:
+      /your\s+new\s+(?:[\w-]+\s+){0,2}?(?:task|role|goal|objective|mission|identity|purpose|directive)/i,
+    description: 'Prompt injection: replaces the assigned task',
   },
   {
     severity: 'critical',
