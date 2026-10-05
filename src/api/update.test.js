@@ -114,7 +114,10 @@ describe('api update', () => {
 
     assert.equal(result.slug, 'team/project-skill')
     assert.equal(result.sourceType, 'local')
-    assert.deepEqual(result.targets, ['agents'])
+    // An entry in the project lockfile stays in the project. This used to be
+    // ['agents'] — the disk-scan fallback fired because nothing was installed
+    // yet, sending the update to the global directory (#346).
+    assert.deepEqual(result.targets, ['project'])
   })
 
   it('updates project files and the lock under the provided cwd', async () => {
@@ -186,6 +189,68 @@ describe('api update', () => {
     )
     assert.equal(projectLock.skills['relative-skill'].source, relativeSource)
     assert.ok(projectLock.skills['relative-skill'].contentSha)
+  })
+
+  // #346: `detectTargets` scanned the filesystem instead of reading the
+  // lockfile's `agents`, so the twelve agents sharing `~/.agents/skills` each
+  // became a separate target — one install per alias — and a project-scoped
+  // agent was written to the global lockfile.
+  it('installs a shared-directory agent once, not once per alias', async () => {
+    await writeLock(tempDir, {})
+    const projectDir = join(tempDir, 'shared-project')
+    const sourceDir = join(tempDir, 'shared-source')
+    await mkdir(sourceDir, { recursive: true })
+    await writeFile(
+      join(sourceDir, 'SKILL.md'),
+      '---\nname: Shared\nslug: shared-skill\n---\n\nShared skill',
+    )
+    // Pre-install into the directory every one of those agents resolves to, so
+    // a filesystem scan really does find all four aliases.
+    const sharedDir = join(tempDir, '.agents', 'skills', 'shared-skill')
+    await mkdir(sharedDir, { recursive: true })
+    await writeFile(join(sharedDir, 'SKILL.md'), 'Old')
+    await writeLock(projectDir, {
+      'shared-skill': {
+        source: sourceDir,
+        sourceType: 'local',
+        agents: ['agents', 'codex', 'warp', 'goose'],
+      },
+    })
+
+    const result = await apiUpdate('shared-skill', projectDir)
+
+    // Four aliases, one directory — exactly one install.
+    assert.equal(result.results.length, 1)
+    assert.equal(result.targets.length, 1)
+  })
+
+  it('keeps a project-scoped skill in the project lockfile', async () => {
+    await writeLock(tempDir, {})
+    const projectDir = join(tempDir, 'scoped-project')
+    const sourceDir = join(tempDir, 'scoped-source')
+    await mkdir(sourceDir, { recursive: true })
+    await writeFile(
+      join(sourceDir, 'SKILL.md'),
+      '---\nname: Scoped\nslug: scoped-skill\n---\n\nScoped skill',
+    )
+    await writeLock(projectDir, {
+      'scoped-skill': {
+        source: sourceDir,
+        sourceType: 'local',
+        agents: ['project'],
+      },
+    })
+
+    await apiUpdate('scoped-skill', projectDir)
+
+    const globalLock = JSON.parse(
+      await readFile(join(tempDir, '.agents', '.skill-lock.json'), 'utf-8'),
+    )
+    assert.deepEqual(
+      Object.keys(globalLock.skills),
+      [],
+      'a project-scoped skill must not gain a global lock entry',
+    )
   })
 
   it('rejects when the requested skill is not installed', async () => {

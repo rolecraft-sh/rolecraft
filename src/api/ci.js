@@ -1,4 +1,8 @@
-import { readLock, getProjectLockPath } from '../utils/lockfile.js'
+import {
+  readLock,
+  getProjectLockPath,
+  targetsFromLockEntry,
+} from '../utils/lockfile.js'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 import { readMcpLock } from '../utils/mcp-lock.js'
@@ -20,12 +24,15 @@ export async function apiCi(cwd = process.cwd()) {
   const allSkills = Object.fromEntries(
     Object.entries(globalLock.skills).map(([slug, entry]) => [
       slug,
-      { entry, targets: ['agents'] },
+      { entry, targets: targetsFromLockEntry(entry) },
     ]),
   )
   for (const [slug, entry] of Object.entries(projectLock.skills)) {
     if (!allSkills[slug]) {
-      allSkills[slug] = { entry, targets: ['project'] }
+      allSkills[slug] = {
+        entry,
+        targets: targetsFromLockEntry(entry, 'project'),
+      }
     }
   }
 

@@ -6,24 +6,38 @@ import { installSkill } from '../utils/installer.js'
 import { assertSkillScanAllowed } from '../utils/scan-gate.js'
 import {
   findActualSlug,
+  getDirForAgent,
   getProjectLockPath,
   normalizeSlug,
   readLock,
+  targetsFromLockEntry,
 } from '../utils/lockfile.js'
 import { resolveSource } from '../utils/resolver.js'
 
+// Legacy fallback for entries written before `agents` was recorded. It still has
+// to collapse aliases: a scan finds every agent whose directory happens to hold
+// the skill, and twelve agents share `~/.agents/skills` (#346).
 function detectTargets(slug, cwd) {
   const normSlug = normalizeSlug(slug)
-  const targets = []
+  const found = []
 
   for (const agent of agents) {
-    const dir = join(agent.getDir(), normSlug)
-    if (existsSync(join(dir, 'SKILL.md'))) targets.push(agent.flag)
+    if (existsSync(join(agent.getDir(), normSlug, 'SKILL.md'))) {
+      found.push(agent.flag)
+    }
+  }
+  if (existsSync(join(cwd, '.agents', 'skills', normSlug, 'SKILL.md'))) {
+    found.push('project')
   }
 
-  const projectDir = join(cwd, '.agents', 'skills', normSlug)
-  if (existsSync(join(projectDir, 'SKILL.md'))) targets.push('project')
-
+  const targets = []
+  const seenDirs = new Set()
+  for (const flag of found) {
+    const dir = flag === 'project' ? 'project' : getDirForAgent(flag)
+    if (seenDirs.has(dir)) continue
+    seenDirs.add(dir)
+    targets.push(flag)
+  }
   return targets
 }
 
@@ -34,26 +48,37 @@ export async function apiUpdate(slug, cwd = process.cwd(), options = {}) {
   let actualSlug
   let source
   let sourceType
+  let scope
+  let entry
 
   const globalFound = findActualSlug(slug, globalLock)
   const projectFound = findActualSlug(slug, projectLock)
 
   if (globalFound) {
     actualSlug = globalFound
-    source = globalLock.skills[actualSlug].source
-    sourceType = globalLock.skills[actualSlug].sourceType
+    entry = globalLock.skills[actualSlug]
+    scope = 'global'
   } else if (projectFound) {
     actualSlug = projectFound
-    source = projectLock.skills[projectFound].source
-    sourceType = projectLock.skills[projectFound].sourceType
+    entry = projectLock.skills[actualSlug]
+    scope = 'project'
   } else {
     throw new UserError(`Skill "${slug}" not found.`, {
       suggestion: 'Run `rolecraft list` to see installed skills.',
       code: 'UPDATE_SKILL_NOT_FOUND',
     })
   }
+  source = entry.source
+  sourceType = entry.sourceType
 
-  const targets = detectTargets(actualSlug, cwd)
+  // The lockfile's `agents` list is the record of where the skill lives, so
+  // reproduce it. Entries predating that field still fall back to a scan.
+  const targets =
+    Array.isArray(entry.agents) && entry.agents.length > 0
+      ? targetsFromLockEntry(entry, scope)
+      : scope === 'project'
+        ? ['project']
+        : detectTargets(actualSlug, cwd)
   if (targets.length === 0) targets.push('agents')
 
   if (options.dryRun) {

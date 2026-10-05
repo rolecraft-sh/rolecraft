@@ -107,6 +107,71 @@ describe('api ci', () => {
     )
   })
 
+  // #407: `ci` hardcoded `targets: ['agents']` and never read the lockfile's
+  // `agents`, so a skill recorded for one agent landed in the directory twelve
+  // agents share, leaving the lockfile's record disagreeing with the disk.
+  it('installs into the directories the lockfile recorded', async () => {
+    const source = await writeLocalSkill('claude-only')
+    await writeGlobalLock({
+      'claude-only': { source, sourceType: 'local', agents: ['claude-code'] },
+    })
+
+    const result = await apiCi(workDir)
+
+    assert.equal(result.allPassed, true)
+    assert.equal(
+      existsSync(join(homeDir, '.agents', 'skills', 'claude-only', 'SKILL.md')),
+      false,
+      'must not write to the directory 12 agents share',
+    )
+    assert.ok(
+      existsSync(join(homeDir, '.claude', 'skills', 'claude-only', 'SKILL.md')),
+    )
+  })
+
+  it('installs once per directory when the lockfile records several agents', async () => {
+    const source = await writeLocalSkill('two-agents')
+    await writeGlobalLock({
+      'two-agents': {
+        source,
+        sourceType: 'local',
+        agents: ['claude-code', 'cursor'],
+      },
+    })
+
+    const result = await apiCi(workDir)
+
+    assert.equal(result.allPassed, true)
+    assert.equal(result.installed.length, 1)
+    assert.equal(result.installed[0].results.length, 2)
+  })
+
+  it('keeps a project-scoped entry in the project lockfile', async () => {
+    const source = await writeLocalSkill('project-scoped')
+    const projectDir = join(tempDir, 'project-scoped-dir')
+    await writeProjectLock(projectDir, {
+      'project-scoped': {
+        source,
+        sourceType: 'local',
+        agents: ['project'],
+      },
+    })
+
+    await apiCi(projectDir)
+
+    // The global lock must not be created or touched at all.
+    assert.equal(
+      existsSync(join(homeDir, '.agents', '.skill-lock.json')),
+      false,
+      'a project-scoped entry must not create a global lock entry',
+    )
+    assert.ok(
+      existsSync(
+        join(projectDir, '.agents', 'skills', 'project-scoped', 'SKILL.md'),
+      ),
+    )
+  })
+
   it('reports entries without a source and failing sources', async () => {
     const missingDir = join(tempDir, 'sources', 'does-not-exist')
     await writeGlobalLock({

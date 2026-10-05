@@ -46,6 +46,44 @@ export function getProjectLockPath(cwd) {
 }
 
 /**
+ * Resolve the install targets a lockfile entry was actually recorded with.
+ *
+ * An entry's `agents` list is the record of where the skill lives, so
+ * re-installing has to reproduce it. Callers that guessed instead — `ci`
+ * hardcoded the shared agents directory, `update` scanned the filesystem —
+ * put a skill somewhere the lockfile did not name, so the record and the disk
+ * disagreed and every alias sharing a directory became its own install.
+ *
+ * Aliases are collapsed by directory, keeping the first flag in the recorded
+ * order: twelve agents resolve to `~/.agents/skills`, and writing there twelve
+ * times is one install, not twelve.
+ *
+ * @param entry a lockfile skill entry
+ * @param scope `'project'` to install into the project lock only
+ * @returns target names for `installSkill`
+ */
+export function targetsFromLockEntry(entry, scope = 'global') {
+  if (scope === 'project') return ['project']
+
+  const recorded = Array.isArray(entry?.agents) ? entry.agents : []
+  if (recorded.length === 0) return ['agents']
+
+  const targets = []
+  const seenDirs = new Set()
+  for (const flag of recorded) {
+    if (flag === 'project') {
+      targets.push('project')
+      continue
+    }
+    const dir = getDirForAgent(flag)
+    if (seenDirs.has(dir)) continue
+    seenDirs.add(dir)
+    targets.push(flag)
+  }
+  return targets.length > 0 ? targets : ['agents']
+}
+
+/**
  * The lock a missing file reads as.
  *
  * A missing lock is normal, so it gets the empty shape. A damaged one does

@@ -20,7 +20,7 @@ import {
   normalizeSlug,
   readLock,
 } from './lockfile.js'
-import { getAgentByFlag } from '../agents.js'
+import { resolveAgent } from '../agents.js'
 
 import { resolve, sep } from 'node:path'
 
@@ -195,7 +195,7 @@ export async function installSkill(
   await assertNoSlugCollision(slug, targets, cwd)
 
   const agentNames = targets.map((target) => {
-    const agent = getAgentByFlag(target)
+    const agent = resolveAgent(target)
 
     return agent ? agent.name : target
   })
@@ -213,7 +213,7 @@ export async function installSkill(
 
       label = './.agents/skills/'
     } else {
-      const agent = getAgentByFlag(target)
+      const agent = resolveAgent(target)
 
       if (!agent) {
         return null

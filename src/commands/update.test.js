@@ -474,7 +474,11 @@ describe('update command', () => {
     await updateModule.updateCommand('cod/skill')
 
     assert.ok(logs.some((l) => l.includes('Updated')))
-    assert.ok(logs.some((l) => l.includes('codex')))
+    // `codex` resolves to the same directory as `agents` — twelve agents share
+    // it — so the skill is reported once, under the first alias (#346). The
+    // assertion is on the directory, not on which alias happened to name it.
+    const installLines = logs.filter((l) => l.includes('skills/'))
+    assert.equal(installLines.length, 1)
     console.log = origLog
   })
 
