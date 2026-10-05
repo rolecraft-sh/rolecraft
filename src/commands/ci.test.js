@@ -4,6 +4,7 @@ import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
 import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
+import { resolveSource } from '../utils/resolver.js'
 
 let tempDir, originalCwd, originalHome, ciModule, lockModule
 
@@ -74,6 +75,16 @@ describe('ci command', () => {
   })
 
   it('installs skill from local source in lockfile', async () => {
+    const sourceDir = join(tempDir, 'ci-source-skill')
+    mkdirSync(sourceDir, { recursive: true })
+    writeFileSync(
+      join(sourceDir, 'SKILL.md'),
+      '# slug: test/ci-skill\nname: ci-skill\nContent',
+    )
+
+    // The recorded hash has to be the real one — `ci` compares it and refuses
+    // a mismatch, which is the point of #402.
+    const { contentSha } = await resolveSource(sourceDir)
     const lockPath = lockModule.getGlobalLockPath()
     await writeFile(
       lockPath,
@@ -82,21 +93,14 @@ describe('ci command', () => {
         skills: {
           'test/ci-skill': {
             slug: 'test/ci-skill',
-            source: join(tempDir, 'ci-source-skill'),
+            source: sourceDir,
             sourceType: 'local',
-            contentSha: 'hash',
+            contentSha,
           },
         },
         dismissed: {},
         lastSelectedAgents: [],
       }),
-    )
-
-    const sourceDir = join(tempDir, 'ci-source-skill')
-    mkdirSync(sourceDir, { recursive: true })
-    writeFileSync(
-      join(sourceDir, 'SKILL.md'),
-      '# slug: test/ci-skill\nname: ci-skill\nContent',
     )
 
     const logs = []

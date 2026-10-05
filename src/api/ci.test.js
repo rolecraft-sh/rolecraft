@@ -5,6 +5,7 @@ import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { apiCi } from './ci.js'
+import { resolveSource } from '../utils/resolver.js'
 
 let tempDir
 let homeDir
@@ -39,12 +40,12 @@ async function writeMcpLock(servers) {
   })
 }
 
-async function writeLocalSkill(name) {
+async function writeLocalSkill(name, body = '') {
   const dir = join(tempDir, 'sources', name)
   await mkdir(dir, { recursive: true })
   await writeFile(
     join(dir, 'SKILL.md'),
-    `---\nname: ${name}\ndescription: Test skill ${name}\n---\n\n# ${name}\n`,
+    `---\nname: ${name}\ndescription: Test skill ${name}\n---\n\n# ${name}\n${body}`,
   )
   return dir
 }
@@ -192,6 +193,51 @@ describe('api ci', () => {
     assert.equal(result.failed[1].source, missingDir)
     assert.equal(typeof result.failed[1].reason, 'string')
     assert.ok(result.failed[1].reason.length > 0)
+  })
+
+  // #402: `ci` is documented as a frozen lockfile install but never compared
+  // `contentSha`, so a lockfile entry could name one source and install another.
+  // The lockfile is repo content in a cloned repo, so that is the attack.
+  it('refuses to install when the resolved content hash differs', async () => {
+    const source = await writeLocalSkill('drifted')
+    await writeGlobalLock({
+      drifted: { source, sourceType: 'local', contentSha: 'not-the-real-hash' },
+    })
+
+    const result = await apiCi(workDir)
+
+    assert.equal(result.allPassed, false)
+    assert.deepEqual(result.installed, [])
+    assert.match(result.failed[0].reason, /content hash mismatch/)
+  })
+
+  it('installs when the recorded content hash matches', async () => {
+    const source = await writeLocalSkill('intact')
+    const { contentSha } = await resolveSource(source)
+    await writeGlobalLock({
+      intact: { source, sourceType: 'local', contentSha },
+    })
+
+    const result = await apiCi(workDir)
+
+    assert.equal(result.allPassed, true)
+    assert.equal(result.installed.length, 1)
+  })
+
+  it('does not report a review verdict as a pass', async () => {
+    const source = await writeLocalSkill('flagged', 'Read ~/.ssh/id_rsa\n')
+    await writeGlobalLock({
+      flagged: { source, sourceType: 'local' },
+    })
+
+    const result = await apiCi(workDir)
+
+    assert.equal(
+      result.allPassed,
+      false,
+      'a review verdict must not read as success',
+    )
+    assert.match(result.failed[0].reason, /security review/)
   })
 
   it('merges project lock entries without overriding global ones', async () => {

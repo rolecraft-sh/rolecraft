@@ -50,14 +50,32 @@ export async function apiCi(cwd = process.cwd()) {
     try {
       const resolved = await resolveSource(entry.source)
 
-      // Security scan — block dangerous skills even in CI
-      const security = scanSkill(resolved)
-      const level = classifyScore(security.score, security.issues)
-      if (level === 'danger') {
+      // The lockfile is repo content in a cloned repo, so an entry can name a
+      // source whose content no longer matches what was recorded. Resolving
+      // live keeps `ci` working when a branch moves, so the recorded hash is
+      // the only signal that it moved too far (#402).
+      if (entry.contentSha && resolved.contentSha !== entry.contentSha) {
         failed.push({
           slug,
           source: entry.source,
-          reason: `blocked by security scan (score: ${security.score}/100)`,
+          reason: `content hash mismatch: lockfile records ${entry.contentSha.slice(0, 12)}, source resolves to ${resolved.contentSha.slice(0, 12)}`,
+        })
+        continue
+      }
+
+      // Security scan — `ci` has no approval override, so a review verdict has
+      // nobody to review it. Leaving it out of `failed` made `allPassed` mean
+      // "nothing was flagged" while a high-severity finding was reported.
+      const security = scanSkill(resolved)
+      const level = classifyScore(security.score, security.issues)
+      if (level !== 'safe') {
+        failed.push({
+          slug,
+          source: entry.source,
+          reason:
+            level === 'danger'
+              ? `blocked by security scan (score: ${security.score}/100)`
+              : `needs security review (score: ${security.score}/100); ci has no approval override`,
         })
         continue
       }
