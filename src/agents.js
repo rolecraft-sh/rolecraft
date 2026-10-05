@@ -883,4 +883,18 @@ export function getAgentByFlag(flag) {
   return AGENTS_DATA.find((a) => a.flag === flag)
 }
 
+/**
+ * Resolve an agent identifier to its record, accepting either spelling: the
+ * command flag (`claude`) or the lockfile name (`claude-code`). They differ
+ * for 7 of the 87 agents, so every caller that compares one against the other
+ * needs this rather than a hand-rolled lookup.
+ *
+ * @param {string} id flag, name, or undefined
+ * @returns the agent record, or null when the identifier is unknown
+ */
+export function resolveAgent(id) {
+  if (!id) return null
+  return getAgentByFlag(id) || AGENTS_DATA.find((a) => a.name === id) || null
+}
+
 export default AGENTS_DATA

@@ -8,6 +8,8 @@ import { resolveSource } from './resolver.js'
 import { installSkill } from './installer.js'
 import { scanSkill, scanMcpServerConfig, classifyScore } from './security.js'
 import { detectAgents } from './agent-detection.js'
+import { resolveAgent } from '../agents.js'
+import { createHash } from 'node:crypto'
 
 export { detectAgents }
 
@@ -325,15 +327,22 @@ export async function captureSkills(agentFlag) {
   const allSkills = { ...globalLock.skills, ...projectLock.skills }
   const slugs = []
 
+  const target = resolveAgent(agentFlag)
+
+  // The lockfile records agent *names* while the CLI takes *flags*, and the two
+  // differ for 7 of 87 agents. Resolve both sides to a canonical flag instead
+  // of comparing strings, so `profile save --agents` records what is actually
+  // installed.
+  const matchesTarget = (stored) => {
+    if (stored === 'all') return true
+    const storedAgent = resolveAgent(stored)
+    if (target && storedAgent) return storedAgent.flag === target.flag
+    return stored === agentFlag
+  }
+
   for (const [slug, entry] of Object.entries(allSkills)) {
     const targetAgents = entry.agents || []
-    if (
-      targetAgents.includes(agentFlag) ||
-      targetAgents.includes('all') ||
-      targetAgents.includes('agents')
-    ) {
-      slugs.push(slug)
-    }
+    if (targetAgents.some(matchesTarget)) slugs.push(slug)
   }
 
   return slugs.length > 0 ? slugs : null
@@ -347,8 +356,16 @@ export async function captureInstructions(agentFlag) {
   for (const [scope, getPath] of Object.entries(paths)) {
     const content = await readFileIfExists(getPath())
     if (content !== null) {
-      const filePath = getPath()
-      result.push({ file: filePath, contentSha: null, scope })
+      // Store the content, not just where it was. `applyInstructions` needs it:
+      // cursor's .cursorrules is a plain-text file, so a captured path would be
+      // written into it verbatim and the applied profile would be a file
+      // reference instead of the instructions.
+      result.push({
+        file: getPath(),
+        content,
+        contentSha: createHash('sha256').update(content).digest('hex'),
+        scope,
+      })
     }
   }
 
@@ -636,7 +653,16 @@ export async function applyInstructions(agentFlag, instructions) {
   }
 
   if (agentFlag === 'cursor') {
-    const content = instructions.map((i) => i.content || i.file).join('\n')
+    // A profile captured before content was stored has no `content` field.
+    // Skip those rather than writing the source path into a plain-text
+    // instructions file, which would leave the profile referencing a file
+    // instead of carrying the rules.
+    const content = instructions
+      .filter((i) => typeof i.content === 'string')
+      .map((i) => i.content)
+      .join('\n')
+    if (!content) return []
+
     const targetPath = join(process.cwd(), '.cursorrules')
     await writeFile(targetPath, `${content}\n`, 'utf-8')
     return [{ scope: 'project', path: targetPath }]

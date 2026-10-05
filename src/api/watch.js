@@ -7,15 +7,11 @@ import { assertSkillScanAllowed } from '../utils/scan-gate.js'
 import { createDebouncer, WATCH_DEBOUNCE_MS } from '../utils/debounce.js'
 import { expandTilde } from '../utils/paths.js'
 import { UserError } from '../utils/errors.js'
-import agents from '../agents.js'
-
-const agentNameToTarget = Object.fromEntries(
-  agents.map((a) => [a.name, a.flag]),
-)
+import { resolveAgent } from '../agents.js'
 
 function installTargetsFor(entry) {
   const targets = (entry.agents || [])
-    .map((agentName) => agentNameToTarget[agentName] || agentName)
+    .map((agentName) => resolveAgent(agentName)?.flag || agentName)
     .filter(Boolean)
   if (targets.length === 0) targets.push('project')
   return targets
@@ -25,7 +21,7 @@ function outputDirsFor(targets, cwd) {
   return targets
     .map((target) => {
       if (target === 'project') return resolve(cwd, '.agents', 'skills')
-      return agents.find((agent) => agent.flag === target)?.getDir?.()
+      return resolveAgent(target)?.getDir?.()
     })
     .filter(Boolean)
 }

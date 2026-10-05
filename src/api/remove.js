@@ -9,7 +9,7 @@ import {
   findActualSlug,
 } from '../utils/lockfile.js'
 import { assertSafeSlug } from '../utils/installer.js'
-import agents, { getAgentByFlag } from '../agents.js'
+import { resolveAgent } from '../agents.js'
 import { UserError } from '../utils/errors.js'
 
 function rebaseToCwd(dir, cwd) {
@@ -27,9 +27,7 @@ function getTargetBaseDir(target, cwd) {
     return join(cwd, '.agents', 'skills')
   }
 
-  const agent =
-    getAgentByFlag(target) ||
-    agents.find((candidate) => candidate.name === target)
+  const agent = resolveAgent(target)
 
   const baseDir = agent ? agent.getDir() : getAgentsDir()
 

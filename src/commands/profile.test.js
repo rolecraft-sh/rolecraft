@@ -4,6 +4,7 @@ import { mkdtempSync, existsSync, writeFileSync, unlinkSync } from 'node:fs'
 import { mkdir, rm, writeFile, readFile } from 'node:fs/promises'
 import { join, dirname } from 'node:path'
 import { tmpdir } from 'node:os'
+import { createHash } from 'node:crypto'
 
 let tempDir, profileCmd, origHome, origCwd, origEditor
 let editHelperPath
@@ -637,7 +638,8 @@ describe('profile diff command', () => {
     await mkdir(join(appDir, '.agents', 'profiles'), { recursive: true })
 
     const opencodeConfig = join(appDir, '.opencode.json')
-    await writeFile(opencodeConfig, JSON.stringify({ model: 'gpt-4' }))
+    const configContent = JSON.stringify({ model: 'gpt-4' })
+    await writeFile(opencodeConfig, configContent)
 
     process.env.HOME = appDir
     process.cwd = () => appDir
@@ -650,7 +652,14 @@ describe('profile diff command', () => {
         agents: {
           config: { global: { model: 'gpt-4' } },
           instructions: [
-            { file: opencodeConfig, contentSha: null, scope: 'global' },
+            {
+              file: opencodeConfig,
+              content: configContent,
+              contentSha: createHash('sha256')
+                .update(configContent)
+                .digest('hex'),
+              scope: 'global',
+            },
           ],
         },
       },

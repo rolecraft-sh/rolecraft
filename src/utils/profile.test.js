@@ -4,6 +4,7 @@ import { mkdtempSync, existsSync } from 'node:fs'
 import { mkdir, rm, writeFile, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
+import { createHash } from 'node:crypto'
 
 let tempDir, profileModule, origHome
 
@@ -559,6 +560,65 @@ describe('profile capture', () => {
       assert.equal(result.includes('owner/repo-b'), false)
     })
 
+    it('matches lockfile agent names against command flags', async () => {
+      // installer.js writes agent *names* into the lockfile while the CLI takes
+      // *flags*. These seven differ, so a string comparison silently matched
+      // nothing and `profile save` recorded an empty list for every agent.
+      const divergent = [
+        ['claude-code', 'claude'],
+        ['gemini-cli', 'gemini'],
+        ['oh-my-pi', 'omp'],
+        ['rovo-dev', 'rovo'],
+        ['ibm-bob', 'bob'],
+        ['deep-agents', 'deepagents'],
+        ['opencode', 'agents'],
+      ]
+
+      for (const [name, flag] of divergent) {
+        const lockPath = join(captureDir, '.agents', '.skill-lock.json')
+        await writeFile(
+          lockPath,
+          JSON.stringify({
+            version: 3,
+            skills: {
+              'owner/named': { slug: 'owner/named', agents: [name] },
+            },
+          }),
+        )
+
+        const byFlag = await captureModule.captureSkills(flag)
+        assert.ok(
+          byFlag?.includes('owner/named'),
+          `expected flag '${flag}' to match stored name '${name}', got ${JSON.stringify(byFlag)}`,
+        )
+
+        const byName = await captureModule.captureSkills(name)
+        assert.ok(
+          byName?.includes('owner/named'),
+          `expected name '${name}' to match itself`,
+        )
+      }
+    })
+
+    it('does not match a skill installed for a different agent', async () => {
+      const lockPath = join(captureDir, '.agents', '.skill-lock.json')
+      await writeFile(
+        lockPath,
+        JSON.stringify({
+          version: 3,
+          skills: {
+            'owner/only-claude': {
+              slug: 'owner/only-claude',
+              agents: ['claude-code'],
+            },
+          },
+        }),
+      )
+
+      const result = await captureModule.captureSkills('cursor')
+      assert.equal(result, null)
+    })
+
     it('captures skills with "all" agent flag', async () => {
       const lockPath = join(captureDir, '.agents', '.skill-lock.json')
       await writeFile(
@@ -595,6 +655,20 @@ describe('profile capture', () => {
       assert.ok(Array.isArray(result))
       assert.equal(result.length, 1)
       assert.equal(result[0].scope, 'global')
+    })
+
+    it('stores the content and its hash, not only the path', async () => {
+      const configPath = join(captureDir, '.opencode.json')
+      const content = JSON.stringify({ instructions: ['AGENTS.md'] })
+      await writeFile(configPath, content)
+
+      const result = await captureModule.captureInstructions('agents')
+
+      assert.equal(result[0].content, content)
+      assert.equal(
+        result[0].contentSha,
+        createHash('sha256').update(content).digest('hex'),
+      )
     })
 
     it('returns null for agent without instruction paths', async () => {
@@ -893,6 +967,51 @@ describe('profile apply', () => {
       const config = JSON.parse(await readFile(configPath, 'utf-8'))
       assert.ok(config.instructions)
       assert.ok(config.instructions.includes('AGENTS.md'))
+    })
+
+    it('writes instruction content into .cursorrules, not the source path', async () => {
+      const prevCwd = process.cwd
+      process.cwd = () => applyDir
+      try {
+        const result = await applyModule.applyInstructions('cursor', [
+          {
+            file: '/somewhere/AGENTS.md',
+            content: 'Always run lint.',
+            scope: 'project',
+          },
+        ])
+        assert.equal(result.length, 1)
+
+        const written = await readFile(join(applyDir, '.cursorrules'), 'utf-8')
+        assert.match(written, /Always run lint\./)
+        assert.ok(
+          !written.includes('/somewhere/AGENTS.md'),
+          '.cursorrules must not receive the source path',
+        )
+      } finally {
+        process.cwd = prevCwd
+      }
+    })
+
+    it('skips a profile entry that has no stored content', async () => {
+      const cwd = mkdtempSync(join(tmpdir(), 'rolecraft-cursorrules-test-'))
+      const prevCwd = process.cwd
+      process.cwd = () => cwd
+      try {
+        const result = await applyModule.applyInstructions('cursor', [
+          { file: '/somewhere/AGENTS.md', contentSha: null, scope: 'project' },
+        ])
+
+        assert.deepEqual(result, [])
+        assert.equal(
+          existsSync(join(cwd, '.cursorrules')),
+          false,
+          'a profile captured before content was stored must not write a path',
+        )
+      } finally {
+        process.cwd = prevCwd
+        await rm(cwd, { recursive: true, force: true })
+      }
     })
 
     it('returns empty array for unknown agent', async () => {
