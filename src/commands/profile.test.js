@@ -72,13 +72,17 @@ describe('profile command dispatcher', () => {
     assert.ok(logs.some((l) => l.includes('save')))
   })
 
-  it('shows error for unknown subcommand', async () => {
+  it('shows error for unknown subcommand and exits non-zero', async () => {
     const logs = []
     mock.method(console, 'error', (...args) => {
       if (args.length) logs.push(String(args[0]))
     })
+    const before = process.exitCode
+    process.exitCode = 0
     await profileCmd.profileCommand(['unknown'])
     assert.ok(logs.some((l) => l.includes('Unknown profile subcommand')))
+    assert.equal(process.exitCode, 1)
+    process.exitCode = before
   })
 
   it('dispatches export with --file through parseArgs', async () => {

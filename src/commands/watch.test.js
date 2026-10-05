@@ -135,7 +135,7 @@ describe('watch command', () => {
     }
   })
 
-  it('shows error when specific slug not found', async () => {
+  it('shows error when specific slug not found and exits non-zero', async () => {
     const logs = []
     const errors = []
     const origLog = console.log
@@ -147,6 +147,8 @@ describe('watch command', () => {
       if (args.length) errors.push(String(args[0]))
     }
 
+    const before = process.exitCode
+    process.exitCode = 0
     const result = await watchModule.watchCommand('nonexistent', tempDir)
     result.close()
 
@@ -154,6 +156,8 @@ describe('watch command', () => {
       logs.some((l) => l.includes('not found')) ||
         errors.some((e) => e.includes('not found')),
     )
+    assert.equal(process.exitCode, 1)
+    process.exitCode = before
     console.log = origLog
     console.error = origError
   })

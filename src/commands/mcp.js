@@ -1,5 +1,3 @@
-import { stdin as input, stdout as output } from 'node:process'
-import { createInterface } from 'node:readline'
 import {
   apiMcpInstall,
   apiMcpList,
@@ -9,20 +7,17 @@ import {
   apiMcpSearch,
 } from '../api/mcp.js'
 import { classifyMcpSource, getSupportedMcpAgents } from '../utils/mcp.js'
-import { ICONS, pickItem, renderTable, theme } from '../utils/tui.js'
+import { UserError } from '../utils/errors.js'
+import {
+  ICONS,
+  askQuestion,
+  pickItem,
+  renderTable,
+  theme,
+} from '../utils/tui.js'
 
 export { setFetch } from '../api/mcp.js'
 import agents from '../agents.js'
-
-function askConfirmation(query) {
-  const rl = createInterface({ input, output })
-  return new Promise((resolve) => {
-    rl.question(query, (answer) => {
-      rl.close()
-      resolve(answer.trim().toLowerCase())
-    })
-  })
-}
 
 function requiresConfirmation(source) {
   const info = classifyMcpSource(source)
@@ -54,7 +49,7 @@ export async function mcpInstallCommand(source, options) {
       '   This will download and execute code from an external source.',
     )
     console.log('   Only proceed if you trust the repository.\n')
-    const answer = await askConfirmation('Continue with installation? [y/N] ')
+    const answer = await askQuestion('Continue with installation? [y/N] ')
     if (answer !== 'y' && answer !== 'yes') {
       console.log('Install cancelled.')
       return
@@ -118,7 +113,7 @@ export async function mcpUpdateCommand(source, options) {
       '   This will download and execute code from an external source.',
     )
     console.log('   Only proceed if you trust the repository.\n')
-    const answer = await askConfirmation('Continue with update? [y/N] ')
+    const answer = await askQuestion('Continue with update? [y/N] ')
     if (answer !== 'y' && answer !== 'yes') {
       console.log('Update cancelled.')
       return
@@ -268,13 +263,19 @@ export async function mcpSearchCommand(query, options = {}) {
   } catch (err) {
     if (err.message?.includes('rate limit')) {
       console.log('\n⚠️  GitHub API rate limit reached. Try again later.\n')
+      process.exitCode = 1
       return
     }
     if (err.message?.includes('API error')) {
       throw err
     }
-    throw new Error(
-      `Failed to search ${sourceType === 'npm' ? 'npm registry' : 'GitHub'}. Check your internet connection.`,
+    throw new UserError(
+      `Failed to search ${sourceType === 'npm' ? 'npm registry' : 'GitHub'}.`,
+      {
+        suggestion: 'Check your internet connection and try again.',
+        detail: err.message,
+        code: err.userCode || err.code || 'MCP_SEARCH_FAILED',
+      },
     )
   }
 
@@ -405,6 +406,12 @@ export async function mcpCommand(args) {
       })
     }
     default:
+      // Bare `rolecraft mcp` is a help request (exit 0); an unrecognised
+      // subcommand is a typo in a script and must not look like success.
+      if (subcommand) {
+        console.error(`❌ Unknown mcp subcommand: "${subcommand}"`)
+        process.exitCode = 1
+      }
       console.log(`
 rolecraft mcp — Manage MCP servers for AI agents
 

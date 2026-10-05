@@ -393,12 +393,16 @@ describe('mcp command', () => {
 
   describe('mcpCommand dispatcher', () => {
     it(
-      'shows help for unknown subcommand',
+      'shows help for unknown subcommand and exits non-zero',
       withTempDir(async () => {
-        const { logs, restore } = capture('log')
+        const out = capture('log')
+        const err = capture('error')
         await mcpModule.mcpCommand(['unknown'])
-        restore()
-        assert.ok(logs.some((l) => l.includes('rolecraft mcp')))
+        err.restore()
+        out.restore()
+        assert.ok(out.logs.some((l) => l.includes('rolecraft mcp')))
+        assert.ok(err.logs.some((l) => l.includes('Unknown mcp subcommand')))
+        assert.equal(process.exitCode, 1)
       }),
     )
 
@@ -608,7 +612,7 @@ describe('mcpSearchCommand', () => {
     assert.ok(logs.some((l) => l.includes('@scope/mcp-pkg')))
   })
 
-  it('handles GitHub rate limit', async () => {
+  it('handles GitHub rate limit and exits non-zero', async () => {
     mcpModule.setFetch(() =>
       Promise.resolve({
         ok: false,
@@ -621,6 +625,8 @@ describe('mcpSearchCommand', () => {
     await mcpModule.mcpSearchCommand('test')
     restore()
     assert.ok(logs.some((l) => l.includes('rate limit')))
+    assert.equal(process.exitCode, 1)
+    process.exitCode = 0
   })
 
   it('handles GitHub API error', async () => {

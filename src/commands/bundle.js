@@ -1,20 +1,13 @@
 import { writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { createInterface } from 'node:readline'
-import { stdin as input, stdout as output } from 'node:process'
+import { askQuestion } from '../utils/tui.js'
 import {
   loadBundleSources,
   installBundleSources,
 } from '../api/bundle-internal.js'
 
-function askQuestion(query) {
-  const rl = createInterface({ input, output })
-  return new Promise((resolve) => {
-    rl.question(query, (answer) => {
-      rl.close()
-      resolve(answer.trim())
-    })
-  })
+async function ask(query) {
+  return askQuestion(query, { lowercase: false })
 }
 
 async function installSources(sources, label, options, noMcp = false) {
@@ -65,9 +58,9 @@ export async function bundleCreateCommand(name) {
     filePath = join(process.cwd(), `${bundleName}.json`)
   } else {
     console.log('\n📝 Creating a new bundle file\n')
-    bundleName = (await askQuestion('Bundle name (my-bundle): ')) || 'my-bundle'
+    bundleName = (await ask('Bundle name (my-bundle): ')) || 'my-bundle'
     const defaultPath = join(process.cwd(), `${bundleName}.json`)
-    const answer = await askQuestion(`File path (${defaultPath}): `)
+    const answer = await ask(`File path (${defaultPath}): `)
     filePath = answer || defaultPath
     if (!filePath.endsWith('.json')) filePath += '.json'
   }
@@ -80,7 +73,7 @@ export async function bundleCreateCommand(name) {
   try {
     await writeFile(filePath, `${JSON.stringify(template, null, 2)}\n`, 'utf-8')
   } catch {
-    const overwrite = await askQuestion(
+    const overwrite = await ask(
       `\n⚠️  ${filePath} already exists. Overwrite? [y/N]: `,
     )
     if (overwrite.toLowerCase() !== 'y') {

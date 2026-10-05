@@ -1,4 +1,5 @@
 import { stdin as input, stdout as output } from 'node:process'
+import { UserError } from './errors.js'
 
 const CSI = '\x1b['
 const sgr = (n) => `${CSI}${n}m`
@@ -26,8 +27,19 @@ export const theme = {
   yellow: (s) => (color ? text(sgr(33), s) : s),
   green: (s) => (color ? text(sgr(32), s) : s),
   red: (s) => (color ? text(sgr(31), s) : s),
+  blue: (s) => (color ? text(sgr(34), s) : s),
   magenta: (s) => (color ? text(sgr(35), s) : s),
+  gray: (s) => (color ? text(sgr(90), s) : s),
   reverse: (s) => (color ? text(sgr(7), s) : s),
+}
+
+const PLAIN_THEME = Object.fromEntries(
+  Object.keys(theme).map((k) => [k, (s) => s]),
+)
+
+/** theme, or an identity theme when the caller passed `--no-color`. */
+export function themeFor(noColor) {
+  return noColor ? PLAIN_THEME : theme
 }
 
 export const ICONS = {
@@ -109,12 +121,45 @@ export function setPromptUser(fn) {
 }
 
 async function defaultPrompt(question) {
-  const { createInterface } = await import('node:readline')
+  return askQuestion(question)
+}
+
+/**
+ * Fail loudly when stdin has no terminal to read from. Without this, readline
+ * hits EOF, the `question` callback never fires, the event loop drains and the
+ * process exits 0 — a silent no-op in every CI job and `$(...)` substitution.
+ */
+export function assertInteractive(hint) {
+  if (input.isTTY) return
+  throw new UserError('This command needs an interactive terminal.', {
+    code: 'NON_INTERACTIVE',
+    suggestion:
+      hint || 'Re-run in a terminal, or pass a flag that skips the prompt.',
+  })
+}
+
+let createReadline = null
+
+export function setCreateInterface(fn) {
+  createReadline = fn || null
+}
+
+/**
+ * The one prompt in the codebase. Every command that asks a question routes
+ * through here so the non-TTY guard cannot be bypassed by a new command.
+ * Inject a fake with setCreateInterface (tests only) to skip the guard.
+ */
+export async function askQuestion(query, options = {}) {
+  if (!createReadline) assertInteractive(options.hint)
+  const createInterface =
+    createReadline || (await import('node:readline')).createInterface
   const rl = createInterface({ input, output })
+  const { lowercase = true } = options
   return new Promise((resolve) => {
-    rl.question(question, (answer) => {
+    rl.question(query, (answer) => {
       rl.close()
-      resolve(answer.trim().toLowerCase())
+      const trimmed = answer.trim()
+      resolve(lowercase ? trimmed.toLowerCase() : trimmed)
     })
   })
 }

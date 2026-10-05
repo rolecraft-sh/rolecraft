@@ -46,6 +46,7 @@ export async function watchCommand(slug, cwd = process.cwd(), options = {}) {
   } catch (err) {
     if (err.userCode === 'WATCH_SKILL_NOT_FOUND') {
       console.error(err.message)
+      process.exitCode = 1
       return { watchers: [], skills: [], close: noopClose }
     }
     throw err

@@ -2,6 +2,7 @@ import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 import { assertSkillScanAllowed } from '../utils/scan-gate.js'
 import { apiSearch } from '../api/search.js'
+import { UserError } from '../utils/errors.js'
 import { pickItem, renderTable, theme } from '../utils/tui.js'
 
 export { setFetch } from '../api/search.js'
@@ -97,9 +98,11 @@ export async function searchCommand(query, options = {}) {
       if (err.message?.includes('skills.sh API error')) {
         throw err
       }
-      throw new Error(
-        'Failed to search skills.sh. Check your internet connection.',
-      )
+      throw new UserError('Failed to search skills.sh.', {
+        suggestion: 'Check your internet connection and try again.',
+        detail: err.message,
+        code: err.userCode || err.code || 'SKILLS_SH_SEARCH_FAILED',
+      })
     }
     return
   }
@@ -112,12 +115,17 @@ export async function searchCommand(query, options = {}) {
       console.log(
         '\n⚠️  GitHub API rate limit reached. Try again later or use a GitHub token.',
       )
+      process.exitCode = 1
       return
     }
     if (err.message?.includes('GitHub API error')) {
       throw err
     }
-    throw new Error(`Failed to search GitHub. Check your internet connection.`)
+    throw new UserError('Failed to search GitHub.', {
+      suggestion: 'Check your internet connection and try again.',
+      detail: err.message,
+      code: err.userCode || err.code || 'GITHUB_SEARCH_FAILED',
+    })
   }
 
   const items = data.results

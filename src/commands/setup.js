@@ -1,7 +1,5 @@
 import { readdirSync } from 'node:fs'
 import { join } from 'node:path'
-import { createInterface as defaultCreateInterface } from 'node:readline'
-import { stdin as input, stdout as output } from 'node:process'
 import { resolveSkills } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 import {
@@ -15,24 +13,11 @@ import {
   getSupportedMcpAgents,
 } from '../utils/mcp.js'
 import { createSpinner } from '../utils/spinner.js'
+import { askQuestion } from '../utils/tui.js'
 import { getAgentsDir } from '../utils/lockfile.js'
 import { detectAgents } from '../utils/agent-detection.js'
 
-let createInterface = defaultCreateInterface
-
-export function setCreateInterface(fn) {
-  createInterface = fn
-}
-
-function askQuestion(query) {
-  const rl = createInterface({ input, output })
-  return new Promise((resolve) => {
-    rl.question(query, (answer) => {
-      rl.close()
-      resolve(answer.trim().toLowerCase())
-    })
-  })
-}
+export { setCreateInterface } from '../utils/tui.js'
 
 function selectSkillsInteractive(skills) {
   console.log()

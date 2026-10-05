@@ -1,33 +1,18 @@
-import { createInterface as defaultCreateInterface } from 'node:readline'
-import { stdin as input, stdout as output } from 'node:process'
 import { apiInstallSkills } from '../api/install.js'
 import agents from '../agents.js'
 import { createProgressBar } from '../utils/spinner.js'
-import { ICONS, renderTable } from '../utils/tui.js'
+import { ICONS, askQuestion, renderTable } from '../utils/tui.js'
 
-let createInterface = defaultCreateInterface
-let askQuestion = defaultAskQuestion
+export { setCreateInterface } from '../utils/tui.js'
 
-function defaultAskQuestion(query) {
-  const rl = createInterface({ input, output })
-  return new Promise((resolve) => {
-    rl.question(query, (answer) => {
-      rl.close()
-      resolve(answer.trim().toLowerCase())
-    })
-  })
-}
+let askQuestionImpl = askQuestion
 
 export function setAskQuestion(fn) {
-  askQuestion = fn || defaultAskQuestion
-}
-
-export function setCreateInterface(fn) {
-  createInterface = fn
+  askQuestionImpl = fn || askQuestion
 }
 
 export function resetAskQuestion() {
-  askQuestion = defaultAskQuestion
+  askQuestionImpl = askQuestion
 }
 
 async function askScope() {
@@ -36,7 +21,9 @@ async function askScope() {
   console.log('  2) Project (./.agents/skills/) [default]')
   console.log('  3) Both\n')
 
-  const answer = await askQuestion('Choice [1/2/3] (default: 2): ')
+  const answer = await askQuestionImpl('Choice [1/2/3] (default: 2): ', {
+    hint: 'Pass --project, --global, or --all to install without being asked.',
+  })
 
   switch (answer) {
     case '1':
@@ -64,7 +51,7 @@ async function selectSkillsInteractive(skills) {
 
   while (true) {
     console.log()
-    const answer = await askQuestion(
+    const answer = await askQuestionImpl(
       'Enter numbers (space-separated) to select, "all" for all, or press Enter to confirm selection: ',
     )
 
@@ -73,7 +60,9 @@ async function selectSkillsInteractive(skills) {
         .filter((c) => c.selected)
         .map((c) => skills[c.index])
       if (selected.length === 0) {
-        const retry = await askQuestion('No skills selected. Try again? [Y/n] ')
+        const retry = await askQuestionImpl(
+          'No skills selected. Try again? [Y/n] ',
+        )
         if (retry === 'n' || retry === 'no') return null
         continue
       }
@@ -180,7 +169,7 @@ export async function installCommand(source, options) {
   } catch (err) {
     if (err.message?.includes('security review') && !options.yes) {
       console.log('\n   Security scan: REVIEW')
-      const answer = await askQuestion(
+      const answer = await askQuestionImpl(
         `\n  Skill requires review. Continue? [y/N] `,
       )
       if (answer !== 'y' && answer !== 'yes') {

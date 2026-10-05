@@ -540,6 +540,7 @@ export async function profileCommand(args) {
       console.error(
         `Unknown profile subcommand: "${subcommand}". Use: save, apply, diff, edit, export, import, link, list, show, delete`,
       )
+      process.exitCode = 1
       profileUsage()
   }
 }

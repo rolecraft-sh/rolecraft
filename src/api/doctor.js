@@ -5,7 +5,7 @@ import {
   readdirSync,
   statSync,
 } from 'node:fs'
-import { execSync } from 'node:child_process'
+import { execSync, spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { homedir, platform, release } from 'node:os'
@@ -97,14 +97,11 @@ const KNOWN_MCP_COMMANDS = [
 ]
 
 function commandExists(cmd) {
-  try {
-    execSync(`which ${cmd} 2>/dev/null || command -v ${cmd} 2>/dev/null`, {
-      stdio: 'pipe',
-    })
-    return true
-  } catch {
-    return false
-  }
+  // No shell: `which`/`command -v`/`2>/dev/null` are POSIX-only and execSync
+  // uses cmd.exe on Windows, where every probe fails and doctor reports every
+  // runtime as missing.
+  const probe = platform() === 'win32' ? 'where' : 'which'
+  return spawnSync(probe, [cmd], { stdio: 'pipe' }).status === 0
 }
 
 function validateMcpServers(detected) {

@@ -46,6 +46,7 @@ export async function upgradeCommand(options = {}) {
       }
     } else {
       console.log('   (could not fetch latest version)')
+      process.exitCode = 1
     }
     console.log()
     return
@@ -56,6 +57,7 @@ export async function upgradeCommand(options = {}) {
       '   ⚠️  Could not check for updates. Check your internet connection.',
     )
     console.log('   Latest: https://www.npmjs.com/package/rolecraft\n')
+    process.exitCode = 1
     return
   }
 

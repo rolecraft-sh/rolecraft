@@ -49,7 +49,7 @@ manifest and run the script — it updates every location automatically.
 | verified_count | docs/index.md:38 | 27 |
 | agent_count | docs/migration-from-skills.md:10 | 87 |
 | agent_count | docs/migration-from-skills.md:54 | 87 |
-| agent_count | docs/reference.md:160 | 87 |
+| agent_count | docs/reference.md:189 | 87 |
 | agent_count | package.json:4 | 87 |
 | agent_count | README.md:9 | 87 |
 | verified_count | README.md:9 | 27 |

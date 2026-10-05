@@ -31,6 +31,7 @@ import { composeCommand } from '../src/commands/compose.js'
 import { rollbackCommand } from '../src/commands/rollback.js'
 import agents from '../src/agents.js'
 import { showError, UserError } from '../src/utils/errors.js'
+import { theme } from '../src/utils/tui.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const pkg = JSON.parse(
@@ -44,9 +45,12 @@ function isHelp(args) {
   return args.includes('--help') || args.includes('-h')
 }
 
-/** Return only flag-style args (starting with -) */
+/**
+ * Return only flag-style args (starting with -). `--verbose` is global (see
+ * showError) so it is stripped here rather than whitelisted by every command.
+ */
 function parseFlags(args) {
-  return args.filter((a) => a.startsWith('-'))
+  return args.filter((a) => a.startsWith('-') && a !== '--verbose')
 }
 
 /** Return only positional (non-flag) args */
@@ -56,15 +60,24 @@ function parsePositionals(args) {
 
 /** Validate flags against allowed list, warn on unknown, exit non-zero if strict */
 function validateFlags(flags, allowed, command) {
-  const unknown = flags.filter(
-    (f) => !allowed.some((a) => f === a || f.startsWith(`${a}=`)),
-  )
-  if (unknown.length > 0) {
-    for (const u of unknown) {
-      console.error(`⚠️  ${command}: unknown flag "${u}" — ignoring`)
+  let bad = false
+  for (const f of flags) {
+    const eq = f.startsWith('--') ? f.indexOf('=') : -1
+    // Handlers read flags by exact match, so `--flag=value` used to validate
+    // cleanly and then be ignored. Say so instead of doing nothing silently.
+    if (eq > 2 && allowed.includes(f.slice(0, eq))) {
+      console.error(
+        `⚠️  ${command}: "${f}" is ignored — use "${f.slice(0, eq)} ${f.slice(eq + 1)}"`,
+      )
+      bad = true
+      continue
     }
-    process.exitCode = 1
+    if (allowed.includes(f) || allowed.some((a) => f.startsWith(`${a}=`)))
+      continue
+    console.error(`⚠️  ${command}: unknown flag "${f}" — ignoring`)
+    bad = true
   }
+  if (bad) process.exitCode = 1
 }
 
 /**
@@ -131,47 +144,47 @@ function usage() {
 
   console.log(`
 RoleCraft —  The Security-First Skill Manager for AI Agents
-\x1b[32mv${pkg.version}\x1b[0m
+${theme.green(`v${pkg.version}`)}
 
 Zero dependencies, no marketplace required.
 Works with ${agents.length} agents: ${agents.map((a) => a.name).join(', ')}, and all spec-compliant agents.
 
-\x1b[32mUsage: \x1b[0m
-  \x1b[32mrolecraft install \x1b[0m<source>            Install a skill (local path, owner/repo, npm:package)
-  \x1b[32mrolecraft bundle \x1b[0m<source> [...]       Install skills from a file or inline sources
-  \x1b[32mrolecraft bundle create \x1b[0m[<name>]      Create a new bundle file
-  \x1b[32mrolecraft use \x1b[0m<source>                Preview a skill without installing
-  \x1b[32mrolecraft list \x1b[0m                       List installed skills (--json, --agent <name>)
-  \x1b[32mrolecraft remove \x1b[0m<slug>               Remove a skill
-  \x1b[32mrolecraft update \x1b[0m<slug>               Re-install a skill (update to latest)
-  \x1b[32mrolecraft rollback \x1b[0m<slug>             Restore a skill to previous version
-  \x1b[32mrolecraft setup \x1b[0m[<source>]            Detect agents and optionally install a skill
-  \x1b[32mrolecraft init \x1b[0m[<name>]               Scaffold a new SKILL.md (--template, --list)
-  \x1b[32mrolecraft search \x1b[0m<query>              Search for skills on GitHub
-  \x1b[32mrolecraft search \x1b[0m<query> --skills-sh  Search skills.sh (experimental)
-  \x1b[32mrolecraft check \x1b[0m                      Check for available skill updates
-  \x1b[32mrolecraft verify \x1b[0m                     Verify installed skill integrity
-  \x1b[32mrolecraft ci \x1b[0m                         Install all skills from lockfile
-  \x1b[32mrolecraft completions \x1b[0m<shell>         Generate shell completions (bash|zsh|fish)
-  \x1b[32mrolecraft doctor \x1b[0m                     Run system health check (--json, --network, --deep)
-  \x1b[32mrolecraft watch \x1b[0m[<slug>]              Watch skills for changes and auto-sync
-  \x1b[32mrolecraft profile \x1b[0m                    Manage agent configuration profiles
-  \x1b[32mrolecraft mcp install \x1b[0m<source>        Install an MCP server (npm:, gh:, or local path)
-  \x1b[32mrolecraft mcp list \x1b[0m                   List configured MCP servers
-  \x1b[32mrolecraft mcp search \x1b[0m<query>          Search for MCP servers (--npm, --interactive)
-  \x1b[32mrolecraft mcp check \x1b[0m                  Check for MCP server updates
-  \x1b[32mrolecraft mcp update \x1b[0m<name>           Update an MCP server
-  \x1b[32mrolecraft mcp remove \x1b[0m<name>           Remove an MCP server
-  \x1b[32mrolecraft agents \x1b[0m                     Show agent capability manifest
-  \x1b[32mrolecraft agents \x1b[0m --json              Output manifest as JSON
-  \x1b[32mrolecraft agents-xml \x1b[0m                 Generate skills XML for AGENTS.md
-  \x1b[32mrolecraft agents-xml \x1b[0m --write         Write skills XML to AGENTS.md
-  \x1b[32mrolecraft upgrade \x1b[0m                    Upgrade rolecraft to the latest version
-  \x1b[32mrolecraft convert \x1b[0m<source>            Convert a skill between SKILL.md and .mdc formats
-  \x1b[32mrolecraft diff \x1b[0m<skill-a> <skill-b>    Compare two skills section-by-section
-  \x1b[32mrolecraft compose \x1b[0m<a> <b> [...]       Compose multiple skills
-  \x1b[32mrolecraft test \x1b[0m<skill-path>           Test a skill quality
-  \x1b[32mrolecraft help \x1b[0m                       Show this help
+${theme.green(`Usage: `)}
+  ${theme.green(`rolecraft install `)}<source>            Install a skill (local path, owner/repo, npm:package)
+  ${theme.green(`rolecraft bundle `)}<source> [...]       Install skills from a file or inline sources
+  ${theme.green(`rolecraft bundle create `)}[<name>]      Create a new bundle file
+  ${theme.green(`rolecraft use `)}<source>                Preview a skill without installing
+  ${theme.green(`rolecraft list `)}                       List installed skills (--json, --agent <name>)
+  ${theme.green(`rolecraft remove `)}<slug>               Remove a skill
+  ${theme.green(`rolecraft update `)}<slug>               Re-install a skill (update to latest)
+  ${theme.green(`rolecraft rollback `)}<slug>             Restore a skill to previous version
+  ${theme.green(`rolecraft setup `)}[<source>]            Detect agents and optionally install a skill
+  ${theme.green(`rolecraft init `)}[<name>]               Scaffold a new SKILL.md (--template, --list)
+  ${theme.green(`rolecraft search `)}<query>              Search for skills on GitHub
+  ${theme.green(`rolecraft search `)}<query> --skills-sh  Search skills.sh (experimental)
+  ${theme.green(`rolecraft check `)}                      Check for available skill updates
+  ${theme.green(`rolecraft verify `)}                     Verify installed skill integrity
+  ${theme.green(`rolecraft ci `)}                         Install all skills from lockfile (no flags)
+  ${theme.green(`rolecraft completions `)}<shell>         Generate shell completions (bash|zsh|fish)
+  ${theme.green(`rolecraft doctor `)}                     Run system health check (--json, --network, --deep)
+  ${theme.green(`rolecraft watch `)}[<slug>]              Watch skills for changes and auto-sync
+  ${theme.green(`rolecraft profile `)}                    Manage agent configuration profiles
+  ${theme.green(`rolecraft mcp install `)}<source>        Install an MCP server (npm:, gh:, or local path)
+  ${theme.green(`rolecraft mcp list `)}                   List configured MCP servers
+  ${theme.green(`rolecraft mcp search `)}<query>          Search for MCP servers (--npm, --interactive)
+  ${theme.green(`rolecraft mcp check `)}                  Check for MCP server updates
+  ${theme.green(`rolecraft mcp update `)}<name>           Update an MCP server
+  ${theme.green(`rolecraft mcp remove `)}<name>           Remove an MCP server
+  ${theme.green(`rolecraft agents `)}                     Show agent capability manifest
+  ${theme.green(`rolecraft agents `)} --json              Output manifest as JSON
+  ${theme.green(`rolecraft agents-xml `)}                 Generate skills XML for AGENTS.md
+  ${theme.green(`rolecraft agents-xml `)} --write         Write skills XML to AGENTS.md
+  ${theme.green(`rolecraft upgrade `)}                    Upgrade rolecraft to the latest version
+  ${theme.green(`rolecraft convert `)}<source>            Convert a skill between SKILL.md and .mdc formats
+  ${theme.green(`rolecraft diff `)}<skill-a> <skill-b>    Compare two skills section-by-section
+  ${theme.green(`rolecraft compose `)}<a> <b> [...]       Compose multiple skills
+  ${theme.green(`rolecraft test `)}<skill-path>           Test a skill quality
+  ${theme.green(`rolecraft help `)}                       Show this help
 
 Options:
   --yes, -y      Non-interactive: accept all defaults (install, setup, mcp, profile)
@@ -234,7 +247,7 @@ ${agentFlags.join('\n')}
   --copy              Install as copy (default)
   --list              List available skills from a source without installing
   --skill <names>     Install specific skills by name (comma-separated, e.g. "skill1,skill2")
-\x1b[33mExamples:
+${theme.yellow(`Examples:
   rolecraft install ./my-skill
   rolecraft install sametcelikbicak/coverage-guard
   rolecraft install npm:lodash
@@ -245,7 +258,20 @@ ${agentFlags.join('\n')}
   rolecraft bundle owner/skill1 owner/skill2 --dry-run
   rolecraft bundle create my-collection
   rolecraft list
-  rolecraft remove task-decomposer\x1b[0m
+  rolecraft remove task-decomposer`)}
+`)
+
+  console.log(`
+${theme.yellow(`Global flags (accepted by every command):`)}
+  --verbose       Show error details (HTTP status, code, cause)
+  --help, -h      Show this help
+
+${theme.yellow(`Environment:`)}
+  NO_COLOR        Disable colored output
+  FORCE_COLOR     Force colored output even when piped
+
+Exit codes: 0 success, 1 failure. A command that installs nothing, cannot
+reach the network, or gets an unknown flag exits non-zero.
 `)
 }
 
@@ -457,6 +483,9 @@ const COMMANDS = {
       usage()
       return
     }
+    // ci has no options. Reject unknown flags rather than installing anyway —
+    // `ci --dry-run` used to write to disk while claiming to preview.
+    validateFlags(parseFlags(args), [], 'ci')
     return ciCommand()
   },
 
@@ -738,14 +767,12 @@ export async function main() {
   const handler = COMMANDS[cmd]
   if (handler) {
     await handler(commandArgs)
-  } else if (cmd) {
-    console.error(`❌ Unknown command: "${cmd}"`)
-    console.error('Run "rolecraft help" for available commands.')
-    process.exitCode = 1
-    usage()
-  } else {
-    usage()
+    return
   }
+  console.error(`❌ Unknown command: "${cmd}"`)
+  console.error('Run "rolecraft help" for available commands.')
+  process.exitCode = 1
+  usage()
 }
 
 export async function run() {

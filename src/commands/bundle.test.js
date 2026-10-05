@@ -267,14 +267,11 @@ describe('bundle command', () => {
       JSON.stringify(join(__dirname, '../api/bundle-internal.js')),
     )
     modSrc = modSrc.replace(
-      `import { createInterface } from 'node:readline'`,
+      `import { askQuestion } from '../utils/tui.js'`,
       [
         `const _bAns = ['my-test-bundle', '']`,
         `let _bIdx = 0`,
-        `const createInterface = () => ({`,
-        `  question: (q, cb) => cb(_bAns[_bIdx++]),`,
-        `  close: () => {},`,
-        `})`,
+        `const askQuestion = async () => _bAns[_bIdx++] ?? ''`,
       ].join('\n'),
     )
     writeFileSync(copyPath, modSrc)
@@ -301,13 +298,8 @@ describe('bundle command', () => {
       JSON.stringify(join(__dirname, '../api/bundle-internal.js')),
     )
     modSrc = modSrc.replace(
-      `import { createInterface } from 'node:readline'`,
-      [
-        `const createInterface = () => ({`,
-        `  question: (q, cb) => cb('y'),`,
-        `  close: () => {},`,
-        `})`,
-      ].join('\n'),
+      `import { askQuestion } from '../utils/tui.js'`,
+      [`const askQuestion = async () => 'y'`].join('\n'),
     )
     modSrc = modSrc.replace(
       `import { writeFile } from 'node:fs/promises'`,

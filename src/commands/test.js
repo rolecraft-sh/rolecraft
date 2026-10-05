@@ -1,5 +1,8 @@
 import { apiTest } from '../api/test.js'
 import { existsSync } from 'node:fs'
+import { themeFor } from '../utils/tui.js'
+
+const colorize = (text, name, t) => t[name]?.(text) ?? text
 
 function icon(pass) {
   if (pass === true) return '✅'
@@ -33,33 +36,9 @@ function useEmoji(options) {
   return true
 }
 
-function useColor(options) {
-  if (options.noColor) return false
-  if (process.env.NO_COLOR) return false
-  if (!process.stdout.isTTY) return false
-  return true
-}
-
-function colorize(text, color, enabled) {
-  if (!enabled) return text
-  const codes = {
-    red: '31',
-    green: '32',
-    yellow: '33',
-    blue: '34',
-    magenta: '35',
-    cyan: '36',
-    gray: '90',
-    bold: '1',
-    dim: '2',
-  }
-  const code = codes[color] || '0'
-  return `\x1b[${code}m${text}\x1b[0m`
-}
-
 function printSingleResult(result, options) {
   const emoji = useEmoji(options)
-  const color = useColor(options)
+  const color = themeFor(options.noColor)
 
   const getIcon = emoji ? icon : iconAscii
 
@@ -102,7 +81,7 @@ function printSingleResult(result, options) {
 
 function printAllResults(data, options) {
   const emoji = useEmoji(options)
-  const color = useColor(options)
+  const color = themeFor(options.noColor)
 
   if (options.json) {
     console.log(JSON.stringify(data, null, 2))

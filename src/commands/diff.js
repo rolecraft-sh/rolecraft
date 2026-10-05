@@ -1,26 +1,7 @@
 import { apiDiff } from '../api/diff.js'
+import { themeFor } from '../utils/tui.js'
 
-function useColor(options) {
-  if (options.noColor) return false
-  if (process.env.NO_COLOR) return false
-  if (!process.stdout.isTTY) return false
-  return true
-}
-
-function colorize(text, color, enabled) {
-  if (!enabled) return text
-  const codes = {
-    red: '31',
-    green: '32',
-    yellow: '33',
-    cyan: '36',
-    gray: '90',
-    bold: '1',
-    dim: '2',
-  }
-  const code = codes[color] || '0'
-  return `\x1b[${code}m${text}\x1b[0m`
-}
+const colorize = (text, name, t) => t[name]?.(text) ?? text
 
 function formatVal(v) {
   if (v === undefined || v === null) return '(undefined)'
@@ -29,7 +10,7 @@ function formatVal(v) {
 }
 
 function printDiff(result, options) {
-  const color = useColor(options)
+  const color = themeFor(options.noColor)
 
   if (options.json) {
     console.log(JSON.stringify(result, null, 2))
@@ -96,7 +77,7 @@ function printDiff(result, options) {
 }
 
 function printBrief(result, options) {
-  const color = useColor(options)
+  const color = themeFor(options.noColor)
 
   if (options.json) {
     console.log(JSON.stringify(result, null, 2))

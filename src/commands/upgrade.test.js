@@ -95,17 +95,21 @@ describe('upgrade command', () => {
     assert.ok(compareVersions('1.0.0', '0.9.9') > 0)
   })
 
-  it('dry-run shows message when fetch fails', async () => {
+  it('dry-run shows message when fetch fails and exits non-zero', async () => {
     const origFetch = globalThis.fetch
     globalThis.fetch = () => Promise.reject(new Error('network error'))
 
     captureLog()
+    const before = process.exitCode
+    process.exitCode = 0
     await upgradeModule.upgradeCommand({ dryRun: true })
     restoreLog()
 
     globalThis.fetch = origFetch
 
     assert.ok(logs.some((l) => l.includes('could not fetch')))
+    assert.equal(process.exitCode, 1)
+    process.exitCode = before
   })
 
   it('dry-run shows would-install when newer version exists', async () => {
@@ -125,17 +129,21 @@ describe('upgrade command', () => {
     assert.ok(logs.some((l) => l.includes('Would install')))
   })
 
-  it('shows warning when fetch fails without dry-run', async () => {
+  it('shows warning when fetch fails without dry-run and exits non-zero', async () => {
     const origFetch = globalThis.fetch
     globalThis.fetch = () => Promise.reject(new Error('network error'))
 
     captureLog()
+    const before = process.exitCode
+    process.exitCode = 0
     await upgradeModule.upgradeCommand()
     restoreLog()
 
     globalThis.fetch = origFetch
 
     assert.ok(logs.some((l) => l.includes('Could not check')))
+    assert.equal(process.exitCode, 1)
+    process.exitCode = before
   })
 
   it('executes upgrade when newer version exists on npm', async () => {

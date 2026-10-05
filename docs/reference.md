@@ -58,9 +58,38 @@ These flags work across multiple commands:
 | `--interactive` | search, mcp search | Open TUI for browsing and selecting results |
 | `--list` | install, use, setup | List available skills from a source without installing |
 | `--skill <names>` | install, use, setup | Install/preview specific skills by name (comma-separated) |
-| `--json` | list, doctor, test, compose, diff | Output structured JSON |
+| `--json` | list, doctor, test, compose, diff, agents | Output structured JSON |
 | `--no-color` | diff, compose, test | Disable colored output |
 | `--no-emoji` | test | Use ASCII fallback for emojis |
+| `--verbose` | every command | Show error details (HTTP status, code, cause) |
+| `--help`, `-h` | every command | Show help |
+
+`ci` takes no flags at all — it installs immediately and rejects anything else.
+
+Flags take their value as a separate argument (`--agent opencode`), never as
+`--agent=opencode`. The `=` form is rejected with a hint rather than silently
+ignored.
+
+---
+
+## Exit codes
+
+| Code | Meaning |
+|------|---------|
+| 0 | Success — the command did what it said |
+| 1 | Failure, including: a prompt was needed but stdin is not a terminal, an unknown flag, an unknown subcommand, a network error, or a skill that could not be found |
+
+If a command needs to ask a question and stdin is not a terminal, it fails with
+an actionable message rather than proceeding with a default. Pass the
+non-interactive flag for that command (`--yes`, `--project`, `--all`) to run it
+in a script.
+
+## Environment
+
+| Variable | Effect |
+|----------|--------|
+| `NO_COLOR` | Disable colored output (also honoured automatically when stdout is not a TTY) |
+| `FORCE_COLOR` | Keep colored output even when stdout is piped |
 
 ---
 
@@ -290,7 +319,7 @@ No arguments. Checks all installed skills for newer versions.
 
 ### `rolecraft ci`
 
-Re-install all skills and MCP servers from lockfiles. Non-interactive by design — no flags needed.
+Re-install all skills and MCP servers from lockfiles. Non-interactive by design — **it takes no flags**, and any flag (including `--dry-run`) is rejected rather than ignored, because `ci` writes to disk the moment it runs.
 
 ### `rolecraft verify`
 
