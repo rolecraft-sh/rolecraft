@@ -204,12 +204,61 @@ describe('api mcp install/list/update/remove', () => {
     assert.deepEqual(result, {
       name: 'srv',
       results: [{ agent: 'agents', name: 'srv', success: true }],
+      dryRun: false,
     })
     assert.equal(readJson('.agents', 'mcp.json').mcpServers.srv, undefined)
   })
 
   it('reports success false when removing an unknown server', async () => {
     const result = await apiMcpRemove('missing', { agents: ['agents'] })
+    assert.deepEqual(result.results, [
+      { agent: 'agents', name: 'missing', success: false },
+    ])
+  })
+
+  // #403: `dryRun` never reached the API layer — the string did not appear in
+  // this file at all — so a preview deleted the server.
+  it('removes nothing and reports a preview when dryRun is set', async () => {
+    await apiMcpInstall('npm:@test/server', {
+      yes: true,
+      agents: ['agents'],
+      name: 'srv',
+    })
+
+    const result = await apiMcpRemove('srv', {
+      agents: ['agents'],
+      dryRun: true,
+    })
+
+    assert.equal(result.dryRun, true)
+    assert.notEqual(readJson('.agents', 'mcp.json').mcpServers.srv, undefined)
+    assert.deepEqual(readJson('.agents', '.mcp-lock.json').servers.srv.agents, [
+      'agents',
+    ])
+  })
+
+  it('reports what a dry-run would remove per agent', async () => {
+    await apiMcpInstall('npm:@test/server', {
+      yes: true,
+      agents: ['agents'],
+      name: 'srv',
+    })
+
+    const result = await apiMcpRemove('srv', {
+      agents: ['agents'],
+      dryRun: true,
+    })
+
+    assert.deepEqual(result.results, [
+      { agent: 'agents', name: 'srv', success: true },
+    ])
+  })
+
+  it('reports success false for a dry-run of an unknown server', async () => {
+    const result = await apiMcpRemove('missing', {
+      agents: ['agents'],
+      dryRun: true,
+    })
     assert.deepEqual(result.results, [
       { agent: 'agents', name: 'missing', success: false },
     ])

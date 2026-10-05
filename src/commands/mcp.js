@@ -152,6 +152,19 @@ export async function mcpUpdateCommand(source, options) {
 export async function mcpRemoveCommand(name, options) {
   const result = await apiMcpRemove(name, options)
 
+  if (options.dryRun) {
+    renderMcpResults(result.results, 'would remove')
+    const succeeded = result.results.filter((r) => r.success).length
+    if (succeeded === 0) {
+      console.log(`No MCP server "${name}" found to remove.`)
+    } else {
+      console.log(
+        `\n📋 [dry-run] Would remove MCP server "${name}" from ${succeeded}/${result.results.length} agents`,
+      )
+    }
+    return result.results
+  }
+
   renderMcpResults(result.results, 'removed')
 
   const succeeded = result.results.filter((r) => r.success).length

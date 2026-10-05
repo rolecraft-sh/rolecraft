@@ -118,12 +118,24 @@ export async function apiMcpRemove(name, options = {}) {
       : getSupportedMcpAgents()
 
   const results = []
+
   for (const agent of targets) {
+    if (options.dryRun) {
+      // A preview must not touch the config or the lockfile. Report what a real
+      // removal would do by asking the read-only list path (#403).
+      const servers = await listMcpServers(agent)
+      results.push({
+        agent,
+        name,
+        success: servers.some((s) => s.name === name),
+      })
+      continue
+    }
     const success = await removeMcpServer(agent, name)
     results.push({ agent, name, success })
   }
 
-  return { name, results }
+  return { name, results, dryRun: Boolean(options.dryRun) }
 }
 
 export async function apiMcpCheck() {

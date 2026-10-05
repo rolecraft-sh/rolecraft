@@ -340,6 +340,55 @@ describe('mcp command', () => {
         assert.ok(logs.some((l) => l.includes('not supported')))
       }),
     )
+
+    // #403: `mcp remove --dry-run` deleted the server while printing a preview.
+    it(
+      'dry-run does not remove anything',
+      withTempDir(async () => {
+        const addModule = await import('../utils/mcp.js')
+        await addModule.addMcpServer('agents', 'keep-me', {
+          command: 'npx',
+          args: ['-y', '@test/keep'],
+        })
+
+        const { logs, restore } = capture('log')
+        await mcpModule.mcpRemoveCommand('keep-me', {
+          agents: ['agents'],
+          dryRun: true,
+        })
+        restore()
+
+        assert.ok(logs.some((l) => l.includes('dry-run')))
+        const config = JSON.parse(
+          readFileSync(join(process.env.HOME, '.agents', 'mcp.json'), 'utf-8'),
+        )
+        assert.ok(config.mcpServers['keep-me'])
+      }),
+    )
+
+    // The class of bug: a preview flag accepted on a path that ignores it.
+    // `bin/rolecraft.js` advertises --dry-run for mcp, so every mutating mcp
+    // subcommand has to honour it.
+    it(
+      'every mutating mcp subcommand forwards dryRun',
+      withTempDir(async () => {
+        const cases = [
+          ['mcpInstallCommand', 'npm:@test/a', { agents: ['agents'] }],
+          ['mcpUpdateCommand', 'npm:@test/b', { agents: ['agents'] }],
+          ['mcpRemoveCommand', 'some-server', { agents: ['agents'] }],
+        ]
+        for (const [fn, arg, opts] of cases) {
+          const { restore } = capture('log')
+          await mcpModule[fn](arg, { ...opts, dryRun: true })
+          restore()
+        }
+        // Nothing was installed, updated or removed by any of the three.
+        assert.equal(
+          existsSync(join(process.env.HOME, '.agents', 'mcp.json')),
+          false,
+        )
+      }),
+    )
   })
 
   describe('mcpCommand dispatcher', () => {
