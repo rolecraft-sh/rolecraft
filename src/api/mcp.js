@@ -7,6 +7,8 @@ import {
   resolveMcpSource,
 } from '../utils/mcp.js'
 import { assertMcpScanAllowed } from '../utils/scan-gate.js'
+import { existsSync } from 'node:fs'
+import { isAbsolute } from 'node:path'
 
 let runFetch = globalThis.fetch
 
@@ -55,6 +57,28 @@ export async function apiMcpInstall(source, options = {}) {
   }
 }
 
+/**
+ * A `gh:` or local-path server runs from a path on disk, and that path is
+ * written into the agent config. If the directory is later gone the server
+ * cannot start, but the config still lists it, so `mcp list` used to report it
+ * as healthy — the agent silently lost the server with nothing on our side to
+ * say so. Only absolute args are checked: npm/uvx/pipx args are package names,
+ * not paths, and would read as missing.
+ */
+function describeServer(server) {
+  const entry = {
+    name: server.name,
+    command: server.command,
+    args: server.args,
+  }
+  const path = (server.args || []).find((a) => isAbsolute(a))
+  if (path && !existsSync(path)) {
+    entry.missing = true
+    entry.missingPath = path
+  }
+  return entry
+}
+
 export async function apiMcpList(options = {}) {
   const targets =
     options.agents && options.agents.length > 0
@@ -70,8 +94,7 @@ export async function apiMcpList(options = {}) {
     // but the reason for the gap is reported.
     try {
       const servers = await listMcpServers(agent)
-      for (const s of servers)
-        all.push({ agent, name: s.name, command: s.command, args: s.args })
+      for (const s of servers) all.push({ agent, ...describeServer(s) })
     } catch (error) {
       unreadable.push({ agent, error })
     }

@@ -150,6 +150,20 @@ More agents will be added as their MCP standards solidify.
 | `cargo:` | `cargo:my-mcp-server` | Rust crate via `cargo run` |
 | Local path | `./my-mcp-server/index.js` | Run directly with `node` |
 
+### Where `gh:` servers are cloned
+
+`gh:` servers run from a path on disk, so that path has to survive. Each one is
+cloned to `~/.agents/mcp/<owner-repo>[@ref]/repo` — rolecraft's own directory,
+not the OS temp dir, which is swept on a schedule rolecraft does not control.
+
+Installing the same source again replaces its own clone rather than leaving the
+old one behind. A server name with a ref (`gh:owner/repo@v1.0.0`) gets its own
+directory, so two versions of one repo do not overwrite each other.
+
+`rolecraft mcp list` checks every absolute path in a server entry and marks the
+ones that no longer exist, so an entry whose files went missing is reported
+instead of listed as healthy. Removing a server leaves its clone on disk.
+
 ## Security Scanning
 
 When installing from `gh:` sources, rolecraft automatically scans the cloned repository for security issues before installation:

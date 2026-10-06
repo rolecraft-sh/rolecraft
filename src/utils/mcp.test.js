@@ -4,6 +4,7 @@ import {
   mkdtempSync,
   existsSync,
   readFileSync,
+  readdirSync,
   writeFileSync,
   mkdirSync,
   rmSync,
@@ -680,14 +681,19 @@ Content
       )
     })
 
-    it('throws when gh: source clone fails', async () => {
-      mcpModule.setSpawnSync(() => ({ status: 1, stderr: 'mock failure' }))
-      await assert.rejects(
-        () => mcpModule.resolveMcpSource('gh:test/repo'),
-        /Failed to clone/,
-      )
-      mcpModule.setSpawnSync(undefined)
-    })
+    // Each gh: case below needs withTempDir: the clone lands under
+    // $HOME/.agents/mcp, and an unwrapped test writes to the real home dir.
+    it(
+      'throws when gh: source clone fails',
+      withTempDir(async () => {
+        mcpModule.setSpawnSync(() => ({ status: 1, stderr: 'mock failure' }))
+        await assert.rejects(
+          () => mcpModule.resolveMcpSource('gh:test/repo'),
+          /Failed to clone/,
+        )
+        mcpModule.setSpawnSync(undefined)
+      }),
+    )
 
     it(
       'gh: source success path',
@@ -714,54 +720,160 @@ Content
       }),
     )
 
-    it('gh: source with @branch ref uses --branch flag', async () => {
-      const capturedArgs = []
-      mcpModule.setSpawnSync((cmd, args) => {
-        if (cmd === 'git') {
-          capturedArgs.push(...args)
-          const cloneDir = args[args.length - 1]
-          mkdirSync(cloneDir, { recursive: true })
-          writeFileSync(
-            join(cloneDir, 'package.json'),
-            JSON.stringify({ main: 'index.js' }),
-          )
+    it(
+      'gh: source with @branch ref uses --branch flag',
+      withTempDir(async () => {
+        const capturedArgs = []
+        mcpModule.setSpawnSync((cmd, args) => {
+          if (cmd === 'git') {
+            capturedArgs.push(...args)
+            const cloneDir = args[args.length - 1]
+            mkdirSync(cloneDir, { recursive: true })
+            writeFileSync(
+              join(cloneDir, 'package.json'),
+              JSON.stringify({ main: 'index.js' }),
+            )
+            return { status: 0 }
+          }
+          if (cmd === 'rm') return { status: 0 }
           return { status: 0 }
-        }
-        if (cmd === 'rm') return { status: 0 }
-        return { status: 0 }
-      })
-      const resolved = await mcpModule.resolveMcpSource(
-        'gh:test/mcp-server@main',
-      )
-      assert.equal(resolved.repo, 'test/mcp-server')
-      assert.equal(resolved.ref, 'main')
-      assert.ok(capturedArgs.includes('--branch'))
-      assert.ok(capturedArgs.includes('main'))
-      mcpModule.setSpawnSync(undefined)
-    })
+        })
+        const resolved = await mcpModule.resolveMcpSource(
+          'gh:test/mcp-server@main',
+        )
+        assert.equal(resolved.repo, 'test/mcp-server')
+        assert.equal(resolved.ref, 'main')
+        assert.ok(capturedArgs.includes('--branch'))
+        assert.ok(capturedArgs.includes('main'))
+        mcpModule.setSpawnSync(undefined)
+      }),
+    )
 
-    it('gh: source with @tag ref', async () => {
-      const capturedArgs = []
-      mcpModule.setSpawnSync((cmd, args) => {
-        if (cmd === 'git') {
-          capturedArgs.push(...args)
-          const cloneDir = args[args.length - 1]
-          mkdirSync(cloneDir, { recursive: true })
-          writeFileSync(
-            join(cloneDir, 'package.json'),
-            JSON.stringify({ main: 'index.js' }),
-          )
+    it(
+      'gh: source with @tag ref',
+      withTempDir(async () => {
+        const capturedArgs = []
+        mcpModule.setSpawnSync((cmd, args) => {
+          if (cmd === 'git') {
+            capturedArgs.push(...args)
+            const cloneDir = args[args.length - 1]
+            mkdirSync(cloneDir, { recursive: true })
+            writeFileSync(
+              join(cloneDir, 'package.json'),
+              JSON.stringify({ main: 'index.js' }),
+            )
+            return { status: 0 }
+          }
+          if (cmd === 'rm') return { status: 0 }
           return { status: 0 }
-        }
-        if (cmd === 'rm') return { status: 0 }
-        return { status: 0 }
-      })
-      const resolved = await mcpModule.resolveMcpSource('gh:owner/repo@v1.0.0')
-      assert.equal(resolved.repo, 'owner/repo')
-      assert.equal(resolved.ref, 'v1.0.0')
-      assert.ok(capturedArgs.includes('--branch'))
-      assert.ok(capturedArgs.includes('v1.0.0'))
-      mcpModule.setSpawnSync(undefined)
+        })
+        const resolved = await mcpModule.resolveMcpSource(
+          'gh:owner/repo@v1.0.0',
+        )
+        assert.equal(resolved.repo, 'owner/repo')
+        assert.equal(resolved.ref, 'v1.0.0')
+        assert.ok(capturedArgs.includes('--branch'))
+        assert.ok(capturedArgs.includes('v1.0.0'))
+        mcpModule.setSpawnSync(undefined)
+      }),
+    )
+
+    // A gh: server runs from a path written into the agent config, so that
+    // path has to outlive the OS temp dir. In mkdtemp the config went stale
+    // on the first /tmp sweep and the server broke permanently and silently.
+    it(
+      'gh: source clones into ~/.agents/mcp, not the OS temp dir',
+      withTempDir(async (td) => {
+        mcpModule.setSpawnSync((cmd, args) => {
+          if (cmd === 'git') {
+            const cloneDir = args[args.length - 1]
+            mkdirSync(cloneDir, { recursive: true })
+            writeFileSync(
+              join(cloneDir, 'package.json'),
+              JSON.stringify({ main: 'index.js' }),
+            )
+            return { status: 0 }
+          }
+          return { status: 0 }
+        })
+        const resolved = await mcpModule.resolveMcpSource('gh:owner/repo')
+        // HOME is the temp dir here, so "not the OS temp dir" is asserted as
+        // "under the rolecraft-owned mcp dir" — mkdtemp would not be there.
+        assert.ok(
+          resolved.args[0].startsWith(join(td, '.agents', 'mcp', 'owner-repo')),
+          `expected a ~/.agents/mcp clone path, got ${resolved.args[0]}`,
+        )
+        mcpModule.setSpawnSync(undefined)
+      }),
+    )
+
+    it(
+      'gh: source replaces the previous clone of the same source',
+      withTempDir(async (td) => {
+        const dir = join(td, '.agents', 'mcp', 'owner-repo', 'repo')
+        mkdirSync(dir, { recursive: true })
+        writeFileSync(join(dir, 'stale.txt'), 'left over from an old install')
+
+        mcpModule.setSpawnSync((cmd, args) => {
+          if (cmd === 'git') {
+            // git clone refuses a non-empty target, so the stale contents have
+            // to be gone by the time this runs.
+            const target = args[args.length - 1]
+            assert.deepEqual(
+              existsSync(target) ? readdirSync(target) : [],
+              [],
+              'the previous clone must be cleared before cloning',
+            )
+            const cloneDir = target
+            mkdirSync(cloneDir, { recursive: true })
+            writeFileSync(
+              join(cloneDir, 'package.json'),
+              JSON.stringify({ main: 'index.js' }),
+            )
+            return { status: 0 }
+          }
+          return { status: 0 }
+        })
+        await mcpModule.resolveMcpSource('gh:owner/repo')
+        assert.ok(existsSync(join(dir, 'package.json')))
+        assert.ok(!existsSync(join(dir, 'stale.txt')))
+        mcpModule.setSpawnSync(undefined)
+      }),
+    )
+
+    it(
+      'gh: source with a ref gets its own clone directory',
+      withTempDir(async (td) => {
+        mcpModule.setSpawnSync((cmd, args) => {
+          if (cmd === 'git') {
+            const cloneDir = args[args.length - 1]
+            mkdirSync(cloneDir, { recursive: true })
+            writeFileSync(
+              join(cloneDir, 'package.json'),
+              JSON.stringify({ main: 'index.js' }),
+            )
+            return { status: 0 }
+          }
+          return { status: 0 }
+        })
+        const resolved = await mcpModule.resolveMcpSource(
+          'gh:owner/repo@feature/x',
+        )
+        assert.ok(
+          resolved.args[0].startsWith(
+            join(td, '.agents', 'mcp', 'owner-repo@feature-x'),
+          ),
+          `a ref must not collide with the default-branch clone: ${resolved.args[0]}`,
+        )
+        mcpModule.setSpawnSync(undefined)
+      }),
+    )
+
+    it('gh: source refuses a repo name that escapes the mcp directory', async () => {
+      await assert.rejects(
+        () => mcpModule.resolveMcpSource('gh:..'),
+        /unsafe|invalid|unknown/i,
+      )
     })
   })
 

@@ -1,13 +1,5 @@
-import {
-  readFile,
-  writeFile,
-  mkdir,
-  rm,
-  mkdtemp,
-  readdir,
-} from 'node:fs/promises'
+import { readFile, writeFile, mkdir, rm, readdir } from 'node:fs/promises'
 import { join, dirname, relative } from 'node:path'
-import { tmpdir } from 'node:os'
 import {
   execSync as defaultExecSync,
   spawnSync as defaultSpawnSync,
@@ -16,7 +8,9 @@ import agents from '../agents.js'
 import { addServerToMcpLock, removeServerFromMcpLock } from './mcp-lock.js'
 import { parseFrontmatter } from './converter.js'
 import { UserError } from './errors.js'
-import { expandTilde } from './paths.js'
+import { normalizeSlug } from './lockfile.js'
+import { assertSafeSlug } from './installer.js'
+import { expandTilde, home } from './paths.js'
 
 let _runExec = defaultExecSync
 let runSpawnSync = defaultSpawnSync
@@ -244,6 +238,22 @@ export function classifyMcpSource(source) {
   return { label: 'local path', type: 'local' }
 }
 
+export function getMcpServerDir() {
+  return home('.agents', 'mcp')
+}
+
+/**
+ * Where a `gh:` server is cloned to. Deterministic per source, so reinstalling
+ * the same source replaces its own clone instead of leaking a new directory.
+ */
+export function getMcpCloneDir(repo, ref = null) {
+  const baseDir = getMcpServerDir()
+  const slug = normalizeSlug(ref ? `${repo}@${ref}` : repo)
+  const dir = join(baseDir, slug)
+  assertSafeSlug(slug, baseDir, dir)
+  return dir
+}
+
 export async function resolveMcpSource(source) {
   if (source.startsWith('npm:')) {
     let pkg = source.slice(4)
@@ -270,9 +280,15 @@ export async function resolveMcpSource(source) {
       ref = repo.slice(atIdx + 1)
       repo = repo.slice(0, atIdx)
     }
-    const tmpDir = await mkdtemp(join(tmpdir(), 'rolecraft-mcp-'))
-    const cloneDir = join(tmpDir, 'repo')
+    const cloneDir = join(getMcpCloneDir(repo, ref), 'repo')
     try {
+      // git clone refuses a non-empty target, so a reinstall of the same
+      // source has to clear the previous clone first. Cloning into the
+      // rolecraft-owned directory rather than the OS temp dir is what makes
+      // the entry survive: the path goes into the agent config, and /tmp is
+      // swept on a schedule rolecraft does not control.
+      await rm(cloneDir, { recursive: true, force: true })
+      await mkdir(dirname(cloneDir), { recursive: true })
       const cloneArgs = [
         'clone',
         '--depth',
@@ -321,8 +337,6 @@ export async function resolveMcpSource(source) {
       }
       await readFilesRecursive(cloneDir, cloneDir)
 
-      // Keep tmpDir on disk — MCP server needs the files at runtime.
-      // The OS cleans /tmp periodically; on error the catch block removes it.
       return {
         command: 'node',
         args: [command],
@@ -332,7 +346,7 @@ export async function resolveMcpSource(source) {
         fileContents,
       }
     } catch (err) {
-      await rm(tmpDir, { recursive: true, force: true }).catch(() => {})
+      await rm(cloneDir, { recursive: true, force: true }).catch(() => {})
       throw err
     }
   }

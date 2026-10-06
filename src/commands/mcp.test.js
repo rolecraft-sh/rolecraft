@@ -205,6 +205,52 @@ describe('mcp command', () => {
         restore()
 
         assert.ok(logs.some((l) => l.includes('list-test')))
+        assert.ok(!logs.some((l) => l.includes('path gone')))
+      }),
+    )
+
+    it(
+      'reports a server whose command path is gone instead of listing it as fine',
+      withTempDir(async () => {
+        const { mkdirSync, writeFileSync } = await import('node:fs')
+        const addModule = await import('../utils/mcp.js')
+        await addModule.addMcpServer('agents', 'gh-gone', {
+          command: 'node',
+          args: [
+            join(process.env.HOME, '.agents', 'mcp', 'owner-repo', 'index.js'),
+          ],
+        })
+        mkdirSync(join(process.env.HOME, '.agents', 'mcp', 'owner-repo'), {
+          recursive: true,
+        })
+        writeFileSync(
+          join(process.env.HOME, '.agents', 'mcp', 'owner-repo', 'index.js'),
+          '// here',
+        )
+
+        const { logs, restore } = capture('log')
+        await mcpModule.mcpListCommand({ agents: ['agents'] })
+        restore()
+        assert.ok(!logs.some((l) => l.includes('path gone')))
+
+        // Now take the clone away, the way an OS temp sweep would.
+        const { rmSync } = await import('node:fs')
+        rmSync(join(process.env.HOME, '.agents', 'mcp', 'owner-repo'), {
+          recursive: true,
+          force: true,
+        })
+
+        const second = capture('log')
+        await mcpModule.mcpListCommand({ agents: ['agents'] })
+        second.restore()
+
+        const output = second.logs.join('\n')
+        assert.match(
+          output,
+          /path gone/,
+          `expected the break to be reported: ${output}`,
+        )
+        assert.match(output, /rolecraft mcp install/, 'expected a repair hint')
       }),
     )
   })

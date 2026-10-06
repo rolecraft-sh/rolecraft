@@ -162,6 +162,61 @@ describe('api mcp install/list/update/remove', () => {
     assert.match(result.unreadable[0].error.message, /not valid JSON/)
   })
 
+  // A gh: entry points at a path on disk. When the OS reclaimed that path the
+  // server stopped starting, but list still reported it as a normal server —
+  // the only visible symptom was an agent that had quietly lost it.
+  it('flags a server whose command path no longer exists', async () => {
+    await mkdir(join(tempDir, '.agents'), { recursive: true })
+    const gone = join(
+      tempDir,
+      '.agents',
+      'mcp',
+      'owner-repo',
+      'repo',
+      'index.js',
+    )
+    await writeFile(
+      join(tempDir, '.agents', 'mcp.json'),
+      JSON.stringify({
+        mcpServers: { 'gh-one': { command: 'node', args: [gone] } },
+      }),
+    )
+
+    const result = await apiMcpList({ agents: ['agents'] })
+
+    assert.equal(result.servers.length, 1)
+    assert.equal(result.servers[0].missing, true)
+    assert.match(result.servers[0].missingPath, /index\.js/)
+  })
+
+  it('flags a server only once the file is actually gone', async () => {
+    await mkdir(join(tempDir, '.agents', 'srv'), { recursive: true })
+    const script = join(tempDir, '.agents', 'srv', 'index.js')
+    await writeFile(script, '// present')
+    await writeFile(
+      join(tempDir, '.agents', 'mcp.json'),
+      JSON.stringify({
+        mcpServers: { 'gh-live': { command: 'node', args: [script] } },
+      }),
+    )
+
+    const result = await apiMcpList({ agents: ['agents'] })
+
+    assert.equal(result.servers[0].missing, undefined)
+  })
+
+  it('does not flag npm servers, whose args are not paths', async () => {
+    await apiMcpInstall('npm:@test/server', {
+      yes: true,
+      agents: ['agents'],
+      name: 'server',
+    })
+
+    const result = await apiMcpList({ agents: ['agents'] })
+
+    assert.equal(result.servers[0].missing, undefined)
+  })
+
   it('returns an empty list when no servers are configured', async () => {
     const result = await apiMcpList({ agents: ['agents'] })
     assert.deepEqual(result, { servers: [], total: 0, unreadable: [] })

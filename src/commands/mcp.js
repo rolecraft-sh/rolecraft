@@ -101,9 +101,23 @@ export async function mcpListCommand(options) {
     s.agent,
     s.name,
     `${s.command} ${(s.args || []).join(' ')}`,
+    s.missing ? `${ICONS.error} path gone` : ICONS.ok,
   ])
-  for (const line of renderTable(['AGENT', 'SERVER', 'COMMAND'], rows))
+  for (const line of renderTable(
+    ['AGENT', 'SERVER', 'COMMAND', 'STATUS'],
+    rows,
+  ))
     console.log(line)
+
+  const broken = result.servers.filter((s) => s.missing)
+  if (broken.length > 0) {
+    console.log(
+      `\n${ICONS.warn}  ${broken.length} server(s) point at a path that no longer exists.`,
+    )
+    for (const s of broken)
+      console.log(`   ${s.agent}/${s.name}: ${s.missingPath}`)
+    console.log('   Reinstall the source: rolecraft mcp install <source>')
+  }
 }
 
 export async function mcpUpdateCommand(source, options) {
