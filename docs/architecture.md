@@ -63,8 +63,8 @@ rolecraft/
 │   │   ├── list.js           ├── mcp.js          ├── profile.js
 │   │   ├── remove.js         ├── rollback.js     ├── search.js
 │   │   ├── setup.js          ├── test.js         ├── update.js
-│   │   ├── upgrade.js        ├── use.js          ├── verify.js
-│   │   └── watch.js
+│   │   ├── spec.js           ├── upgrade.js      ├── use.js
+│   │   ├── verify.js         └── watch.js
 │   └── utils/
 │       ├── agent-detection.js#   which agents are installed on this machine
 │       ├── converter.js     #   frontmatter parsing, SKILL.md <-> .mdc
@@ -100,8 +100,8 @@ Three layers, and where each one is allowed to reach.
 
 **1. `src/api/`** — business logic. Modules export async functions that take options and return plain objects. Intended to be side-effect free and importable via `import { ... } from 'rolecraft'`. Two caveats: `api/install.js` writes progress warnings with `console.error`, and four modules reach into `commands/` (`api/setup.js`, `api/doctor.js`, `api/completions.js`, `utils/profile.js`).
 
-**2. `src/commands/`** — CLI layer. Parses args, calls `api/`, formats output. Most files are thin; `setup.js` (284 lines) and `completions.js` (416 lines) hold real logic, and `completions.js` is the implementation behind the 14-line `api/completions.js` shim.
+**2. `src/commands/`** — CLI layer. Parses args, calls `api/`, formats output. Most files are thin; `setup.js` holds real logic, and `completions.js` is the implementation behind the 14-line `api/completions.js` shim. `spec.js` is the single description of the command surface — every command, its flags, their descriptions and its aliases — from which `bin/rolecraft.js` derives flag validation and help, and `completions.js` derives all three shell scripts (#410).
 
 **3. `src/utils/`** — shared helpers. No circular dependencies. Not strictly a bottom layer: `utils/profile.js` imports from `commands/setup.js`, which is how `detectAgents` ended up reachable from four places before it moved to `utils/agent-detection.js`.
 
-The command surface is 25 modules under `src/commands/` over 25 under `src/api/`, exposed as 22 top-level handlers in `bin/rolecraft.js` (`profile` and `mcp` each carry several subcommands). `bin` also holds 18 hand-written flag-validation lists. The command list is written out by hand in four more places, and they have drifted — the shell completion currently offers flags the CLI rejects. Tracked as [#410](https://github.com/rolecraft-sh/rolecraft/issues/410).
+The command surface is 26 modules under `src/commands/` over 25 under `src/api/`, exposed as 25 top-level handlers in `bin/rolecraft.js` (`profile` and `mcp` each carry several subcommands). Those handlers hold no flag lists: they read flags by exact name, and the one `validateFlags` call in `main()` checks them against `commands/spec.js`. A flag added there appears in `--help`, in validation and in all three completion scripts at once. Unknown commands and flags exit 2, so a typo is distinguishable from a failed operation.

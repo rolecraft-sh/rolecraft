@@ -42,27 +42,56 @@ Complete reference for all rolecraft commands, flags, and options.
 
 ## Common flags
 
-These flags work across multiple commands:
+`--verbose`, `--help` and `--version` are accepted by every command. Every
+other flag is accepted only by the commands listed here — this table is
+generated from `src/commands/spec.js`, which is also what `--help` and the
+shell completions are generated from, so the three cannot drift.
 
-| Flag | Affects | Description |
-|------|---------|-------------|
-| `--yes` / `-y` | install, setup, bundle, mcp, profile, publish | Non-interactive: accept all defaults, bypass security prompts |
-| `--dry-run` | install, setup, bundle, remove, update, profile, mcp, upgrade, watch, convert | Preview without making changes |
-| `--global` | install, use, setup | Install to `~/.agents/skills/` (user-wide) |
-| `--project` | install, use, setup | Install to `./.agents/skills/` (repo-scoped, default) |
-| `--all` | install, setup, profile, mcp | Install to every supported agent |
-| `--symlink` | install, setup | Symlink instead of copy |
-| `--copy` | install, setup | Force copy (default) |
-| `--frozen-lockfile` | install | Fail if skill is already installed |
-| `--no-mcp` | install, setup, bundle | Skip MCP server installation |
-| `--interactive` | search, mcp search | Open TUI for browsing and selecting results |
-| `--list` | install, use, setup | List available skills from a source without installing |
-| `--skill <names>` | install, use, setup | Install/preview specific skills by name (comma-separated) |
-| `--json` | list, doctor, test, compose, diff, agents | Output structured JSON |
+| Flag | Commands | Description |
+|------|----------|-------------|
+| `--agent` | list | Filter by installed agent |
+| `--agents` | init | Declare target agents |
+| `--all` | install | Install to all locations |
+| `--all` | mcp | Install to all supported agents |
+| `--all` | test | Test all installed skills |
+| `--brief` | diff | Show only a summary |
+| `--chain` | compose | Override mode (last skill wins) |
+| `--context` | diff | Lines of context around each change |
+| `--copy` | install | Install as copy (default) |
+| `--deep` | doctor | Run deep checks |
+| `--description` | init | Set the skill description |
+| `--dry-run` | install, bundle, remove, update, rollback, setup, watch, profile, mcp, upgrade, convert, compose | Preview without making changes |
+| `--force` | compose | Overwrite existing output file |
+| `--frozen-lockfile` | install | Fail if skill already installed |
+| `--global` | install | Install to ~/.agents/skills/ |
+| `--interactive` | search, mcp | Choose and install from results |
+| `--json` | list, doctor, agents, diff, compose, test | Output structured JSON |
+| `--list` | install, setup | List available skills without installing |
+| `--list` | use | List available skills without previewing |
+| `--list` | rollback | Show available rollback versions |
+| `--list` | init | List available templates |
+| `--min-score` | test | Fail if score is below threshold |
+| `--name` | mcp | Override server name |
+| `--name` | compose | Set output skill name |
+| `--network` | doctor | Run network checks |
 | `--no-color` | diff, compose, test | Disable colored output |
 | `--no-emoji` | test | Use ASCII fallback for emojis |
-| `--verbose` | every command | Show error details (HTTP status, code, cause) |
-| `--help`, `-h` | every command | Show help |
+| `--no-mcp` | install, bundle | Skip MCP server installation |
+| `--npm` | mcp | Search npm instead of GitHub |
+| `--only` | test | Run specific checks |
+| `--output` | convert | Write result to file |
+| `--output` | compose | Write to file instead of stdout |
+| `--project` | install | Install to ./.agents/skills/ |
+| `--skill` | install | Select skills by name |
+| `--skill` | use | Preview skills by name |
+| `--skill` | setup | Install skills by name |
+| `--skills-sh` | search | Search skills.sh instead of GitHub |
+| `--symlink` | install | Install as symlink instead of copy |
+| `--template` | init | Scaffold from a named template |
+| `--write` | agents-xml | Write skills XML to AGENTS.md |
+| `--yes` | install | Non-interactive: accept all defaults |
+| `--yes` | bundle, update, setup, search, profile, mcp | Skip confirmation |
+| `--<agent>` | install | One flag per agent, e.g. `--claude`. See [Agent-specific flags](#agent-specific-flags) |
 
 `ci` takes no flags at all — it installs immediately and rejects anything else.
 

@@ -76,15 +76,102 @@ describe('exit codes', () => {
     assert.match(result.stderr, /Unknown profile subcommand/)
   })
 
-  it('rejects an unknown top-level command', () => {
+  it('rejects an unknown top-level command with exit 2', () => {
     const result = run(['definitely-not-a-command'])
-    assert.notEqual(result.status, 0)
+    assert.equal(result.status, 2)
     assert.match(result.stderr, /Unknown command/)
+    assert.match(result.stderr, /Known commands:/)
   })
 
   it('exit 0 on --help', () => {
     assert.equal(run(['--help']).status, 0)
     assert.equal(run(['mcp']).status, 0, 'bare mcp is a help request')
+  })
+})
+
+describe('usage errors exit 2, failures exit 1 (#410)', () => {
+  it('an unknown flag exits 2', () => {
+    const result = run(['list', '--bogusflag'])
+    assert.equal(result.status, 2)
+    assert.match(result.stderr, /unknown flag "--bogusflag"/)
+  })
+
+  it('every command validates its flags, except passthrough commands', async () => {
+    const { COMMANDS } = await import('../../src/commands/spec.js')
+    for (const { name, passthrough } of COMMANDS) {
+      if (name === 'help' || name === 'version') continue
+      const result = run([name, '--definitely-not-a-flag'])
+      if (passthrough) continue
+      assert.match(
+        result.stderr,
+        /unknown flag "--definitely-not-a-flag"/,
+        `${name} must reject an unknown flag`,
+      )
+      assert.equal(result.status, 2, `${name} must exit 2 on a usage error`)
+    }
+  })
+
+  it('the spec and the root help agree on the command list', async () => {
+    const { COMMANDS } = await import('../../src/commands/spec.js')
+    const help = run(['--help']).stdout
+    for (const { name, desc } of COMMANDS) {
+      if (name === 'help') continue
+      assert.match(
+        help,
+        new RegExp(`rolecraft ${name}\\b`),
+        `help lists ${name}`,
+      )
+      assert.ok(desc.length > 0, `${name} has a description`)
+    }
+  })
+
+  it('every flag in the spec appears in its focused help', async () => {
+    const { COMMANDS } = await import('../../src/commands/spec.js')
+    for (const { name, flags } of COMMANDS) {
+      if (name === 'help' || name === 'version') continue
+      const help = run([name, '--help']).stdout
+      for (const f of flags) {
+        assert.match(
+          help,
+          new RegExp(`--${f.flag}\\b`),
+          `${name} --help lists --${f.flag}`,
+        )
+      }
+    }
+  })
+
+  it('every flag the shell completes is a flag the CLI accepts', async () => {
+    const { bashScript } = await import('../../src/commands/completions.js')
+    const { byName } = await import('../../src/commands/spec.js')
+    const { flagNames } = await import('../../src/commands/spec.js')
+    // `    install) COMPREPLY=($(compgen -W "--yes --global" -- "$cur")) ;;`
+    for (const [, name, words] of bashScript().matchAll(
+      /^\s{4}(\S+)\) COMPREPLY=\(\$\(compgen -W "([^"]*)"/gm,
+    )) {
+      for (const word of words.split(/\s+/).filter(Boolean)) {
+        if (word.startsWith('-')) {
+          assert.ok(
+            flagNames(byName.get(name)).includes(word),
+            `bash completes "${word}" for ${name}, which the CLI rejects`,
+          )
+        } else {
+          const spec = byName.get(name)
+          const known = [
+            ...(spec.subcommands || []).map((s) => s.name),
+            ...(spec.aliases || []),
+          ]
+          assert.ok(
+            known.includes(word),
+            `bash completes "${word}" for ${name}, which is not a subcommand`,
+          )
+        }
+      }
+    }
+  })
+
+  it('an alias dispatches to its canonical command', () => {
+    const result = run(['check-updates', '--help'])
+    assert.equal(result.status, 0)
   })
 })
 

@@ -68,26 +68,38 @@ describe('rolecraft CLI', () => {
     assert.ok(logs.some((l) => l.includes('rolecraft')))
   })
 
-  it('shows usage for unknown command', async () => {
+  it('rejects an unknown command with a usage exit code', async () => {
     const { main } = await import('./rolecraft.js')
-    const logs = captureLogs()
     const errors = captureErrors()
     process.argv = ['node', 'rolecraft', 'nonexistent-command']
     await main()
-    assert.ok(logs.some((l) => l.includes('rolecraft')))
     assert.ok(errors.some((e) => e.includes('Unknown command')))
-    assert.equal(process.exitCode, 1)
+    assert.ok(errors.some((e) => e.includes('Known commands')))
+    assert.equal(process.exitCode, 2)
     process.exitCode = 0
   })
 
-  it('sets exit code 1 for unknown flags', async () => {
+  it('sets exit code 2 for unknown flags', async () => {
     const { main } = await import('./rolecraft.js')
     const errors = captureErrors()
     process.argv = ['node', 'rolecraft', 'list', '--bogusflag']
     await main()
     assert.ok(errors.some((e) => e.includes('unknown flag')))
-    assert.equal(process.exitCode, 1)
+    assert.equal(process.exitCode, 2)
     process.exitCode = 0
+  })
+
+  it('accepts the global flags on every command', async () => {
+    const { main } = await import('./rolecraft.js')
+    for (const name of ['list', 'remove', 'agents']) {
+      const errors = captureErrors()
+      process.argv = ['node', 'rolecraft', name, '--verbose', '--help']
+      await main()
+      assert.ok(
+        !errors.some((e) => e.includes('--verbose')),
+        `${name} must accept --verbose`,
+      )
+    }
   })
 
   it('shows version for --version', async () => {
@@ -120,7 +132,10 @@ describe('rolecraft CLI', () => {
     process.argv = ['node', 'rolecraft', 'install', '--help']
     await main()
     const help = logs.join('\n')
-    assert.match(help, /Options for install:[\s\S]*--yes, -y/)
+    assert.match(help, /rolecraft install <source>/)
+    assert.match(help, /Options:[\s\S]*--yes, -y/)
+    // Focused help, not the full command list.
+    assert.ok(!help.includes('rolecraft compose'))
   })
 
   it('throws for install with no source', async () => {
@@ -192,7 +207,7 @@ describe('rolecraft CLI', () => {
   it('rejects an agent filter without a name', async () => {
     const { main } = await import('./rolecraft.js')
     process.argv = ['node', 'rolecraft', 'list', '--agent']
-    await assert.rejects(() => main(), /Missing agent name/)
+    await assert.rejects(() => main(), /Missing value for --agent/)
   })
 
   it('passes the short agent filter to the list command', async () => {

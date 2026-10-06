@@ -32,6 +32,7 @@ import { rollbackCommand } from '../src/commands/rollback.js'
 import agents from '../src/agents.js'
 import { showError, UserError } from '../src/utils/errors.js'
 import { theme } from '../src/utils/tui.js'
+import { COMMANDS, aliases, byName, flagNames } from '../src/commands/spec.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const pkg = JSON.parse(
@@ -58,26 +59,32 @@ function parsePositionals(args) {
   return args.filter((a) => !a.startsWith('-'))
 }
 
-/** Validate flags against allowed list, warn on unknown, exit non-zero if strict */
-function validateFlags(flags, allowed, command) {
+/**
+ * Validate flags against the spec. Exits 2 so a typo is distinguishable from a
+ * failed operation (1). Handlers read flags by exact match, so `--flag=value`
+ * is rejected with the supported spelling rather than silently ignored.
+ */
+function validateFlags(flags, commandName) {
+  const spec = byName.get(commandName)
+  const allowed = flagNames(spec)
   let bad = false
   for (const f of flags) {
     const eq = f.startsWith('--') ? f.indexOf('=') : -1
-    // Handlers read flags by exact match, so `--flag=value` used to validate
-    // cleanly and then be ignored. Say so instead of doing nothing silently.
     if (eq > 2 && allowed.includes(f.slice(0, eq))) {
       console.error(
-        `⚠️  ${command}: "${f}" is ignored — use "${f.slice(0, eq)} ${f.slice(eq + 1)}"`,
+        `✗  ${commandName}: "${f}" is not supported — use "${f.slice(0, eq)} ${f.slice(eq + 1)}"`,
       )
       bad = true
       continue
     }
-    if (allowed.includes(f) || allowed.some((a) => f.startsWith(`${a}=`)))
-      continue
-    console.error(`⚠️  ${command}: unknown flag "${f}" — ignoring`)
+    if (allowed.includes(f)) continue
+    console.error(`✗  ${commandName}: unknown flag "${f}"`)
+    console.error(
+      `   Run "rolecraft ${commandName} --help" to see the accepted flags.`,
+    )
     bad = true
   }
-  if (bad) process.exitCode = 1
+  if (bad) process.exitCode = 2
 }
 
 /**
@@ -137,11 +144,62 @@ function buildInstallScope(flags, agents) {
 
 // ── Command registry ──────────────────────────────────────────────
 
-function usage() {
-  const agentFlags = agents.map(
-    (a) => `  --${a.flag.padEnd(15)}   Also install to ${a.label}`,
+/** One `rolecraft <cmd> <args>` line per spec entry. */
+function commandLines() {
+  const width = Math.max(
+    ...COMMANDS.map((c) => `rolecraft ${c.name} ${c.args}`.trim().length),
   )
+  return COMMANDS.filter((c) => c.name !== 'help')
+    .map((c) => {
+      const label = theme.green(`rolecraft ${c.name} ${c.args}`.trim())
+      return `  ${label.padEnd(width + 10)}  ${c.desc}`
+    })
+    .join('\n')
+}
 
+/** `  --flag <arg>   description`, aligned. */
+function flagLines(flags) {
+  if (!flags.length) return '  (none)'
+  const labels = flags.map(
+    (f) =>
+      `--${f.flag}${f.short ? `, -${f.short}` : ''}${f.arg ? ` <${f.arg}>` : ''}`,
+  )
+  const width = Math.max(...labels.map((l) => l.length))
+  return labels
+    .map((label, i) => `  ${label.padEnd(width + 2)}  ${flags[i].desc}`)
+    .join('\n')
+}
+
+/** Focused help for one command; the root help is usage(). */
+function commandUsage(name) {
+  const spec = byName.get(name)
+  if (!spec) return usage()
+
+  const out = [
+    `
+${theme.green(`rolecraft ${spec.name} ${spec.args}`.trim())}  —  ${spec.desc}
+`,
+  ]
+  out.push(`Options:\n${flagLines(spec.flags)}`)
+  if (spec.subcommands?.length) {
+    const labels = spec.subcommands.map((s) => `${s.name}  ${s.desc}`)
+    out.push(`\nSubcommands:\n${labels.map((l) => `  ${l}`).join('\n')}`)
+  }
+  out.push(`
+${theme.yellow(`Global flags:`)}
+  --verbose       Show error details
+  --help, -h      Show this help
+  --version, -v   Show rolecraft version
+${
+  spec.agentFlags
+    ? `\nAlso accepts one flag per agent (--claude, --cursor, --codex, ...).\nRun "rolecraft agents" for all ${agents.length}.\n`
+    : ''
+}
+Run "rolecraft help" for the full command list.`)
+  console.log(out.join('\n'))
+}
+
+function usage() {
   console.log(`
 RoleCraft —  The Security-First Skill Manager for AI Agents
 ${theme.green(`v${pkg.version}`)}
@@ -150,104 +208,23 @@ Zero dependencies, no marketplace required.
 Works with ${agents.length} agents: ${agents.map((a) => a.name).join(', ')}, and all spec-compliant agents.
 
 ${theme.green(`Usage: `)}
-  ${theme.green(`rolecraft install `)}<source>            Install a skill (local path, owner/repo, npm:package)
-  ${theme.green(`rolecraft bundle `)}<source> [...]       Install skills from a file or inline sources
-  ${theme.green(`rolecraft bundle create `)}[<name>]      Create a new bundle file
-  ${theme.green(`rolecraft use `)}<source>                Preview a skill without installing
-  ${theme.green(`rolecraft list `)}                       List installed skills (--json, --agent <name>)
-  ${theme.green(`rolecraft remove `)}<slug>               Remove a skill
-  ${theme.green(`rolecraft update `)}<slug>               Re-install a skill (update to latest)
-  ${theme.green(`rolecraft rollback `)}<slug>             Restore a skill to previous version
-  ${theme.green(`rolecraft setup `)}[<source>]            Detect agents and optionally install a skill
-  ${theme.green(`rolecraft init `)}[<name>]               Scaffold a new SKILL.md (--template, --list)
-  ${theme.green(`rolecraft search `)}<query>              Search for skills on GitHub
-  ${theme.green(`rolecraft search `)}<query> --skills-sh  Search skills.sh (experimental)
-  ${theme.green(`rolecraft check `)}                      Check for available skill updates
-  ${theme.green(`rolecraft verify `)}                     Verify installed skill integrity
-  ${theme.green(`rolecraft ci `)}                         Install all skills from lockfile (no flags)
-  ${theme.green(`rolecraft completions `)}<shell>         Generate shell completions (bash|zsh|fish)
-  ${theme.green(`rolecraft doctor `)}                     Run system health check (--json, --network, --deep)
-  ${theme.green(`rolecraft watch `)}[<slug>]              Watch skills for changes and auto-sync
-  ${theme.green(`rolecraft profile `)}                    Manage agent configuration profiles
-  ${theme.green(`rolecraft mcp install `)}<source>        Install an MCP server (npm:, gh:, or local path)
-  ${theme.green(`rolecraft mcp list `)}                   List configured MCP servers
-  ${theme.green(`rolecraft mcp search `)}<query>          Search for MCP servers (--npm, --interactive)
-  ${theme.green(`rolecraft mcp check `)}                  Check for MCP server updates
-  ${theme.green(`rolecraft mcp update `)}<name>           Update an MCP server
-  ${theme.green(`rolecraft mcp remove `)}<name>           Remove an MCP server
-  ${theme.green(`rolecraft agents `)}                     Show agent capability manifest
-  ${theme.green(`rolecraft agents `)} --json              Output manifest as JSON
-  ${theme.green(`rolecraft agents-xml `)}                 Generate skills XML for AGENTS.md
-  ${theme.green(`rolecraft agents-xml `)} --write         Write skills XML to AGENTS.md
-  ${theme.green(`rolecraft upgrade `)}                    Upgrade rolecraft to the latest version
-  ${theme.green(`rolecraft convert `)}<source>            Convert a skill between SKILL.md and .mdc formats
-  ${theme.green(`rolecraft diff `)}<skill-a> <skill-b>    Compare two skills section-by-section
-  ${theme.green(`rolecraft compose `)}<a> <b> [...]       Compose multiple skills
-  ${theme.green(`rolecraft test `)}<skill-path>           Test a skill quality
-  ${theme.green(`rolecraft help `)}                       Show this help
+${commandLines()}
 
-Options:
-  --yes, -y      Non-interactive: accept all defaults (install, setup, mcp, profile)
-  --dry-run      Preview without making changes (install, setup, bundle, upgrade, profile, mcp, update, remove, watch)
-  --no-mcp       Skip MCP server installation from skills (install, bundle)
-  --version, -v  Show rolecraft version
+${theme.yellow(`Global flags (accepted by every command):`)}
+  --verbose       Show error details (HTTP status, code, cause)
+  --help, -h      Show help for any command
+  --version, -v   Show rolecraft version
 
-Options for diff:
-  --json         Output structured JSON
-  --brief        Show only summary of changes
-  --context <n>  Show N lines of context around each change
-  --no-color     Disable colored output
+${theme.yellow(`Environment:`)}
+  NO_COLOR        Disable colored output
+  FORCE_COLOR     Force colored output even when piped
 
-Options for compose:
-  --chain        Override mode (last skill wins), default: merge
-  --output, -o   Write to file instead of stdout
-  --name <name>  Set output skill name
-  --dry-run      Preview merge result without writing
-  --force        Overwrite existing output file
-  --json         Output structured JSON
-  --no-color     Disable colored output
+${theme.yellow(`Exit codes:`)}
+  0  success
+  1  the command failed (network error, skill not found, nothing installed)
+  2  usage error (unknown command, subcommand or flag)
 
-Options for test:
-  --all           Test all installed skills
-  --json          Output structured JSON
-  --verbose       Show detailed results
-  --no-color      Disable colored output
-  --no-emoji      Use ASCII fallback for emojis
-  --min-score <n> Fail if score is below threshold
-  --only <names>  Run specific checks (comma-separated)
-
-Options for use:
-  --list          List available skills from a source without previewing
-  --skill <names> Preview specific skills by name (comma-separated)
-
-Options for list:
-  --agent, -a <name> Filter skills by installed agent
-
-Options for search:
-  --interactive Interactive TUI picker
-  --skills-sh   Search skills.sh instead of GitHub
-
-Options for init:
-  --list            List available templates
-  --template <name> Scaffold from a named template (basic, code-review, git-workflow, testing, security, react)
-
-Options for setup:
-  --list          List available skills from a source without installing
-  --skill <names> Install specific skills by name (comma-separated)
-
-Options for install:
-  --yes, -y           Non-interactive: accept all defaults and skip prompts
-  --global            Install to ~/.agents/skills/
-  --project           Install to ./.agents/skills/ (default)
-${agentFlags.join('\n')}
-  --all               Install to all locations
-  --no-mcp            Skip MCP server installation from skill
-  --frozen-lockfile   Fail if skill already installed
-  --symlink           Install as symlink instead of copy
-  --copy              Install as copy (default)
-  --list              List available skills from a source without installing
-  --skill <names>     Install specific skills by name (comma-separated, e.g. "skill1,skill2")
-${theme.yellow(`Examples:
+${theme.yellow(`Examples:`)}
   rolecraft install ./my-skill
   rolecraft install sametcelikbicak/coverage-guard
   rolecraft install npm:lodash
@@ -258,29 +235,16 @@ ${theme.yellow(`Examples:
   rolecraft bundle owner/skill1 owner/skill2 --dry-run
   rolecraft bundle create my-collection
   rolecraft list
-  rolecraft remove task-decomposer`)}
-`)
-
-  console.log(`
-${theme.yellow(`Global flags (accepted by every command):`)}
-  --verbose       Show error details (HTTP status, code, cause)
-  --help, -h      Show this help
-
-${theme.yellow(`Environment:`)}
-  NO_COLOR        Disable colored output
-  FORCE_COLOR     Force colored output even when piped
-
-Exit codes: 0 success, 1 failure. A command that installs nothing, cannot
-reach the network, or gets an unknown flag exits non-zero.
+  rolecraft remove task-decomposer
 `)
 }
 
 // ── Command handlers (one per top-level command) ──────────────────
 
-const COMMANDS = {
+const HANDLERS = {
   install(args) {
     if (isHelp(args)) {
-      usage()
+      commandUsage('install')
       return
     }
     const pos = parsePositionals(args)
@@ -297,27 +261,6 @@ const COMMANDS = {
       })
     }
     const flags = parseFlags(args)
-    validateFlags(
-      flags,
-      [
-        '--yes',
-        '-y',
-        '--global',
-        '--project',
-        '--windsurf',
-        '--devin',
-        '--all',
-        '--no-mcp',
-        '--frozen-lockfile',
-        '--symlink',
-        '--copy',
-        '--list',
-        '--skill',
-        '--dry-run',
-        ...agents.map((a) => `--${a.flag}`),
-      ],
-      'install',
-    )
     const scope = buildInstallScope(flags, agents)
     const opts = {
       ...scope,
@@ -334,17 +277,18 @@ const COMMANDS = {
 
   async list(args) {
     if (isHelp(args)) {
-      usage()
+      commandUsage('list')
       return
     }
-    const flags = parseFlags(args)
-    validateFlags(flags, ['--json', '--agent', '-a'], 'list')
     const agentIndex = args.findIndex(
       (arg) => arg === '--agent' || arg === '-a',
     )
     const agent = agentIndex === -1 ? undefined : args[agentIndex + 1]
     if (agentIndex !== -1 && (!agent || agent.startsWith('-'))) {
-      throw new Error('Missing agent name for --agent.')
+      throw new UserError('Missing value for --agent.', {
+        suggestion: 'rolecraft list --agent claude',
+        code: 'USAGE',
+      })
     }
     return listCommand(process.cwd(), {
       json: args.includes('--json'),
@@ -354,32 +298,34 @@ const COMMANDS = {
 
   async remove(args) {
     if (isHelp(args)) {
-      usage()
+      commandUsage('remove')
       return
     }
-    const flags = parseFlags(args)
-    validateFlags(flags, ['--dry-run'], 'remove')
     const pos = parsePositionals(args)
     const slug = pos[0]
     if (!slug) {
       console.error('Usage: rolecraft remove <slug>')
-      throw new Error('Missing slug argument.')
+      throw new UserError('Missing slug argument.', {
+        suggestion: 'Run "rolecraft list" to see installed skills.',
+        code: 'USAGE',
+      })
     }
     return removeCommand(slug, { dryRun: args.includes('--dry-run') })
   },
 
   async update(args) {
     if (isHelp(args)) {
-      usage()
+      commandUsage('update')
       return
     }
-    const flags = parseFlags(args)
-    validateFlags(flags, ['--dry-run', '--yes', '-y'], 'update')
     const pos = parsePositionals(args)
     const slug = pos[0]
     if (!slug) {
       console.error('Usage: rolecraft update <slug>')
-      throw new Error('Missing slug argument.')
+      throw new UserError('Missing slug argument.', {
+        suggestion: 'Run "rolecraft list" to see installed skills.',
+        code: 'USAGE',
+      })
     }
     return updateCommand(slug, {
       dryRun: args.includes('--dry-run'),
@@ -389,11 +335,9 @@ const COMMANDS = {
 
   async use(args) {
     if (isHelp(args)) {
-      usage()
+      commandUsage('use')
       return
     }
-    const flags = parseFlags(args)
-    validateFlags(flags, ['--list', '--skill'], 'use')
     const pos = parsePositionals(args)
     const source = pos[0]
     if (!source) {
@@ -401,7 +345,10 @@ const COMMANDS = {
       console.error(
         'Source can be a local path (./, /, ~), GitHub ref (owner/repo), or npm package (npm:package)',
       )
-      throw new Error('Missing source argument.')
+      throw new UserError('Missing source argument.', {
+        suggestion: 'rolecraft <cmd> ./my-skill, owner/repo, or npm:package',
+        code: 'USAGE',
+      })
     }
     return useCommand(source, {
       list: args.includes('--list'),
@@ -411,18 +358,12 @@ const COMMANDS = {
 
   async init(args) {
     if (isHelp(args)) {
-      usage()
+      commandUsage('init')
       return
     }
-    const flags = parseFlags(args)
-    validateFlags(
-      flags,
-      ['--list', '--template', '--description', '--agents'],
-      'init',
-    )
     const pos = parsePositionals(args)
     return initCommand(pos[0], {
-      list: flags.includes('--list'),
+      list: args.includes('--list'),
       template: parseFlagValue(args, '--template'),
       description: parseFlagValue(args, '--description'),
       agents: parseFlagValue(args, '--agents'),
@@ -431,20 +372,17 @@ const COMMANDS = {
 
   async search(args) {
     if (isHelp(args)) {
-      usage()
+      commandUsage('search')
       return
     }
-    const flags = parseFlags(args)
-    validateFlags(
-      flags,
-      ['--interactive', '--skills-sh', '--yes', '-y'],
-      'search',
-    )
     const pos = parsePositionals(args)
     const query = pos[0]
     if (!query) {
       console.error('Usage: rolecraft search <query> [--interactive]')
-      throw new Error('Missing query argument.')
+      throw new UserError('Missing query argument.', {
+        suggestion: 'rolecraft search <query>',
+        code: 'USAGE',
+      })
     }
     return searchCommand(query, {
       interactive: args.includes('--interactive'),
@@ -455,7 +393,7 @@ const COMMANDS = {
 
   async completions(args) {
     if (isHelp(args)) {
-      usage()
+      commandUsage('completions')
       return
     }
     const pos = parsePositionals(args)
@@ -464,7 +402,7 @@ const COMMANDS = {
 
   async verify(args) {
     if (isHelp(args)) {
-      usage()
+      commandUsage('verify')
       return
     }
     return verifyCommand(true)
@@ -472,7 +410,7 @@ const COMMANDS = {
 
   async check(args) {
     if (isHelp(args)) {
-      usage()
+      commandUsage('check')
       return
     }
     return checkCommand()
@@ -480,26 +418,19 @@ const COMMANDS = {
 
   async ci(args) {
     if (isHelp(args)) {
-      usage()
+      commandUsage('ci')
       return
     }
     // ci has no options. Reject unknown flags rather than installing anyway —
     // `ci --dry-run` used to write to disk while claiming to preview.
-    validateFlags(parseFlags(args), [], 'ci')
     return ciCommand()
   },
 
   async setup(args) {
     if (isHelp(args)) {
-      usage()
+      commandUsage('setup')
       return
     }
-    const flags = parseFlags(args)
-    validateFlags(
-      flags,
-      ['--dry-run', '--yes', '-y', '--list', '--skill'],
-      'setup',
-    )
     const pos = parsePositionals(args)
     const source = pos[0]
     return setupCommand(source, {
@@ -512,21 +443,17 @@ const COMMANDS = {
 
   async upgrade(args) {
     if (isHelp(args)) {
-      usage()
+      commandUsage('upgrade')
       return
     }
-    const flags = parseFlags(args)
-    validateFlags(flags, ['--dry-run'], 'upgrade')
     return upgradeCommand({ dryRun: args.includes('--dry-run') })
   },
 
   async doctor(args) {
     if (isHelp(args)) {
-      usage()
+      commandUsage('doctor')
       return
     }
-    const flags = parseFlags(args)
-    validateFlags(flags, ['--json', '--network', '--deep'], 'doctor')
     return doctorCommand({
       json: args.includes('--json'),
       network: args.includes('--network'),
@@ -536,11 +463,9 @@ const COMMANDS = {
 
   async watch(args) {
     if (isHelp(args)) {
-      usage()
+      commandUsage('watch')
       return
     }
-    const flags = parseFlags(args)
-    validateFlags(flags, ['--dry-run'], 'watch')
     const pos = parsePositionals(args)
     const slug = pos[0]
     const { watchers, close } = await watchCommand(slug, process.cwd(), {
@@ -557,36 +482,33 @@ const COMMANDS = {
 
   async agents(args) {
     if (isHelp(args)) {
-      usage()
+      commandUsage('agents')
       return
     }
-    const flags = parseFlags(args)
-    validateFlags(flags, ['--json'], 'agents')
     return agentsCommand({ json: args.includes('--json') })
   },
 
   async 'agents-xml'(args) {
     if (isHelp(args)) {
-      usage()
+      commandUsage('agents-xml')
       return
     }
-    const flags = parseFlags(args)
-    validateFlags(flags, ['--write'], 'agents-xml')
     return agentsXmlCommand(args.includes('--write'))
   },
 
   async convert(args) {
     if (isHelp(args)) {
-      usage()
+      commandUsage('convert')
       return
     }
-    const flags = parseFlags(args)
-    validateFlags(flags, ['--dry-run', '--output'], 'convert')
     const pos = parsePositionals(args)
     const source = pos[0]
     if (!source) {
       console.error('Usage: rolecraft convert <source>')
-      throw new Error('Missing source argument.')
+      throw new UserError('Missing source argument.', {
+        suggestion: 'rolecraft <cmd> ./my-skill, owner/repo, or npm:package',
+        code: 'USAGE',
+      })
     }
     return convertCommand(source, {
       dryRun: args.includes('--dry-run'),
@@ -596,15 +518,9 @@ const COMMANDS = {
 
   async diff(args) {
     if (isHelp(args)) {
-      usage()
+      commandUsage('diff')
       return
     }
-    const flags = parseFlags(args)
-    validateFlags(
-      flags,
-      ['--json', '--brief', '--no-color', '--context'],
-      'diff',
-    )
     const pos = parsePositionals(args)
     return diffCommand(pos[0], pos[1], {
       json: args.includes('--json'),
@@ -616,24 +532,9 @@ const COMMANDS = {
 
   async compose(args) {
     if (isHelp(args)) {
-      usage()
+      commandUsage('compose')
       return
     }
-    const flags = parseFlags(args)
-    validateFlags(
-      flags,
-      [
-        '--chain',
-        '--dry-run',
-        '--force',
-        '--json',
-        '--no-color',
-        '--name',
-        '--output',
-        '-o',
-      ],
-      'compose',
-    )
     const pos = parsePositionals(args)
     return composeCommand(pos, {
       mode: args.includes('--chain') ? 'chain' : 'merge',
@@ -648,25 +549,9 @@ const COMMANDS = {
 
   async testCommand(args) {
     if (isHelp(args)) {
-      usage()
+      commandUsage('test')
       return
     }
-    const flags = parseFlags(args)
-    validateFlags(
-      flags,
-      [
-        '--json',
-        '--verbose',
-        '-v',
-        '--no-color',
-        '--no-emoji',
-        '--all',
-        '--min-score',
-        '--only',
-        '--skill',
-      ],
-      'test',
-    )
     const pos = parsePositionals(args)
     const skillPath = pos[0]
     const minScore = parseFlagValue(args, '--min-score')
@@ -683,30 +568,32 @@ const COMMANDS = {
 
   async bundle(args) {
     if (isHelp(args)) {
-      usage()
+      commandUsage('bundle')
       return
     }
-    const flags = parseFlags(args)
-    validateFlags(flags, ['--dry-run', '--no-mcp', '--yes', '-y'], 'bundle')
     if (args.length === 0) {
       console.error('Usage: rolecraft bundle <source> [...]')
       console.error('       rolecraft bundle <file>')
       console.error('       rolecraft bundle create [<name>]')
-      throw new Error('Missing arguments.')
+      throw new UserError('Missing arguments.', {
+        suggestion:
+          'rolecraft bundle <file> or rolecraft bundle create [<name>]',
+        code: 'USAGE',
+      })
     }
     if (args[0] === 'create') {
       const createArgs = args.slice(1)
       if (isHelp(createArgs)) {
-        usage()
+        commandUsage('bundle')
         return
       }
       return bundleCreateCommand(parsePositionals(createArgs)[0])
     }
     const sources = parsePositionals(args)
     const opts = {
-      dryRun: flags.includes('--dry-run'),
-      noMcp: flags.includes('--no-mcp'),
-      yes: flags.includes('--yes') || flags.includes('-y'),
+      dryRun: args.includes('--dry-run'),
+      noMcp: args.includes('--no-mcp'),
+      yes: args.includes('--yes') || args.includes('-y'),
     }
     if (sources.length === 1) {
       return bundleCommand(sources[0], opts)
@@ -716,7 +603,7 @@ const COMMANDS = {
 
   async profile(args) {
     if (isHelp(args)) {
-      usage()
+      commandUsage('profile')
       return
     }
     // profile command has its own subcommands, skip flag validation
@@ -725,7 +612,7 @@ const COMMANDS = {
 
   async mcp(args) {
     if (isHelp(args)) {
-      usage()
+      commandUsage('mcp')
       return
     }
     // mcp command has subcommands (install, list, search, check, update, remove)
@@ -744,9 +631,9 @@ const COMMANDS = {
 }
 
 // Alias: test → testCommand (avoid name collision with node:test)
-COMMANDS.test = COMMANDS.testCommand
+HANDLERS.test = HANDLERS.testCommand
 // Alias: check-updates → check
-COMMANDS['check-updates'] = COMMANDS.check
+HANDLERS['check-updates'] = HANDLERS.check
 
 // Only non-command names that show usage
 const ALWAYS_SHOW_USAGE = new Set(['help', '--help', '-h', undefined, null])
@@ -755,7 +642,7 @@ export async function main() {
   const [, , cmd, ...commandArgs] = process.argv
 
   if (cmd === '--version' || cmd === '-v') {
-    COMMANDS.version()
+    HANDLERS.version()
     return
   }
 
@@ -764,23 +651,35 @@ export async function main() {
     return
   }
 
-  const handler = COMMANDS[cmd]
+  const handler = HANDLERS[cmd]
   if (handler) {
+    // Unknown flags are a usage error, so they exit 2 — distinguishable from
+    // a failed operation. Skip for commands that parse their own options.
+    const spec = byName.get(aliases.get(cmd) || cmd)
+    if (spec && !spec.passthrough) validateFlags(parseFlags(commandArgs), cmd)
     await handler(commandArgs)
     return
   }
-  console.error(`❌ Unknown command: "${cmd}"`)
-  console.error('Run "rolecraft help" for available commands.')
-  process.exitCode = 1
-  usage()
+
+  console.error(`✗  Unknown command: "${cmd}"`)
+  const known = COMMANDS.filter((c) => HANDLERS[c.name]).map((c) => c.name)
+  console.error(`   Known commands: ${known.join(', ')}`)
+  console.error('   Run "rolecraft help" for details.')
+  process.exitCode = 2
 }
+
+/** A usage error: bad command, bad flag, missing required argument. */
+const USAGE_CODES = new Set(['USAGE', 'MISSING_SOURCE'])
 
 export async function run() {
   try {
     await main()
   } catch (err) {
     showError(err)
-    process.exit(1)
+    // Keep an already-reported usage error (exitCode 2) rather than
+    // downgrading it to 1 when a later step throws.
+    const usage = USAGE_CODES.has(err.userCode) || process.exitCode === 2
+    process.exit(usage ? 2 : 1)
   }
 }
 
