@@ -7,7 +7,7 @@
 | | rolecraft | skills (Vercel) | @agentskill.sh/cli |
 |---|---|---|---|
 | **Runtime** | Zero-dep Node ESM | 1 dep (Node) | 2 deps (TypeScript) |
-| **Agent targets** | **87** | 72 | 15+ |
+| **Agent targets** | **90** | 72 | 15+ |
 | **Skill marketplace** | skills.sh (90K+) | agentskill.sh (100K+) | — |
 | **Publish your own** | ❌ | ❌ | ❌ |
 | **MCP management** | ✅ | ❌ | ❌ |

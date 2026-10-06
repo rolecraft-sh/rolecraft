@@ -55,7 +55,7 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | forge | `./.forge/skills/` | verified | - |
 | inference-sh | `~/.inferencesh/skills/` | experimental | - |
 | jazz | `~/.jazz/skills/` | verified | - |
-| iflow | `~/.iflow/skills/` | experimental | - |
+| iflow | `~/.iflow/skills/` | legacy | - |
 | kilo-code | `~/.kilocode/skills/` | experimental | - |
 | kode | `~/.kode/skills/` | experimental | - |
 | lingma | `~/.lingma/skills/` | verified | - |
@@ -70,21 +70,24 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | zap | `~/.zap/skills/` | experimental | - |
 | codeep | `~/.codeep/skills/` | experimental | - |
 | kimi-code | `~/.kimi-code/skills/` | experimental | - |
-| zcode | `~/.zcode/skills/` | experimental | - |
+| zcode | `~/.zcode/skills/` | verified | - |
 | astrbot | `~/.astrbot/data/skills/` | experimental | - |
 | qoder-cn | `~/.qoder-cn/skills/` | community | - |
 | trae-cn | `~/.trae-cn/skills/` | experimental | - |
 | zenflow | `~/.zenflow/skills/` | experimental | - |
 | neovate | `~/.neovate/skills/` | experimental | - |
-| pochi | `~/.pochi/skills/` | experimental | - |
+| pochi | `~/.pochi/skills/` | verified | - |
 | adal | `~/.adal/skills/` | experimental | - |
 | droid | `~/.droid/skills/` | experimental | - |
 | chatgpt | `~/.agents/skills/` | verified | - |
 | codearts-agent | `~/.codeartsdoer/skills/` | experimental | - |
 | universal | `~/.config/agents/skills/` | experimental | - |
 | amp | `~/.config/agents/skills/` | verified | - |
-| antigravity | `~/.agents/skills/` | experimental | - |
-| antigravity-cli | `~/.agents/skills/` | experimental | - |
+| antigravity | `~/.gemini/config/skills/` | verified | - |
+| antigravity-cli | `~/.gemini/antigravity-cli/skills/` | verified | - |
+| grok | `~/.grok/skills/` | verified | - |
+| muse-code | `~/.config/muse/skills/` | verified | mcpServers |
+| posit-assistant | `~/.posit/assistant/skills/` | verified | - |
 | deep-agents | `~/.agents/skills/` | experimental | - |
 | dexto | `~/.agents/skills/` | experimental | - |
 | loaf | `~/.agents/skills/` | experimental | - |
@@ -94,9 +97,9 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 
 > **Support levels:** `verified` — actively tested and maintained; `community` — community-contributed, maintained on best-effort; `legacy` — previous generation, no active development; `experimental` — known to exist, not formally tested.
 
-> **MCP support:** 8 agent(s) support MCP server configuration. Format: `mcpServers`, `servers`, `experimental.mcpServers`
+> **MCP support:** 9 agent(s) support MCP server configuration. Format: `mcpServers`, `servers`, `experimental.mcpServers`
 
-> **Agent count:** 87 total — 27 verified, 4 community, 4 legacy, 52 experimental.
+> **Agent count:** 90 total — 34 verified, 4 community, 5 legacy, 47 experimental.
 
 ## Notes
 
@@ -123,9 +126,17 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 - **oh-my-pi:** pi fork by can1357; native skills at ~/.omp/agent/skills (user) and .omp/skills (project); also reads ~/.claude/skills, ~/.agents/skills and .github/skills; MCP via standard mcpServers format
 - **forge:** ForgeCode by tailcallhq; also reads ~/forge/skills and ~/.agents/skills; project dir has highest precedence
 - **jazz:** jazz-ai (lvndry/jazz, not an AWS product); also reads project ./skills
+- **iflow:** iFlow CLI was shut down on 2026-04-17; the vendor directs users to migrate to Qoder
 - **lingma:** Also reads project .lingma/skills; renamed to Qoder CN on 2026-05-20
+- **zcode:** ZCode, the GLM coding client. Reads ~/.zcode/skills/<name>/SKILL.md and ~/.agents/mcp.json
+- **pochi:** Pochi (TabbyML). Also reads ~/.agents/skills; project .pochi/skills
 - **chatgpt:** ChatGPT/Codex share the .agents skills locations; symlinked skill folders honored
 - **amp:** amp skill add --global installs to ~/.config/agents/skills; also reads ~/.agents/skills
+- **antigravity:** Antigravity 2.0 and the IDE read ~/.gemini/config/skills; the IDE also accepts legacy ~/.gemini/antigravity/skills. All surfaces share <workspace>/.agents/skills
+- **antigravity-cli:** Antigravity CLI (agy) has its own global dir, separate from the 2.0/IDE surface; plugin skills at ~/.gemini/antigravity-cli/plugins/<name>/skills. Shares <workspace>/.agents/skills
+- **grok:** Project skills at ./.grok/skills. Reads ~/.agents/skills via AGENTS.md compatibility. MCP lives in ~/.grok/config.toml as [mcp_servers.<name>] (TOML), which rolecraft does not yet write
+- **muse-code:** Muse Code by Meta. Scans ~/.config/muse/skills, ~/.agents/skills, ~/.claude/skills, ~/.codex/skills and project .agents/.codex/.claude/skills. MCP at ~/.config/muse/settings.json under mcpServers
+- **posit-assistant:** Posit Assistant (Positron, RStudio). Also reads ~/.agents/skills; project .posit/assistant/skills. Legacy ~/.positai/
 - **replit:** Project-committed .agents/skills only; no user-global skills dir
 - **zed:** Flat layout only: skills must be direct children of ~/.agents/skills
 

@@ -4,7 +4,7 @@ layout: home
 hero:
   name: "RoleCraft"
   text: "The Security-First Skill Manager for AI Agents"
-  tagline: Security scoring before install · Skills & MCP Servers across 87 Agents (27 Verified)
+  tagline: Security scoring before install · Skills & MCP Servers across 90 Agents (34 Verified)
   image:
     src: /rolecraft-demo.gif
     alt: RoleCraft Demo
@@ -35,4 +35,4 @@ features:
   - title: Init Templates
     details: "rolecraft init --template scaffolds production-ready skills from pre-built templates. Start fast, ship faster."
   - title: Parallel Install
-    details: Install skills and MCP servers across all 87 agents (27 verified) simultaneously. Blazing fast, built for scale.
+    details: Install skills and MCP servers across all 90 agents (34 verified) simultaneously. Blazing fast, built for scale.

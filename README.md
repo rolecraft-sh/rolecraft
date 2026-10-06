@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>The Security-First Skill Manager for AI Agents</b><br>
-   Static security scoring before any skill is installed · Skills & MCP Servers across 87 Agents (27 Verified)<br>
+   Static security scoring before any skill is installed · Skills & MCP Servers across 90 Agents (34 Verified)<br>
   Zero-dependency CLI · No signup · No marketplace required
 </p>
 
@@ -51,7 +51,7 @@
 
 
 <p align="center">
-  <b>⚡ Zero dependencies</b> · <b>🤖 27 verified agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 Security scoring</b> · <b>📝 Skill testing</b> · <b>🔧 Init templates</b> · <b>🌐 No marketplace required</b>
+  <b>⚡ Zero dependencies</b> · <b>🤖 34 verified agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 Security scoring</b> · <b>📝 Skill testing</b> · <b>🔧 Init templates</b> · <b>🌐 No marketplace required</b>
 </p>
 
 ---
@@ -87,7 +87,7 @@ rolecraft setup user/repo
 
 - **Zero dependencies** — only Node.js built-ins, nothing to audit
 - **Any source** — local folder, GitHub/GitLab/SSH URL, npm package
-- **87 agents** — opencode, claude-code, cursor, copilot, aider, oh-my-pi, and more
+- **90 agents** — opencode, claude-code, cursor, copilot, aider, oh-my-pi, and more
 - **No registry required** — works fully without a marketplace
 - **Security scoring** — static analysis before every install: prompt injection, command injection, obfuscated code, credential harvesting. Scores 0–100. It is a regex linter, not a policy engine — [what it does not catch](docs/security.md#what-this-does-not-catch)
 - **CI-ready** — lockfile-based re-install (`rolecraft ci`), `--yes` flag, `--dry-run`

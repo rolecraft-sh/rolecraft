@@ -1,6 +1,7 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
+import { homedir } from 'node:os'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
@@ -12,6 +13,7 @@ import {
   SUPPORT_LEVELS,
 } from './manifest.js'
 import { generateAgentsDocs } from '../../scripts/generate-agents-docs.js'
+import AGENTS_DATA from '../agents.js'
 import {
   getTokenValues,
   parseMatrix,
@@ -157,6 +159,53 @@ describe('agent manifest', () => {
     )
   })
 
+  // A verified entry is a claim that we read the vendor's page. The path is
+  // the load-bearing half of that claim, so pin the ones that were corrected
+  // against their docs rather than letting a later edit drift back silently.
+  it('records the documented path for agents whose paths were corrected', () => {
+    const expected = {
+      antigravity: {
+        dir: join(homedir(), '.gemini', 'config', 'skills'),
+        docUrl: 'https://antigravity.google/docs/skills',
+      },
+      'antigravity-cli': {
+        dir: join(homedir(), '.gemini', 'antigravity-cli', 'skills'),
+        docUrl: 'https://antigravity.google/docs/skills',
+      },
+      grok: {
+        dir: join(homedir(), '.grok', 'skills'),
+        docUrl: 'https://docs.x.ai/build/features/skills-plugins-marketplaces',
+      },
+      muse: {
+        dir: join(homedir(), '.config', 'muse', 'skills'),
+        docUrl:
+          'https://meta-models.github.io/muse-code-sdk/next/guides/extend/skills/',
+      },
+      posit: {
+        dir: join(homedir(), '.posit', 'assistant', 'skills'),
+        docUrl: 'http://assistant.posit.co/docs/features/skills',
+      },
+      zcode: {
+        dir: join(homedir(), '.zcode', 'skills'),
+        docUrl: 'https://zcode.z.ai/en/docs/skill',
+      },
+      pochi: {
+        dir: join(homedir(), '.pochi', 'skills'),
+        docUrl: 'https://docs.getpochi.com/skills',
+      },
+    }
+
+    for (const [flag, { dir, docUrl }] of Object.entries(expected)) {
+      const agent = getAgentManifestByFlag(flag)
+      assert.ok(agent, `${flag} must exist in the manifest`)
+      assert.equal(agent.supportLevel, SUPPORT_LEVELS.VERIFIED, flag)
+      assert.equal(agent.docUrl, docUrl, `${flag} must cite its vendor docs`)
+      assert.ok(agent.lastVerified, `${flag} needs a verification date`)
+      const entry = AGENTS_DATA.find((a) => a.flag === flag)
+      assert.equal(entry.getDir(), dir, `${flag} path`)
+    }
+  })
+
   it('validateManifest requires MCP-enabled agents to declare a format', () => {
     const result = validateManifest([
       {
@@ -284,6 +333,10 @@ describe('agent manifest', () => {
       const content = readFileSync(join(__dirname, '..', '..', file), 'utf-8')
       for (const [index, line] of content.split('\n').entries()) {
         if (!pattern.test(line)) continue
+        // The count alone is not a claim about agents — the security score
+        // table has a "90+" row that happens to share the digits. Every real
+        // count claim names agents on the same line.
+        if (!/agents?\b/i.test(line)) continue
         assert.ok(
           tracked.has(`${file}:${index + 1}`),
           `untracked agent count in ${file}:${index + 1}`,

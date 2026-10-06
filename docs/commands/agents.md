@@ -44,7 +44,7 @@ $ rolecraft agents
 
 🔍 Agent Capability Manifest
 
-Total agents: 87
+Total agents: 90
 
 ## VERIFIED
 
@@ -68,7 +68,7 @@ These agents have built-in MCP configuration support:
 ## Validation
 
 Manifest valid: ✅ Yes
-Agent count: 87
+Agent count: 90
 ```
 
 ```bash
@@ -76,7 +76,7 @@ $ rolecraft agents --json
 
 {
   "version": 1,
-  "agentCount": 87,
+  "agentCount": 90,
   "agents": [
     {
       "flag": "claude",

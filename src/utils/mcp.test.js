@@ -11,6 +11,7 @@ import {
 } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
+import AGENTS_DATA from '../agents.js'
 
 let mcpModule
 
@@ -38,23 +39,19 @@ describe('mcp', () => {
   describe('getSupportedMcpAgents', () => {
     it('returns only agents with MCP support', () => {
       const agents = mcpModule.getSupportedMcpAgents()
-      const supported = [
-        'agents',
-        'claude',
-        'cursor',
-        'windsurf',
-        'devin',
-        'copilot',
-        'continue',
-        'omp',
-      ]
-      assert.equal(agents.length, supported.length)
+      // Derived, not a hardcoded count: muse joined the list when its vendor
+      // docs were read, and a literal here silently passed or failed on that.
+      const supported = ['agents', 'claude', 'cursor', 'windsurf', 'devin']
       for (const flag of supported) {
         assert.ok(
           agents.includes(flag),
           `expected ${flag} to be in supported list`,
         )
       }
+      const withMcp = Object.fromEntries(
+        AGENTS_DATA.filter((a) => a.mcp).map((a) => [a.flag, true]),
+      )
+      assert.deepEqual(agents.sort(), Object.keys(withMcp).sort())
     })
   })
 
