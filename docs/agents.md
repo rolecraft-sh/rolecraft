@@ -128,13 +128,13 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 - **jazz:** jazz-ai (lvndry/jazz, not an AWS product); also reads project ./skills
 - **iflow:** iFlow CLI was shut down on 2026-04-17; the vendor directs users to migrate to Qoder
 - **lingma:** Also reads project .lingma/skills; renamed to Qoder CN on 2026-05-20
-- **zcode:** ZCode, the GLM coding client. Reads ~/.zcode/skills/<name>/SKILL.md and ~/.agents/mcp.json
+- **zcode:** ZCode, the GLM coding client. Reads ~/.zcode/skills/&lt;name&gt;/SKILL.md and ~/.agents/mcp.json
 - **pochi:** Pochi (TabbyML). Also reads ~/.agents/skills; project .pochi/skills
 - **chatgpt:** ChatGPT/Codex share the .agents skills locations; symlinked skill folders honored
 - **amp:** amp skill add --global installs to ~/.config/agents/skills; also reads ~/.agents/skills
-- **antigravity:** Antigravity 2.0 and the IDE read ~/.gemini/config/skills; the IDE also accepts legacy ~/.gemini/antigravity/skills. All surfaces share <workspace>/.agents/skills
-- **antigravity-cli:** Antigravity CLI (agy) has its own global dir, separate from the 2.0/IDE surface; plugin skills at ~/.gemini/antigravity-cli/plugins/<name>/skills. Shares <workspace>/.agents/skills
-- **grok:** Project skills at ./.grok/skills. Reads ~/.agents/skills via AGENTS.md compatibility. MCP lives in ~/.grok/config.toml as [mcp_servers.<name>] (TOML), which rolecraft does not yet write
+- **antigravity:** Antigravity 2.0 and the IDE read ~/.gemini/config/skills; the IDE also accepts legacy ~/.gemini/antigravity/skills. All surfaces share &lt;workspace&gt;/.agents/skills
+- **antigravity-cli:** Antigravity CLI (agy) has its own global dir, separate from the 2.0/IDE surface; plugin skills at ~/.gemini/antigravity-cli/plugins/&lt;name&gt;/skills. Shares &lt;workspace&gt;/.agents/skills
+- **grok:** Project skills at ./.grok/skills. Reads ~/.agents/skills via AGENTS.md compatibility. MCP lives in ~/.grok/config.toml as [mcp_servers.&lt;name&gt;] (TOML), which rolecraft does not yet write
 - **muse-code:** Muse Code by Meta. Scans ~/.config/muse/skills, ~/.agents/skills, ~/.claude/skills, ~/.codex/skills and project .agents/.codex/.claude/skills. MCP at ~/.config/muse/settings.json under mcpServers
 - **posit-assistant:** Posit Assistant (Positron, RStudio). Also reads ~/.agents/skills; project .posit/assistant/skills. Legacy ~/.positai/
 - **replit:** Project-committed .agents/skills only; no user-global skills dir

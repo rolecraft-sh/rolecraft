@@ -245,6 +245,21 @@ describe('agent manifest', () => {
     assert.equal(current, generated)
   })
 
+  // Agent notes contain literal paths like `~/.zcode/skills/<name>/SKILL.md`.
+  // VitePress reads a bare `<...>` in a .md file as a Vue tag, and an unclosed
+  // one aborts the docs build with no link back to the note that caused it.
+  it('escapes angle brackets in agent notes so the docs build', () => {
+    const generated = generateAgentsDocs()
+    const notesSection = generated.slice(generated.indexOf('## Notes'))
+    for (const line of notesSection.split('\n')) {
+      assert.ok(
+        !line.includes('<'),
+        `unescaped tag in generated notes: ${line}`,
+      )
+    }
+    assert.match(notesSection, /&lt;name&gt;/, 'expected an escaped path')
+  })
+
   it('matrix token values match the agent manifest', () => {
     const manifest = getAgentManifest()
     const tokens = getTokenValues()

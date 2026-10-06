@@ -60,6 +60,16 @@ function formatMcp(agent) {
 }
 
 /**
+ * Agent notes carry literal paths like `~/.zcode/skills/<name>/SKILL.md`.
+ * Markdown-in-`<...>` is read as a Vue tag when VitePress builds the docs,
+ * and an unclosed one aborts the whole build, so angle brackets are escaped
+ * here rather than relying on every future note to avoid them.
+ */
+function escapeMarkdown(text) {
+  return text.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
+/**
  * Generate docs/agents.md content from manifest data
  */
 export function generateAgentsDocs() {
@@ -103,7 +113,9 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like \
   const notes = manifest.filter((a) => a.notes)
   const notesSection =
     notes.length > 0
-      ? `\n## Notes\n\n${notes.map((a) => `- **${a.name}:** ${a.notes}`).join('\n')}\n`
+      ? `\n## Notes\n\n${notes
+          .map((a) => `- **${a.name}:** ${escapeMarkdown(a.notes)}`)
+          .join('\n')}\n`
       : ''
 
   const mcpFormats = [...new Set(mcpAgents.map((a) => a.mcpSupport.format))]
