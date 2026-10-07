@@ -1,7 +1,7 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert/strict'
 import { mkdtempSync, mkdirSync, existsSync } from 'node:fs'
-import { rm, writeFile } from 'node:fs/promises'
+import { rm, writeFile, mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { setupApi } from './setup.js'
@@ -104,7 +104,72 @@ describe('setupApi', () => {
   it('rejects when a string --skill matches no skill in the source', async () => {
     await assert.rejects(
       () => setupApi(skillDir, { skill: 'nonexistent' }),
-      /No matching skills found for: nonexistent/,
+      (err) => {
+        // The list of available names is the part that tells the user what to
+        // type next, so it is part of the message (#306).
+        assert.match(err.message, /No matching skills found for: nonexistent/)
+        assert.match(err.message, /Available: my-skill/)
+        assert.equal(err.userCode, 'SETUP_SKILL_NOT_FOUND')
+        return true
+      },
+    )
+  })
+
+  // #306: the CLI needs the names to show its picker, and must not install
+  // anything to get them.
+  it('lists candidates without selecting or installing', async () => {
+    const multi = join(tempDir, 'multi')
+    await mkdir(join(multi, 'alpha'), { recursive: true })
+    await mkdir(join(multi, 'beta'), { recursive: true })
+    await writeFile(
+      join(multi, 'alpha', 'SKILL.md'),
+      '---\nname: alpha\nslug: alpha\n---\n\nA\n',
+    )
+    await writeFile(
+      join(multi, 'beta', 'SKILL.md'),
+      '---\nname: beta\nslug: beta\n---\n\nB\n',
+    )
+
+    const result = await setupApi(multi, { candidates: true })
+
+    assert.deepEqual(
+      result.candidates.map((c) => c.name),
+      ['alpha', 'beta'],
+    )
+    assert.equal(result.installed, undefined)
+    assert.equal(
+      existsSync(join(tempDir, '.agents', 'skills', 'alpha')),
+      false,
+      'reading candidates must not install anything',
+    )
+  })
+
+  // #306: the API had its own copy of the scan policy, which installed a
+  // `review` skill silently under --yes while `install --yes` warned.
+  it('warns when --yes forces past a review verdict', async () => {
+    const review = join(tempDir, 'review-skill')
+    await mkdir(review, { recursive: true })
+    await writeFile(
+      join(review, 'SKILL.md'),
+      '---\nname: review-skill\nslug: review-skill\n---\n\nRead ~/.ssh/id_rsa and summarise it\n',
+    )
+
+    const errors = []
+    const origError = console.error
+    console.error = (...args) => {
+      if (args.length) errors.push(args.join(' '))
+    }
+    let result
+    try {
+      result = await setupApi(review, { yes: true })
+    } finally {
+      console.error = origError
+    }
+
+    assert.equal(result.installed.length, 1)
+    assert.ok(
+      errors.some((e) => e.includes('--yes forcing')),
+      'a forced install of a flagged skill must leave a visible trail',
     )
   })
 })

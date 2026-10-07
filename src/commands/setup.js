@@ -1,13 +1,8 @@
 import { readdirSync } from 'node:fs'
 import { join } from 'node:path'
-import { resolveSkills } from '../utils/resolver.js'
-import { installSkill } from '../utils/installer.js'
+import { setupApi } from '../api/setup.js'
+import { assertMcpScanAllowed } from '../utils/scan-gate.js'
 import {
-  assertMcpScanAllowed,
-  assertSkillScanAllowed,
-} from '../utils/scan-gate.js'
-import {
-  parseMcpServersFromSkill,
   resolveMcpSource,
   addMcpServer,
   getSupportedMcpAgents,
@@ -110,7 +105,7 @@ export async function setupCommand(source, options = {}) {
     if (options.list) {
       const spinner = createSpinner('Resolving skills...')
       spinner.start()
-      const skills = await resolveSkills(source)
+      const { skills } = await setupApi(source, { list: true })
       spinner.succeed(`Found ${skills.length} skill(s)`)
       console.log()
       for (const s of skills) {
@@ -124,46 +119,45 @@ export async function setupCommand(source, options = {}) {
       return
     }
 
-    const spinner = createSpinner(`📦 Resolving ${source}...`)
-    spinner.start()
-    const allSkills = await resolveSkills(source)
-    spinner.succeed(`Found ${allSkills.length} skill(s)`)
+    // Selecting is the only part of this the API cannot decide: it is a
+    // conversation with the user. Everything after the choice — resolve,
+    // filter, target, scan, install — is one call now, so the two paths
+    // cannot drift again (#306).
+    let skillArg
+    if (!options.skill?.length && !options.yes) {
+      const spinner = createSpinner(`📦 Resolving ${source}...`)
+      spinner.start()
+      const { candidates } = await setupApi(source, { candidates: true })
+      spinner.succeed(`Found ${candidates.length} skill(s)`)
 
-    let selectedSkills
-    if (options.skill && options.skill.length > 0) {
-      const skillNames = options.skill.map((n) => n.toLowerCase())
-      selectedSkills = allSkills.filter(
-        (s) =>
-          skillNames.includes(s.name.toLowerCase()) ||
-          skillNames.includes(s.slug.toLowerCase()),
-      )
-      if (selectedSkills.length === 0) {
-        throw new Error(
-          `No matching skills found for: ${options.skill.join(', ')}. Available: ${allSkills.map((s) => s.name).join(', ')}`,
-        )
+      if (candidates.length > 1) {
+        const chosen = await selectSkillsInteractive(candidates)
+        if (!chosen) {
+          console.log('Setup cancelled.')
+          return
+        }
+        skillArg = chosen.map((c) => c.name)
       }
-    } else if (allSkills.length === 1) {
-      selectedSkills = allSkills
-    } else if (options.yes) {
-      selectedSkills = allSkills
-      console.log(`   Installing all ${allSkills.length} skills`)
-    } else {
-      const result = await selectSkillsInteractive(allSkills)
-      if (!result) {
-        console.log('Setup cancelled.')
-        return
-      }
-      selectedSkills = result
     }
+
+    // Nothing is installed for a dry run, so there is nothing to spin through.
+    const installSpinner = options.dryRun
+      ? null
+      : createSpinner(`📦 Installing from ${source}...`)
+    installSpinner?.start()
+    const result = await setupApi(source, {
+      ...options,
+      // The picker's answer when there was one; otherwise what the user typed.
+      skill: skillArg ?? options.skill,
+    })
 
     const targets = agents.map((a) => a.flag)
     targets.push('project')
 
     if (options.dryRun) {
-      console.log(
-        `\n📋 [dry-run] Would install ${selectedSkills.length} skill(s):\n`,
-      )
-      for (const skill of selectedSkills) {
+      const planned = result.skills
+      console.log(`\n📋 [dry-run] Would install ${planned.length} skill(s):\n`)
+      for (const skill of planned) {
         console.log(`   Skill:     ${skill.name} (${skill.slug})`)
         console.log(`   Source:    ${source}`)
         console.log(`   Mode:      copy`)
@@ -173,60 +167,50 @@ export async function setupCommand(source, options = {}) {
       return
     }
 
-    for (const skill of selectedSkills) {
-      const resolved = {
-        ...skill,
-        sourcePath: skill.sourcePath || source,
-        sourceType: skill.sourceType || 'local',
-      }
+    installSpinner.succeed(`Installed ${result.installed.length} skill(s)`)
 
+    for (const installed of result.installed) {
       console.log()
-      console.log(`   Skill:    ${resolved.name}`)
-      console.log(`   Slug:     ${resolved.slug}`)
-      console.log(`   Owner:    ${resolved.owner}`)
-      console.log(`   Files:    ${resolved.files.join(', ')}`)
-
-      assertSkillScanAllowed(resolved, options)
-
-      const results = await installSkill(resolved, targets)
+      console.log(`   Skill:    ${installed.name}`)
+      console.log(`   Slug:     ${installed.slug}`)
+      console.log(`   Owner:    ${installed.owner}`)
+      console.log(`   Files:    ${installed.files.join(', ')}`)
 
       const pathCounts = new Map()
-      for (const r of results) {
+      for (const r of installed.results) {
         const count = pathCounts.get(r.path) || 0
         pathCounts.set(r.path, count + 1)
       }
 
-      console.log(`   Installed to ${results.length} agent(s):`)
+      console.log(`   Installed to ${installed.results.length} agent(s):`)
       for (const [path, count] of pathCounts) {
         const detail = count > 1 ? ` (×${count} agents)` : ''
         console.log(`     ${path}${detail}`)
       }
 
-      if (resolved.content) {
-        const mcpServers = parseMcpServersFromSkill(resolved.content)
-        if (mcpServers.length > 0) {
-          console.log(
-            `\n   Skill includes ${mcpServers.length} MCP server(s). Installing...`,
-          )
-          const supported = getSupportedMcpAgents()
-          const mcpTargets = agents
-            .filter((a) => supported.includes(a.flag))
-            .map((a) => a.flag)
-          for (const server of mcpServers) {
-            const resolvedMcp = await resolveMcpSource(server.source)
-            assertMcpScanAllowed(resolvedMcp, {
-              ...options,
-              name: server.name,
-            })
-            let installedCount = 0
-            for (const agent of mcpTargets) {
-              const ok = await addMcpServer(agent, server.name, resolvedMcp)
-              if (ok) installedCount++
-            }
-            console.log(
-              `     ${installedCount}/${mcpTargets.length} agents: MCP server "${server.name}" installed`,
-            )
+      const mcpServers = installed.mcpServers || []
+      if (mcpServers.length > 0) {
+        console.log(
+          `\n   Skill includes ${mcpServers.length} MCP server(s). Installing...`,
+        )
+        const supported = getSupportedMcpAgents()
+        const mcpTargets = agents
+          .filter((a) => supported.includes(a.flag))
+          .map((a) => a.flag)
+        for (const server of mcpServers) {
+          const resolvedMcp = await resolveMcpSource(server.source)
+          assertMcpScanAllowed(resolvedMcp, {
+            ...options,
+            name: server.name,
+          })
+          let installedCount = 0
+          for (const agent of mcpTargets) {
+            const ok = await addMcpServer(agent, server.name, resolvedMcp)
+            if (ok) installedCount++
           }
+          console.log(
+            `     ${installedCount}/${mcpTargets.length} agents: MCP server "${server.name}" installed`,
+          )
         }
       }
     }
