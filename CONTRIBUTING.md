@@ -39,6 +39,7 @@ Don't see anything you like? Open a [feature request](https://github.com/rolecra
 - **Business logic** goes in `src/api/`, **CLI output** goes in `src/commands/`
 - Add or update tests for any new functionality
 - Run `npm run lint` and `npm test` before submitting — both must pass
+- `npm test` uses `node --test`, which walks the whole project, so a new test file is picked up wherever it lives (except inside a dot-directory like `.github/`, which the script names explicitly)
 - To auto-fix formatting and unused imports, run `npm run lint:fix`
 
 ## Error Handling
