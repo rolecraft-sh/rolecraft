@@ -290,8 +290,9 @@ Detect agents and optionally install a skill to all detected agents.
 | `dryRun` | `boolean` | `false` | Preview only |
 | `list` | `boolean` | `false` | List available skills without installing |
 | `skill` | `string\|string[]` | — | Install specific skills by name |
+| `candidates` | `boolean` | `false` | Return the resolved skills without selecting or installing |
 
-Returns `{ agents: [{ flag, label }], installed?: [{ name, slug, results }] }`. With `list: true`, returns `{ agents, skills: [{ name, slug, owner, description, files }] }`.
+Returns `{ agents: [{ flag, label }], installed?: [{ name, slug, owner, files, results, mcpServers }] }`. With `list: true`, returns `{ agents, skills: [{ name, slug, owner, description, files }] }`. With `candidates: true`, returns `{ agents, candidates: [{ name, slug, description }] }` and writes nothing — read the list, then call again with `skill` to install a choice.
 
 ### `bundle(sources, options?)`
 
