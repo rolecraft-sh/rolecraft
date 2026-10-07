@@ -77,8 +77,12 @@ export async function ensureProfileDir() {
 
 export function profilePath(name) {
   if (!isValidProfileName(name)) {
-    throw new Error(
+    throw new UserError(
       `Invalid profile name: "${name}". Use only letters, digits, hyphens, underscores, or dots.`,
+      {
+        suggestion: 'Rename the profile, or check the name you typed.',
+        code: 'PROFILE_INVALID_NAME',
+      },
     )
   }
   return join(getProfilesDir(), `${name}.json`)
@@ -192,8 +196,13 @@ export async function readProfile(name) {
 export async function writeProfile(data) {
   const validation = validateProfile(data)
   if (!validation.valid) {
-    throw new Error(
+    throw new UserError(
       `Invalid profile data:\n  ${validation.errors.join('\n  ')}`,
+      {
+        suggestion:
+          'Fix the listed fields, or check the profile file for a typo in a key name.',
+        code: 'PROFILE_INVALID',
+      },
     )
   }
 
@@ -877,7 +886,10 @@ async function rollbackConfigs(written, originalError) {
 
 export async function applyProfileData(data, options = {}) {
   if (!data?.agents || typeof data.agents !== 'object') {
-    throw new Error('Profile must contain an "agents" object')
+    throw new UserError('Profile must contain an "agents" object', {
+      suggestion: 'Check the profile file has an "agents" object.',
+      code: 'PROFILE_INVALID',
+    })
   }
 
   const results = {}

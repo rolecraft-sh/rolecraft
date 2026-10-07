@@ -61,7 +61,11 @@ describe('apiCompose', () => {
     const { apiCompose } = await import('./compose.js')
     await assert.rejects(
       () => apiCompose([join(tempDir, 'frontend.SKILL.md')]),
-      /At least 2 skill files/,
+      (err) => {
+        assert.match(err.message, /At least 2 skill files/)
+        assert.equal(err.userCode, 'COMPOSE_TOO_FEW_FILES')
+        return true
+      },
     )
   })
 

@@ -24,7 +24,11 @@ export async function apiProfileSave(name, options = {}) {
   }
 
   if (Object.keys(agentsData).length === 0) {
-    throw new Error('No agent configurations found to save.')
+    throw new UserError('No agent configurations found to save.', {
+      suggestion:
+        'Run `rolecraft agents` to see which agents are detected, or pass --agents <name>.',
+      code: 'PROFILE_NO_AGENTS',
+    })
   }
 
   if (options.dryRun) {
@@ -43,7 +47,11 @@ export async function apiProfileSave(name, options = {}) {
 
 export async function apiProfileApply(name, options = {}) {
   const data = await readProfile(name)
-  if (!data) throw new Error(`Profile "${name}" not found.`)
+  if (!data)
+    throw new UserError(`Profile "${name}" not found.`, {
+      suggestion: 'Run `rolecraft profile list` to see the saved profiles.',
+      code: 'PROFILE_NOT_FOUND',
+    })
 
   if (options.dryRun) {
     const agentsToApply =
@@ -69,7 +77,11 @@ export async function apiProfileApply(name, options = {}) {
 
 export async function apiProfileDiff(name) {
   const data = await readProfile(name)
-  if (!data) throw new Error(`Profile "${name}" not found.`)
+  if (!data)
+    throw new UserError(`Profile "${name}" not found.`, {
+      suggestion: 'Run `rolecraft profile list` to see the saved profiles.',
+      code: 'PROFILE_NOT_FOUND',
+    })
   if (!data.agents) return { name, diffs: {} }
 
   const diffs = {}
@@ -117,7 +129,11 @@ export async function apiProfileList() {
 
 export async function apiProfileShow(name) {
   const data = await readProfile(name)
-  if (!data) throw new Error(`Profile "${name}" not found.`)
+  if (!data)
+    throw new UserError(`Profile "${name}" not found.`, {
+      suggestion: 'Run `rolecraft profile list` to see the saved profiles.',
+      code: 'PROFILE_NOT_FOUND',
+    })
   return data
 }
 
@@ -127,7 +143,11 @@ export async function apiProfileDelete(name, options = {}) {
     return { dryRun: true, name, exists: !!exists }
   }
   const deleted = await deleteProfile(name)
-  if (!deleted) throw new Error(`Profile "${name}" not found.`)
+  if (!deleted)
+    throw new UserError(`Profile "${name}" not found.`, {
+      suggestion: 'Run `rolecraft profile list` to see the saved profiles.',
+      code: 'PROFILE_NOT_FOUND',
+    })
   return { name, deleted: true }
 }
 
@@ -210,7 +230,11 @@ export async function apiProfileImport(path) {
     try {
       return JSON.parse(raw)
     } catch {
-      throw new Error('Invalid JSON in profile.')
+      throw new UserError('Invalid JSON in profile.', {
+        suggestion:
+          'Fix the JSON by hand, or delete the profile file to start over.',
+        code: 'PROFILE_INVALID_JSON',
+      })
     }
   }
 
@@ -234,8 +258,13 @@ export async function apiProfileImport(path) {
 
   const validation = validateProfile(data)
   if (!validation.valid)
-    throw new Error(
+    throw new UserError(
       `Invalid profile data:\n  ${validation.errors.join('\n  ')}`,
+      {
+        suggestion:
+          'Fix the listed fields, or check the profile file for a typo in a key name.',
+        code: 'PROFILE_INVALID',
+      },
     )
 
   const enriched = await writeProfile(data)

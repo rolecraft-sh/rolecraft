@@ -145,7 +145,13 @@ describe('api profile show/list/delete', () => {
   it('throws not-found errors for unknown profiles', async () => {
     await assert.rejects(
       () => apiProfileShow('missing'),
-      /Profile "missing" not found\./,
+      (err) => {
+        assert.match(err.message, /Profile "missing" not found\./)
+        // User-facing errors carry a machine code and a suggestion (#297)
+        assert.equal(err.userCode, 'PROFILE_NOT_FOUND')
+        assert.ok(err.suggestion)
+        return true
+      },
     )
     await assert.rejects(
       () => apiProfileApply('missing'),

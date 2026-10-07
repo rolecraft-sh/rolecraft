@@ -210,8 +210,13 @@ async function resolveLocalInternal(source) {
     } else if (st.isFile() && basename(expanded) === 'SKILL.md') {
       skillDir = dirname(expanded)
     } else {
-      throw new Error(
+      throw new UserError(
         `Source must be a SKILL.md file or a directory containing one`,
+        {
+          suggestion:
+            'Pass a directory that contains a SKILL.md, or the SKILL.md file itself.',
+          code: 'SOURCE_NOT_A_SKILL',
+        },
       )
     }
   } catch (e) {
@@ -330,13 +335,21 @@ async function resolveGitUrlInternal(source) {
     try {
       runGit(['clone', '--depth', '1', url, tmpDir])
     } catch {
-      throw new Error(`Failed to clone repository from ${source}`)
+      throw new UserError(`Failed to clone repository from ${source}`, {
+        suggestion:
+          'Check the repository exists and is reachable: gh:owner/repo, git@host:owner/repo.git, or an https URL.',
+        code: 'GIT_CLONE_FAILED',
+      })
     }
 
     const found = await scanForSkill(tmpDir)
 
     if (found.length === 0) {
-      throw new Error(`No SKILL.md found in repository ${source}`)
+      throw new UserError(`No SKILL.md found in repository ${source}`, {
+        suggestion:
+          'The repository has no SKILL.md at its root. Check the path points at a skills repository.',
+        code: 'NO_SKILL_IN_REPO',
+      })
     }
 
     const enriched = await Promise.all(
@@ -365,12 +378,20 @@ function isNpmRef(source) {
 
 function parseNpmRef(source) {
   const npmPart = source.slice(4)
-  if (!npmPart) throw new Error(`Invalid npm reference: "${source}"`)
+  if (!npmPart)
+    throw new UserError(`Invalid npm reference: "${source}"`, {
+      suggestion: 'Use npm:package, npm:@scope/package or npm:package@version.',
+      code: 'NPM_INVALID_REF',
+    })
   let pkgName, version
 
   if (npmPart.startsWith('@')) {
     const slashIdx = npmPart.indexOf('/')
-    if (slashIdx === -1) throw new Error(`Invalid npm reference: "${source}"`)
+    if (slashIdx === -1)
+      throw new UserError(`Invalid npm reference: "${source}"`, {
+        suggestion: 'Use npm:@scope/package or npm:package@version.',
+        code: 'NPM_INVALID_REF',
+      })
     const rest = npmPart.slice(slashIdx + 1)
     const atIdx = rest.indexOf('@')
     if (atIdx > 0) {
@@ -398,7 +419,11 @@ function fetchJson(url) {
   const parsed = new URL(url)
   const hostname = parsed.hostname
   if (!hostname.endsWith('.npmjs.org') && hostname !== 'npmjs.org') {
-    throw new Error(`Fetch not allowed from ${hostname}`)
+    throw new UserError(`Fetch not allowed from ${hostname}`, {
+      suggestion:
+        'npm: sources may only be fetched from the npm registry. This one pointed elsewhere.',
+      code: 'NPM_REGISTRY_HOST_BLOCKED',
+    })
   }
   const cleanUrl = `https://${hostname}${parsed.pathname}${parsed.search}`
   return new Promise((resolve, reject) => {
@@ -482,7 +507,11 @@ async function downloadFile(url, dest, pkgLabel) {
   })
 
   if (!response.ok) {
-    throw new Error(`Failed to download: HTTP ${response.status}`)
+    throw new UserError(`Failed to download: HTTP ${response.status}`, {
+      suggestion:
+        'The registry did not serve the tarball. Retry, or check the package version exists.',
+      code: 'NPM_DOWNLOAD_FAILED',
+    })
   }
 
   const fileStream = createWriteStream(dest)
@@ -515,7 +544,14 @@ async function resolveNpmInternal(source) {
 
   const pkgVersionData = metadata.versions?.[ver]
   if (!pkgVersionData)
-    throw new Error(`Version "${ver}" not found for npm package "${pkgName}"`)
+    throw new UserError(
+      `Version "${ver}" not found for npm package "${pkgName}"`,
+      {
+        suggestion:
+          'Run `npm view <package> versions` to see the versions that exist.',
+        code: 'NPM_VERSION_NOT_FOUND',
+      },
+    )
 
   const tarballUrl = pkgVersionData.dist?.tarball
   if (!tarballUrl)
@@ -544,8 +580,13 @@ async function resolveNpmInternal(source) {
         (e) => e.includes('..') || e.startsWith('/'),
       )
       if (dangerous) {
-        throw new Error(
+        throw new UserError(
           `Tarball contains unsafe path entries: ${entries.find((e) => e.includes('..') || e.startsWith('/'))}`,
+          {
+            suggestion:
+              'The package was not extracted. Report it to the npm registry, or install it manually if you trust it.',
+            code: 'NPM_TARBALL_UNSAFE_PATHS',
+          },
         )
       }
     }
@@ -556,7 +597,14 @@ async function resolveNpmInternal(source) {
     })
     if (tarResult.error) throw tarResult.error
     if (tarResult.status !== 0)
-      throw new Error(`tar extraction failed with code ${tarResult.status}`)
+      throw new UserError(
+        `tar extraction failed with code ${tarResult.status}`,
+        {
+          suggestion:
+            'The download is likely corrupt. Retry, or re-download the package tarball.',
+          code: 'NPM_TAR_EXTRACT_FAILED',
+        },
+      )
   } catch (e) {
     await rm(tmpDir, { recursive: true, force: true }).catch(() => {})
     // A refused host is a policy decision, not a corrupt package. The generic
