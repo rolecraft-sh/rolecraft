@@ -60,6 +60,19 @@ rolecraft profile apply frontend-dev --skip-skills
 
 Apply creates backups of existing configs in `~/.agents/backups/` before making changes.
 
+**Merge, not overwrite.** `apply` writes the profile's settings *into* the config you have now, so anything you added after the snapshot is kept. A setting both disagree on is shown to you — key, profile value, current value — and you pick per setting:
+
+```text
+⚠️  agents (global): 1 setting(s) changed since this profile was saved:
+
+   model
+     profile: "gpt-4"
+     current:  "hand-edited"
+     keep current, or use profile value? [k]eep / [p]rofile (default keep):
+```
+
+Nothing is written until every setting is resolved. Without a terminal (CI, `$(...)`) there is nobody to ask, so the command stops and writes nothing rather than guessing. `--yes` forces past the security scan, not past a conflict — it never picks a value for you. If an agent fails part-way through a multi-agent apply, the configs already written are restored.
+
 ### `diff`
 
 Compare a profile against your current configuration.

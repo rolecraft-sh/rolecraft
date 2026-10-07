@@ -5,9 +5,20 @@ import { mkdir, rm, writeFile, readFile } from 'node:fs/promises'
 import { join, dirname } from 'node:path'
 import { tmpdir } from 'node:os'
 import { createHash } from 'node:crypto'
+import { setCreateInterface } from '../utils/tui.js'
 
 let tempDir, profileCmd, origHome, origCwd, origEditor
 let editHelperPath
+
+// Feed the conflict prompt a queue of answers; returns a restore function.
+function stubPrompt(answers = []) {
+  const queue = [...answers]
+  setCreateInterface(() => ({
+    question: (_query, cb) => cb(queue.shift() ?? ''),
+    close: () => {},
+  }))
+  return () => setCreateInterface(null)
+}
 
 before(async () => {
   tempDir = mkdtempSync(join(tmpdir(), 'rolecraft-profile-cmd-test-'))
@@ -47,6 +58,14 @@ function captureLogs() {
     if (args.length) logs.push(String(args[0]))
   })
   return logs
+}
+
+function captureStderr() {
+  const lines = []
+  mock.method(console, 'error', (...args) => {
+    if (args.length) lines.push(args.join(' '))
+  })
+  return lines
 }
 
 describe('profile command dispatcher', () => {
@@ -544,15 +563,82 @@ describe('profile apply command', () => {
     await writeFile(opencodeConfig, JSON.stringify({ model: 'gpt-3.5' }))
 
     const logs = captureLogs()
-    await profileCmd.profileApplyCommand('apply-full', {
-      dryRun: false,
-      targets: [],
-      skipMcp: true,
-      skipSkills: true,
-    })
+    const restore = stubPrompt(['p'])
+    try {
+      await profileCmd.profileApplyCommand('apply-full', {
+        dryRun: false,
+        targets: [],
+        skipMcp: true,
+        skipSkills: true,
+      })
+    } finally {
+      restore()
+    }
 
     assert.ok(logs.some((l) => l.includes('Applied profile')))
     assert.ok(logs.some((l) => l.includes('agents')))
+    const written = JSON.parse(await readFile(opencodeConfig, 'utf-8'))
+    assert.equal(written.model, 'gpt-4')
+  })
+
+  // #408: a setting the user changed after the snapshot is theirs to decide,
+  // one key at a time, and both values are shown before the choice.
+  it('asks which value to keep for a changed setting', async () => {
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({
+      name: 'apply-conflict',
+      agents: { agents: { config: { global: { model: 'from-profile' } } } },
+    })
+
+    const opencodeConfig = join(tempDir, '.opencode.json')
+    await writeFile(
+      opencodeConfig,
+      JSON.stringify({ model: 'hand-edited', keepMe: true }),
+    )
+
+    const logs = captureStderr()
+    const restore = stubPrompt(['k'])
+    try {
+      await profileCmd.profileApplyCommand('apply-conflict', {
+        dryRun: false,
+        targets: [],
+        skipMcp: true,
+        skipSkills: true,
+      })
+    } finally {
+      restore()
+      mock.restoreAll()
+    }
+
+    assert.ok(logs.some((l) => l.includes('model')))
+    assert.ok(logs.some((l) => l.includes('hand-edited')))
+    assert.ok(logs.some((l) => l.includes('from-profile')))
+    const written = JSON.parse(await readFile(opencodeConfig, 'utf-8'))
+    assert.equal(written.model, 'hand-edited')
+    assert.equal(written.keepMe, true)
+  })
+
+  it('writes nothing when a changed setting cannot be resolved', async () => {
+    const { writeProfile } = await import('../utils/profile.js')
+    await writeProfile({
+      name: 'apply-conflict-nontty',
+      agents: { agents: { config: { global: { model: 'from-profile' } } } },
+    })
+
+    const opencodeConfig = join(tempDir, '.opencode.json')
+    const before = JSON.stringify({ model: 'hand-edited' })
+    await writeFile(opencodeConfig, before)
+
+    await assert.rejects(() =>
+      profileCmd.profileApplyCommand('apply-conflict-nontty', {
+        dryRun: false,
+        targets: [],
+        skipMcp: true,
+        skipSkills: true,
+      }),
+    )
+
+    assert.equal(await readFile(opencodeConfig, 'utf-8'), before)
   })
 
   it('applies with specific agent targets in dry-run', async () => {
@@ -591,12 +677,17 @@ describe('profile apply command', () => {
     })
 
     const logs = captureLogs()
-    await profileCmd.profileApplyCommand('apply-targeted-real', {
-      dryRun: false,
-      targets: ['agents'],
-      skipMcp: true,
-      skipSkills: true,
-    })
+    const restore = stubPrompt(['p'])
+    try {
+      await profileCmd.profileApplyCommand('apply-targeted-real', {
+        dryRun: false,
+        targets: ['agents'],
+        skipMcp: true,
+        skipSkills: true,
+      })
+    } finally {
+      restore()
+    }
 
     assert.ok(logs.some((l) => l.includes('Applied profile')))
     assert.ok(logs.some((l) => l.includes('agents')))

@@ -1,8 +1,11 @@
 import { mkdir, readFile, writeFile, readdir, rm } from 'node:fs/promises'
-import { join, dirname } from 'node:path'
+import { join } from 'node:path'
 import { homedir } from 'node:os'
+import { isDeepStrictEqual } from 'node:util'
 
 import { listMcpServers, addMcpServer } from './mcp.js'
+import { writeJsonAtomic } from './lock-write.js'
+import { UserError } from './errors.js'
 import { readLock, getGlobalLockPath, getProjectLockPath } from './lockfile.js'
 import { resolveSource } from './resolver.js'
 import { installSkill } from './installer.js'
@@ -203,10 +206,8 @@ export async function writeProfile(data) {
   }
   if (data.description) enriched.description = data.description
 
-  const content = `${JSON.stringify(enriched, null, 2)}\n`
-
   await ensureProfileDir()
-  await writeFile(profilePath(data.name), content, 'utf-8')
+  await writeJsonAtomic(profilePath(data.name), enriched)
   return enriched
 }
 
@@ -509,6 +510,74 @@ function filterConfigMcpServers(scope, scopeData, options) {
   return { data, blocked }
 }
 
+function isPlainObject(value) {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+/**
+ * Merge a profile's config snapshot over the config on disk.
+ *
+ * `profile apply` used to serialize the snapshot and write it over the file, so
+ * anything the user added after the snapshot (a hand-written MCP server, a new
+ * model) was silently lost. Now only the snapshot's own keys are applied:
+ * a key absent from the file is added, a key present in both with the same
+ * value is a no-op, and a key present in both with a *different* value is a
+ * conflict — reported, never silently overwritten (#408).
+ *
+ * Plain objects merge key by key; arrays and scalars replace wholesale.
+ */
+function mergeConfigSnapshot(current, snapshot, keys = [], conflicts = []) {
+  const merged = { ...current }
+
+  for (const [key, value] of Object.entries(snapshot)) {
+    const keyPath = [...keys, key]
+
+    if (isPlainObject(merged[key]) && isPlainObject(value)) {
+      merged[key] = mergeConfigSnapshot(
+        merged[key],
+        value,
+        keyPath,
+        conflicts,
+      ).merged
+      continue
+    }
+
+    if (merged[key] !== undefined && !isDeepStrictEqual(merged[key], value))
+      conflicts.push({
+        key: keyPath.join('.'),
+        keys: keyPath,
+        snapshot: value,
+        current: merged[key],
+      })
+
+    merged[key] = value
+  }
+
+  return { merged, conflicts }
+}
+
+// Apply the user's per-key choices back onto the merge result. Anything the
+// resolver does not name keeps the value already on disk.
+function applyConflictDecisions(merged, conflicts, decisions = {}) {
+  for (const conflict of conflicts) {
+    if (decisions[conflict.key] !== 'snapshot') {
+      let node = merged
+      for (const key of conflict.keys.slice(0, -1)) node = node[key]
+      node[conflict.keys.at(-1)] = conflict.current
+    }
+  }
+  return merged
+}
+
+function describeConflicts(conflicts) {
+  return conflicts
+    .map(
+      (c) =>
+        `${c.key}: profile=${JSON.stringify(c.snapshot)} current=${JSON.stringify(c.current)}`,
+    )
+    .join('; ')
+}
+
 export async function applyAgentConfig(agentFlag, configData, options = {}) {
   const paths = AGENT_CONFIG_PATHS[agentFlag]
   if (!paths || !configData || typeof configData !== 'object') return []
@@ -520,9 +589,61 @@ export async function applyAgentConfig(agentFlag, configData, options = {}) {
 
     const { data, blocked } = filterConfigMcpServers(scope, scopeData, options)
     const targetPath = getPath()
-    await mkdir(dirname(targetPath), { recursive: true })
-    await writeFile(targetPath, `${JSON.stringify(data, null, 2)}\n`, 'utf-8')
-    results.push({ scope, path: targetPath, blocked })
+
+    const previous = await readFileIfExists(targetPath)
+    let current = {}
+    if (previous !== null) {
+      try {
+        current = JSON.parse(previous)
+      } catch {
+        throw new UserError(
+          `Cannot merge into ${targetPath}: not valid JSON.`,
+          {
+            code: 'PROFILE_CONFIG_UNREADABLE',
+            suggestion:
+              'Fix or remove that file, then re-run. Nothing was written.',
+          },
+        )
+      }
+      if (!isPlainObject(current)) {
+        throw new UserError(
+          `Cannot merge into ${targetPath}: expected a JSON object.`,
+          {
+            code: 'PROFILE_CONFIG_UNREADABLE',
+            suggestion:
+              'Fix or remove that file, then re-run. Nothing was written.',
+          },
+        )
+      }
+    }
+
+    const { merged, conflicts } = mergeConfigSnapshot(current, data)
+    if (conflicts.length > 0) {
+      const decisions = options.resolveConflicts
+        ? await options.resolveConflicts({
+            agent: agentFlag,
+            scope,
+            path: targetPath,
+            conflicts,
+          })
+        : null
+      if (!decisions)
+        throw new UserError(
+          `${agentFlag} (${scope}): ${conflicts.length} setting(s) changed since the profile was saved.`,
+          {
+            code: 'PROFILE_CONFLICT',
+            detail: describeConflicts(conflicts),
+            suggestion:
+              'Re-run in a terminal to pick per setting, or remove the conflicting keys from the config.',
+          },
+        )
+      applyConflictDecisions(merged, conflicts, decisions)
+    }
+
+    await writeJsonAtomic(targetPath, merged)
+    // `previous` is the rollback material for applyProfileData; it is stripped
+    // from the returned results once the apply succeeds.
+    results.push({ scope, path: targetPath, blocked, previous })
   }
 
   return results
@@ -640,12 +761,7 @@ export async function applyInstructions(agentFlag, instructions) {
         }
       }
       config.instructions = filePaths
-      await mkdir(dirname(targetPath), { recursive: true })
-      await writeFile(
-        targetPath,
-        `${JSON.stringify(config, null, 2)}\n`,
-        'utf-8',
-      )
+      await writeJsonAtomic(targetPath, config)
       applied.push({ scope, path: targetPath })
     }
 
@@ -690,8 +806,8 @@ export async function applyProfileEntry(agentFlag, entry, options = {}) {
       entry.config,
       options,
     )
-    for (const { scope, path, blocked } of configResult) {
-      result.config.applied.push({ scope, path })
+    for (const { scope, path, blocked, previous } of configResult) {
+      result.config.applied.push({ scope, path, previous })
       result.config.blocked.push(...blocked)
     }
   } else {
@@ -745,15 +861,42 @@ export async function applyProfileEntry(agentFlag, entry, options = {}) {
   return result
 }
 
+// Put back the config files this apply already overwrote. A backup exists but
+// the user has to go find it; a failed apply has to leave the machine as it was.
+async function rollbackConfigs(written, originalError) {
+  for (const { path, previous } of written.reverse()) {
+    try {
+      if (previous === null) await rm(path, { force: true })
+      else await writeFile(path, previous, 'utf-8')
+    } catch (err) {
+      originalError.rollbackErrors ??= []
+      originalError.rollbackErrors.push(`${path}: ${err.message}`)
+    }
+  }
+}
+
 export async function applyProfileData(data, options = {}) {
   if (!data?.agents || typeof data.agents !== 'object') {
     throw new Error('Profile must contain an "agents" object')
   }
 
   const results = {}
-  for (const [agentFlag, entry] of Object.entries(data.agents)) {
-    results[agentFlag] = await applyProfileEntry(agentFlag, entry, options)
+  const written = []
+
+  try {
+    for (const [agentFlag, entry] of Object.entries(data.agents)) {
+      results[agentFlag] = await applyProfileEntry(agentFlag, entry, options)
+      for (const applied of results[agentFlag].config.applied)
+        written.push({ path: applied.path, previous: applied.previous })
+    }
+  } catch (err) {
+    await rollbackConfigs(written, err)
+    throw err
   }
+
+  // Rollback material has served its purpose; keep it out of the result.
+  for (const result of Object.values(results))
+    for (const applied of result.config.applied) delete applied.previous
 
   return results
 }
