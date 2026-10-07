@@ -35,7 +35,7 @@ rolecraft/
 │   │   ├── bundle-internal.js#   bundle install core
 │   │   ├── check.js          #   skill update checking
 │   │   ├── ci.js             #   lockfile-driven re-install
-│   │   ├── completions.js    #   re-export shim for the completion generators
+│   │   ├── completions.js    #   shell completion script generation
 │   │   ├── compose.js        #   combine skills into one
 │   │   ├── convert.js        #   SKILL.md <-> .mdc conversion
 │   │   ├── diff.js           #   compare two states
@@ -98,9 +98,9 @@ rolecraft/
 
 Three layers, and where each one is allowed to reach.
 
-**1. `src/api/`** — business logic. Modules export async functions that take options and return plain objects. Intended to be side-effect free and importable via `import { ... } from 'rolecraft'`. Two caveats: `api/install.js` writes progress warnings with `console.error`, and four modules reach into `commands/` (`api/setup.js`, `api/doctor.js`, `api/completions.js`, `utils/profile.js`).
+**1. `src/api/`** — business logic. Modules export async functions that take options and return plain objects. Intended to be side-effect free and importable via `import { ... } from 'rolecraft'`. Two caveats: `api/install.js` writes progress warnings with `console.error`, and three modules reach into `commands/` (`api/setup.js`, `api/doctor.js`, `utils/profile.js`).
 
-**2. `src/commands/`** — CLI layer. Parses args, calls `api/`, formats output. Most files are thin; `setup.js` holds real logic, and `completions.js` is the implementation behind the 14-line `api/completions.js` shim. `spec.js` is the single description of the command surface — every command, its flags, their descriptions and its aliases — from which `bin/rolecraft.js` derives flag validation and help, and `completions.js` derives all three shell scripts (#410).
+**2. `src/commands/`** — CLI layer. Parses args, calls `api/`, formats output. Most files are thin; `setup.js` holds real logic, and `completions.js` only prints what `api/completions.js` generates. `spec.js` is the single description of the command surface — every command, its flags, their descriptions and its aliases — from which `bin/rolecraft.js` derives flag validation and help, and `api/completions.js` derives all three shell scripts (#410).
 
 **3. `src/utils/`** — shared helpers. No circular dependencies. Not strictly a bottom layer: `utils/profile.js` imports from `commands/setup.js`, which is how `detectAgents` ended up reachable from four places before it moved to `utils/agent-detection.js`.
 

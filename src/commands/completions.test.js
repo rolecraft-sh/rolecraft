@@ -171,18 +171,19 @@ describe('completions command', () => {
     restore()
   })
 
-  it('uses the command generators for the public API', () => {
-    assert.equal(
-      completionsApi.completionApi('bash'),
-      completionsModule.bashScript(),
-    )
-    assert.equal(
-      completionsApi.completionApi('zsh'),
-      completionsModule.zshScript(),
-    )
-    assert.equal(
-      completionsApi.completionApi('fish'),
-      completionsModule.fishScript(),
-    )
+  it('prints exactly what the public API returns', async () => {
+    for (const shell of ['bash', 'zsh', 'fish']) {
+      const logs = []
+      const origLog = console.log
+      console.log = (...args) => {
+        if (args.length) logs.push(String(args[0]))
+      }
+      try {
+        await completionsModule.completionsCommand(shell)
+      } finally {
+        console.log = origLog
+      }
+      assert.equal(logs[0], completionsApi.completionApi(shell))
+    }
   })
 })

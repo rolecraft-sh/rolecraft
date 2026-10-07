@@ -1,7 +1,7 @@
 /**
  * The one description of the CLI surface: every command, its flags, their
  * descriptions, and its aliases. `bin/rolecraft.js` derives flag validation and
- * the usage text from it; `src/commands/completions.js` derives all three
+ * the usage text from it; `src/api/completions.js` derives all three
  * shell scripts. Adding a flag in one place updates help, validation and
  * completions together, so the shell cannot offer a flag the CLI rejects.
  *

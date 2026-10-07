@@ -141,7 +141,7 @@ describe('usage errors exit 2, failures exit 1 (#410)', () => {
   })
 
   it('every flag the shell completes is a flag the CLI accepts', async () => {
-    const { bashScript } = await import('../../src/commands/completions.js')
+    const { bashScript } = await import('../../src/api/completions.js')
     const { byName } = await import('../../src/commands/spec.js')
     const { flagNames } = await import('../../src/commands/spec.js')
     // `    install) COMPREPLY=($(compgen -W "--yes --global" -- "$cur")) ;;`
