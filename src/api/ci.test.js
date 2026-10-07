@@ -33,6 +33,11 @@ async function writeProjectLock(dir, skills) {
   await writeJson(join(dir, '.agents', '.skill-lock.json'), skillLock(skills))
 }
 
+async function writeCorruptMcpLock() {
+  await mkdir(join(homeDir, '.agents'), { recursive: true })
+  await writeFile(join(homeDir, '.agents', '.mcp-lock.json'), '{ not json')
+}
+
 async function writeMcpLock(servers) {
   await writeJson(join(homeDir, '.agents', '.mcp-lock.json'), {
     version: 1,
@@ -266,6 +271,37 @@ describe('api ci', () => {
         { slug: 'project-only', source: projectOnly },
       ],
     )
+  })
+
+  // #367: a corrupt MCP lock is a finding, not a reason to abandon the skills
+  // in the same run — but it must keep `allPassed` false so the run cannot
+  // pass for a clean one.
+  it('reports a corrupt MCP lock as a failure and still installs skills', async () => {
+    const source = await writeLocalSkill('ci-survivor')
+    await writeCorruptMcpLock()
+    await writeGlobalLock({
+      'ci-survivor': { source, sourceType: 'local' },
+    })
+
+    const result = await apiCi(workDir)
+
+    assert.equal(result.installed.length, 1)
+    assert.equal(result.installed[0].slug, 'ci-survivor')
+    assert.equal(result.mcpCount, 0)
+    assert.equal(result.allPassed, false)
+    assert.equal(result.mcpFailed.length, 1)
+    assert.equal(result.mcpFailed[0].name, '<mcp-lock>')
+    assert.match(result.mcpFailed[0].reason, /not valid JSON/)
+  })
+
+  it('fails the run on a corrupt MCP lock even with nothing else to install', async () => {
+    await writeCorruptMcpLock()
+
+    const result = await apiCi(workDir)
+
+    assert.equal(result.total, 0)
+    assert.equal(result.allPassed, false)
+    assert.match(result.mcpFailed[0].reason, /not valid JSON/)
   })
 
   it('refuses to restore an MCP source the scanner could not read', async () => {

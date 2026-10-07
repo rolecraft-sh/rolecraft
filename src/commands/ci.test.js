@@ -154,4 +154,37 @@ describe('ci command', () => {
     process.exit = origExit
     assert.ok(errors.some((l) => l.includes('fail-install')))
   })
+
+  // #367: with nothing else to install, a corrupt MCP lock must still be
+  // reported and must still fail the run — `No skills or MCP servers` over a
+  // corrupt lock would exit 0 and hide it.
+  it('reports a corrupt MCP lock instead of claiming there is nothing to do', async () => {
+    await writeFile(join(tempDir, '.agents', '.mcp-lock.json'), '{ not json')
+
+    const logs = []
+    const origLog = console.log
+    console.log = (...args) => {
+      if (args.length) logs.push(String(args[0]))
+    }
+    const errors = []
+    const origErr = console.error
+    console.error = (...args) => {
+      if (args.length) errors.push(args.map((a) => String(a)).join(' '))
+    }
+    try {
+      await assert.rejects(() => ciModule.ciCommand(), /Some items failed/)
+    } finally {
+      console.log = origLog
+      console.error = origErr
+      await rm(join(tempDir, '.agents', '.mcp-lock.json'), { force: true })
+    }
+
+    assert.equal(
+      logs.some((l) => l.includes('No skills or MCP servers')),
+      false,
+      'a corrupt lock is not an empty lockfile',
+    )
+    assert.ok(errors.some((l) => l.includes('<mcp-lock>')))
+    assert.ok(errors.some((l) => l.includes('not valid JSON')))
+  })
 })

@@ -3,7 +3,9 @@ import { apiCi } from '../api/ci.js'
 export async function ciCommand() {
   const result = await apiCi(process.cwd())
 
-  if (result.total === 0) {
+  // A finding with nothing to install is still a finding: reporting "nothing
+  // to do" over a corrupt lock would exit 0 and hide it (#367).
+  if (result.total === 0 && result.allPassed) {
     console.log('No skills or MCP servers in lockfile to install.')
     return
   }
@@ -21,10 +23,12 @@ export async function ciCommand() {
     console.log()
   }
 
-  if (result.mcpCount > 0) {
-    console.log(
-      `🔌 Installing ${result.mcpCount} MCP server(s) from lockfile...\n`,
-    )
+  if (result.mcpCount > 0 || result.mcpFailed.length > 0) {
+    if (result.mcpCount > 0) {
+      console.log(
+        `🔌 Installing ${result.mcpCount} MCP server(s) from lockfile...\n`,
+      )
+    }
     for (const inst of result.mcpInstalled) {
       console.log(
         `   ✅ ${inst.name} installed to ${inst.agents.length} agent(s)`,
