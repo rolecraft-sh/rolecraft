@@ -46,6 +46,42 @@ export function getProjectLockPath(cwd) {
 }
 
 /**
+ * Is this target's skill directory inside the project rather than the home
+ * directory?
+ *
+ * Deciding lock scope from the target *string* is what put a project agent's
+ * install in the global lockfile (#332): `--devin` is not `'project'`, yet it
+ * writes `./.devin/skills/`. The agents table is the only place that knows
+ * which is which, so the flag lives there.
+ */
+export function isProjectScopedTarget(flag) {
+  if (flag === 'project') return true
+  const agent = getAgentByFlag(flag) || AGENTS_DATA.find((a) => a.name === flag)
+  return Boolean(agent?.projectScoped)
+}
+
+/**
+ * The lockfile a target's install belongs in. One resolver for install,
+ * update, ci and the collision check, so they cannot disagree.
+ */
+export function targetLockPath(flag, cwd = process.cwd()) {
+  return isProjectScopedTarget(flag)
+    ? getProjectLockPath(cwd)
+    : getGlobalLockPath()
+}
+
+/**
+ * The directory a target installs into. Two targets resolving to the same
+ * directory are one install, not two — `project` and `replit` both land in
+ * `<cwd>/.agents/skills` (#346).
+ */
+export function targetDir(flag, cwd = process.cwd()) {
+  return flag === 'project'
+    ? join(cwd, '.agents', 'skills')
+    : getDirForAgent(flag, cwd)
+}
+
+/**
  * Resolve the install targets a lockfile entry was actually recorded with.
  *
  * An entry's `agents` list is the record of where the skill lives, so
@@ -71,11 +107,7 @@ export function targetsFromLockEntry(entry, scope = 'global') {
   const targets = []
   const seenDirs = new Set()
   for (const flag of recorded) {
-    if (flag === 'project') {
-      targets.push('project')
-      continue
-    }
-    const dir = getDirForAgent(flag)
+    const dir = targetDir(flag)
     if (seenDirs.has(dir)) continue
     seenDirs.add(dir)
     targets.push(flag)

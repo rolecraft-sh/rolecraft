@@ -6,10 +6,10 @@ import { installSkill } from '../utils/installer.js'
 import { assertSkillScanAllowed } from '../utils/scan-gate.js'
 import {
   findActualSlug,
-  getDirForAgent,
   getProjectLockPath,
   normalizeSlug,
   readLock,
+  targetDir,
   targetsFromLockEntry,
 } from '../utils/lockfile.js'
 import { resolveSource } from '../utils/resolver.js'
@@ -33,7 +33,7 @@ function detectTargets(slug, cwd) {
   const targets = []
   const seenDirs = new Set()
   for (const flag of found) {
-    const dir = flag === 'project' ? 'project' : getDirForAgent(flag)
+    const dir = targetDir(flag, cwd)
     if (seenDirs.has(dir)) continue
     seenDirs.add(dir)
     targets.push(flag)

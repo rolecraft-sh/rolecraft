@@ -805,4 +805,52 @@ describe('lockfile', () => {
       assert.equal(lock.skills['a/b'], undefined) // no crash
     })
   })
+
+  // #332 / #346: lock scope and install directory come from one resolver, so
+  // a project agent and `project` cannot disagree about where they belong.
+  describe('target resolution', () => {
+    it('knows which targets live in the project', () => {
+      assert.equal(lockModule.isProjectScopedTarget('project'), true)
+      assert.equal(lockModule.isProjectScopedTarget('devin'), true)
+      assert.equal(lockModule.isProjectScopedTarget('replit'), true)
+      assert.equal(lockModule.isProjectScopedTarget('claude'), false)
+      assert.equal(lockModule.isProjectScopedTarget('agents'), false)
+    })
+
+    it('resolves the lockfile per target scope', () => {
+      assert.equal(
+        lockModule.targetLockPath('devin', '/tmp/proj'),
+        join('/tmp/proj', '.agents', '.skill-lock.json'),
+      )
+      assert.equal(
+        lockModule.targetLockPath('claude', '/tmp/proj'),
+        lockModule.getGlobalLockPath(),
+      )
+    })
+
+    it('resolves one directory for project and replit alike', () => {
+      assert.equal(
+        lockModule.targetDir('replit', '/tmp/proj'),
+        lockModule.targetDir('project', '/tmp/proj'),
+      )
+      assert.notEqual(
+        lockModule.targetDir('claude', '/tmp/proj'),
+        lockModule.targetDir('project', '/tmp/proj'),
+      )
+    })
+
+    it('collapses a recorded project agent onto the project directory', () => {
+      const targets = lockModule.targetsFromLockEntry({
+        agents: ['replit', 'project'],
+      })
+      assert.deepEqual(targets, ['replit'])
+    })
+
+    it('keeps distinct directories as separate targets', () => {
+      assert.deepEqual(
+        lockModule.targetsFromLockEntry({ agents: ['claude', 'devin'] }),
+        ['claude', 'devin'],
+      )
+    })
+  })
 })
