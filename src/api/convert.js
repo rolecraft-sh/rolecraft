@@ -24,7 +24,10 @@ function findMdcFiles(dir, entries) {
 
 async function detectSingleFileFormat(inputPath) {
   const content = await readFile(inputPath, 'utf-8').catch(() => {
-    throw new Error(`Source not found: ${inputPath}`)
+    throw new UserError(`Source not found: ${inputPath}`, {
+      suggestion: 'Check the path exists and points at a file or directory.',
+      code: 'CONVERT_SOURCE_NOT_FOUND',
+    })
   })
 
   const format = detectFormat(inputPath)
@@ -34,8 +37,12 @@ async function detectSingleFileFormat(inputPath) {
   if (content.includes('alwaysApply:') || content.includes('globs:'))
     return 'mdc'
 
-  throw new Error(
+  throw new UserError(
     `Cannot detect format. Name file SKILL.md (skill) or use .mdc extension.`,
+    {
+      suggestion: 'Rename the file to SKILL.md, or give it a .mdc extension.',
+      code: 'CONVERT_UNDETECTABLE_FORMAT',
+    },
   )
 }
 
@@ -57,7 +64,11 @@ async function collectSources(expanded) {
     return mdcFiles.map((inputPath) => ({ inputPath, format: 'mdc' }))
   }
 
-  throw new Error(`No SKILL.md or .mdc files found in ${expanded}`)
+  throw new UserError(`No SKILL.md or .mdc files found in ${expanded}`, {
+    suggestion:
+      'Point at a directory that holds a SKILL.md or .mdc files, or at one such file.',
+    code: 'CONVERT_NO_SKILL_FILES',
+  })
 }
 
 function outputPathFor(format, outDir, content) {
@@ -81,7 +92,11 @@ export async function convertApi(source, options = {}) {
   for (const { inputPath, format } of sources) {
     const content = await readFile(inputPath, 'utf-8')
     if (!content.trim()) {
-      throw new Error(`Source is empty: ${inputPath}`)
+      throw new UserError(`Source is empty: ${inputPath}`, {
+        suggestion:
+          'Add frontmatter and body content, or convert another file.',
+        code: 'CONVERT_EMPTY_SOURCE',
+      })
     }
 
     const outPath = outputPathFor(format, outDir, content)

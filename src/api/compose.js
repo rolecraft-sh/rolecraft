@@ -4,6 +4,7 @@ import {
   serializeFrontmatter,
   splitSections,
 } from '../utils/converter.js'
+import { UserError } from '../utils/errors.js'
 
 function mergeSectionLines(existingLines, newLines) {
   const seen = new Set(existingLines)
@@ -35,7 +36,11 @@ function mergeFrontmatter(attrsList) {
 
 export async function apiCompose(sources, options = {}) {
   if (!sources || sources.length < 2) {
-    throw new Error('At least 2 skill files are required for compose.')
+    throw new UserError('At least 2 skill files are required for compose.', {
+      suggestion:
+        'Pass two or more skill files to merge, e.g. `rolecraft compose a/SKILL.md b/SKILL.md`',
+      code: 'COMPOSE_TOO_FEW_FILES',
+    })
   }
 
   const mode = options.mode || 'merge'
@@ -44,7 +49,10 @@ export async function apiCompose(sources, options = {}) {
 
   for (const src of sources) {
     const raw = await readFile(src, 'utf-8').catch(() => {
-      throw new Error(`Skill file not found: ${src}`)
+      throw new UserError(`Skill file not found: ${src}`, {
+        suggestion: 'Check the path, and that the file is readable.',
+        code: 'SKILL_FILE_NOT_FOUND',
+      })
     })
     const { attrs, body } = parseFrontmatter(raw)
     allAttrs.push(attrs)

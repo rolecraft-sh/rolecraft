@@ -198,7 +198,11 @@ describe('convertApi', () => {
   it('rejects a nonexistent source', async () => {
     await assert.rejects(
       () => convertApi(join(tempDir, 'nonexistent'), { output: tempDir }),
-      /Source not found:/,
+      (err) => {
+        assert.match(err.message, /Source not found:/)
+        assert.equal(err.userCode, 'CONVERT_SOURCE_NOT_FOUND')
+        return true
+      },
     )
   })
 
