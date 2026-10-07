@@ -273,4 +273,41 @@ describe('api update', () => {
       },
     )
   })
+
+  // #346: the filesystem fallback reported `replit` and `project` as two
+  // targets even though both resolve to `<cwd>/.agents/skills`, installing the
+  // same directory twice and writing the entry to both lockfiles.
+  it('resolves a project agent and project to one target', async () => {
+    await writeLock(tempDir, {})
+    const projectDir = join(tempDir, 'replit-project')
+    const sourceDir = join(tempDir, 'replit-source')
+    await mkdir(sourceDir, { recursive: true })
+    await writeFile(
+      join(sourceDir, 'SKILL.md'),
+      '---\nname: Replit\nslug: replit-skill\n---\n\nReplit skill',
+    )
+    // Legacy entry: no `agents`, so the scan runs. The skill sits in the
+    // project directory, which is both replit's and project's directory.
+    const projectSkill = join(projectDir, '.agents', 'skills', 'replit-skill')
+    await mkdir(projectSkill, { recursive: true })
+    await writeFile(join(projectSkill, 'SKILL.md'), 'Old')
+    await writeLock(projectDir, {
+      'replit-skill': { source: sourceDir, sourceType: 'local' },
+    })
+
+    const result = await apiUpdate('replit-skill', projectDir)
+
+    assert.equal(result.targets.length, 1)
+    assert.equal(result.results.length, 1)
+    assert.equal(result.results[0].path, join(projectSkill))
+
+    const globalLock = JSON.parse(
+      await readFile(join(tempDir, '.agents', '.skill-lock.json'), 'utf-8'),
+    )
+    assert.deepEqual(
+      Object.keys(globalLock.skills),
+      [],
+      'a project install must not gain a global lock entry',
+    )
+  })
 })

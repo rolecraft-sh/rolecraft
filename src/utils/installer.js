@@ -13,12 +13,11 @@ import { join, relative, dirname } from 'node:path'
 import { UserError } from './errors.js'
 import {
   addSkillToLock,
-  getGlobalLockPath,
-  getProjectLockPath,
   computeFileHashes,
-  getDirForAgent,
   normalizeSlug,
   readLock,
+  targetDir,
+  targetLockPath,
 } from './lockfile.js'
 import { resolveAgent } from '../agents.js'
 
@@ -145,9 +144,7 @@ export async function removeLatestBackup(slug) {
 }
 
 function getTargetSkillDir(target, cwd) {
-  return target === 'project'
-    ? join(cwd, '.agents', 'skills')
-    : getDirForAgent(target)
+  return targetDir(target, cwd)
 }
 
 async function assertNoSlugCollision(slug, targets, cwd = process.cwd()) {
@@ -156,9 +153,7 @@ async function assertNoSlugCollision(slug, targets, cwd = process.cwd()) {
     targets.map((target) => getTargetSkillDir(target, cwd)),
   )
   const lockPaths = new Set(
-    targets.map((target) =>
-      target === 'project' ? getProjectLockPath(cwd) : getGlobalLockPath(),
-    ),
+    targets.map((target) => targetLockPath(target, cwd)),
   )
 
   for (const lockPath of lockPaths) {
@@ -219,7 +214,7 @@ export async function installSkill(
         return null
       }
 
-      baseDir = agent.getDir()
+      baseDir = agent.getDir(cwd)
       label = agent.label
     }
 
@@ -304,8 +299,7 @@ export async function installSkill(
       }
     }
 
-    const lockPath =
-      target === 'project' ? getProjectLockPath(cwd) : getGlobalLockPath()
+    const lockPath = targetLockPath(target, cwd)
 
     await addSkillToLock(
       slug,

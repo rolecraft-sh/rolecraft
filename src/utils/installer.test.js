@@ -609,6 +609,72 @@ describe('installer', () => {
     assert.equal(results.length, 2)
   })
 
+  // #332: `--devin` is not the string 'project', but its directory is inside
+  // the project, so its entry belongs in the project lockfile.
+  it('records a project-scoped agent install in the project lockfile', async () => {
+    const projectDir = mkdtempSync(join(tmpdir(), 'rolecraft-devin-'))
+    try {
+      mkdirSync(join(projectDir, '.agents'), { recursive: true })
+
+      const results = await installerModule.installSkill(
+        { ...resolvedSkill, slug: 'devin/only', sourcePath: 'devin/only' },
+        ['devin'],
+        'copy',
+        projectDir,
+      )
+
+      assert.equal(results.length, 1)
+      assert.ok(
+        existsSync(
+          join(projectDir, '.devin', 'skills', 'devin-only', 'SKILL.md'),
+        ),
+      )
+
+      const projectLock = JSON.parse(
+        readFileSync(join(projectDir, '.agents', '.skill-lock.json'), 'utf-8'),
+      )
+      assert.ok(projectLock.skills['devin/only'])
+      assert.equal(projectLock.skills['devin/only'].agents[0], 'devin')
+
+      const globalLock = JSON.parse(
+        readFileSync(join(tempDir, '.agents', '.skill-lock.json'), 'utf-8'),
+      )
+      assert.equal(globalLock.skills['devin-only'], undefined)
+    } finally {
+      await rm(projectDir, { recursive: true, force: true })
+    }
+  })
+
+  // #346: replit's directory is `<cwd>/.agents/skills`, the same one `project`
+  // means. One directory, one install, one lock entry.
+  it('installs once when a project agent shares the project directory', async () => {
+    const projectDir = mkdtempSync(join(tmpdir(), 'rolecraft-replit-'))
+    try {
+      mkdirSync(join(projectDir, '.agents'), { recursive: true })
+
+      const results = await installerModule.installSkill(
+        { ...resolvedSkill, slug: 'replit/only', sourcePath: 'replit/only' },
+        ['replit', 'project'],
+        'copy',
+        projectDir,
+      )
+
+      assert.equal(results.length, 2)
+      assert.equal(
+        results[0].path,
+        results[1].path,
+        'both targets resolve to one directory',
+      )
+
+      const projectLock = JSON.parse(
+        readFileSync(join(projectDir, '.agents', '.skill-lock.json'), 'utf-8'),
+      )
+      assert.ok(projectLock.skills['replit/only'])
+    } finally {
+      await rm(projectDir, { recursive: true, force: true })
+    }
+  })
+
   it('skips unknown targets', async () => {
     const results = await installerModule.installSkill(resolvedSkill, [
       'unknown',
