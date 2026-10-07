@@ -1,4 +1,4 @@
-import { describe, it, before, after, mock } from 'node:test'
+import { describe, it, before, after, beforeEach, mock } from 'node:test'
 import assert from 'node:assert/strict'
 import { mkdtempSync, existsSync } from 'node:fs'
 import { mkdir, rm, writeFile, readFile } from 'node:fs/promises'
@@ -758,6 +758,13 @@ describe('profile apply', () => {
     process.env.HOME = origHome
   })
 
+  // `profile apply` merges into whatever is on disk (#408), so a config left
+  // behind by an earlier test would surface as a conflict. Start each test
+  // from no config; the merge tests below write their own.
+  beforeEach(async () => {
+    await rm(join(applyDir, '.opencode.json'), { force: true })
+  })
+
   describe('createBackup', () => {
     it('returns null for agent without known config paths', async () => {
       const result = await applyModule.createBackup('nonexistent')
@@ -776,7 +783,7 @@ describe('profile apply', () => {
     })
 
     it('returns null when no config exists', async () => {
-      await rm(join(applyDir, '.opencode.json'))
+      await rm(join(applyDir, '.opencode.json'), { force: true })
       const result = await applyModule.createBackup('agents')
       assert.equal(result, null)
     })
@@ -896,7 +903,7 @@ describe('profile apply', () => {
 
       assert.deepEqual(result[0].blocked, [])
       const written = JSON.parse(await readFile(result[0].path, 'utf-8'))
-      assert.deepEqual(written.mcpServers, { evil: FLAGGED_MCP_SERVER })
+      assert.deepEqual(written.mcpServers.evil, FLAGGED_MCP_SERVER)
       assert.ok(errors.some((e) => e.includes('--yes forcing MCP server')))
     })
   })
@@ -1055,6 +1062,10 @@ describe('profile apply', () => {
     })
 
     it('applies a complete entry', async () => {
+      await writeFile(
+        join(applyDir, '.opencode.json'),
+        JSON.stringify({ model: 'gpt-4o' }),
+      )
       const entry = {
         config: { global: { model: 'gpt-4', instructions: ['AGENTS.md'] } },
         mcpServers: {
@@ -1065,6 +1076,7 @@ describe('profile apply', () => {
 
       const result = await applyModule.applyProfileEntry('agents', entry, {
         skipSkills: true,
+        resolveConflicts: () => ({ model: 'snapshot' }),
       })
       assert.equal(result.agent, 'agents')
       assert.ok(result.config.applied.length > 0)
@@ -1088,7 +1100,7 @@ describe('profile apply', () => {
 
       assert.deepEqual(
         result.config.applied.map((a) => Object.keys(a).sort()),
-        [['path', 'scope']],
+        [['path', 'previous', 'scope']],
       )
       assert.deepEqual(
         result.config.blocked.map((b) => [b.scope, b.name]),
@@ -1216,6 +1228,166 @@ describe('profile apply', () => {
         () => applyModule.applyProfileData({ agents: 'string' }),
         /must contain an "agents" object/,
       )
+    })
+  })
+
+  // #408: `profile apply` used to serialize the snapshot over the config file,
+  // silently dropping anything the user added afterwards.
+  describe('config merge', () => {
+    const configPath = () => join(applyDir, '.opencode.json')
+
+    const writeCurrent = (config) =>
+      writeFile(configPath(), JSON.stringify(config, null, 2))
+
+    const readCurrent = async () =>
+      JSON.parse(await readFile(configPath(), 'utf-8'))
+
+    it('keeps a setting the profile never captured', async () => {
+      await writeCurrent({
+        model: 'profile-model',
+        mcpServers: {
+          'my-manual-server': { command: 'npx', args: ['-y', 'x'] },
+        },
+      })
+
+      await applyModule.applyAgentConfig('agents', {
+        global: { model: 'profile-model', theme: 'dark' },
+      })
+
+      const written = await readCurrent()
+      assert.equal(written.model, 'profile-model')
+      assert.equal(written.theme, 'dark')
+      assert.ok(written.mcpServers['my-manual-server'])
+    })
+
+    it('merges nested objects key by key', async () => {
+      await writeCurrent({
+        mcpServers: { kept: { command: 'a', args: ['x'] } },
+      })
+
+      await applyModule.applyAgentConfig('agents', {
+        global: { mcpServers: { added: { command: 'b' } } },
+      })
+
+      const written = await readCurrent()
+      assert.deepEqual(Object.keys(written.mcpServers).sort(), [
+        'added',
+        'kept',
+      ])
+    })
+
+    it('reports a conflict and writes nothing without a resolver', async () => {
+      await writeCurrent({ model: 'hand-edited' })
+
+      await assert.rejects(
+        () =>
+          applyModule.applyAgentConfig('agents', {
+            global: { model: 'profile-model' },
+          }),
+        (err) => {
+          assert.equal(err.userCode, 'PROFILE_CONFLICT')
+          assert.match(err.detail, /model/)
+          return true
+        },
+      )
+
+      assert.deepEqual(await readCurrent(), { model: 'hand-edited' })
+    })
+
+    it('reports a nested conflict on the deepest differing key', async () => {
+      await writeCurrent({
+        mcpServers: { server: { command: 'old', args: ['-y'] } },
+      })
+
+      const seen = []
+      await applyModule.applyAgentConfig(
+        'agents',
+        {
+          global: { mcpServers: { server: { command: 'new', args: ['-y'] } } },
+        },
+        {
+          resolveConflicts: ({ conflicts }) => {
+            seen.push(...conflicts.map((c) => c.key))
+            return { 'mcpServers.server.command': 'current' }
+          },
+        },
+      )
+
+      assert.deepEqual(seen, ['mcpServers.server.command'])
+      const written = await readCurrent()
+      assert.equal(written.mcpServers.server.command, 'old')
+    })
+
+    it("keeps the current value when the resolver chooses 'current'", async () => {
+      await writeCurrent({ model: 'hand-edited', other: 'keep' })
+
+      await applyModule.applyAgentConfig(
+        'agents',
+        { global: { model: 'profile-model', theme: 'dark' } },
+        { resolveConflicts: () => ({ model: 'current' }) },
+      )
+
+      const written = await readCurrent()
+      assert.equal(written.model, 'hand-edited')
+      assert.equal(written.other, 'keep')
+      assert.equal(written.theme, 'dark')
+    })
+
+    it("applies the profile value when the resolver chooses 'snapshot'", async () => {
+      await writeCurrent({ model: 'hand-edited', other: 'keep' })
+
+      await applyModule.applyAgentConfig(
+        'agents',
+        { global: { model: 'profile-model' } },
+        { resolveConflicts: () => ({ model: 'snapshot' }) },
+      )
+
+      const written = await readCurrent()
+      assert.equal(written.model, 'profile-model')
+      assert.equal(written.other, 'keep')
+    })
+
+    it('refuses to overwrite a config file that is not valid JSON', async () => {
+      await writeFile(configPath(), '{ not json')
+
+      await assert.rejects(
+        () =>
+          applyModule.applyAgentConfig('agents', { global: { model: 'x' } }),
+        (err) => err.userCode === 'PROFILE_CONFIG_UNREADABLE',
+      )
+
+      assert.equal(await readFile(configPath(), 'utf-8'), '{ not json')
+    })
+
+    it('restores the first agent config when a later agent fails', async () => {
+      await writeCurrent({ model: 'original' })
+      const geminiPath = join(applyDir, '.gemini', 'config', 'config.json')
+      await mkdir(join(applyDir, '.gemini', 'config'), { recursive: true })
+      await writeFile(geminiPath, '{ not json')
+
+      await assert.rejects(() =>
+        applyModule.applyProfileData({
+          agents: {
+            agents: { config: { global: { model: 'from-profile' } } },
+            gemini: { config: { global: { model: 'from-profile' } } },
+          },
+        }),
+      )
+
+      assert.deepEqual(await readCurrent(), { model: 'original' })
+    })
+
+    it('does not leak rollback material into the result', async () => {
+      await writeCurrent({ model: 'same' })
+
+      const results = await applyModule.applyProfileData({
+        agents: { agents: { config: { global: { model: 'same' } } } },
+      })
+
+      assert.deepEqual(Object.keys(results.agents.config.applied[0]).sort(), [
+        'path',
+        'scope',
+      ])
     })
   })
 

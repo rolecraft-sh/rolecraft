@@ -61,7 +61,9 @@ The linked profile is automatically discovered when `rolecraft profile apply` ru
 
 ## Safety: backups
 
-Every `profile apply` creates a timestamped backup of your current config in `~/.agents/backups/` before making changes. Rollback is a manual restore from that directory.
+Every `profile apply` creates a timestamped backup of your current config in `~/.agents/backups/` before making changes.
+
+`apply` merges the profile into your current config rather than replacing it, so settings you added after the snapshot survive. Where the two disagree on the same setting, the command shows both values and asks which to keep — nothing is written until you answer, and a failure part-way through restores what it had already written.
 
 ## Commands reference
 

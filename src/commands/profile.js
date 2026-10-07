@@ -25,9 +25,37 @@ import {
   writeProfile,
 } from '../utils/profile.js'
 import agents from '../agents.js'
+import { askQuestion } from '../utils/tui.js'
 
 const LINK_FILE = '.agent-profile.json'
 const LINK_DIRS = [process.cwd(), homedir()]
+
+function formatConflictValue(value) {
+  const text = JSON.stringify(value)
+  if (text === undefined) return String(value)
+  return text.length > 120 ? `${text.slice(0, 117)}...` : text
+}
+
+// `profile apply` merges into the config on disk; a setting the user changed
+// since the snapshot is theirs to decide, one key at a time. Non-TTY falls
+// through askQuestion's guard and aborts before anything is written.
+async function promptConflictResolutions({ agent, scope, conflicts }) {
+  console.error(
+    `\n⚠️  ${agent} (${scope}): ${conflicts.length} setting(s) changed since this profile was saved:`,
+  )
+
+  const decisions = {}
+  for (const conflict of conflicts) {
+    console.error(`\n   ${conflict.key}`)
+    console.error(`     profile: ${formatConflictValue(conflict.snapshot)}`)
+    console.error(`     current:  ${formatConflictValue(conflict.current)}`)
+    const answer = await askQuestion(
+      '     keep current, or use profile value? [k]eep / [p]rofile (default keep): ',
+    )
+    decisions[conflict.key] = answer === 'p' ? 'snapshot' : 'current'
+  }
+  return decisions
+}
 
 const AGENT_FLAGS = ['--agents', ...agents.map((a) => `--${a.flag}`), '--all']
 const AGENT_MAP = Object.fromEntries(agents.map((a) => [`--${a.flag}`, a.flag]))
@@ -176,7 +204,10 @@ export async function profileApplyCommand(name, options) {
     return
   }
 
-  const result = await apiProfileApply(name, options)
+  const result = await apiProfileApply(name, {
+    ...options,
+    resolveConflicts: promptConflictResolutions,
+  })
 
   const formattedLines = []
   if (result.results) {

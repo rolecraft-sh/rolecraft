@@ -62,6 +62,7 @@ export async function apiProfileApply(name, options = {}) {
     skipMcp: options.skipMcp,
     skipSkills: options.skipSkills,
     yes: options.yes,
+    resolveConflicts: options.resolveConflicts,
   })
   return { name, results }
 }
