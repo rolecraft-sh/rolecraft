@@ -15,11 +15,18 @@ import {
 } from '../utils/security.js'
 
 export async function apiCi(cwd = process.cwd()) {
-  const [globalLock, projectLock, mcpLock] = await Promise.all([
+  const [globalLock, projectLock, mcpLockResult] = await Promise.all([
     readLock(),
     readLock(getProjectLockPath(cwd)).catch(() => ({ skills: {} })),
-    readMcpLock(),
+    // A corrupt MCP lock is one finding, not a reason to abandon the whole
+    // workspace (#367): it has nothing to do with the skills being installed.
+    // It lands in `mcpFailed` below, which keeps `allPassed` false and the
+    // command's exit code non-zero, so a degraded run cannot pass for a clean
+    // one. `mcp check` deliberately still fails loudly — inspecting MCP state
+    // is the only thing it does.
+    readMcpLock().catch((error) => ({ error })),
   ])
+  const mcpLock = mcpLockResult.error ? { servers: {} } : mcpLockResult
 
   const allSkills = Object.fromEntries(
     Object.entries(globalLock.skills).map(([slug, entry]) => [
@@ -89,6 +96,12 @@ export async function apiCi(cwd = process.cwd()) {
 
   const mcpInstalled = []
   const mcpFailed = []
+
+  if (mcpLockResult.error)
+    mcpFailed.push({
+      name: '<mcp-lock>',
+      reason: mcpLockResult.error.message,
+    })
 
   for (const [name, entry] of mcpEntries) {
     if (!entry.source) {
