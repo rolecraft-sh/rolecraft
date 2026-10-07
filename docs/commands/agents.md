@@ -22,7 +22,6 @@ Each agent entry includes:
 | `flag` | CLI flag used with install (e.g. `--claude`, `--cursor`) |
 | `name` | Agent identifier |
 | `skillInstallScope` | Where skills are installed (global path or project path) |
-| `projectScoped` | `true` when the agent's skill directory is inside the project, so its installs are recorded in the project lockfile |
 | `supportLevel` | `verified`, `community`, `legacy`, or `experimental` |
 | `mcpSupport` | Whether MCP servers are supported and in which config format |
 | `instructionFormat` | Skill instruction file format (`skill-md`, `mdc`, `agents-md`, etc.) |
