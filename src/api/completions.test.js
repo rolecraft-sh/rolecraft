@@ -1,7 +1,11 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
-import { completionApi } from './completions.js'
-import { bashScript, zshScript, fishScript } from '../commands/completions.js'
+import {
+  completionApi,
+  bashScript,
+  zshScript,
+  fishScript,
+} from './completions.js'
 
 describe('completionApi', () => {
   it('returns the bash completion script', () => {
