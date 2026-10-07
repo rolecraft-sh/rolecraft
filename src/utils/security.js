@@ -19,7 +19,7 @@ const SEP = String.raw`(?:[ \t]|\\\r?\n)+`
 const QUOTED = String.raw`'[^'\n]{0,200}'|"[^"\n]{0,200}"`
 const FLAG = String.raw`-(?:[^\s'"|;&]|${QUOTED})*`
 const VALUE = String.raw`(?:${QUOTED}|[^\s'"|;&-][^\s'"|;&]*)`
-const FLAGS = String.raw`(?:${SEP}${FLAG}(?:${SEP}${VALUE})?)*?`
+const FLAGS = `(?:${SEP}${FLAG}(?:${SEP}${VALUE})?)*?`
 // - Python reading the download as data is not execution, but only for a
 //   module that provably only formats it. Anything else given to `python3` —
 //   a `-c` program, `-m code`, or any other module — can run what it reads, so
