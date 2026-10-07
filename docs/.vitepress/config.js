@@ -4,21 +4,35 @@ import { createRequire } from 'node:module'
 const require = createRequire(import.meta.url)
 const { version } = require('../../package.json')
 
+const SITE = 'https://rolecraft-sh.github.io'
+const DESCRIPTION = 'Install AI agent skills as roles & behaviors — from any source. Zero-dependency CLI for 90 agents.'
+
 export default defineConfig({
   title: `RoleCraft v${version}`,
-  description: 'Install AI agent skills as roles & behaviors — from any source',
+  description: DESCRIPTION,
   base: '/rolecraft/',
   lastUpdated: true,
+  transformHead({ page, siteConfig }) {
+    const path = page.replace(/(^|\/)index\.md$/, '$1').replace(/\.md$/, '')
+    const url = `${SITE}${siteConfig.site.base}${path}`
+    return [
+      ['link', { rel: 'canonical', href: url }],
+      ['meta', { property: 'og:url', content: url }],
+    ]
+  },
   head: [
     ['link', { rel: 'icon', type: 'image/png', href: '/rolecraft/favicon.png' }],
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:site_name', content: 'RoleCraft' }],
     ['meta', { property: 'og:title', content: 'RoleCraft — AI agent skill & MCP manager' }],
-    ['meta', { property: 'og:description', content: 'Install AI agent skills as roles & behaviors — from any source. Zero-dependency CLI for 87 agents.' }],
-    ['meta', { property: 'og:url', content: 'https://rolecraft-sh.github.io/rolecraft/' }],
-    ['meta', { name: 'twitter:card', content: 'summary' }],
+    ['meta', { property: 'og:description', content: DESCRIPTION }],
+    ['meta', { property: 'og:image', content: `${SITE}/rolecraft/og.jpg` }],
+    ['meta', { property: 'og:image:width', content: '1200' }],
+    ['meta', { property: 'og:image:height', content: '630' }],
+    ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
     ['meta', { name: 'twitter:title', content: 'RoleCraft — AI agent skill & MCP manager' }],
-    ['meta', { name: 'twitter:description', content: 'Install AI agent skills as roles & behaviors — from any source. Zero-dependency CLI for 87 agents.' }],
+    ['meta', { name: 'twitter:description', content: DESCRIPTION }],
+    ['meta', { name: 'twitter:image', content: `${SITE}/rolecraft/og.jpg` }],
     ['style', {}, ':root { --vp-nav-logo-height: 48px; }'],
     ['style', {}, `
       .VPHero .image-src { max-width: 520px !important; max-height: none !important; }
