@@ -291,6 +291,120 @@ describe('search command', () => {
     assert.ok(logs.some((l) => l.includes('1 result(s) found')))
   })
 
+  // #392: `--json` is the only output an automation gets, so nothing else may
+  // reach stdout and an error has to be machine-readable too.
+  describe('--json', () => {
+    const payload = {
+      items: [
+        {
+          full_name: 'acme/code-review',
+          description: 'A skill description',
+          stargazers_count: 42,
+          language: 'JavaScript',
+        },
+      ],
+    }
+
+    it('prints the query, source, count and results', async () => {
+      mockFetch(200, payload)
+
+      const { logs, restore } = capture('log')
+      try {
+        await searchModule.searchCommand('code-review', { json: true })
+      } finally {
+        restore()
+      }
+
+      assert.equal(logs.length, 1)
+      const out = JSON.parse(logs[0])
+      assert.equal(out.query, 'code-review')
+      assert.equal(out.source, 'github')
+      assert.equal(out.count, 1)
+      assert.equal(out.results[0].full_name, 'acme/code-review')
+      assert.equal(out.results[0].stargazers_count, 42)
+    })
+
+    it('prints an empty result set rather than a human message', async () => {
+      mockSequentialFetch([{ status: 200, body: { items: [] } }])
+
+      const { logs, restore } = capture('log')
+      try {
+        await searchModule.searchCommand('nothing-here', { json: true })
+      } finally {
+        restore()
+      }
+
+      const out = JSON.parse(logs[0])
+      assert.equal(out.count, 0)
+      assert.deepEqual(out.results, [])
+    })
+
+    it('does not prompt when --json is combined with --interactive', async () => {
+      mockFetch(200, payload)
+      searchModule.setPromptUser(() => {
+        throw new Error('must not prompt in json mode')
+      })
+
+      const { logs, restore } = capture('log')
+      try {
+        await searchModule.searchCommand('code-review', {
+          json: true,
+          interactive: true,
+        })
+      } finally {
+        restore()
+      }
+
+      assert.equal(JSON.parse(logs[0]).count, 1)
+    })
+
+    it('reports a rate limit as an error field and a non-zero exit', async () => {
+      searchModule.setFetch(() =>
+        Promise.resolve({ status: 403, ok: false, json: () => ({}) }),
+      )
+
+      const { logs, restore } = capture('log')
+      try {
+        await searchModule.searchCommand('code-review', { json: true })
+      } finally {
+        restore()
+      }
+
+      const out = JSON.parse(logs[0])
+      assert.match(out.error, /rate limit/)
+      assert.deepEqual(out.results, [])
+      assert.equal(process.exitCode, 1)
+    })
+
+    it('prints skills.sh results with the same shape', async () => {
+      searchModule.setFetch(() =>
+        Promise.resolve({
+          status: 200,
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              skills: [{ source: 'acme', skillId: 'react', installs: 7 }],
+            }),
+        }),
+      )
+
+      const { logs, restore } = capture('log')
+      try {
+        await searchModule.searchCommand('react', {
+          json: true,
+          skillsSh: true,
+        })
+      } finally {
+        restore()
+      }
+
+      const out = JSON.parse(logs[0])
+      assert.equal(out.source, 'skills.sh')
+      assert.equal(out.count, 1)
+      assert.equal(out.results[0].skillId, 'react')
+    })
+  })
+
   describe('interactive mode', () => {
     afterEach(() => {
       searchModule.setFetch(globalThis.fetch)

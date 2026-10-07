@@ -145,6 +145,7 @@ export const COMMANDS = [
     flags: [
       { flag: 'interactive', desc: 'Choose and install from results' },
       { flag: 'skills-sh', desc: 'Search skills.sh instead of GitHub' },
+      { flag: 'json', desc: 'Output structured JSON' },
       YES,
     ],
   },

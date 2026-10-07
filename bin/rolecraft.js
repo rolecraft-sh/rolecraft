@@ -378,7 +378,9 @@ const HANDLERS = {
     const pos = parsePositionals(args)
     const query = pos[0]
     if (!query) {
-      console.error('Usage: rolecraft search <query> [--interactive]')
+      console.error(
+        'Usage: rolecraft search <query> [--interactive] [--skills-sh] [--json]',
+      )
       throw new UserError('Missing query argument.', {
         suggestion: 'rolecraft search <query>',
         code: 'USAGE',
@@ -387,6 +389,7 @@ const HANDLERS = {
     return searchCommand(query, {
       interactive: args.includes('--interactive'),
       skillsSh: args.includes('--skills-sh'),
+      json: args.includes('--json'),
       yes: args.includes('--yes') || args.includes('-y'),
     })
   },
