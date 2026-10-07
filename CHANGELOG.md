@@ -2,6 +2,49 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.6.0] - 2026-10-07
+
+### Added
+- add --json output to search by @sametcelikbicak in [#439](https://github.com/rolecraft-sh/rolecraft/pull/439)
+- add grok, muse and posit; correct antigravity paths and verify zcode and pochi by @sametcelikbicak in [#430](https://github.com/rolecraft-sh/rolecraft/pull/430)
+
+### Fixed
+- mark pages deployments inactive before deleting them by @sametcelikbicak in [#444](https://github.com/rolecraft-sh/rolecraft/pull/444)
+- refuse lockfile slugs that escape the skills directory by @sametcelikbicak in [#443](https://github.com/rolecraft-sh/rolecraft/pull/443)
+- report a corrupt MCP lock as a ci finding instead of a crash by @sametcelikbicak in [#437](https://github.com/rolecraft-sh/rolecraft/pull/437)
+- record project-scoped agent installs in the project lockfile by @sametcelikbicak in [#436](https://github.com/rolecraft-sh/rolecraft/pull/436)
+- merge profile apply into config and ask on conflicts by @sametcelikbicak in [#435](https://github.com/rolecraft-sh/rolecraft/pull/435)
+- align doctor checks with skill lock paths by @kkkhs in [#434](https://github.com/rolecraft-sh/rolecraft/pull/434)
+- escape angle brackets in agent notes so the docs build by @sametcelikbicak in [#433](https://github.com/rolecraft-sh/rolecraft/pull/433)
+- clone gh: MCP servers into ~/.agents/mcp instead of the OS temp dir by @sametcelikbicak in [#428](https://github.com/rolecraft-sh/rolecraft/pull/428)
+- never report success when the CLI did nothing  by @sametcelikbicak in [#426](https://github.com/rolecraft-sh/rolecraft/pull/426)
+- widen prompt-injection detection to common phrasings by @sametcelikbicak in [#424](https://github.com/rolecraft-sh/rolecraft/pull/424)
+- verify content hashes in ci by @sametcelikbicak in [#423](https://github.com/rolecraft-sh/rolecraft/pull/423)
+- derive install targets from the lockfile entry by @sametcelikbicak in [#422](https://github.com/rolecraft-sh/rolecraft/pull/422)
+- hash and install skill files in subdirectories by @sametcelikbicak in [#421](https://github.com/rolecraft-sh/rolecraft/pull/421)
+- honor --dry-run in mcp remove by @sametcelikbicak in [#420](https://github.com/rolecraft-sh/rolecraft/pull/420)
+- raise unscanned_source for MCP sources the scanner never reads by @sametcelikbicak in [#419](https://github.com/rolecraft-sh/rolecraft/pull/419)
+- refuse corrupt MCP config files by @kkkhs in [#417](https://github.com/rolecraft-sh/rolecraft/pull/417)
+- resolve agent identity by flag or name when capturing a profile by @sametcelikbicak in [#416](https://github.com/rolecraft-sh/rolecraft/pull/416)
+- scan setup mcp servers by @kkkhs in [#415](https://github.com/rolecraft-sh/rolecraft/pull/415)
+- run the security scan gate on every path that installs a skill by @sametcelikbicak in [#412](https://github.com/rolecraft-sh/rolecraft/pull/412)
+- refuse non-https, non-default-port and credentialed profile import URLs by @muraa-p in [#386](https://github.com/rolecraft-sh/rolecraft/pull/386)
+
+### Changed
+- make the setup command delegate to setupApi by @sametcelikbicak in [#442](https://github.com/rolecraft-sh/rolecraft/pull/442)
+- move completion generators into the api layer by @sametcelikbicak in [#441](https://github.com/rolecraft-sh/rolecraft/pull/441)
+- finish UserError migration in resolver, profile, compose, convert by @sametcelikbicak in [#440](https://github.com/rolecraft-sh/rolecraft/pull/440)
+- make npm test run the same suite as CI by @sametcelikbicak in [#438](https://github.com/rolecraft-sh/rolecraft/pull/438)
+- bump @vue/server-renderer and vue in [#432](https://github.com/rolecraft-sh/rolecraft/pull/432)
+- bump source-map-js from 1.2.1 to 1.2.2 in [#431](https://github.com/rolecraft-sh/rolecraft/pull/431)
+- derive flags, help and completions from one command spec by @sametcelikbicak in [#427](https://github.com/rolecraft-sh/rolecraft/pull/427)
+- delegate convert command to convertApi by @samiullah-636 in [#411](https://github.com/rolecraft-sh/rolecraft/pull/411)
+- move agent detection to shared utility by @nikhiljangid120 in [#399](https://github.com/rolecraft-sh/rolecraft/pull/399)
+- check doc values before merge instead of repairing after by @sametcelikbicak in [#398](https://github.com/rolecraft-sh/rolecraft/pull/398)
+- update changelog and version for v2.5.0 by @sametcelikbicak in [#396](https://github.com/rolecraft-sh/rolecraft/pull/396)
+
+### Documentation
+- correct security and reproducibility claims, document what the scan does not cover by @sametcelikbicak in [#413](https://github.com/rolecraft-sh/rolecraft/pull/413)
 ## [v2.5.0] - 2026-10-02
 
 ### Added
