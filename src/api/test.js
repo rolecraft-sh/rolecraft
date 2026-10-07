@@ -3,6 +3,8 @@ import { join, basename } from 'node:path'
 import { homedir } from 'node:os'
 import { parseFrontmatter } from '../utils/converter.js'
 import { readLock, normalizeSlug } from '../utils/lockfile.js'
+import { assertSafeSlug } from '../utils/installer.js'
+import { UserError } from '../utils/errors.js'
 
 const ASSERTIONS = [
   {
@@ -303,12 +305,30 @@ async function testAllSkills(options) {
 
   for (const slug of allSlugs) {
     const normSlug = normalizeSlug(slug)
+    const projectDir = join(process.cwd(), '.agents', 'skills', normSlug)
     let skillFile = join(agentsDir, normSlug, 'SKILL.md')
 
-    if (!existsSync(skillFile)) {
-      const projectDir = join(process.cwd(), '.agents', 'skills', normSlug)
-      skillFile = join(projectDir, 'SKILL.md')
+    // `normalizeSlug` replaces `/` and nothing else, so a lockfile key of `..`
+    // (or `..\` on Windows) walks out of the skills directory and the entry
+    // decides which file gets scored (#375).
+    try {
+      assertSafeSlug(slug, agentsDir, skillFile)
+      assertSafeSlug(slug, join(process.cwd(), '.agents', 'skills'), projectDir)
+    } catch (err) {
+      if (err instanceof UserError && err.userCode === 'UNSAFE_SLUG') {
+        results.push({
+          skill: slug,
+          score: 0,
+          grade: 'F',
+          label: 'Unusable',
+          error: `unsafe slug: ${err.message}`,
+        })
+        continue
+      }
+      throw err
     }
+
+    if (!existsSync(skillFile)) skillFile = join(projectDir, 'SKILL.md')
 
     if (!existsSync(skillFile)) {
       results.push({

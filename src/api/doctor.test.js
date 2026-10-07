@@ -52,6 +52,7 @@ describe('api doctor', () => {
       orphaned: 0,
       missingDirs: 0,
       hashMismatches: 0,
+      unsafeSlugs: [],
       verified: 0,
       brokenSymlinks: 0,
     })
@@ -200,5 +201,33 @@ describe('api doctor', () => {
     } finally {
       process.chdir(originalCwd)
     }
+  })
+
+  // #375: a lockfile is repo content in a cloned repo, and `normalizeSlug`
+  // replaces only `/`, so a `..` key walks out of the skills directory and the
+  // entry decides what doctor reads and hashes.
+  it('reports an unsafe slug instead of reading outside the skills tree', async () => {
+    const projectDir = join(tempDir, 'unsafe-project')
+    await mkdir(join(projectDir, '.agents'), { recursive: true })
+    // The file the `..` slug resolves to: outside skills/, inside .agents/.
+    await writeFile(join(projectDir, '.agents', 'SKILL.md'), 'outside\n')
+    await writeFile(
+      join(projectDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: { '..': { slug: '..', agents: ['project'] } },
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
+
+    const result = await apiDoctor(projectDir)
+
+    assert.deepEqual(result.skills.unsafeSlugs, ['..'])
+    assert.equal(result.skills.verified, 0)
+    assert.equal(result.skills.missingDirs, 0)
+    assert.equal(result.skills.hashMismatches, 0)
+    const integrity = result.checks.find((c) => c.label === 'Skill integrity')
+    assert.match(integrity.detail, /unsafe slug/)
   })
 })

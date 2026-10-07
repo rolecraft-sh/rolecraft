@@ -18,6 +18,8 @@ import {
   readSkillFiles,
   getDirForAgent,
 } from '../utils/lockfile.js'
+import { assertSafeSlug } from '../utils/installer.js'
+import { UserError } from '../utils/errors.js'
 import { detectAgents } from '../utils/agent-detection.js'
 import { parseFrontmatter, splitSections } from '../utils/converter.js'
 import { expandTilde } from '../utils/paths.js'
@@ -275,9 +277,22 @@ function lockEntrySkillDirs(slug, entry, cwd) {
   const recordedAgents = Array.isArray(entry?.agents) ? entry.agents : []
   const dirs = []
   const seen = new Set()
+  let unsafe = false
 
   function addDir(baseDir) {
     const dir = join(baseDir, normSlug)
+    // A lockfile is repo content in a cloned repo, and `normalizeSlug` only
+    // replaces `/`, so `..` and `..\` survive into the joined path. Without
+    // this the entry decides which files `doctor` reads and hashes (#375).
+    try {
+      assertSafeSlug(slug, baseDir, dir)
+    } catch (err) {
+      if (err instanceof UserError && err.userCode === 'UNSAFE_SLUG') {
+        unsafe = true
+        return
+      }
+      throw err
+    }
     if (seen.has(dir)) return
     seen.add(dir)
     dirs.push(dir)
@@ -293,13 +308,20 @@ function lockEntrySkillDirs(slug, entry, cwd) {
     addDir(join(cwd, '.agents', 'skills'))
   }
 
-  return dirs
+  return { dirs, unsafe }
 }
 
 function detectSkillConflicts(allSkills, cwd) {
   const skills = {}
   for (const [slug, entry] of Object.entries(allSkills)) {
-    const searchDirs = lockEntrySkillDirs(slug, entry, cwd)
+    const { dirs: searchDirs, unsafe } = lockEntrySkillDirs(slug, entry, cwd)
+    if (unsafe) {
+      // The entry never becomes a path, so it is neither verified nor
+      // missing: a lockfile is pointing outside the skills directory.
+      // Reporting it as "missing" would hide why (#375).
+      unsafeSlugs.push(slug)
+      continue
+    }
     const existingDir = searchDirs.find((d) => {
       try {
         accessSync(d, constants.F_OK)
@@ -509,9 +531,17 @@ export async function apiDoctor(cwd = process.cwd(), options = {}) {
   let hashMismatches = 0
   let verifiedSkills = 0
   let brokenSymlinks = 0
+  const unsafeSlugs = []
 
   for (const [slug, entry] of Object.entries(allSkills)) {
-    const searchDirs = lockEntrySkillDirs(slug, entry, cwd)
+    const { dirs: searchDirs, unsafe } = lockEntrySkillDirs(slug, entry, cwd)
+    if (unsafe) {
+      // The entry never becomes a path, so it is neither verified nor missing:
+      // a lockfile is pointing outside the skills directory. Reporting it as
+      // "missing" would hide why (#375).
+      unsafeSlugs.push(slug)
+      continue
+    }
     const existingDir = searchDirs.find((d) => {
       try {
         accessSync(d, constants.F_OK)
@@ -541,9 +571,12 @@ export async function apiDoctor(cwd = process.cwd(), options = {}) {
   }
 
   if (Object.keys(allSkills).length > 0) {
-    const integrityIssues = hashMismatches + missingDirs + brokenSymlinks > 0
+    const integrityIssues =
+      hashMismatches + missingDirs + brokenSymlinks + unsafeSlugs.length > 0
     let detail = `${verifiedSkills} checked`
     if (hashMismatches > 0) detail += `, ${hashMismatches} hash mismatch(es)`
+    if (unsafeSlugs.length > 0)
+      detail += `, ${unsafeSlugs.length} unsafe slug(s): ${unsafeSlugs.join(', ')}`
     if (missingDirs > 0) detail += `, ${missingDirs} missing director(ies)`
     if (brokenSymlinks > 0) detail += `, ${brokenSymlinks} broken symlink(s)`
     checked('Skill integrity', integrityIssues ? 'warn' : 'pass', detail)
@@ -618,6 +651,7 @@ export async function apiDoctor(cwd = process.cwd(), options = {}) {
       orphaned: orphanedDirs,
       missingDirs,
       hashMismatches,
+      unsafeSlugs,
       verified: verifiedSkills,
       brokenSymlinks,
     },
