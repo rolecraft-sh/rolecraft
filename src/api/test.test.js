@@ -218,6 +218,30 @@ Just a single paragraph with no markdown sections.
     assert.equal(result.summary.passed, 1)
   })
 
+  it('refuses a lockfile slug that escapes the skills directory', async () => {
+    // `normalizeSlug` replaces `/` and nothing else, so `..` survives and
+    // `join(skillsDir, '..')` names `~/.agents` — a file outside the tree gets
+    // scored and reported as a real skill (#375).
+    await mkdirSync(join(tempDir, '.agents'), { recursive: true })
+    writeFileSync(join(tempDir, '.agents', 'SKILL.md'), GOOD_SKILL)
+    await writeFile(
+      join(tempDir, '.agents', '.skill-lock.json'),
+      JSON.stringify({
+        version: 3,
+        skills: { '..': { slug: '..', agents: ['agents'] } },
+        dismissed: {},
+        lastSelectedAgents: [],
+      }),
+    )
+
+    const result = await testApi.apiTest(null, { all: true })
+
+    assert.equal(result.summary.total, 1)
+    assert.equal(result.summary.passed, 0)
+    assert.equal(result.summary.failed, 1)
+    assert.match(result.results[0].error, /unsafe slug/)
+  })
+
   it('generates suggestions for failed assertions', async () => {
     const fp = createSkill(BAD_SKILL)
     const result = await testApi.apiTest(fp)
