@@ -5,6 +5,10 @@ function proj(...parts) {
   return join(process.cwd(), ...parts)
 }
 
+function projFrom(cwd, ...parts) {
+  return join(cwd || process.cwd(), ...parts)
+}
+
 function mcpFromSkillDir(getDirFn) {
   return () => {
     const dir = getDirFn()
@@ -82,7 +86,7 @@ const AGENTS_DATA = [
   {
     flag: 'devin',
     name: 'devin',
-    getDir: () => proj('.devin', 'skills'),
+    getDir: (cwd) => projFrom(cwd, '.devin', 'skills'),
     label: './.devin/skills/',
     skillInstallScope: 'project ./.devin/skills',
     mcpSupport: {
@@ -114,7 +118,7 @@ const AGENTS_DATA = [
   {
     flag: 'copilot',
     name: 'copilot',
-    getDir: () => proj('.github', 'skills'),
+    getDir: (cwd) => projFrom(cwd, '.github', 'skills'),
     label: './.github/skills/',
     skillInstallScope: 'project ./.github/skills',
     mcpSupport: {
@@ -511,14 +515,14 @@ const AGENTS_DATA = [
   {
     flag: 'eve',
     name: 'eve',
-    getDir: () => proj('agent', 'skills'),
+    getDir: (cwd) => projFrom(cwd, 'agent', 'skills'),
     label: './agent/skills/',
     supportLevel: 'experimental',
   },
   {
     flag: 'forge',
     name: 'forge',
-    getDir: () => proj('.forge', 'skills'),
+    getDir: (cwd) => projFrom(cwd, '.forge', 'skills'),
     label: './.forge/skills/',
     skillInstallScope: 'project ./.forge/skills',
     instructionFormat: 'skill-md',
@@ -887,7 +891,7 @@ const AGENTS_DATA = [
   {
     flag: 'replit',
     name: 'replit',
-    getDir: () => proj('.agents', 'skills'),
+    getDir: (cwd) => projFrom(cwd, '.agents', 'skills'),
     label: './.agents/skills/',
     skillInstallScope: 'project ./.agents/skills',
     instructionFormat: 'skill-md',
@@ -913,7 +917,7 @@ const AGENTS_DATA = [
   {
     flag: 'promptscript',
     name: 'promptscript',
-    getDir: () => proj('agent', 'skills'),
+    getDir: (cwd) => projFrom(cwd, 'agent', 'skills'),
     label: './agent/skills/',
     supportLevel: 'experimental',
   },

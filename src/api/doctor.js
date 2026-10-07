@@ -16,6 +16,7 @@ import {
   computeContentHash,
   normalizeSlug,
   readSkillFiles,
+  getDirForAgent,
 } from '../utils/lockfile.js'
 import { detectAgents } from '../utils/agent-detection.js'
 import { parseFrontmatter, splitSections } from '../utils/converter.js'
@@ -269,14 +270,36 @@ function parseSkillContent(skillDir) {
   }
 }
 
-function detectSkillConflicts(allSkills, agentsDir, cwd) {
+function lockEntrySkillDirs(slug, entry, cwd) {
+  const normSlug = normalizeSlug(slug)
+  const recordedAgents = Array.isArray(entry?.agents) ? entry.agents : []
+  const dirs = []
+  const seen = new Set()
+
+  function addDir(baseDir) {
+    const dir = join(baseDir, normSlug)
+    if (seen.has(dir)) return
+    seen.add(dir)
+    dirs.push(dir)
+  }
+
+  for (const agent of recordedAgents) {
+    if (agent === 'project') addDir(join(cwd, '.agents', 'skills'))
+    else addDir(getDirForAgent(agent, cwd))
+  }
+
+  if (dirs.length === 0) {
+    addDir(getAgentsDir())
+    addDir(join(cwd, '.agents', 'skills'))
+  }
+
+  return dirs
+}
+
+function detectSkillConflicts(allSkills, cwd) {
   const skills = {}
-  for (const slug of Object.keys(allSkills)) {
-    const normSlug = normalizeSlug(slug)
-    const searchDirs = [
-      join(agentsDir, normSlug),
-      join(cwd, '.agents', 'skills', normSlug),
-    ]
+  for (const [slug, entry] of Object.entries(allSkills)) {
+    const searchDirs = lockEntrySkillDirs(slug, entry, cwd)
     const existingDir = searchDirs.find((d) => {
       try {
         accessSync(d, constants.F_OK)
@@ -431,7 +454,7 @@ export async function apiDoctor(cwd = process.cwd(), options = {}) {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
   }
 
-  const detected = detectAgents()
+  const detected = detectAgents(cwd)
   const totalAgents = agents.length
   const detectedResults = []
 
@@ -442,7 +465,7 @@ export async function apiDoctor(cwd = process.cwd(), options = {}) {
       `${detected.length}/${totalAgents} supported agents detected`,
     )
     for (const agent of detected) {
-      const dir = agent.dir()
+      const dir = agent.dir(cwd)
       const skillCount = countAgentSkills(dir)
       detectedResults.push({
         flag: agent.flag,
@@ -462,12 +485,10 @@ export async function apiDoctor(cwd = process.cwd(), options = {}) {
   let orphanedDirs = 0
   try {
     const entries = readdirSync(getAgentsDir(), { withFileTypes: true })
+    const lockedDirNames = new Set([...allLockSlugs].map(normalizeSlug))
     for (const e of entries) {
       if (e.isDirectory() && !e.name.startsWith('.')) {
-        const normSlug =
-          allLockSlugs.has(e.name) ||
-          allLockSlugs.has(e.name.replace(/-/g, '/'))
-        if (!normSlug) orphanedDirs++
+        if (!lockedDirNames.has(e.name)) orphanedDirs++
       }
     }
   } catch {}
@@ -490,11 +511,7 @@ export async function apiDoctor(cwd = process.cwd(), options = {}) {
   let brokenSymlinks = 0
 
   for (const [slug, entry] of Object.entries(allSkills)) {
-    const normSlug = normalizeSlug(slug)
-    const searchDirs = [
-      join(getAgentsDir(), normSlug),
-      join(cwd, '.agents', 'skills', normSlug),
-    ]
+    const searchDirs = lockEntrySkillDirs(slug, entry, cwd)
     const existingDir = searchDirs.find((d) => {
       try {
         accessSync(d, constants.F_OK)
@@ -570,7 +587,7 @@ export async function apiDoctor(cwd = process.cwd(), options = {}) {
       for (const [slug, entry] of Object.entries(projectLock.skills))
         allSkills[slug] = entry
 
-    skillConflicts = detectSkillConflicts(allSkills, getAgentsDir(), cwd)
+    skillConflicts = detectSkillConflicts(allSkills, cwd)
     if (skillConflicts.length > 0)
       checked(
         'Conflict detection',

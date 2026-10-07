@@ -31,11 +31,11 @@ export function getAgentsDir() {
  * Resolve an agent's skill directory from agents.js data.
  * Falls back to ~/.agents/skills for unknown flags.
  */
-export function getDirForAgent(flag) {
+export function getDirForAgent(flag, cwd = process.cwd()) {
   const agent = getAgentByFlag(flag) || AGENTS_DATA.find((a) => a.name === flag)
 
   if (agent) {
-    return agent.getDir()
+    return agent.getDir(cwd)
   }
 
   return home('.agents', 'skills')
