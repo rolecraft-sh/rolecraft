@@ -37,7 +37,19 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          ids=$(gh api "repos/${{ github.repository }}/deployments?environment=github-pages&per_page=100" --paginate --jq '.[].id')
-          echo "$ids" | tail -n +4 | while read -r id; do
-            gh api -X DELETE "repos/${{ github.repository }}/deployments/$id" > /dev/null 2>&1 || true
-          done
+          # GitHub refuses to delete a deployment whose latest status is not
+          # `error`, `failure` or `inactive`. Every Pages deploy ends in
+          # `success`, so every record stays active and every DELETE returns
+          # 422 — which `|| true` swallowed, leaving 89 deployments instead of
+          # the 5 this keeps. Marking each one inactive first is what makes the
+          # delete legal.
+          keep=5
+          gh api "repos/${{ github.repository }}/deployments?per_page=100" --paginate --jq '.[].id' \
+            | tail -n +$((keep + 1)) \
+            | while read -r id; do
+              gh api -X POST "repos/${{ github.repository }}/deployments/$id/statuses" \
+                -f state=inactive > /dev/null \
+                || echo "warn: could not mark deployment $id inactive"
+              gh api -X DELETE "repos/${{ github.repository }}/deployments/$id" > /dev/null \
+                || echo "warn: could not delete deployment $id"
+            done
