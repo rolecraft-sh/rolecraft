@@ -65,7 +65,7 @@ shell completions are generated from, so the three cannot drift.
 | `--frozen-lockfile` | install | Fail if skill already installed |
 | `--global` | install | Install to ~/.agents/skills/ |
 | `--interactive` | search, mcp | Choose and install from results |
-| `--json` | list, doctor, agents, diff, compose, test | Output structured JSON |
+| `--json` | list, search, doctor, agents, diff, compose, test | Output structured JSON |
 | `--list` | install, setup | List available skills without installing |
 | `--list` | use | List available skills without previewing |
 | `--list` | rollback | Show available rollback versions |

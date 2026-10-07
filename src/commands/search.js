@@ -67,11 +67,35 @@ export function formatSkillsShItem(skill) {
   return `${bold(`${skill.source}/${skill.skillId}`)}\n  ${dim(desc)}  ${yellow(`📦 ${installs}`)}  ${cyan('skills.sh')}`
 }
 
+// `--json` wins over every human affordance: no table, no TTY picker, no
+// prompt. It is the only output an automation gets, so it has to be the only
+// thing on stdout — errors included.
+function printJson(query, source, results, error) {
+  console.log(
+    JSON.stringify(
+      {
+        query,
+        source,
+        count: results.length,
+        results,
+        ...(error && { error }),
+      },
+      null,
+      2,
+    ),
+  )
+}
+
 export async function searchCommand(query, options = {}) {
   if (options.skillsSh) {
     try {
       const data = await apiSearch(query, { skillsSh: true })
       const items = data.results
+
+      if (options.json) {
+        printJson(query, data.source, items)
+        return
+      }
 
       if (items.length === 0) {
         console.log(`\nNo skills found on skills.sh for "${query}".`)
@@ -112,9 +136,11 @@ export async function searchCommand(query, options = {}) {
     data = await apiSearch(query)
   } catch (err) {
     if (err.message?.includes('rate limit')) {
-      console.log(
-        '\n⚠️  GitHub API rate limit reached. Try again later or use a GitHub token.',
-      )
+      if (options.json) printJson(query, 'github', [], err.message)
+      else
+        console.log(
+          '\n⚠️  GitHub API rate limit reached. Try again later or use a GitHub token.',
+        )
       process.exitCode = 1
       return
     }
@@ -129,6 +155,11 @@ export async function searchCommand(query, options = {}) {
   }
 
   const items = data.results
+
+  if (options.json) {
+    printJson(query, data.source, items)
+    return
+  }
 
   if (items.length === 0) {
     console.log(`\nNo skills found for "${query}".`)

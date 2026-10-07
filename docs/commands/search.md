@@ -5,7 +5,7 @@ Search for skills on GitHub or skills.sh (experimental).
 ## Usage
 
 ```bash
-rolecraft search <query> [--interactive] [--skills-sh]
+rolecraft search <query> [--interactive] [--skills-sh] [--json]
 ```
 
 ## Description
@@ -21,6 +21,33 @@ Use `--interactive` to open an arrow-key navigable TUI. Browse results with `↑
 > ⚠️ **Experimental.** The skills.sh API is undocumented and may change or become unavailable without notice.
 
 Use `--skills-sh` to search the [skills.sh](https://skills.sh) skill directory instead of GitHub. Results include install counts and the exact install command.
+
+### JSON output
+
+Use `--json` for machine-readable output, with either source:
+
+```bash
+rolecraft search code-review --json
+rolecraft search react --skills-sh --json
+```
+
+```json
+{
+  "query": "code-review",
+  "source": "github",
+  "count": 2,
+  "results": [
+    {
+      "full_name": "user/skill",
+      "description": "A skill description",
+      "stargazers_count": 42,
+      "language": "JavaScript"
+    }
+  ]
+}
+```
+
+`--json` replaces the human output entirely: no table, no interactive picker, no prompt. A GitHub rate limit is reported as an `error` field with an empty `results` array and a non-zero exit code, so a script can tell an empty result from a failed one.
 
 ## Examples
 
@@ -42,6 +69,9 @@ rolecraft search "code review" --interactive
 
 # Search skills.sh directory (experimental)
 rolecraft search react --skills-sh
+
+# Machine-readable output
+rolecraft search code-review --json
 ```
 
 ## Node.js API
