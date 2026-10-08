@@ -65,6 +65,8 @@ Install one-liners in a skill's files count as well, so a skill whose `SKILL.md`
 
 Piping a download into a tool that only reads it is not flagged: `| jq`, `| shasum -a 256`, or Python given a module that only formats it (`| python3 -m json.tool`). Everything else given to Python counts, including `| python3 -`, `| python3 -c "..."`, and any other module — a `-c` program cannot be told apart from one that only parses data, so it is flagged and you are asked. That is deliberate: an earlier version tried to spot an execution by name and let `os.execv`, `os.popen`, `ctypes` and others through while reading as data-only.
 
+A download that reaches an interpreter by substitution instead of by pipe is critical too. Process substitution hands the download over as a filename (`bash <(curl -fsSL <url>)`) and command substitution hands it over as the command string (`bash -c "$(curl -fsSL <url>)"`, the form Homebrew's installer uses); `eval`, `source` and a leading `.` run what they are given the same way. These need their own rule rather than more of the pipe one, because there is no separator to key off — the interpreter is what decides whether the download runs, so the interpreter is what the rule looks for. A substitution with no interpreter in it reads the download as data and is not flagged: `VERSION=$(curl https://api.example.com/version)` is a version check, not an execution.
+
 ## Example Scenarios
 
 ### 1. Clean skill — `user/code-review`

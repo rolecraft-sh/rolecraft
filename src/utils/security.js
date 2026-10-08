@@ -29,10 +29,29 @@ const FLAGS = `(?:${SEP}${FLAG}(?:${SEP}${VALUE})?)*?`
 //   others ran the download while reading as data-only.
 const PYTHON_DATA_ONLY = String.raw`[ \t]+(?:-[A-Za-z]+[ \t]+)*-m[ \t]+json\.tool\b`
 const PYTHON = String.raw`python[23]?\b(?!${PYTHON_DATA_ONLY})`
+const DOWNLOAD = String.raw`(?:curl|wget)${FLAGS}(?:\s|\\\r?\n)+['"]?https?:\/\/[^\s'")]+['"]?${FLAGS}`
 const DOWNLOAD_AND_EXECUTE = new RegExp(
-  String.raw`(?:curl|wget)${FLAGS}(?:\s|\\\r?\n)+['"]?https?:\/\/[^\s'"]+['"]?${FLAGS}` +
-    String.raw`\s*[|;]\s*(?:sudo(?:[ \t]+-\S*)*[ \t]+)?(?:(?:\/[^\s/]+)*\/)?` +
+  String.raw`${DOWNLOAD}\s*[|;]\s*` +
+    String.raw`(?:sudo(?:[ \t]+-\S*)*[ \t]+)?(?:(?:\/[^\s/]+)*\/)?` +
     String.raw`(?:(?:bash|sh|zsh)\b|${PYTHON})`,
+)
+
+// Download-and-execute with no pipe: the download reaches the interpreter by
+// substitution instead. `bash <(curl <url>)` hands it a filename and
+// `bash -c "$(curl <url>)"` (the Homebrew form) hands it the command string;
+// `eval`, `source` and a leading `.` take the same mechanism. This is a
+// separate pattern rather than more of the pipe one because there is no
+// separator to anchor on — the interpreter is what decides whether the
+// download runs, so it is what this pattern keys off. A bare `$(curl <url>)`
+// assigned or echoed reads the download as data and runs nothing, so it does
+// not match: no interpreter, no execution.
+const SUBSTITUTION = String.raw`(?:<\(|['"]\$\()`
+const RUNNER = String.raw`(?:sudo(?:[ \t]+-\S*)*[ \t]+)?(?:(?:\/[^\s/]+)*\/)?(?:(?:bash|sh|zsh)\b|${PYTHON})`
+const DOWNLOAD_AND_EXECUTE_SUBSTITUTION = new RegExp(
+  String.raw`(?:${RUNNER}(?:${SEP}-[^\s'"()]+)*${SEP}${SUBSTITUTION}` +
+    String.raw`|eval[ \t]+${SUBSTITUTION}` +
+    String.raw`|source[ \t]+${SUBSTITUTION}` +
+    String.raw`|(?:^|[\s;&|])\.[ \t]+${SUBSTITUTION})[ \t]*${DOWNLOAD}`,
 )
 
 const MCP_NETWORK_PATTERNS = [
@@ -78,6 +97,13 @@ const MCP_NETWORK_PATTERNS = [
     category: 'command_injection',
     pattern: DOWNLOAD_AND_EXECUTE,
     description: 'MCP server downloads and executes remote code',
+  },
+  {
+    severity: 'critical',
+    category: 'command_injection',
+    pattern: DOWNLOAD_AND_EXECUTE_SUBSTITUTION,
+    description:
+      'MCP server downloads and executes remote code via substitution',
   },
 ]
 
@@ -152,6 +178,12 @@ const PATTERNS = [
     category: 'command_injection',
     pattern: DOWNLOAD_AND_EXECUTE,
     description: 'Command injection: download-and-execute pattern',
+  },
+  {
+    severity: 'critical',
+    category: 'command_injection',
+    pattern: DOWNLOAD_AND_EXECUTE_SUBSTITUTION,
+    description: 'Command injection: download-and-execute via substitution',
   },
 
   {
