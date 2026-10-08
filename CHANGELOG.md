@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.6.1] - 2026-10-08
+
+### Fixed
+- drop invalid ruleset trigger from scorecard workflow by @sametcelikbicak in [#453](https://github.com/rolecraft-sh/rolecraft/pull/453)
+- download-and-execute rule misses process and command substitution by @sametcelikbicak in [#449](https://github.com/rolecraft-sh/rolecraft/pull/449)
+- drop useless String.raw on FLAGS regex fragment by @sametcelikbicak in [#447](https://github.com/rolecraft-sh/rolecraft/pull/447)
+- deploy sitemap and add canonical, og:image and robots.txt to docs by @sametcelikbicak in [#446](https://github.com/rolecraft-sh/rolecraft/pull/446)
+
+### Changed
+- pin remaining GitHub actions to commit SHAs by @sametcelikbicak in [#454](https://github.com/rolecraft-sh/rolecraft/pull/454)
+- retrigger scorecard on ruleset changes and allow manual runs by @sametcelikbicak in [#452](https://github.com/rolecraft-sh/rolecraft/pull/452)
+- scope workflow token permissions to job level and verify release tag by @sametcelikbicak in [#451](https://github.com/rolecraft-sh/rolecraft/pull/451)
+- add OpenSSF Scorecard and GitHub build provenance attestation by @sametcelikbicak in [#450](https://github.com/rolecraft-sh/rolecraft/pull/450)
+- update changelog and version for v2.6.0 by @sametcelikbicak in [#445](https://github.com/rolecraft-sh/rolecraft/pull/445)
+
+### Documentation
+- add OpenSSF Scorecard badge by @sametcelikbicak in [#455](https://github.com/rolecraft-sh/rolecraft/pull/455)
 ## [v2.6.0] - 2026-10-07
 
 ### Added
