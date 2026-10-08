@@ -17,6 +17,7 @@
    <a href="https://github.com/rolecraft-sh/rolecraft/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/rolecraft-sh/rolecraft/test.yml?logo=githubactions&label=tests" alt="Tests"></a>
    <a href="https://github.com/rolecraft-sh/rolecraft/actions/workflows/codeql.yml"><img src="https://img.shields.io/github/actions/workflow/status/rolecraft-sh/rolecraft/codeql.yml?logo=github&label=CodeQL" alt="CodeQL"></a>
    <a href="https://github.com/rolecraft-sh/rolecraft/blob/main/.github/dependabot.yml"><img src="https://img.shields.io/badge/dependabot-enabled-025e8c?logo=Dependabot" alt="Dependabot"></a>
+   <a href="https://github.com/rolecraft-sh/rolecraft/actions/workflows/scorecard.yml"><img src="https://img.shields.io/ossf-scorecard/github.com/rolecraft-sh/rolecraft?label=OpenSSF+Scorecard" alt="OpenSSF Scorecard: 8.0 out of 10"></a>
    <a href="https://github.com/marketplace/actions/rolecraft-action"><img src="https://img.shields.io/badge/GitHub%20Action-rolecraft--action-blue?logo=github" alt="GitHub Action"></a>
    <a href="https://github.com/rolecraft-sh/rolecraft"><img src="https://img.shields.io/github/stars/rolecraft-sh/rolecraft?style=social" alt="Stars"></a>
   <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/📜-Changelog-blue" alt="Changelog"></a>

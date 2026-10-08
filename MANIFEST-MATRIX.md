@@ -53,8 +53,8 @@ manifest and run the script — it updates every location automatically.
 | agent_count | package.json:4 | 90 |
 | agent_count | README.md:9 | 90 |
 | verified_count | README.md:9 | 34 |
-| verified_count | README.md:54 | 34 |
-| agent_count | README.md:90 | 90 |
+| verified_count | README.md:55 | 34 |
+| agent_count | README.md:91 | 90 |
 | agent_count | SKILL.md:5 | 90 |
 | verified_count | SKILL.md:5 | 34 |
 | agent_count | SKILL.md:10 | 90 |
