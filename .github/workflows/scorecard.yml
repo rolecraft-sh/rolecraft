@@ -5,11 +5,16 @@ on:
   # workflow would edit branch protection, which would retrigger this workflow
   # and loop forever.
   branch_protection_rule:
+  # Rules are the current mechanism — classic branch protection is gone. Editing
+  # a ruleset does not fire branch_protection_rule, so that trigger alone would
+  # never re-score after a ruleset change.
+  ruleset:
   schedule:
     - cron: '30 6 * * 1'
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions: read-all
 
