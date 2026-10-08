@@ -13,6 +13,21 @@ permissions:
 jobs:
   welcome:
     runs-on: ubuntu-latest
+    # Only greet real first-time contributors. Dependabot and other automation
+    # open issues and PRs constantly and do not need to be welcomed, and the
+    # maintainer opening their own issue should not be greeted either.
+    #
+    # The two triggers carry the author under different keys (`issue` for
+    # `issues`, `pull_request` for `pull_request_target`), so both are checked.
+    if: >-
+      github.actor != 'sametcelikbicak' &&
+      !endsWith(github.actor, '[bot]') &&
+      (
+        github.event_name == 'issues' &&
+        github.event.issue.user.login == github.actor ||
+        github.event_name == 'pull_request_target' &&
+        github.event.pull_request.user.login == github.actor
+      )
     steps:
       - uses: actions/first-interaction@753c925c8d1ac6fede23781875376600628d9b5d # v3.0.0
         with:
