@@ -18,6 +18,7 @@ jobs:
     permissions:
       contents: write
       id-token: write
+      attestations: write
 
     steps:
       - name: Checkout repository
@@ -32,7 +33,23 @@ jobs:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
 
+      # Re-running this workflow must not fail on an already-published version.
+      # v2.6.1 published fine but the attestation failed on a missing permission,
+      # leaving the GitHub Release uncreated; a manual re-run skips the publish
+      # and completes the remaining steps.
+      - name: Check if version is already published
+        id: published
+        run: |
+          VERSION=$(node -e "console.log(require('./package.json').version)")
+          if npm view "rolecraft@$VERSION" version >/dev/null 2>&1; then
+            echo "Version $VERSION is already on npm — skipping publish"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish to npm
+        if: steps.published.outputs.skip != 'true'
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
