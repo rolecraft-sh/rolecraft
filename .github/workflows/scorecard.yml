@@ -4,11 +4,12 @@ on:
   # Fires when branch protection changes. Without this, adding or editing a
   # workflow would edit branch protection, which would retrigger this workflow
   # and loop forever.
+  #
+  # There is no `ruleset` trigger — it exists as a webhook event but not as a
+  # workflow trigger, and an unknown event name makes the whole workflow file
+  # invalid. Ruleset edits do not fire branch_protection_rule either, so after
+  # changing a ruleset, re-run Scorecard from the Actions tab.
   branch_protection_rule:
-  # Rules are the current mechanism — classic branch protection is gone. Editing
-  # a ruleset does not fire branch_protection_rule, so that trigger alone would
-  # never re-score after a ruleset change.
-  ruleset:
   schedule:
     - cron: '30 6 * * 1'
   push:
