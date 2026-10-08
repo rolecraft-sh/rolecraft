@@ -51,9 +51,11 @@ jobs:
 
       - name: Run npm audit
         if: matrix.node-version == 24
-        run: |
-          npm i --package-lock-only
-          npm audit --audit-level=high
+        # No `npm i --package-lock-only` before this: it pulls the newest
+        # transitive versions from the registry, so the audit would report on a
+        # dependency tree nobody installs. `npm ci` already installed the
+        # committed lockfile, which is what this audits.
+        run: npm audit --audit-level=high
         continue-on-error: true
 
       - name: Install dependencies
@@ -86,7 +88,7 @@ jobs:
 
       - name: Upload coverage report
         if: ${{ always() && matrix.node-version == 24 }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: coverage-report
           path: coverage-output.txt
