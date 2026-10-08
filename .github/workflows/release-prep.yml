@@ -6,13 +6,15 @@ on:
       - 'v*'
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   prepare-release:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     env:
       GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
 
