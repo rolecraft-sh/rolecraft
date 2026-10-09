@@ -125,15 +125,24 @@ describe('installer', () => {
   })
 
   it('installs skill to copilot project directory (.github/skills/)', async () => {
-    const results = await installerModule.installSkill(resolvedSkill, [
-      'copilot',
-    ])
+    // copilot is projectScoped, so both the skill and its lock entry resolve
+    // through process.cwd(). Unmocked this writes a fixture into the repo's own
+    // .github/skills/ and .agents/.skill-lock.json.
+    const origCwd = process.cwd
+    process.cwd = () => tempDir
+    try {
+      const results = await installerModule.installSkill(resolvedSkill, [
+        'copilot',
+      ])
 
-    assert.equal(results.length, 1)
-    assert.equal(results[0].target, 'copilot')
+      assert.equal(results.length, 1)
+      assert.equal(results[0].target, 'copilot')
 
-    const skillDir = join(process.cwd(), '.github', 'skills', 'test-my-skill')
-    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+      const skillDir = join(tempDir, '.github', 'skills', 'test-my-skill')
+      assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+    } finally {
+      process.cwd = origCwd
+    }
   })
 
   it('installs skill to aider directory', async () => {
@@ -602,11 +611,21 @@ describe('installer', () => {
   })
 
   it('installs to multiple targets', async () => {
-    const results = await installerModule.installSkill(resolvedSkill, [
-      'agents',
-      'project',
-    ])
-    assert.equal(results.length, 2)
+    // `project` resolves its lockfile through process.cwd(). Without this the
+    // install lands in the repo's own .agents/.skill-lock.json, and every
+    // later `rolecraft ci` in that checkout reports this fixture as a broken
+    // skill. Same reason the sibling test above mocks it.
+    const origCwd = process.cwd
+    process.cwd = () => tempDir
+    try {
+      const results = await installerModule.installSkill(resolvedSkill, [
+        'agents',
+        'project',
+      ])
+      assert.equal(results.length, 2)
+    } finally {
+      process.cwd = origCwd
+    }
   })
 
   // #332: `--devin` is not the string 'project', but its directory is inside
