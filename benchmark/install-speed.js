@@ -81,6 +81,13 @@ async function main() {
   const fixtureDir = mkdtempSync(join(tmpdir(), 'rc-bench-fixture-'))
   createFixture(fixtureDir)
 
+  // `project` resolves its lockfile through cwd, which defaults to wherever the
+  // benchmark was launched. Installing there records `bench-skill` in the real
+  // project's .agents/.skill-lock.json and every later `rolecraft ci` fails on
+  // a temp dir that no longer exists.
+  const benchCwd = mkdtempSync(join(tmpdir(), 'rc-bench-cwd-'))
+  mkdirSync(join(benchCwd, '.agents'), { recursive: true })
+
   console.log(
     `\n  ⚡ Install benchmark (${ITERATIONS} runs each, lower is better)\n`,
   )
@@ -93,7 +100,7 @@ async function main() {
 
   const rcLocal = await bench('rolecraft', async () => {
     const resolved = await resolveSource(fixtureDir)
-    await installSkill(resolved, ['project'], 'copy')
+    await installSkill(resolved, ['project'], 'copy', benchCwd)
   })
 
   const vercelLocal = await bench(
@@ -118,7 +125,7 @@ async function main() {
 
   const rcGh = await bench('rolecraft', async () => {
     const resolved = await resolveSource(GITHUB_SOURCE)
-    await installSkill(resolved, ['project'], 'copy')
+    await installSkill(resolved, ['project'], 'copy', benchCwd)
   })
 
   const vercelGh = await bench(

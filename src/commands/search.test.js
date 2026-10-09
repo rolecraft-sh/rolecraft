@@ -478,6 +478,13 @@ describe('search command', () => {
       process.env.HOME = testDir
       await mkdir(join(testDir, '.agents'), { recursive: true })
 
+      // searchCommand installs without a cwd, so `project` resolves its
+      // lockfile through process.cwd(). Left unmocked the fixture is recorded
+      // in the repo's own .agents/.skill-lock.json and `rolecraft ci` there
+      // fails on it forever.
+      const origCwd = process.cwd
+      process.cwd = () => testDir
+
       const skillDir = join(testDir, 'interactive-install-skill')
       mkdirSync(skillDir, { recursive: true })
       writeFileSync(
@@ -497,15 +504,18 @@ describe('search command', () => {
         ],
       })
 
-      const { logs, restore } = capture('log')
-      await searchModule.searchCommand('test', { interactive: true })
-      restore()
+      try {
+        const { logs, restore } = capture('log')
+        await searchModule.searchCommand('test', { interactive: true })
+        restore()
 
-      process.env.HOME = origHome
-      await rm(testDir, { recursive: true, force: true })
-
-      assert.ok(logs.some((l) => l.includes('Installed')))
-      assert.ok(logs.some((l) => l.includes('interactive-skill')))
+        assert.ok(logs.some((l) => l.includes('Installed')))
+        assert.ok(logs.some((l) => l.includes('interactive-skill')))
+      } finally {
+        process.cwd = origCwd
+        process.env.HOME = origHome
+        await rm(testDir, { recursive: true, force: true })
+      }
     })
 
     it('refuses an interactive install the security scan blocks', async () => {
