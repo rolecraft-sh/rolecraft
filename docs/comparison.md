@@ -76,8 +76,8 @@ These aren't CLI tools — they're curated SKILL.md repositories. rolecraft can 
 
 ## Benchmark
 
-rolecraft installs local skills in ~11 ms, against ~4.4 s for `npx skills`. See
-[`benchmark/RESULTS.md`](../benchmark/RESULTS.md) for the measured numbers, the
+rolecraft installs local skills in ~18 ms, against ~4.7 s for `npx skills`. See
+[`benchmark/RESULTS.md`](benchmark/RESULTS.md) for the measured numbers, the
 method that produces them, and what the ratio does and does not measure.
 
 [→ Full benchmark results](benchmark/RESULTS.md)
