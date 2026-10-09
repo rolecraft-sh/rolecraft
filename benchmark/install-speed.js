@@ -140,8 +140,9 @@ async function main() {
   )
 
   let agentskillFailed = false
+  let agentskillGh = null
   try {
-    await bench(
+    agentskillGh = await bench(
       '@agentskill.sh/cli',
       async () => {
         execSync(
@@ -181,7 +182,7 @@ async function main() {
     github: {
       rolecraft: rcGh,
       vercel: vercelGh,
-      agentskill: agentskillFailed ? 'failed' : null,
+      agentskill: agentskillFailed ? 'failed' : agentskillGh,
       githubRatio: Number.parseFloat(vercelGh.ratio.toFixed(2)),
     },
     agents: {

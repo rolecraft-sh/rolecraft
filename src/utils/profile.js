@@ -339,10 +339,10 @@ export async function captureSkills(agentFlag) {
 
   const target = resolveAgent(agentFlag)
 
-  // The lockfile records agent *names* while the CLI takes *flags*, and the two
-  // differ for 7 of 87 agents. Resolve both sides to a canonical flag instead
-  // of comparing strings, so `profile save --agents` records what is actually
-  // installed.
+  // The lockfile records agent *names* while the CLI takes *flags*, and several
+  // agents are registered under both spellings. Resolve both sides to a
+  // canonical flag instead of comparing strings, so `profile save --agents`
+  // records what is actually installed.
   const matchesTarget = (stored) => {
     if (stored === 'all') return true
     const storedAgent = resolveAgent(stored)

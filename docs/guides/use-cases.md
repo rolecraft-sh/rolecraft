@@ -57,7 +57,7 @@ The lockfile (`~/.agents/.skill-lock.json`) records each skill's source and cont
 Use `--dry-run` to preview changes before applying:
 
 ```bash
-rolecraft ci
+rolecraft ci --dry-run
 ```
 
 **Who it's for:** DevOps engineers, platform teams, CI/CD maintainers.

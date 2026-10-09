@@ -956,9 +956,9 @@ export function getAgentByFlag(flag) {
 
 /**
  * Resolve an agent identifier to its record, accepting either spelling: the
- * command flag (`claude`) or the lockfile name (`claude-code`). They differ
- * for 7 of the 87 agents, so every caller that compares one against the other
- * needs this rather than a hand-rolled lookup.
+ * command flag (`claude`) or the lockfile name (`claude-code`). Several agents
+ * are registered under the two spellings, so every caller that compares one
+ * against the other needs this rather than a hand-rolled lookup.
  *
  * @param {string} id flag, name, or undefined
  * @returns the agent record, or null when the identifier is unknown
