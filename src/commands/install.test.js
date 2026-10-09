@@ -62,15 +62,18 @@ describe('install command', () => {
   it('installs with --project flag', async () => {
     const origCwd = process.cwd
     process.cwd = () => tempDir
-    const { logs, restore } = capture('log')
+    try {
+      const { logs, restore } = capture('log')
 
-    await installModule.installCommand(join(tempDir, 'test-skill'), {
-      project: true,
-    })
+      await installModule.installCommand(join(tempDir, 'test-skill'), {
+        project: true,
+      })
 
-    assert.ok(logs.some((l) => l.includes('installed')))
-    restore()
-    process.cwd = origCwd
+      assert.ok(logs.some((l) => l.includes('installed')))
+      restore()
+    } finally {
+      process.cwd = origCwd
+    }
   })
 
   it('installs with --claude flag', async () => {
@@ -109,18 +112,21 @@ describe('install command', () => {
   it('installs with --all scope', async () => {
     const origCwd = process.cwd
     process.cwd = () => tempDir
-    const { logs, restore } = capture('log')
+    try {
+      const { logs, restore } = capture('log')
 
-    await installModule.installCommand(join(tempDir, 'test-skill'), {
-      global: true,
-      project: true,
-      claude: true,
-      cursor: true,
-    })
+      await installModule.installCommand(join(tempDir, 'test-skill'), {
+        global: true,
+        project: true,
+        claude: true,
+        cursor: true,
+      })
 
-    assert.ok(logs.some((l) => l.includes('installed')))
-    restore()
-    process.cwd = origCwd
+      assert.ok(logs.some((l) => l.includes('installed')))
+      restore()
+    } finally {
+      process.cwd = origCwd
+    }
   })
 })
 
@@ -142,22 +148,28 @@ describe('askScope', () => {
     withAnswer('2')
     const origCwd = process.cwd
     process.cwd = () => tempDir
-    const { logs, restore } = capture('log')
-    await installModule.installCommand(join(tempDir, 'test-skill'), {})
-    assert.ok(logs.some((l) => l.includes('installed')))
-    restore()
-    process.cwd = origCwd
+    try {
+      const { logs, restore } = capture('log')
+      await installModule.installCommand(join(tempDir, 'test-skill'), {})
+      assert.ok(logs.some((l) => l.includes('installed')))
+      restore()
+    } finally {
+      process.cwd = origCwd
+    }
   })
 
   it('returns both scope for choice 3', async () => {
     withAnswer('3')
     const origCwd = process.cwd
     process.cwd = () => tempDir
-    const { logs, restore } = capture('log')
-    await installModule.installCommand(join(tempDir, 'test-skill'), {})
-    assert.ok(logs.some((l) => l.includes('installed')))
-    restore()
-    process.cwd = origCwd
+    try {
+      const { logs, restore } = capture('log')
+      await installModule.installCommand(join(tempDir, 'test-skill'), {})
+      assert.ok(logs.some((l) => l.includes('installed')))
+      restore()
+    } finally {
+      process.cwd = origCwd
+    }
   })
 
   it('calls defaultAskQuestion when askQuestion is not overridden', async () => {

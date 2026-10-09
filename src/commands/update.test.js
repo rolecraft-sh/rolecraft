@@ -107,50 +107,52 @@ describe('update command', () => {
   it('updates a project-scoped skill via projectFound branch', async () => {
     const origCwd = process.cwd
     process.cwd = () => tempDir
-
-    await mkdir(join(tempDir, '.agents'), { recursive: true })
-    await writeFile(
-      join(tempDir, '.agents', '.skill-lock.json'),
-      JSON.stringify({
-        version: 3,
-        skills: {
-          'proj/skill': {
-            name: 'Project Skill',
-            source: join(tempDir, 'proj-source'),
-            sourceType: 'local',
-            installedAt: new Date().toISOString(),
+    try {
+      await mkdir(join(tempDir, '.agents'), { recursive: true })
+      await writeFile(
+        join(tempDir, '.agents', '.skill-lock.json'),
+        JSON.stringify({
+          version: 3,
+          skills: {
+            'proj/skill': {
+              name: 'Project Skill',
+              source: join(tempDir, 'proj-source'),
+              sourceType: 'local',
+              installedAt: new Date().toISOString(),
+            },
           },
-        },
-        dismissed: {},
-        lastSelectedAgents: [],
-      }),
-    )
+          dismissed: {},
+          lastSelectedAgents: [],
+        }),
+      )
 
-    await mkdir(join(tempDir, '.agents', 'skills', 'proj-skill'), {
-      recursive: true,
-    })
-    writeFileSync(
-      join(tempDir, '.agents', 'skills', 'proj-skill', 'SKILL.md'),
-      '# slug: proj/skill\nname: Project Skill\nContent',
-    )
+      await mkdir(join(tempDir, '.agents', 'skills', 'proj-skill'), {
+        recursive: true,
+      })
+      writeFileSync(
+        join(tempDir, '.agents', 'skills', 'proj-skill', 'SKILL.md'),
+        '# slug: proj/skill\nname: Project Skill\nContent',
+      )
 
-    mkdirSync(join(tempDir, 'proj-source'), { recursive: true })
-    writeFileSync(
-      join(tempDir, 'proj-source', 'SKILL.md'),
-      '# slug: proj/skill\nname: Project Skill\nContent',
-    )
+      mkdirSync(join(tempDir, 'proj-source'), { recursive: true })
+      writeFileSync(
+        join(tempDir, 'proj-source', 'SKILL.md'),
+        '# slug: proj/skill\nname: Project Skill\nContent',
+      )
 
-    const logs = []
-    const origLog = console.log
-    console.log = (...args) => {
-      if (args.length) logs.push(String(args[0]))
+      const logs = []
+      const origLog = console.log
+      console.log = (...args) => {
+        if (args.length) logs.push(String(args[0]))
+      }
+
+      await updateModule.updateCommand('proj/skill')
+
+      assert.ok(logs.some((l) => l.includes('Updated')))
+      console.log = origLog
+    } finally {
+      process.cwd = origCwd
     }
-
-    await updateModule.updateCommand('proj/skill')
-
-    assert.ok(logs.some((l) => l.includes('Updated')))
-    console.log = origLog
-    process.cwd = origCwd
   })
 
   it('detects skill in windsurf target directory', async () => {
@@ -231,14 +233,16 @@ describe('update command', () => {
     }
     const origCwd = process.cwd
     process.cwd = () => tempDir
+    try {
+      await updateModule.updateCommand('dev/skill')
 
-    await updateModule.updateCommand('dev/skill')
+      console.log = origLog
 
-    process.cwd = origCwd
-    console.log = origLog
-
-    assert.ok(logs.some((l) => l.includes('Updated')))
-    assert.ok(logs.some((l) => l.includes('devin')))
+      assert.ok(logs.some((l) => l.includes('Updated')))
+      assert.ok(logs.some((l) => l.includes('devin')))
+    } finally {
+      process.cwd = origCwd
+    }
   })
 
   it('finds skill by normalized slug when exact match fails', async () => {
@@ -485,47 +489,49 @@ describe('update command', () => {
   it('detects skill in copilot target directory', async () => {
     const origCwd = process.cwd
     process.cwd = () => tempDir
+    try {
+      const lock = JSON.parse(
+        await readFile(join(tempDir, '.agents', '.skill-lock.json'), 'utf-8'),
+      )
+      lock.skills['cop/skill'] = {
+        name: 'Copilot Skill',
+        source: join(tempDir, 'cop-source'),
+        sourceType: 'local',
+        installedAt: new Date().toISOString(),
+      }
+      await writeFile(
+        join(tempDir, '.agents', '.skill-lock.json'),
+        JSON.stringify(lock, null, 2),
+      )
 
-    const lock = JSON.parse(
-      await readFile(join(tempDir, '.agents', '.skill-lock.json'), 'utf-8'),
-    )
-    lock.skills['cop/skill'] = {
-      name: 'Copilot Skill',
-      source: join(tempDir, 'cop-source'),
-      sourceType: 'local',
-      installedAt: new Date().toISOString(),
+      mkdirSync(join(tempDir, 'cop-source'), { recursive: true })
+      writeFileSync(
+        join(tempDir, 'cop-source', 'SKILL.md'),
+        '# slug: cop/skill\nname: Copilot Skill\nContent',
+      )
+
+      mkdirSync(join(tempDir, '.github', 'skills', 'cop-skill'), {
+        recursive: true,
+      })
+      writeFileSync(
+        join(tempDir, '.github', 'skills', 'cop-skill', 'SKILL.md'),
+        '# slug: cop/skill\nname: Copilot Skill\nContent',
+      )
+
+      const logs = []
+      const origLog = console.log
+      console.log = (...args) => {
+        if (args.length) logs.push(String(args[0]))
+      }
+
+      await updateModule.updateCommand('cop/skill')
+
+      assert.ok(logs.some((l) => l.includes('Updated')))
+      assert.ok(logs.some((l) => l.includes('copilot')))
+      console.log = origLog
+    } finally {
+      process.cwd = origCwd
     }
-    await writeFile(
-      join(tempDir, '.agents', '.skill-lock.json'),
-      JSON.stringify(lock, null, 2),
-    )
-
-    mkdirSync(join(tempDir, 'cop-source'), { recursive: true })
-    writeFileSync(
-      join(tempDir, 'cop-source', 'SKILL.md'),
-      '# slug: cop/skill\nname: Copilot Skill\nContent',
-    )
-
-    mkdirSync(join(tempDir, '.github', 'skills', 'cop-skill'), {
-      recursive: true,
-    })
-    writeFileSync(
-      join(tempDir, '.github', 'skills', 'cop-skill', 'SKILL.md'),
-      '# slug: cop/skill\nname: Copilot Skill\nContent',
-    )
-
-    const logs = []
-    const origLog = console.log
-    console.log = (...args) => {
-      if (args.length) logs.push(String(args[0]))
-    }
-
-    await updateModule.updateCommand('cop/skill')
-
-    assert.ok(logs.some((l) => l.includes('Updated')))
-    assert.ok(logs.some((l) => l.includes('copilot')))
-    console.log = origLog
-    process.cwd = origCwd
   })
 
   it('detects skill in aider target directory', async () => {

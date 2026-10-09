@@ -168,16 +168,19 @@ describe('installer', () => {
   it('installs skill to devin directory', async () => {
     const origCwd = process.cwd
     process.cwd = () => tempDir
+    try {
+      const results = await installerModule.installSkill(resolvedSkill, [
+        'devin',
+      ])
 
-    const results = await installerModule.installSkill(resolvedSkill, ['devin'])
+      assert.equal(results.length, 1)
+      assert.equal(results[0].target, 'devin')
 
-    process.cwd = origCwd
-
-    assert.equal(results.length, 1)
-    assert.equal(results[0].target, 'devin')
-
-    const skillDir = join(tempDir, '.devin', 'skills', 'test-my-skill')
-    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+      const skillDir = join(tempDir, '.devin', 'skills', 'test-my-skill')
+      assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+    } finally {
+      process.cwd = origCwd
+    }
   })
 
   it('installs skill to gemini directory', async () => {
@@ -596,18 +599,19 @@ describe('installer', () => {
   it('installs skill to project directory', async () => {
     const origCwd = process.cwd
     process.cwd = () => tempDir
+    try {
+      const results = await installerModule.installSkill(resolvedSkill, [
+        'project',
+      ])
 
-    const results = await installerModule.installSkill(resolvedSkill, [
-      'project',
-    ])
+      assert.equal(results.length, 1)
+      assert.equal(results[0].target, 'project')
 
-    assert.equal(results.length, 1)
-    assert.equal(results[0].target, 'project')
-
-    const skillDir = join(tempDir, '.agents', 'skills', 'test-my-skill')
-    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
-
-    process.cwd = origCwd
+      const skillDir = join(tempDir, '.agents', 'skills', 'test-my-skill')
+      assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+    } finally {
+      process.cwd = origCwd
+    }
   })
 
   it('installs to multiple targets', async () => {
@@ -1111,26 +1115,32 @@ describe('installer', () => {
   it('installs skill to eve directory', async () => {
     const origCwd = process.cwd
     process.cwd = () => tempDir
-    const results = await installerModule.installSkill(resolvedSkill, ['eve'])
-    assert.equal(results.length, 1)
-    assert.equal(results[0].target, 'eve')
-    const skillDir = join(tempDir, 'agent', 'skills', 'test-my-skill')
-    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
-    process.cwd = origCwd
+    try {
+      const results = await installerModule.installSkill(resolvedSkill, ['eve'])
+      assert.equal(results.length, 1)
+      assert.equal(results[0].target, 'eve')
+      const skillDir = join(tempDir, 'agent', 'skills', 'test-my-skill')
+      assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+    } finally {
+      process.cwd = origCwd
+    }
   })
 
   it('installs skill to forge directory (.forge/skills/)', async () => {
     const origCwd = process.cwd
     process.cwd = () => tempDir
+    try {
+      const results = await installerModule.installSkill(resolvedSkill, [
+        'forge',
+      ])
 
-    const results = await installerModule.installSkill(resolvedSkill, ['forge'])
-
-    process.cwd = origCwd
-
-    assert.equal(results.length, 1)
-    assert.equal(results[0].target, 'forge')
-    const skillDir = join(tempDir, '.forge', 'skills', 'test-my-skill')
-    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+      assert.equal(results.length, 1)
+      assert.equal(results[0].target, 'forge')
+      const skillDir = join(tempDir, '.forge', 'skills', 'test-my-skill')
+      assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+    } finally {
+      process.cwd = origCwd
+    }
   })
 
   it('installs skill to inference-sh directory', async () => {
@@ -1586,17 +1596,18 @@ describe('installer', () => {
   it('installs skill to replit directory (./.agents/skills/)', async () => {
     const origCwd = process.cwd
     process.cwd = () => tempDir
+    try {
+      const results = await installerModule.installSkill(resolvedSkill, [
+        'replit',
+      ])
 
-    const results = await installerModule.installSkill(resolvedSkill, [
-      'replit',
-    ])
-
-    process.cwd = origCwd
-
-    assert.equal(results.length, 1)
-    assert.equal(results[0].target, 'replit')
-    const skillDir = join(tempDir, '.agents', 'skills', 'test-my-skill')
-    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+      assert.equal(results.length, 1)
+      assert.equal(results[0].target, 'replit')
+      const skillDir = join(tempDir, '.agents', 'skills', 'test-my-skill')
+      assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+    } finally {
+      process.cwd = origCwd
+    }
   })
 
   it('installs skill to zed directory (~/.agents/skills/)', async () => {
@@ -1615,14 +1626,17 @@ describe('installer', () => {
   it('installs skill to promptscript directory (./agent/skills/)', async () => {
     const origCwd = process.cwd
     process.cwd = () => tempDir
-    const results = await installerModule.installSkill(resolvedSkill, [
-      'promptscript',
-    ])
-    assert.equal(results.length, 1)
-    assert.equal(results[0].target, 'promptscript')
-    const skillDir = join(tempDir, 'agent', 'skills', 'test-my-skill')
-    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
-    process.cwd = origCwd
+    try {
+      const results = await installerModule.installSkill(resolvedSkill, [
+        'promptscript',
+      ])
+      assert.equal(results.length, 1)
+      assert.equal(results[0].target, 'promptscript')
+      const skillDir = join(tempDir, 'agent', 'skills', 'test-my-skill')
+      assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+    } finally {
+      process.cwd = origCwd
+    }
   })
 
   describe('backup and restore', () => {
