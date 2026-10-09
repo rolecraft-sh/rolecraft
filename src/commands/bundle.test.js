@@ -251,12 +251,15 @@ describe('bundle command', () => {
 
     const origCwd = process.cwd
     process.cwd = () => tempDir
-    capture()
-    await bundleModule.bundleCommand('my-bundle')
-    restoreLog()
-    process.cwd = origCwd
+    try {
+      capture()
+      await bundleModule.bundleCommand('my-bundle')
+      restoreLog()
 
-    assert.ok(logs.some((l) => l.includes('All 1 skill(s) installed')))
+      assert.ok(logs.some((l) => l.includes('All 1 skill(s) installed')))
+    } finally {
+      process.cwd = origCwd
+    }
   })
 
   it('creates a bundle interactively when no name is given', async () => {
