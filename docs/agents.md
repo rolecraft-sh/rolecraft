@@ -17,7 +17,7 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | cody | `~/.cody/skills/ or ./.cody/skills/` | legacy | - |
 | continue | `~/.continue/skills/ or ./.continue/skills/` | verified | experimental.mcpServers |
 | warp | `~/.agents/skills/` | verified | - |
-| codeium | `~/.codeium/skills/` | experimental | - |
+| codeium | `~/.codeium/windsurf/skills/` | verified | - |
 | fabric | `~/.fabric/skills/` | experimental | - |
 | goose | `~/.agents/skills/` | verified | - |
 | tabnine | `~/.tabnine/agent/skills/` | verified | - |
@@ -28,8 +28,8 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | trae | `~/.trae/skills/` | verified | - |
 | hermes | `~/.hermes/skills/` | experimental | - |
 | kiro | `~/.kiro/skills/` | verified | - |
-| augment | `~/.augment/skills/` | experimental | - |
-| kilo | `~/.kilo/skills/` | experimental | - |
+| augment | `~/.augment/skills/` | verified | - |
+| kilo | `~/.kilo/skills/` | verified | - |
 | openhands | `~/.agents/skills/` | verified | - |
 | junie | `~/.junie/skills/` | verified | - |
 | factory | `~/.factory/skills/` | experimental | - |
@@ -57,7 +57,7 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | jazz | `~/.jazz/skills/` | verified | - |
 | iflow | `~/.iflow/skills/` | legacy | - |
 | kilo-code | `~/.kilocode/skills/` | experimental | - |
-| kode | `~/.kode/skills/` | experimental | - |
+| kode | `~/.kode/skills/` | verified | - |
 | lingma | `~/.lingma/skills/` | verified | - |
 | mcp-jam | `~/.mcpjam/skills/` | experimental | - |
 | moxby | `~/.moxby/skills/` | experimental | - |
@@ -80,7 +80,7 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | adal | `~/.adal/skills/` | experimental | - |
 | droid | `~/.droid/skills/` | experimental | - |
 | chatgpt | `~/.agents/skills/` | verified | - |
-| codearts-agent | `~/.codeartsdoer/skills/` | experimental | - |
+| codearts-agent | `~/.codeartsdoer/skills/` | verified | - |
 | universal | `~/.config/agents/skills/` | experimental | - |
 | amp | `~/.config/agents/skills/` | verified | - |
 | antigravity | `~/.gemini/config/skills/` | verified | - |
@@ -99,7 +99,7 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 
 > **MCP support:** 9 agent(s) support MCP server configuration. Format: `mcpServers`, `servers`, `experimental.mcpServers`
 
-> **Agent count:** 90 total — 36 verified, 4 community, 5 legacy, 45 experimental.
+> **Agent count:** 90 total — 41 verified, 4 community, 5 legacy, 40 experimental.
 
 ## Notes
 
