@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>The Security-First Skill Manager for AI Agents</b><br>
-   Static security scoring before any skill is installed · Skills & MCP Servers across 90 Agents (36 Verified)<br>
+   Static security scoring before any skill is installed · Skills & MCP Servers across 90 Agents (41 Verified)<br>
   Zero-dependency CLI · No signup · No marketplace required
 </p>
 
@@ -52,7 +52,7 @@
 
 
 <p align="center">
-  <b>⚡ Zero dependencies</b> · <b>🤖 36 verified agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 Security scoring</b> · <b>📝 Skill testing</b> · <b>🔧 Init templates</b> · <b>🌐 No marketplace required</b>
+  <b>⚡ Zero dependencies</b> · <b>🤖 41 verified agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 Security scoring</b> · <b>📝 Skill testing</b> · <b>🔧 Init templates</b> · <b>🌐 No marketplace required</b>
 </p>
 
 ---

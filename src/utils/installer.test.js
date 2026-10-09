@@ -235,7 +235,13 @@ describe('installer', () => {
     assert.equal(results.length, 1)
     assert.equal(results[0].target, 'codeium')
 
-    const skillDir = join(tempDir, '.codeium', 'skills', 'test-my-skill')
+    const skillDir = join(
+      tempDir,
+      '.codeium',
+      'windsurf',
+      'skills',
+      'test-my-skill',
+    )
     assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 
