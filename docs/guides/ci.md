@@ -15,11 +15,14 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      # Actions are pinned to commit SHAs, matching this repo's own workflows.
+      # A floating tag can be moved to point at different code, which is the
+      # same supply-chain risk rolecraft's lockfile checks guard against.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
-      - uses: rolecraft-sh/rolecraft-action@v1
+      - uses: rolecraft-sh/rolecraft-action@0cbe93d3791d8f434f2862f758b64b4d531e74a0 # v1
         with:
           command: ci
 ```

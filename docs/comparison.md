@@ -34,8 +34,9 @@
 | Interactive scope prompt | ✅ | ✅ | ❌ |
 | Non-interactive flag (`--yes`/`-y`) | ✅ | ✅ | ❌ |
 | Dry-run preview (`--dry-run`) | ✅ | ❌ | ❌ |
-| Lockfile integrity (`--frozen-lockfile`) | ✅ | ✅ | ❌ |
+| Lockfile collision guard (`--frozen-lockfile`) | ✅ | ❌ | ❌ |
 | Content hash verification (`verify`) | ✅ | ✅ | ❌ |
+| Source pinning (commit SHA in lockfile) | ❌ | ❌ | ❌ |
 | CI-mode re-install (`ci`) | ✅ | ✅ | ❌ |
 | Skill update check (`check`) | ✅ | ❌ | ❌ |
 | Skill update / re-install (`update`) | ✅ | ✅ | ❌ |
@@ -75,6 +76,8 @@ These aren't CLI tools — they're curated SKILL.md repositories. rolecraft can 
 
 ## Benchmark
 
-rolecraft installs skills **up to 381× faster** than `npx skills` in cold-cache scenarios (local install: ~381×, GitHub install: ~6.9×).
+rolecraft installs local skills in ~11 ms, against ~4.4 s for `npx skills`. See
+[`benchmark/RESULTS.md`](../benchmark/RESULTS.md) for the measured numbers, the
+method that produces them, and what the ratio does and does not measure.
 
 [→ Full benchmark results](benchmark/RESULTS.md)

@@ -41,6 +41,8 @@ manifest and run the script — it updates every location automatically.
 | agent_count | docs/commands/doctor.md:60 | 90 |
 | agent_count | docs/commands/doctor.md:77 | 90 |
 | agent_count | docs/comparison.md:10 | 90 |
+| agent_count | docs/faq.md:9 | 90 |
+| agent_count | docs/faq.md:17 | 90 |
 | agent_count | docs/guides/getting-started.md:18 | 90 |
 | verified_count | docs/guides/getting-started.md:18 | 34 |
 | agent_count | docs/index.md:7 | 90 |
