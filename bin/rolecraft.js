@@ -3,32 +3,7 @@
 import { readFileSync, realpathSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
-import { installCommand } from '../src/commands/install.js'
-import { listCommand } from '../src/commands/list.js'
-import { removeCommand } from '../src/commands/remove.js'
-import { updateCommand } from '../src/commands/update.js'
-import { useCommand } from '../src/commands/use.js'
-import { setupCommand } from '../src/commands/setup.js'
-import { initCommand } from '../src/commands/init.js'
-import { searchCommand } from '../src/commands/search.js'
-import { verifyCommand } from '../src/commands/verify.js'
-import { checkCommand } from '../src/commands/check.js'
-import { ciCommand } from '../src/commands/ci.js'
-import { bundleCommand, bundleCreateCommand } from '../src/commands/bundle.js'
-import { completionsCommand } from '../src/commands/completions.js'
-import { upgradeCommand } from '../src/commands/upgrade.js'
-import { doctorCommand } from '../src/commands/doctor.js'
-import { agentsCommand } from '../src/commands/agents.js'
-import { agentsXmlCommand } from '../src/commands/agents-xml.js'
-import { mcpCommand } from '../src/commands/mcp.js'
-import { watchCommand } from '../src/commands/watch.js'
-import { convertCommand } from '../src/commands/convert.js'
-import { profileCommand } from '../src/commands/profile.js'
-import { testCommand } from '../src/commands/test.js'
-import { diffCommand } from '../src/commands/diff.js'
-import { composeCommand } from '../src/commands/compose.js'
 
-import { rollbackCommand } from '../src/commands/rollback.js'
 import agents from '../src/agents.js'
 import { showError, UserError } from '../src/utils/errors.js'
 import { theme } from '../src/utils/tui.js'
@@ -240,9 +215,17 @@ ${theme.yellow(`Examples:`)}
 }
 
 // ── Command handlers (one per top-level command) ──────────────────
-
+//
+// Command modules are imported inside each handler, not at the top of the
+// file. Eager imports made every invocation parse all 26 command modules:
+// `--version` cost 298 ms, of which ~150 ms was loading code it never ran.
+// Lazy import cuts that to 138 ms, near Node's ~120 ms startup floor.
+//
+// Do not hoist these back to module scope. `src/commands/spec.js` and
+// `src/agents.js` stay eager on purpose — they back help output and are cheap
+// (7.6 ms and 9.8 ms), and making them lazy would force the help helpers async.
 const HANDLERS = {
-  install(args) {
+  async install(args) {
     if (isHelp(args)) {
       commandUsage('install')
       return
@@ -272,6 +255,7 @@ const HANDLERS = {
       list: flags.includes('--list'),
       skill: parseSkillOption(args),
     }
+    const { installCommand } = await import('../src/commands/install.js')
     return installCommand(source, opts)
   },
 
@@ -290,6 +274,7 @@ const HANDLERS = {
         code: 'USAGE',
       })
     }
+    const { listCommand } = await import('../src/commands/list.js')
     return listCommand(process.cwd(), {
       json: args.includes('--json'),
       agent,
@@ -310,6 +295,7 @@ const HANDLERS = {
         code: 'USAGE',
       })
     }
+    const { removeCommand } = await import('../src/commands/remove.js')
     return removeCommand(slug, { dryRun: args.includes('--dry-run') })
   },
 
@@ -327,6 +313,7 @@ const HANDLERS = {
         code: 'USAGE',
       })
     }
+    const { updateCommand } = await import('../src/commands/update.js')
     return updateCommand(slug, {
       dryRun: args.includes('--dry-run'),
       yes: args.includes('--yes') || args.includes('-y'),
@@ -350,6 +337,7 @@ const HANDLERS = {
         code: 'USAGE',
       })
     }
+    const { useCommand } = await import('../src/commands/use.js')
     return useCommand(source, {
       list: args.includes('--list'),
       skill: parseSkillOption(args),
@@ -362,6 +350,7 @@ const HANDLERS = {
       return
     }
     const pos = parsePositionals(args)
+    const { initCommand } = await import('../src/commands/init.js')
     return initCommand(pos[0], {
       list: args.includes('--list'),
       template: parseFlagValue(args, '--template'),
@@ -386,6 +375,7 @@ const HANDLERS = {
         code: 'USAGE',
       })
     }
+    const { searchCommand } = await import('../src/commands/search.js')
     return searchCommand(query, {
       interactive: args.includes('--interactive'),
       skillsSh: args.includes('--skills-sh'),
@@ -400,6 +390,9 @@ const HANDLERS = {
       return
     }
     const pos = parsePositionals(args)
+    const { completionsCommand } = await import(
+      '../src/commands/completions.js'
+    )
     return completionsCommand(pos[0])
   },
 
@@ -408,6 +401,7 @@ const HANDLERS = {
       commandUsage('verify')
       return
     }
+    const { verifyCommand } = await import('../src/commands/verify.js')
     return verifyCommand(true)
   },
 
@@ -416,6 +410,7 @@ const HANDLERS = {
       commandUsage('check')
       return
     }
+    const { checkCommand } = await import('../src/commands/check.js')
     return checkCommand()
   },
 
@@ -426,6 +421,7 @@ const HANDLERS = {
     }
     // ci has no options. Reject unknown flags rather than installing anyway —
     // `ci --dry-run` used to write to disk while claiming to preview.
+    const { ciCommand } = await import('../src/commands/ci.js')
     return ciCommand()
   },
 
@@ -436,6 +432,7 @@ const HANDLERS = {
     }
     const pos = parsePositionals(args)
     const source = pos[0]
+    const { setupCommand } = await import('../src/commands/setup.js')
     return setupCommand(source, {
       dryRun: args.includes('--dry-run'),
       yes: args.includes('--yes') || args.includes('-y'),
@@ -449,6 +446,7 @@ const HANDLERS = {
       commandUsage('upgrade')
       return
     }
+    const { upgradeCommand } = await import('../src/commands/upgrade.js')
     return upgradeCommand({ dryRun: args.includes('--dry-run') })
   },
 
@@ -457,6 +455,7 @@ const HANDLERS = {
       commandUsage('doctor')
       return
     }
+    const { doctorCommand } = await import('../src/commands/doctor.js')
     return doctorCommand({
       json: args.includes('--json'),
       network: args.includes('--network'),
@@ -471,6 +470,7 @@ const HANDLERS = {
     }
     const pos = parsePositionals(args)
     const slug = pos[0]
+    const { watchCommand } = await import('../src/commands/watch.js')
     const { watchers, close } = await watchCommand(slug, process.cwd(), {
       dryRun: args.includes('--dry-run'),
     })
@@ -488,6 +488,7 @@ const HANDLERS = {
       commandUsage('agents')
       return
     }
+    const { agentsCommand } = await import('../src/commands/agents.js')
     return agentsCommand({ json: args.includes('--json') })
   },
 
@@ -496,6 +497,7 @@ const HANDLERS = {
       commandUsage('agents-xml')
       return
     }
+    const { agentsXmlCommand } = await import('../src/commands/agents-xml.js')
     return agentsXmlCommand(args.includes('--write'))
   },
 
@@ -513,6 +515,7 @@ const HANDLERS = {
         code: 'USAGE',
       })
     }
+    const { convertCommand } = await import('../src/commands/convert.js')
     return convertCommand(source, {
       dryRun: args.includes('--dry-run'),
       output: parseFlagValue(args, '--output'),
@@ -525,6 +528,7 @@ const HANDLERS = {
       return
     }
     const pos = parsePositionals(args)
+    const { diffCommand } = await import('../src/commands/diff.js')
     return diffCommand(pos[0], pos[1], {
       json: args.includes('--json'),
       brief: args.includes('--brief'),
@@ -539,6 +543,7 @@ const HANDLERS = {
       return
     }
     const pos = parsePositionals(args)
+    const { composeCommand } = await import('../src/commands/compose.js')
     return composeCommand(pos, {
       mode: args.includes('--chain') ? 'chain' : 'merge',
       dryRun: args.includes('--dry-run'),
@@ -558,6 +563,7 @@ const HANDLERS = {
     const pos = parsePositionals(args)
     const skillPath = pos[0]
     const minScore = parseFlagValue(args, '--min-score')
+    const { testCommand } = await import('../src/commands/test.js')
     return testCommand(skillPath, {
       json: args.includes('--json'),
       verbose: args.includes('--verbose') || args.includes('-v'),
@@ -590,6 +596,7 @@ const HANDLERS = {
         commandUsage('bundle')
         return
       }
+      const { bundleCreateCommand } = await import('../src/commands/bundle.js')
       return bundleCreateCommand(parsePositionals(createArgs)[0])
     }
     const sources = parsePositionals(args)
@@ -598,10 +605,8 @@ const HANDLERS = {
       noMcp: args.includes('--no-mcp'),
       yes: args.includes('--yes') || args.includes('-y'),
     }
-    if (sources.length === 1) {
-      return bundleCommand(sources[0], opts)
-    }
-    return bundleCommand(sources, opts)
+    const { bundleCommand } = await import('../src/commands/bundle.js')
+    return bundleCommand(sources.length === 1 ? sources[0] : sources, opts)
   },
 
   async profile(args) {
@@ -610,6 +615,7 @@ const HANDLERS = {
       return
     }
     // profile command has its own subcommands, skip flag validation
+    const { profileCommand } = await import('../src/commands/profile.js')
     return profileCommand(args)
   },
 
@@ -620,11 +626,13 @@ const HANDLERS = {
     }
     // mcp command has subcommands (install, list, search, check, update, remove)
     // We can't easily validate without knowing subcommand, so skip
+    const { mcpCommand } = await import('../src/commands/mcp.js')
     return mcpCommand(args)
   },
 
   async rollback(args) {
     // rollback handles --help itself with focused help text
+    const { rollbackCommand } = await import('../src/commands/rollback.js')
     return rollbackCommand(args)
   },
 
