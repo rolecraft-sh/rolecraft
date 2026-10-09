@@ -89,8 +89,8 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | muse-code | `~/.config/muse/skills/` | verified | mcpServers |
 | posit-assistant | `~/.posit/assistant/skills/` | verified | - |
 | deep-agents | `~/.agents/skills/` | experimental | - |
-| dexto | `~/.agents/skills/` | experimental | - |
-| loaf | `~/.agents/skills/` | experimental | - |
+| dexto | `~/.agents/skills/` | verified | - |
+| loaf | `~/.agents/skills/` | verified | - |
 | replit | `./.agents/skills/` | verified | - |
 | zed | `~/.agents/skills/` | verified | - |
 | promptscript | `./agent/skills/` | experimental | - |
@@ -99,7 +99,7 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 
 > **MCP support:** 9 agent(s) support MCP server configuration. Format: `mcpServers`, `servers`, `experimental.mcpServers`
 
-> **Agent count:** 90 total — 34 verified, 4 community, 5 legacy, 47 experimental.
+> **Agent count:** 90 total — 36 verified, 4 community, 5 legacy, 45 experimental.
 
 ## Notes
 
