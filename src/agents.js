@@ -209,6 +209,7 @@ const AGENTS_DATA = [
     supportLevel: 'verified',
     docUrl: 'https://docs.warp.dev/agents/capabilities/skills/',
     lastVerified: '2026-08-17',
+    aliasFor: 'opencode',
     notes:
       'Discovers a broad list of provider dirs; ~/.agents/skills is the recommended global path',
   },
@@ -241,6 +242,7 @@ const AGENTS_DATA = [
     docUrl:
       'https://goose-docs.ai/docs/guides/context-engineering/using-skills/',
     lastVerified: '2026-08-17',
+    aliasFor: 'opencode',
     notes:
       'Legacy .goose/skills and .claude/skills paths still discovered for backward compatibility',
   },
@@ -366,6 +368,7 @@ const AGENTS_DATA = [
     supportLevel: 'verified',
     docUrl: 'https://docs.openhands.dev/overview/skills',
     lastVerified: '2026-08-17',
+    aliasFor: 'opencode',
     notes:
       'Also reads project .agents/skills; legacy .openhands/skills and .openhands/microagents still supported',
   },
