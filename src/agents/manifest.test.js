@@ -78,6 +78,18 @@ describe('agent manifest', () => {
         ),
       )
     }
+
+    // Any agent sharing the ~/.agents/skills directory must be flagged, or
+    // installers treat it as its own private location.
+    const SHARED = 'global ~/.agents/skills'
+    const unflagged = getAgentManifest().filter(
+      (a) => !a.aliasFor && a.skillInstallScope === SHARED,
+    )
+    assert.deepEqual(
+      unflagged.map((a) => a.flag),
+      ['agents'],
+      'only the canonical opencode entry may omit aliasFor',
+    )
   })
 
   it('getAgentManifestByFlag returns correct agent', () => {
