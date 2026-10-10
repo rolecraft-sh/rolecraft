@@ -35,7 +35,7 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | factory | `~/.factory/skills/` | verified | - |
 | command-code | `~/.commandcode/skills/` | verified | - |
 | cortex | `~/.snowflake/cortex/skills/` | experimental | - |
-| mistral-vibe | `~/.vibe/skills/` | experimental | - |
+| mistral-vibe | `~/.vibe/skills/` | verified | - |
 | qwen-code | `~/.qwen/skills/` | verified | - |
 | openclaw | `~/.openclaw/skills/` | verified | - |
 | codebuddy | `~/.codebuddy/skills/` | verified | - |
@@ -51,7 +51,7 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | code-maker | `~/.codemaker/skills/` | experimental | - |
 | code-studio | `~/.codestudio/skills/` | verified | - |
 | crush | `~/.crush/skills/` | community | - |
-| eve | `./agent/skills/` | experimental | - |
+| eve | `./agent/skills/` | verified | - |
 | forge | `./.forge/skills/` | verified | - |
 | inference-sh | `~/.inferencesh/skills/` | experimental | - |
 | jazz | `~/.jazz/skills/` | verified | - |
@@ -88,18 +88,18 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | grok | `~/.grok/skills/` | verified | - |
 | muse-code | `~/.config/muse/skills/` | verified | mcpServers |
 | posit-assistant | `~/.posit/assistant/skills/` | verified | - |
-| deep-agents | `~/.agents/skills/` | experimental | - |
+| deep-agents | `~/.agents/skills/` | verified | - |
 | dexto | `~/.agents/skills/` | verified | - |
 | loaf | `~/.agents/skills/` | verified | - |
 | replit | `./.agents/skills/` | verified | - |
 | zed | `~/.agents/skills/` | verified | - |
-| promptscript | `./agent/skills/` | experimental | - |
+| promptscript | `./.promptscript/skills/` | verified | - |
 
 > **Support levels:** `verified` — actively tested and maintained; `community` — community-contributed, maintained on best-effort; `legacy` — previous generation, no active development; `experimental` — known to exist, not formally tested.
 
 > **MCP support:** 9 agent(s) support MCP server configuration. Format: `mcpServers`, `servers`, `experimental.mcpServers`
 
-> **Agent count:** 90 total — 61 verified, 4 community, 5 legacy, 20 experimental.
+> **Agent count:** 90 total — 65 verified, 4 community, 5 legacy, 16 experimental.
 
 ## Notes
 
@@ -124,6 +124,7 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 - **junie:** Also reads project .junie/skills; auto-imports .cursor/.claude/.codex skill folders
 - **qwen-code:** Also reads project .qwen/skills
 - **oh-my-pi:** pi fork by can1357; native skills at ~/.omp/agent/skills (user) and .omp/skills (project); also reads ~/.claude/skills, ~/.agents/skills and .github/skills; MCP via standard mcpServers format
+- **eve:** Project-scoped only; no user-global authoring path. $HOME/.agents/skills is a sandbox seed dir, not an authoring target
 - **forge:** ForgeCode by tailcallhq; also reads ~/forge/skills and ~/.agents/skills; project dir has highest precedence
 - **jazz:** jazz-ai (lvndry/jazz, not an AWS product); also reads project ./skills
 - **iflow:** iFlow CLI was shut down on 2026-04-17; the vendor directs users to migrate to Qoder
@@ -137,8 +138,10 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 - **grok:** Project skills at ./.grok/skills. Reads ~/.agents/skills via AGENTS.md compatibility. MCP lives in ~/.grok/config.toml as [mcp_servers.&lt;name&gt;] (TOML), which rolecraft does not yet write
 - **muse-code:** Muse Code by Meta. Scans ~/.config/muse/skills, ~/.agents/skills, ~/.claude/skills, ~/.codex/skills and project .agents/.codex/.claude/skills. MCP at ~/.config/muse/settings.json under mcpServers
 - **posit-assistant:** Posit Assistant (Positron, RStudio). Also reads ~/.agents/skills; project .posit/assistant/skills. Legacy ~/.positai/
+- **deep-agents:** One of six discovery dirs; native default of deepagents skills create is ~/.deepagents/&lt;agent&gt;/skills (agent defaults to "agent"). Project root resolved by walking to nearest .git
 - **replit:** Project-committed .agents/skills only; no user-global skills dir
 - **zed:** Flat layout only: skills must be direct children of ~/.agents/skills
+- **promptscript:** Path corrected from ./agent/skills (eve path) to .promptscript/skills; also reads .agents/skills via universalDir in promptscript.yaml. No global installation
 
 ## Install to multiple agents
 

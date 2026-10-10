@@ -416,7 +416,11 @@ const AGENTS_DATA = [
     name: 'mistral-vibe',
     getDir: () => home('.vibe', 'skills'),
     label: '~/.vibe/skills/',
-    supportLevel: 'experimental',
+    skillInstallScope: 'global ~/.vibe/skills',
+    instructionFormat: 'skill-md',
+    supportLevel: 'verified',
+    docUrl: 'https://docs.mistral.ai/vibe/code/cli/skills',
+    lastVerified: '2026-10-10',
   },
   {
     flag: 'qwen-code',
@@ -582,7 +586,13 @@ const AGENTS_DATA = [
     getDir: (cwd) => projFrom(cwd, 'agent', 'skills'),
     projectScoped: true,
     label: './agent/skills/',
-    supportLevel: 'experimental',
+    skillInstallScope: 'project ./agent/skills',
+    instructionFormat: 'skill-md',
+    supportLevel: 'verified',
+    docUrl: 'https://eve.dev/docs/skills',
+    lastVerified: '2026-10-10',
+    notes:
+      'Project-scoped only; no user-global authoring path. $HOME/.agents/skills is a sandbox seed dir, not an authoring target',
   },
   {
     flag: 'forge',
@@ -967,9 +977,11 @@ const AGENTS_DATA = [
     label: '~/.agents/skills/',
     skillInstallScope: 'global ~/.agents/skills',
     instructionFormat: 'skill-md',
-    supportLevel: 'experimental',
+    supportLevel: 'verified',
     docUrl: 'https://github.com/langchain-ai/deepagents',
-    lastVerified: '2026-10-09',
+    lastVerified: '2026-10-10',
+    notes:
+      'One of six discovery dirs; native default of deepagents skills create is ~/.deepagents/<agent>/skills (agent defaults to "agent"). Project root resolved by walking to nearest .git',
     aliasFor: 'opencode',
   },
   {
@@ -1026,10 +1038,16 @@ const AGENTS_DATA = [
   {
     flag: 'promptscript',
     name: 'promptscript',
-    getDir: (cwd) => projFrom(cwd, 'agent', 'skills'),
+    getDir: (cwd) => projFrom(cwd, '.promptscript', 'skills'),
     projectScoped: true,
-    label: './agent/skills/',
-    supportLevel: 'experimental',
+    label: './.promptscript/skills/',
+    skillInstallScope: 'project ./.promptscript/skills',
+    instructionFormat: 'skill-md',
+    supportLevel: 'verified',
+    docUrl: 'https://getpromptscript.dev/docs/skills',
+    lastVerified: '2026-10-10',
+    notes:
+      'Path corrected from ./agent/skills (eve path) to .promptscript/skills; also reads .agents/skills via universalDir in promptscript.yaml. No global installation',
   },
 ]
 
