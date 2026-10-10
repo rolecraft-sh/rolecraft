@@ -68,16 +68,16 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | tiny-cloud | `~/.tinycloud/skills/` | experimental | - |
 | zencoder | `~/.zencoder/skills/` | experimental | - |
 | zap | `~/.zap/skills/` | verified | - |
-| codeep | `~/.codeep/skills/` | experimental | - |
-| kimi-code | `~/.kimi-code/skills/` | experimental | - |
+| codeep | `~/.codeep/skills/` | verified | - |
+| kimi-code | `~/.kimi-code/skills/` | verified | - |
 | zcode | `~/.zcode/skills/` | verified | - |
 | astrbot | `~/.astrbot/data/skills/` | experimental | - |
 | qoder-cn | `~/.qoder-cn/skills/` | community | - |
-| trae-cn | `~/.trae-cn/skills/` | experimental | - |
+| trae-cn | `~/.trae-cn/skills/` | verified | - |
 | zenflow | `~/.zenflow/skills/` | experimental | - |
-| neovate | `~/.neovate/skills/` | experimental | - |
+| neovate | `~/.neovate/skills/` | verified | - |
 | pochi | `~/.pochi/skills/` | verified | - |
-| adal | `~/.adal/skills/` | experimental | - |
+| adal | `~/.adal/skills/` | verified | - |
 | droid | `~/.droid/skills/` | experimental | - |
 | chatgpt | `~/.agents/skills/` | verified | - |
 | codearts-agent | `~/.codeartsdoer/skills/` | verified | - |
@@ -99,7 +99,7 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 
 > **MCP support:** 9 agent(s) support MCP server configuration. Format: `mcpServers`, `servers`, `experimental.mcpServers`
 
-> **Agent count:** 90 total — 56 verified, 4 community, 5 legacy, 25 experimental.
+> **Agent count:** 90 total — 61 verified, 4 community, 5 legacy, 20 experimental.
 
 ## Notes
 
