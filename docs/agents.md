@@ -26,20 +26,20 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | loom | `~/.loom/skills/` | legacy | - |
 | roo | `~/.roo/skills/` | verified | - |
 | trae | `~/.trae/skills/` | verified | - |
-| hermes | `~/.hermes/skills/` | experimental | - |
+| hermes | `~/.hermes/skills/` | verified | - |
 | kiro | `~/.kiro/skills/` | verified | - |
 | augment | `~/.augment/skills/` | verified | - |
 | kilo | `~/.kilo/skills/` | verified | - |
 | openhands | `~/.agents/skills/` | verified | - |
 | junie | `~/.junie/skills/` | verified | - |
-| factory | `~/.factory/skills/` | experimental | - |
-| command-code | `~/.commandcode/skills/` | experimental | - |
+| factory | `~/.factory/skills/` | verified | - |
+| command-code | `~/.commandcode/skills/` | verified | - |
 | cortex | `~/.snowflake/cortex/skills/` | experimental | - |
 | mistral-vibe | `~/.vibe/skills/` | experimental | - |
 | qwen-code | `~/.qwen/skills/` | verified | - |
-| openclaw | `~/.openclaw/skills/` | experimental | - |
-| codebuddy | `~/.codebuddy/skills/` | experimental | - |
-| mux | `~/.mux/skills/` | experimental | - |
+| openclaw | `~/.openclaw/skills/` | verified | - |
+| codebuddy | `~/.codebuddy/skills/` | verified | - |
+| mux | `~/.mux/skills/` | verified | - |
 | pi | `~/.pi/agent/skills/` | community | - |
 | oh-my-pi | `~/.omp/agent/skills/` | verified | mcpServers |
 | autohand-code | `~/.autohand/skills/` | experimental | - |
@@ -99,7 +99,7 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 
 > **MCP support:** 9 agent(s) support MCP server configuration. Format: `mcpServers`, `servers`, `experimental.mcpServers`
 
-> **Agent count:** 90 total — 41 verified, 4 community, 5 legacy, 40 experimental.
+> **Agent count:** 90 total — 47 verified, 4 community, 5 legacy, 34 experimental.
 
 ## Notes
 
