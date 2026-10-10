@@ -42,14 +42,14 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | mux | `~/.mux/skills/` | verified | - |
 | pi | `~/.pi/agent/skills/` | community | - |
 | oh-my-pi | `~/.omp/agent/skills/` | verified | mcpServers |
-| autohand-code | `~/.autohand/skills/` | experimental | - |
-| rovo-dev | `~/.rovodev/skills/` | experimental | - |
-| firebender | `~/.firebender/skills/` | experimental | - |
-| ibm-bob | `~/.bob/skills/` | experimental | - |
-| aider-desk | `~/.aider-desk/skills/` | experimental | - |
+| autohand-code | `~/.autohand/skills/` | verified | - |
+| rovo-dev | `~/.rovodev/skills/` | verified | - |
+| firebender | `~/.firebender/skills/` | verified | - |
+| ibm-bob | `~/.bob/skills/` | verified | - |
+| aider-desk | `~/.aider-desk/skills/` | verified | - |
 | code-arts-doer | `~/.codeartsdoer/skills/` | experimental | - |
 | code-maker | `~/.codemaker/skills/` | experimental | - |
-| code-studio | `~/.codestudio/skills/` | experimental | - |
+| code-studio | `~/.codestudio/skills/` | verified | - |
 | crush | `~/.crush/skills/` | community | - |
 | eve | `./agent/skills/` | experimental | - |
 | forge | `./.forge/skills/` | verified | - |
@@ -99,7 +99,7 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 
 > **MCP support:** 9 agent(s) support MCP server configuration. Format: `mcpServers`, `servers`, `experimental.mcpServers`
 
-> **Agent count:** 90 total — 47 verified, 4 community, 5 legacy, 34 experimental.
+> **Agent count:** 90 total — 53 verified, 4 community, 5 legacy, 28 experimental.
 
 ## Notes
 
