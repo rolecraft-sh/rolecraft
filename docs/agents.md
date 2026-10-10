@@ -59,15 +59,15 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 | kilo-code | `~/.kilocode/skills/` | experimental | - |
 | kode | `~/.kode/skills/` | verified | - |
 | lingma | `~/.lingma/skills/` | verified | - |
-| mcp-jam | `~/.mcpjam/skills/` | experimental | - |
+| mcp-jam | `~/.mcpjam/skills/` | verified | - |
 | moxby | `~/.moxby/skills/` | experimental | - |
 | ona | `~/.ona/skills/` | experimental | - |
 | qoder | `~/.qoder/skills/` | community | - |
-| reasonix | `~/.reasonix/skills/` | experimental | - |
+| reasonix | `~/.reasonix/skills/` | verified | - |
 | terra-mind | `~/.terramind/skills/` | experimental | - |
 | tiny-cloud | `~/.tinycloud/skills/` | experimental | - |
 | zencoder | `~/.zencoder/skills/` | experimental | - |
-| zap | `~/.zap/skills/` | experimental | - |
+| zap | `~/.zap/skills/` | verified | - |
 | codeep | `~/.codeep/skills/` | experimental | - |
 | kimi-code | `~/.kimi-code/skills/` | experimental | - |
 | zcode | `~/.zcode/skills/` | verified | - |
@@ -99,7 +99,7 @@ rolecraft knows where each AI agent looks for skills. When you use a flag like `
 
 > **MCP support:** 9 agent(s) support MCP server configuration. Format: `mcpServers`, `servers`, `experimental.mcpServers`
 
-> **Agent count:** 90 total — 53 verified, 4 community, 5 legacy, 28 experimental.
+> **Agent count:** 90 total — 56 verified, 4 community, 5 legacy, 25 experimental.
 
 ## Notes
 
