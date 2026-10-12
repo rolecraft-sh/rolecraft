@@ -519,6 +519,25 @@ async function downloadFile(url, dest, pkgLabel) {
   await response.body.pipeTo(writable)
 }
 
+/**
+ * Pull the entry name out of one `tar -tvf` line.
+ *
+ * The verbose listing is
+ * `type perms links owner group size day mon time name`, and the day/month
+ * fields are locale-dependent (some tar builds omit the year, some print a
+ * full timestamp). Rather than count columns, find the time-of-day token —
+ * `HH:MM:SS` — and take everything after it. Symlink lines append ` ->
+ * target`, which is dropped along with the arrow so the check sees the name
+ * the archive would actually create.
+ */
+function tarEntryName(line) {
+  const withoutLinkTarget = line.replace(/ -> .*$/, '')
+  const parts = withoutLinkTarget.trim().split(/\s+/)
+  const timeIndex = parts.findIndex((p) => /^\d{2}:\d{2}:\d{2}$/.test(p))
+  if (timeIndex === -1) return parts.at(-1)
+  return parts.slice(timeIndex + 1).join(' ')
+}
+
 async function resolveNpmInternal(source) {
   const { pkgName, version } = parseNpmRef(source)
   const encodedName = encodeURIComponent(pkgName)
@@ -569,32 +588,80 @@ async function resolveNpmInternal(source) {
   try {
     await downloadFile(tarballUrl, tarballPath, `${pkgName}@${ver}`)
 
-    // Validate tarball entries before extraction (prevent path traversal)
-    const listResult = runSpawn('tar', ['-tf', tarballPath], {
+    // Validate tarball entries before extraction. Two separate checks:
+    //
+    // - path traversal: a name containing `..` or an absolute path would let
+    //   extraction write outside tmpDir.
+    // - link entries: `tar -tf` prints only names, so a symlink or hardlink
+    //   with a perfectly clean name slips through. Extracting
+    //   `package/out -> /etc` followed by `package/out/passwd` then writes
+    //   outside tmpDir through that link. `-tvf` includes the entry type as the
+    //   first character: `l` symlink, `h` hardlink.
+    const listResult = runSpawn('tar', ['-tvf', tarballPath], {
       stdio: 'pipe',
       timeout: 10000,
     })
-    if (listResult.status === 0) {
-      const entries = listResult.stdout.toString().split('\n').filter(Boolean)
-      const dangerous = entries.some(
-        (e) => e.includes('..') || e.startsWith('/'),
+    // Fail closed. A `tar` that could not list (missing binary, timeout,
+    // truncated download) used to skip validation entirely and extract
+    // anyway — a security control that silently turned itself off.
+    if (listResult.error) throw listResult.error
+    if (listResult.status !== 0) {
+      throw new UserError(
+        `Could not read the contents of the ${pkgName}@${ver} tarball.`,
+        {
+          suggestion:
+            'The download is likely corrupt and was not extracted. Retry, or install the package manually if you trust it.',
+          code: 'NPM_TARBALL_UNREADABLE',
+        },
       )
-      if (dangerous) {
-        throw new UserError(
-          `Tarball contains unsafe path entries: ${entries.find((e) => e.includes('..') || e.startsWith('/'))}`,
-          {
-            suggestion:
-              'The package was not extracted. Report it to the npm registry, or install it manually if you trust it.',
-            code: 'NPM_TARBALL_UNSAFE_PATHS',
-          },
-        )
-      }
     }
 
-    const tarResult = runSpawn('tar', ['-xzf', tarballPath, '-C', tmpDir], {
-      stdio: 'pipe',
-      timeout: 30000,
+    const entries = listResult.stdout.toString().split('\n').filter(Boolean)
+    const unsafePath = entries.find((line) => {
+      const name = tarEntryName(line)
+      return name.includes('..') || name.startsWith('/')
     })
+    if (unsafePath) {
+      throw new UserError(
+        `Tarball contains unsafe path entries: ${tarEntryName(unsafePath)}`,
+        {
+          suggestion:
+            'The package was not extracted. Report it to the npm registry, or install it manually if you trust it.',
+          code: 'NPM_TARBALL_UNSAFE_PATHS',
+        },
+      )
+    }
+
+    const linked = entries.find((line) => /^[lh]/.test(line))
+    if (linked) {
+      throw new UserError(
+        `Tarball contains a link entry: ${tarEntryName(linked)}`,
+        {
+          suggestion:
+            'Skill packages do not need symlinks. The package was not extracted. Report it to the npm registry, or install it manually if you trust it.',
+          code: 'NPM_TARBALL_UNSAFE_PATHS',
+        },
+      )
+    }
+
+    // Strip ownership and permission bits so nothing in the archive can change
+    // who owns the extracted files or make them group/world writable, even
+    // after the checks above pass.
+    const tarResult = runSpawn(
+      'tar',
+      [
+        '-xzf',
+        tarballPath,
+        '-C',
+        tmpDir,
+        '--no-same-owner',
+        '--no-same-permissions',
+      ],
+      {
+        stdio: 'pipe',
+        timeout: 30000,
+      },
+    )
     if (tarResult.error) throw tarResult.error
     if (tarResult.status !== 0)
       throw new UserError(

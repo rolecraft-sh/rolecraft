@@ -796,6 +796,120 @@ Content
       })
     })
 
+    it('rejects a tarball containing a symlink entry', async () => {
+      await freshImport()
+      mockHttps(resolverModule)
+
+      // A clean-looking name: only the entry *type* gives it away, which is
+      // why the listing is read with `-tvf` rather than `-tf`.
+      resolverModule.setSpawnSync((cmd, args) => {
+        if (cmd === 'tar' && args[0] === '-tvf') {
+          return {
+            status: 0,
+            stdout:
+              'drwxr-xr-x  0 samet  staff  0 Oct 12 15:57 package/\n' +
+              'lrwxr-xr-x  0 samet  staff  0 Oct 12 15:57 package/evil -> /etc\n' +
+              '-rw-r--r--  0 samet  staff  3 Oct 12 15:57 package/ok.txt\n',
+            stderr: '',
+          }
+        }
+        return { status: 0, stdout: '', stderr: '' }
+      })
+
+      await withMockFetch(async () => {
+        await assert.rejects(
+          () => resolverModule.resolveSource('npm:test-pkg'),
+          (error) => {
+            assert.equal(error.userCode, 'NPM_TARBALL_UNSAFE_PATHS')
+            assert.match(error.message, /link entry/)
+            return true
+          },
+        )
+      })
+    })
+
+    it('rejects a tarball containing a path traversal entry', async () => {
+      await freshImport()
+      mockHttps(resolverModule)
+
+      resolverModule.setSpawnSync((cmd, args) => {
+        if (cmd === 'tar' && args[0] === '-tvf') {
+          return {
+            status: 0,
+            stdout:
+              '-rw-r--r--  0 samet  staff  3 Oct 12 15:57 package/../../escape.txt\n',
+            stderr: '',
+          }
+        }
+        return { status: 0, stdout: '', stderr: '' }
+      })
+
+      await withMockFetch(async () => {
+        await assert.rejects(
+          () => resolverModule.resolveSource('npm:test-pkg'),
+          (error) => {
+            assert.equal(error.userCode, 'NPM_TARBALL_UNSAFE_PATHS')
+            assert.match(error.message, /unsafe path entries/)
+            return true
+          },
+        )
+      })
+    })
+
+    it('refuses to extract when the tarball cannot be listed', async () => {
+      await freshImport()
+      mockHttps(resolverModule)
+
+      let extracted = false
+      resolverModule.setSpawnSync((cmd, args) => {
+        if (cmd === 'tar' && args[0] === '-tvf') {
+          // A `tar` that cannot list used to skip validation entirely and
+          // extract anyway.
+          return { status: null, stdout: '', stderr: 'tar: not found' }
+        }
+        if (cmd === 'tar' && args[0] === '-xzf') extracted = true
+        return { status: 0, stdout: '', stderr: '' }
+      })
+
+      await withMockFetch(async () => {
+        await assert.rejects(
+          () => resolverModule.resolveSource('npm:test-pkg'),
+          (error) => {
+            assert.equal(error.userCode, 'NPM_TARBALL_UNREADABLE')
+            return true
+          },
+        )
+      })
+
+      assert.equal(extracted, false, 'extraction ran despite a failed listing')
+    })
+
+    it('extracts without preserving archive ownership or permissions', async () => {
+      await freshImport()
+      mockHttps(resolverModule)
+
+      let extractArgs = null
+      resolverModule.setSpawnSync((cmd, args) => {
+        if (cmd === 'tar' && args[0] === '-xzf') {
+          extractArgs = args
+          const packageDir = join(args[3], 'package')
+          mkdirSync(packageDir, { recursive: true })
+          writeFileSync(
+            join(packageDir, 'SKILL.md'),
+            '# slug: test/npm-skill\nname: npm-skill\nContent',
+          )
+        }
+        return { status: 0, stdout: '', stderr: '' }
+      })
+
+      await withMockFetch(async () => {
+        await resolverModule.resolveSource('npm:test-pkg')
+      })
+
+      assert.ok(extractArgs.includes('--no-same-owner'))
+      assert.ok(extractArgs.includes('--no-same-permissions'))
+    })
+
     it('throws for invalid npm ref', async () => {
       await freshImport()
       mockHttps(resolverModule)
