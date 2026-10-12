@@ -1,4 +1,4 @@
-import { readFile, readdir, stat } from 'node:fs/promises'
+import { readFile, readdir, open } from 'node:fs/promises'
 import { join, relative, sep } from 'node:path'
 import { createHash } from 'node:crypto'
 import AGENTS_DATA, { getAgentByFlag } from '../agents.js'
@@ -483,20 +483,20 @@ export async function readSkillFiles(skillDir) {
       if (!relPath || relPath.startsWith('..')) continue
       if (isIgnoredSkillPath(relPath)) continue
       try {
-        // Size is checked before the read, not after: reading first and then
-        // measuring still costs the memory. A hostile skill is a directory we
-        // do not control, so an unbounded read is an availability risk.
-        const { size } = await stat(fullPath)
-        if (size > MAX_SKILL_FILE_BYTES) {
+        // Size is enforced by the read itself, so an oversized or hostile file
+        // is never held in memory. A skill arrives from a URL, so its size is
+        // chosen by whoever published it.
+        const read = await readFileBounded(fullPath, MAX_SKILL_FILE_BYTES)
+        if (!read) {
           truncated = true
           continue
         }
-        if (totalBytes + size > MAX_SKILL_TOTAL_BYTES) {
+        if (totalBytes + read.bytes > MAX_SKILL_TOTAL_BYTES) {
           truncated = true
           break
         }
-        totalBytes += size
-        fileContents[relPath] = await readFile(fullPath, 'utf-8')
+        totalBytes += read.bytes
+        fileContents[relPath] = read.content
       } catch {}
     }
   } catch {}
@@ -515,6 +515,38 @@ export async function readSkillFiles(skillDir) {
 // skill (the largest legitimate one in the ecosystem is a few hundred KB).
 export const MAX_SKILL_FILE_BYTES = 1_000_000
 export const MAX_SKILL_TOTAL_BYTES = 8_000_000
+
+/**
+ * Read a file, refusing anything larger than `maxBytes`.
+ *
+ * The size is enforced by asking for at most `maxBytes + 1` and checking what
+ * came back, rather than `stat`-ing first and then reading. Measuring and
+ * reading separately is a TOCTOU race (CodeQL `js/file-system-race`): the file
+ * can be replaced in between, so the byte count that was checked is not
+ * necessarily the byte count that gets read. Reading into a buffer sized by the
+ * limit bounds memory no matter what the file is on disk, and one byte of
+ * headroom is enough to know it was too big.
+ *
+ * @returns {Promise<{content: string, bytes: number} | null>} `null` when the
+ * file is over the limit or could not be read.
+ */
+export async function readFileBounded(fullPath, maxBytes) {
+  let handle
+  try {
+    handle = await open(fullPath, 'r')
+    const buffer = Buffer.allocUnsafe(maxBytes + 1)
+    const { bytesRead } = await handle.read(buffer, 0, maxBytes + 1, 0)
+    if (bytesRead > maxBytes) return null
+    return {
+      content: buffer.toString('utf-8', 0, bytesRead),
+      bytes: bytesRead,
+    }
+  } catch {
+    return null
+  } finally {
+    await handle?.close().catch(() => {})
+  }
+}
 
 // Files skipped by the budget above are unread rather than scanned, which is a
 // hole in the security check: the scanner would otherwise see a directory with

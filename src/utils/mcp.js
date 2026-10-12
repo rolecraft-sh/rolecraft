@@ -1,4 +1,4 @@
-import { readFile, mkdir, rm, readdir, stat } from 'node:fs/promises'
+import { readFile, mkdir, rm, readdir } from 'node:fs/promises'
 import { join, dirname, relative } from 'node:path'
 import {
   execSync as defaultExecSync,
@@ -13,6 +13,7 @@ import {
   MAX_SKILL_FILE_BYTES,
   MAX_SKILL_TOTAL_BYTES,
   normalizeSlug,
+  readFileBounded,
 } from './lockfile.js'
 import { assertSafeSlug } from './installer.js'
 import { expandTilde, home } from './paths.js'
@@ -369,13 +370,13 @@ export async function resolveMcpSource(source) {
             if (entry.name === '.git' || entry.name === 'node_modules') continue
             await readFilesRecursive(fullPath, baseDir)
           } else if (entry.isFile()) {
+            const read = await readFileBounded(fullPath, MAX_SKILL_FILE_BYTES)
+            if (!read) continue
+            if (totalBytes + read.bytes > MAX_SKILL_TOTAL_BYTES) return
+            totalBytes += read.bytes
             try {
-              const { size } = await stat(fullPath)
-              if (size > MAX_SKILL_FILE_BYTES) continue
-              if (totalBytes + size > MAX_SKILL_TOTAL_BYTES) return
-              totalBytes += size
               const relPath = relative(baseDir, fullPath)
-              fileContents[relPath] = await readFile(fullPath, 'utf-8')
+              fileContents[relPath] = read.content
             } catch {}
           }
         }
