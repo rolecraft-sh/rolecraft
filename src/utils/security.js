@@ -304,11 +304,14 @@ const PATTERNS = [
   // The local-path forms (`go run ./cmd/x`, `cargo run`) are excluded: a runner
   // pointed at a path inside the project executes code the user already has, and
   // flagging them is noise on a very common instruction.
+  // The flag group is ` --?` with no leading `[ \t]+`: a nested `[ \t]+` inside
+  // a `*` group is ambiguous against the separator after it, which is textbook
+  // catastrophic backtracking (CodeQL `js/redos`).
   {
     severity: 'high',
     category: 'arbitrary_code_execution',
     pattern:
-      /\b(?:npx|dlx|uvx|bunx)(?:[ \t]+--?[^\s]+)*[ \t]+(?![.~/\\])[\w@][\w@./-]*|\b(?:pnpm|yarn|bun)[ \t]+dlx\b/i,
+      /\b(?:npx|dlx|uvx|bunx)(?: --?[^\s]+)*[ \t]+(?![.~/\\])[\w@][\w@./-]*|\b(?:pnpm|yarn|bun)[ \t]dlx\b/i,
     description:
       'Skill instructs running an arbitrary package runner (fetches and executes remote code)',
   },
@@ -382,10 +385,20 @@ const TOOL_AUTHORITY_FRONTMATTER =
 function normalizeForScan(text) {
   return (
     text
-      // Comments used to split a keyword apart (`Ig<!--x-->nore`). Removed with
-      // no replacement, so the split is closed rather than widened into a
-      // space that would break the word in two.
-      .replace(/<!--[\s\S]*?-->/g, '')
+      // An HTML comment is stripped from the *scanner's copy* only. Nothing
+      // escapes this: the text is never rendered, re-serialised, or used to
+      // build output, and `normalizeForScan` has exactly one caller, which
+      // feeds the result to regex matching alone.
+      //
+      // A single pass removes both delimiters, which is what defeats
+      // `Ig<!--x-->nore`. The unterminated case (`<!--` with no closing `-->`)
+      // is deliberately left alone: it cannot split a keyword in the middle
+      // of one, and dropping a stray `<!--` would only lose text.
+      //
+      // Comments used to split a keyword apart. Removed with no replacement,
+      // so the split is closed rather than widened into a space that would
+      // break the word in two.
+      .replace(/<!--(?:[^-]|-(?!->))*-->/g, '')
       // Zero-width and invisible formatting characters.
       .replace(/[\u200b-\u200f\u202a-\u202e\u2060-\u2064\ufeff]/g, '')
       // Full-width and other compatibility forms folded to ASCII.
