@@ -324,11 +324,13 @@ export function scanSkill(resolved) {
   return { score: computeScore(issues), issues }
 }
 
-export function classifyScore(score, issues = []) {
-  // Any critical issue → danger regardless of score
-  const hasCritical = issues.some((i) => i.severity === 'critical')
-  if (hasCritical) return 'danger'
-  if (score >= 90) return 'safe'
+export function classifyScore(score, issues) {
+  // Any critical issue → danger regardless of score.
+  // A high-severity issue must never be reported as `safe`, but it does not on
+  // its own imply danger — the score still decides between review and danger.
+  if (issues.some((i) => i.severity === 'critical')) return 'danger'
+  if (score >= 90)
+    return issues.some((i) => i.severity === 'high') ? 'review' : 'safe'
   if (score >= 70) return 'review'
   return 'danger'
 }
@@ -431,7 +433,7 @@ export function scanMcpServerConfig(name, serverConfig) {
 }
 
 export function formatSecurityReport({ score, issues }, skillName) {
-  const label = classifyScore(score)
+  const label = classifyScore(score, issues)
   const emoji = label === 'safe' ? '✅' : label === 'review' ? '⚠️' : '❌'
   const header = skillName ? ` ${skillName}` : ''
   const lines = [

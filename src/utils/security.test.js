@@ -142,16 +142,26 @@ function makeResolved(overrides = {}) {
 describe('security', () => {
   describe('classifyScore', () => {
     it('returns safe for 90+', () => {
-      assert.equal(classifyScore(100), 'safe')
-      assert.equal(classifyScore(90), 'safe')
+      assert.equal(classifyScore(100, []), 'safe')
+      assert.equal(classifyScore(90, []), 'safe')
     })
     it('returns review for 70-89', () => {
-      assert.equal(classifyScore(89), 'review')
-      assert.equal(classifyScore(70), 'review')
+      assert.equal(classifyScore(89, []), 'review')
+      assert.equal(classifyScore(70, []), 'review')
     })
     it('returns danger for below 70', () => {
-      assert.equal(classifyScore(69), 'danger')
-      assert.equal(classifyScore(0), 'danger')
+      assert.equal(classifyScore(69, []), 'danger')
+      assert.equal(classifyScore(0, []), 'danger')
+    })
+    it('never returns safe when a high-severity issue is present', () => {
+      const high = [{ severity: 'high', category: 'sensitive_path' }]
+      assert.equal(classifyScore(90, high), 'review')
+      assert.equal(classifyScore(100, high), 'review')
+    })
+    it('keeps a high-severity issue from escalating past the score band', () => {
+      const high = [{ severity: 'high', category: 'sensitive_path' }]
+      assert.equal(classifyScore(89, high), 'review')
+      assert.equal(classifyScore(69, high), 'danger')
     })
   })
 
@@ -670,8 +680,8 @@ describe('security', () => {
         score: 80,
         issues: [
           {
-            severity: 'critical',
-            category: 'prompt_injection',
+            severity: 'medium',
+            category: 'network',
             description: 'Test',
             file: 'SKILL.md',
           },
@@ -680,6 +690,22 @@ describe('security', () => {
       assert.ok(report.includes('80'))
       assert.ok(report.includes('REVIEW'))
       assert.ok(report.includes('Review before installing'))
+    })
+
+    it('escalates a critical issue even when the score is in the review band', () => {
+      const report = formatSecurityReport({
+        score: 80,
+        issues: [
+          {
+            severity: 'critical',
+            category: 'prompt_injection',
+            description: 'Test',
+            file: 'SKILL.md',
+          },
+        ],
+      })
+      assert.ok(report.includes('DANGER'))
+      assert.ok(!report.includes('REVIEW'))
     })
 
     it('formats danger result with recommendation', () => {

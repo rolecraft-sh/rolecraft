@@ -711,7 +711,7 @@ export async function ensureSkillsInstalled(skills, targetFlags, options = {}) {
 
       // Security scan before install
       const security = scanSkill(resolved)
-      const level = classifyScore(security.score)
+      const level = classifyScore(security.score, security.issues)
       if ((level === 'danger' || level === 'review') && !options.yes) {
         const issues = security.issues
           .filter((i) => i.severity !== 'low')
