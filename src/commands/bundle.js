@@ -29,7 +29,7 @@ async function installSources(sources, label, options, noMcp = false) {
   const { installed: successCount, failed: failCount } =
     await installBundleSources(
       sources,
-      { yes: true, noMcp },
+      { yes: options.yes ?? false, noMcp },
       {
         onStart: (source, index) =>
           console.log('   [%s/%s] %s', index + 1, sources.length, source),
