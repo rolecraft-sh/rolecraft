@@ -4,7 +4,7 @@ import { ICONS, renderTable } from '../utils/tui.js'
 export async function checkCommand() {
   const result = await apiCheck(process.cwd())
 
-  const { skills, updatesAvailable } = result
+  const { skills, updatesAvailable, unsafeAvailable = 0 } = result
   if (skills.length === 0) {
     console.log('\nNo installed skills found.')
     return
@@ -20,6 +20,12 @@ export async function checkCommand() {
   for (const s of skills) {
     if (s.status === 'skipped') {
       rows.push([s.slug, `${ICONS.skip} skipped`, s.reason])
+    } else if (s.status === 'unsafe_update') {
+      rows.push([
+        s.slug,
+        `${ICONS.error} UNSAFE UPDATE`,
+        `security scan: ${s.reason}`,
+      ])
     } else if (s.status === 'update_available') {
       const detail = 'update available'
       rows.push([s.slug, `${ICONS.update} update`, detail])
@@ -31,6 +37,21 @@ export async function checkCommand() {
   }
   for (const line of renderTable(['SKILL', 'STATUS', 'DETAIL'], rows)) {
     console.log(line)
+  }
+
+  // Never let a flagged update hide behind the ordinary update count.
+  if (unsafeAvailable > 0) {
+    console.error(
+      `\n⚠️  ${unsafeAvailable} skill(s) have an update whose upstream content trips the security scan:`,
+    )
+    for (const s of skills) {
+      if (s.status !== 'unsafe_update') continue
+      console.error(`\n   ${s.slug} (${s.source})`)
+      for (const line of s.reason.split('\n')) console.error(`   ${line}`)
+    }
+    console.error(
+      '\n   Do not update these. Review the source, or pin the version you trust.',
+    )
   }
 
   console.log(
