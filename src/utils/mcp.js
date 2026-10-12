@@ -1,4 +1,4 @@
-import { readFile, writeFile, mkdir, rm, readdir } from 'node:fs/promises'
+import { readFile, mkdir, rm, readdir } from 'node:fs/promises'
 import { join, dirname, relative } from 'node:path'
 import {
   execSync as defaultExecSync,
@@ -6,6 +6,7 @@ import {
 } from 'node:child_process'
 import agents from '../agents.js'
 import { addServerToMcpLock, removeServerFromMcpLock } from './mcp-lock.js'
+import { updateLockFile, writeJsonAtomic } from './lock-write.js'
 import { parseFrontmatter } from './converter.js'
 import { UserError } from './errors.js'
 import { normalizeSlug } from './lockfile.js'
@@ -39,6 +40,13 @@ export function getSupportedMcpAgents() {
 export async function readMcpConfig(agent) {
   const configPath = getMcpConfigPath(agent)
   if (!configPath) return null
+  return { configPath, data: await readMcpConfigAt(configPath) }
+}
+
+// Read and validate one MCP config file by path. Split out from
+// `readMcpConfig` so the locked update below can re-read under the sentinel
+// without re-resolving the agent's config path.
+async function readMcpConfigAt(configPath) {
   let raw
 
   try {
@@ -54,7 +62,7 @@ export async function readMcpConfig(agent) {
         },
       )
     }
-    return { configPath, data: {} }
+    return {}
   }
 
   let data
@@ -82,7 +90,7 @@ export async function readMcpConfig(agent) {
     )
   }
 
-  return { configPath, data }
+  return data
 }
 
 function setMcpServerEntry(data, agent, name, serverConfig) {
@@ -164,13 +172,38 @@ function listMcpServerEntries(data, agent) {
   }))
 }
 
+// MCP config files carry API keys in their `env` blocks, so they are written
+// with owner-only permissions rather than the default 0644.
+const MCP_CONFIG_MODE = 0o600
+
+async function writeMcpConfig(data, configPath) {
+  await writeJsonAtomic(configPath, data, { mode: MCP_CONFIG_MODE })
+}
+
+// Read-modify-write an agent's MCP config under an exclusive lock.
+//
+// The previous read and write were two independent calls, so two concurrent
+// `mcp add` processes could each read the same starting state and the second
+// write would silently discard the first server. The lock is held across the
+// whole cycle, and the write itself is atomic, so a reader never sees a
+// half-written config.
+async function updateMcpConfig(agent, mutate) {
+  const configPath = getMcpConfigPath(agent)
+  if (!configPath) return null
+
+  return updateLockFile(configPath, {
+    read: readMcpConfigAt,
+    write: writeMcpConfig,
+    mutate,
+  })
+}
+
 export async function addMcpServer(agent, name, serverConfig, source = null) {
-  const result = await readMcpConfig(agent)
-  if (!result) return false
-  const { configPath, data } = result
-  setMcpServerEntry(data, agent, name, serverConfig)
-  await mkdir(dirname(configPath), { recursive: true })
-  await writeFile(configPath, `${JSON.stringify(data, null, 2)}\n`, 'utf-8')
+  const updated = await updateMcpConfig(agent, (data) => {
+    setMcpServerEntry(data, agent, name, serverConfig)
+    return data
+  })
+  if (updated === null) return false
 
   await addServerToMcpLock(name, {
     source: source || reconstructMcpSource(serverConfig, name),
@@ -182,15 +215,16 @@ export async function addMcpServer(agent, name, serverConfig, source = null) {
 }
 
 export async function removeMcpServer(agent, name) {
-  const result = await readMcpConfig(agent)
-  if (!result) return false
-  const { configPath, data } = result
-  const before = JSON.stringify(data)
-  removeMcpServerEntry(data, agent, name)
-  const after = JSON.stringify(data)
-  if (before === after) return false
-  await mkdir(dirname(configPath), { recursive: true })
-  await writeFile(configPath, `${JSON.stringify(data, null, 2)}\n`, 'utf-8')
+  let removed = false
+  const updated = await updateMcpConfig(agent, (data) => {
+    const before = JSON.stringify(data)
+    removeMcpServerEntry(data, agent, name)
+    removed = JSON.stringify(data) !== before
+    return data
+  })
+  if (updated === null) return false
+  // No entry changed, so nothing was written and the MCP lock must stay as is.
+  if (!removed) return false
 
   await removeServerFromMcpLock(name, agent)
 

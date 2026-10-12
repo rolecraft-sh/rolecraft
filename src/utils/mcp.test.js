@@ -8,6 +8,7 @@ import {
   writeFileSync,
   mkdirSync,
   rmSync,
+  statSync,
 } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
@@ -56,6 +57,42 @@ describe('mcp', () => {
   })
 
   describe('addMcpServer', () => {
+    it(
+      'writes the config owner-only so env secrets are not world-readable',
+      withTempDir(async () => {
+        await mcpModule.addMcpServer('agents', 'secretive', {
+          command: 'npx',
+          args: ['-y', '@test/server'],
+          env: { API_KEY: 'sk-not-a-real-key' },
+        })
+
+        const configPath = join(process.env.HOME, '.agents', 'mcp.json')
+        const mode = statSync(configPath).mode & 0o777
+        assert.equal(mode, 0o600)
+      }),
+    )
+
+    it(
+      'concurrent adds do not lose a server entry',
+      withTempDir(async () => {
+        // Both calls read-modify-write the same file. Without the lock they
+        // can interleave and the second write discards the first server.
+        const server = (n) => ({
+          command: 'npx',
+          args: ['-y', `@test/server-${n}`],
+        })
+        await Promise.all([
+          mcpModule.addMcpServer('agents', 'server-a', server('a')),
+          mcpModule.addMcpServer('agents', 'server-b', server('b')),
+        ])
+
+        const configPath = join(process.env.HOME, '.agents', 'mcp.json')
+        const config = JSON.parse(readFileSync(configPath, 'utf-8'))
+        assert.ok(config.mcpServers['server-a'], 'server-a was lost')
+        assert.ok(config.mcpServers['server-b'], 'server-b was lost')
+      }),
+    )
+
     it(
       'adds an MCP server to agents (opencode) config',
       withTempDir(async () => {

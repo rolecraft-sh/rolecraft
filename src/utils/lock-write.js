@@ -83,8 +83,13 @@ async function renameWithRetry(from, to, attempts = 10, renameFile = rename) {
  * so a reader can observe a truncated or half-written file. Writing to a
  * sibling temp file and renaming it into place keeps the swap atomic on the
  * same filesystem, so readers only ever see the old or the new file.
+ *
+ * `mode` sets permissions on the temp file, which the rename carries over to
+ * the final path. Callers writing a file that holds credentials pass 0o600 —
+ * without it a first write lands at 0644 and the umask default leaves the
+ * secret readable by every local user.
  */
-export async function writeJsonAtomic(lockPath, data) {
+export async function writeJsonAtomic(lockPath, data, { mode } = {}) {
   await ensureParentDir(lockPath)
 
   // The pid separates processes, the counter separates concurrent writes
@@ -92,7 +97,10 @@ export async function writeJsonAtomic(lockPath, data) {
   const tmpPath = `${lockPath}.${process.pid}.${tmpCounter++}.tmp`
 
   try {
-    await writeFile(tmpPath, `${JSON.stringify(data, null, 2)}\n`, 'utf-8')
+    await writeFile(tmpPath, `${JSON.stringify(data, null, 2)}\n`, {
+      encoding: 'utf-8',
+      ...(mode === undefined ? {} : { mode }),
+    })
     await renameWithRetry(tmpPath, lockPath)
   } catch (error) {
     // Never leave a stray temp file behind on a failed write.
