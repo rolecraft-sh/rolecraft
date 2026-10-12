@@ -476,11 +476,28 @@ function gateMcpServer(name, serverConfig, options = {}, where = '') {
   return { allowed: true, level }
 }
 
-// Drop flagged MCP servers from one scope of a profile's `config` section.
-// For some agents (windsurf, continue) the config file is also the MCP config
-// file, so `mcpServers` here would otherwise bypass the gate in
-// `applyMcpServers`. Covers the object form (`mcpServers`) and continue's list
-// form (`experimental.mcpServers`). The profile data is not modified.
+// Every key an agent uses to declare MCP servers. Profiles are imported from
+// URLs, so each of these needs the same gate as skill-sourced servers:
+//   opencode  -> `mcp`      claude/cursor/windsurf -> `mcpServers`
+//   copilot   -> `servers`  continue -> `experimental.mcpServers`
+const MCP_OBJECT_CONFIG_KEYS = ['mcpServers', 'mcp', 'servers']
+
+// Keys that grant an agent the authority to execute code or to relax its own
+// permission gates. A profile is data describing a setup — it has no business
+// granting these, and `profile import` accepts any public gist, so writing
+// them would turn a shared config file into remote code execution.
+const EXEC_AUTHORITY_CONFIG_KEYS = [
+  'plugin',
+  'permission',
+  'permissions',
+  'hooks',
+]
+
+// Drop flagged MCP servers and execution-authority keys from one scope of a
+// profile's `config` section. For some agents (windsurf, continue) the config
+// file is also the MCP config file, so these keys would otherwise bypass the
+// gate in `applyMcpServers`. Covers the object form and continue's list form
+// (`experimental.mcpServers`). The profile data is not modified.
 function filterConfigMcpServers(scope, scopeData, options) {
   if (!scopeData || typeof scopeData !== 'object' || Array.isArray(scopeData))
     return { data: scopeData, blocked: [] }
@@ -488,15 +505,30 @@ function filterConfigMcpServers(scope, scopeData, options) {
   const blocked = []
   let data = scopeData
 
-  const servers = scopeData.mcpServers
-  if (servers && typeof servers === 'object' && !Array.isArray(servers)) {
+  for (const key of EXEC_AUTHORITY_CONFIG_KEYS) {
+    if (scopeData[key] === undefined) continue
+    const reason = `"${key}" grants code-execution or permission authority and cannot be set from a profile`
+    // Never silently: the user asked for this profile to apply, so say what
+    // was dropped rather than leaving a gap they would not notice.
+    console.error(
+      `\n⚠️  "${key}" in config.${scope} was not applied. ${reason}.`,
+    )
+    blocked.push({ scope, name: key, reason })
+    data = { ...data }
+    delete data[key]
+  }
+
+  for (const key of MCP_OBJECT_CONFIG_KEYS) {
+    const servers = data[key]
+    if (!servers || typeof servers !== 'object' || Array.isArray(servers))
+      continue
     const kept = {}
     for (const [name, serverConfig] of Object.entries(servers)) {
       const gate = gateMcpServer(name, serverConfig, options, `config.${scope}`)
       if (gate.allowed) kept[name] = serverConfig
       else blocked.push({ scope, name, reason: gate.reason })
     }
-    if (blocked.length > 0) data = { ...data, mcpServers: kept }
+    data = { ...data, [key]: kept }
   }
 
   const list = scopeData.experimental?.mcpServers
