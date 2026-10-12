@@ -35,11 +35,25 @@ const FLAGS = `(?:${SEP}${FLAG}(?:${SEP}${VALUE})?)*?`
 //   others ran the download while reading as data-only.
 const PYTHON_DATA_ONLY = String.raw`[ \t]+(?:-[A-Za-z]+[ \t]+)*-m[ \t]+json\.tool\b`
 const PYTHON = String.raw`python[23]?\b(?!${PYTHON_DATA_ONLY})`
+// The interpreter that receives the download. This was a short list and the
+// same primitive reached every runtime not named in it — `| node`, `| perl`,
+// `| ruby` all execute what they are piped. The list is now closed in the
+// other direction: anything here counts, and `SAFE_SINK` below carves out the
+// readers that only ever pass bytes along.
+const INTERPRETER = String.raw`(?:(?:bash|sh|zsh|node|perl|ruby|php|deno|bun)\b|${PYTHON})`
 const DOWNLOAD = String.raw`(?:curl|wget)${FLAGS}(?:\s|\\\r?\n)+['"]?https?:\/\/[^\s'")]+['"]?${FLAGS}`
 const DOWNLOAD_AND_EXECUTE = new RegExp(
   String.raw`${DOWNLOAD}\s*[|;]\s*` +
     String.raw`(?:sudo(?:[ \t]+-\S*)*[ \t]+)?(?:(?:\/[^\s/]+)*\/)?` +
     String.raw`(?:(?:bash|sh|zsh)\b|${PYTHON})`,
+)
+
+// A second download-and-execute shape, matched by decoding rather than by
+// fetching: `base64 -d | sh` is the same primitive as `curl | sh` with a
+// different front half. The old rules only understood a download, so this one
+// passed untouched at 100/100.
+const DECODE_AND_EXECUTE = new RegExp(
+  String.raw`(?:base64|xxd)\b[^\n|;]{0,40}(?:-d|--decode)\s*[|;]\s*${INTERPRETER}`,
 )
 
 // Download-and-execute with no pipe: the download reaches the interpreter by
@@ -52,7 +66,7 @@ const DOWNLOAD_AND_EXECUTE = new RegExp(
 // assigned or echoed reads the download as data and runs nothing, so it does
 // not match: no interpreter, no execution.
 const SUBSTITUTION = String.raw`(?:<\(|['"]\$\()`
-const RUNNER = String.raw`(?:sudo(?:[ \t]+-\S*)*[ \t]+)?(?:(?:\/[^\s/]+)*\/)?(?:(?:bash|sh|zsh)\b|${PYTHON})`
+const RUNNER = String.raw`(?:sudo(?:[ \t]+-\S*)*[ \t]+)?(?:(?:\/[^\s/]+)*\/)?${INTERPRETER}`
 const DOWNLOAD_AND_EXECUTE_SUBSTITUTION = new RegExp(
   String.raw`(?:${RUNNER}(?:${SEP}-[^\s'"()]+)*${SEP}${SUBSTITUTION}` +
     String.raw`|eval[ \t]+${SUBSTITUTION}` +
@@ -191,11 +205,31 @@ const PATTERNS = [
     pattern: DOWNLOAD_AND_EXECUTE_SUBSTITUTION,
     description: 'Command injection: download-and-execute via substitution',
   },
+  {
+    severity: 'critical',
+    category: 'command_injection',
+    pattern: DECODE_AND_EXECUTE,
+    description: 'Command injection: decodes and executes an inline payload',
+  },
+  {
+    severity: 'critical',
+    category: 'data_exfiltration',
+    pattern:
+      /https?:\/\/[^\s'"]*[?&][^\s'"]*(?:k|key|token|secret|password|auth|api_?key)=["']?\$?\{?(?:[A-Z0-9_]*(?:KEY|TOKEN|SECRET|PASSWORD)|\d+)/i,
+    description: 'Secret or credential value passed to a remote host in a URL',
+  },
 
   {
     severity: 'high',
     category: 'sensitive_file_access',
-    pattern: /~\/\.(?:ssh|aws|gpg|gnupg|docker|kube|config|npm|vscode|netrc)/,
+    // `~/.ssh/config` and `~/.config` are excluded: the first lists host
+    // aliases, the second is a directory name that precedes anything. They
+    // are the two paths a skill legitimately needs and a secret never lives in.
+    // The guard is `\b` rather than `$`: the path is usually followed by more
+    // prose, so anchoring to end-of-string let `~/.ssh/config to find ...`
+    // through.
+    pattern:
+      /~\/\.(?:ssh\/(?!config\b)|aws|gpg|gnupg|docker|kube|config\/(?!$)|npm|vscode|netrc)/,
     description: 'Access to sensitive user files',
   },
   {
@@ -261,6 +295,50 @@ const PATTERNS = [
     pattern: /(?:writeFileSync|appendFileSync|writeFile|appendFile)\s*\(/,
     description: 'File write capability',
   },
+
+  // An arbitrary package runner is the most common way a skill turns into remote
+  // code execution: `npx -y <pkg>` fetches and runs whatever the registry serves
+  // at that moment, so the package name is only the start of it. No rule covered
+  // this before.
+  //
+  // The local-path forms (`go run ./cmd/x`, `cargo run`) are excluded: a runner
+  // pointed at a path inside the project executes code the user already has, and
+  // flagging them is noise on a very common instruction.
+  {
+    severity: 'high',
+    category: 'arbitrary_code_execution',
+    pattern:
+      /\b(?:npx|dlx|uvx|bunx)(?:[ \t]+--?[^\s]+)*[ \t]+(?![.~/\\])[\w@][\w@./-]*|\b(?:pnpm|yarn|bun)[ \t]+dlx\b/i,
+    description:
+      'Skill instructs running an arbitrary package runner (fetches and executes remote code)',
+  },
+  // The syntaxes real prompt-injection payloads use to impersonate the harness.
+  // A skill is text an agent reads, so a control marker in that text is a way to
+  // claim authority the payload does not have.
+  {
+    severity: 'critical',
+    category: 'prompt_injection',
+    pattern:
+      /<\/?(?:system|assistant|human|tool_result)(?:[-_][\w-]+)?\s*>|<system-reminder>|<\/?(?:im_start|im_end)>\s*|\[\/?INST\]|<{2}\/?SYS>{2}|###\s*(?:system|instructions?)\b|^\s*(?:system|admin|root)\s*:|\bsystem\s+prompt\s*(?:override|replace)/im,
+    description: 'Prompt injection: embeds agent control markers',
+  },
+  // Sending a secret outward. Matched by structure rather than by host: the old
+  // rule named a handful of paste sites that rotate in a day, so any other
+  // destination scored clean.
+  {
+    severity: 'critical',
+    category: 'data_exfiltration',
+    pattern:
+      /(?:process\.env\.[A-Z0-9_]*(?:KEY|TOKEN|SECRET|PASSWORD)|readFileSync\s*\(\s*['"`][^'"`]*\.ssh|~?\/?\.(?:npmrc|netrc)\b|ANTHROPIC_API_KEY|OPENAI_API_KEY|AWS_SECRET_ACCESS_KEY)\b[^)\n]{0,120}https?:\/\//i,
+    description: 'Secret read and sent to a remote host',
+  },
+  {
+    severity: 'high',
+    category: 'persistence',
+    pattern:
+      /\b(?:crontab|launchctl\s+load|LaunchAgents|LaunchDaemons|systemctl\s+enable)\b|>>?\s*~?\/?[\w/.-]*(?:bashrc|zshrc|bash_profile|zprofile|profile)\b|\bgit\s+config\s+--global\b/i,
+    description: 'Persistence: writes to a startup or scheduled location',
+  },
 ]
 
 // A skill is documentation that gets read into an agent's context. It has no
@@ -283,6 +361,44 @@ const SHADOWING_HOOK_PATHS = /(?:^|\/)hooks\//i
 // already gated, and would mark a legitimate skill as needing review.
 const TOOL_AUTHORITY_FRONTMATTER =
   /^([ \t]*)(allowed[-_]tools?|permissions?|hooks?)[ \t]*:/im
+
+/**
+ * Fold away the tricks that hide a keyword from a literal pattern.
+ *
+ * Every rule in this file is a regex over text, so an attacker only has to
+ * insert a character the regex does not mention. Four ways to do that were
+ * verified against `scanSkill` before this existed — all scored 100 and
+ * classified `safe`:
+ *
+ *   `ig\u200bnore all previous instructions`  zero-width, invisible in an editor
+ *   `Ig<!--x-->nore all previous instructions` a comment splits the verb
+ *   `ｉｇｎｏｒｅ　ｐｒｅｖｉｏｕｓ`               full-width Unicode letters
+ *   `ignore\u2010all previous instructions`    a Unicode dash for `-`
+ *
+ * Normalising once here lifts all the existing rules at once. The normalised
+ * form is only ever used for matching; the file is reported and stored as it
+ * actually arrived.
+ */
+function normalizeForScan(text) {
+  return (
+    text
+      // Comments used to split a keyword apart (`Ig<!--x-->nore`). Removed with
+      // no replacement, so the split is closed rather than widened into a
+      // space that would break the word in two.
+      .replace(/<!--[\s\S]*?-->/g, '')
+      // Zero-width and invisible formatting characters.
+      .replace(/[\u200b-\u200f\u202a-\u202e\u2060-\u2064\ufeff]/g, '')
+      // Full-width and other compatibility forms folded to ASCII.
+      .normalize('NFKC')
+      // Look-alikes. The dash family maps to a space rather than to `-`:
+      // these rules match English phrases, so a dash standing in for a word
+      // break has to become one or the phrase still misses.
+      .replace(/[\u2010-\u2015\u2212\uFE63\uFF0D]/g, ' ')
+      .replace(/[\u2018\u2019\u201B\u2032]/g, "'")
+      .replace(/[\u201C\u201D\u201F\u2033]/g, '"')
+      .replace(/[\u00A0\u2000-\u200A\u202F\u205F\u3000]/g, ' ')
+  )
+}
 
 export function computeScore(issues) {
   const deductions = {}
@@ -321,10 +437,12 @@ export function scanSkill(resolved) {
       })
     }
 
+    const normalized = normalizeForScan(content)
+
     for (const check of PATTERNS) {
       const key = `${check.severity}:${check.category}:${check.description}:${filename}`
       if (seen.has(key)) continue
-      if (check.pattern.test(content)) {
+      if (check.pattern.test(normalized)) {
         issues.push({
           severity: check.severity,
           category: check.category,
