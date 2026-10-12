@@ -9,6 +9,7 @@ import {
   requiresMcpApproval,
   formatSecurityReport,
 } from './security.js'
+import { TRUNCATED } from './lockfile.js'
 
 // Real invocations of download-and-execute (#370).
 const DOWNLOAD_AND_EXECUTE = [
@@ -284,6 +285,23 @@ describe('security', () => {
         }),
       )
       assert.equal(result.score, 80)
+    })
+  })
+
+  describe('scanSkill scan budget reporting', () => {
+    it('reports an incomplete scan instead of calling the skill clean', () => {
+      const fileContents = { 'SKILL.md': 'looks fine' }
+      Object.defineProperty(fileContents, TRUNCATED, {
+        value: true,
+        enumerable: false,
+      })
+
+      const result = scanSkill(makeResolved({ fileContents }))
+
+      assert.ok(
+        result.issues.some((i) => i.category === 'scan_incomplete'),
+        'oversized content was not reported',
+      )
     })
   })
 

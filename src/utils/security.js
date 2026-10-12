@@ -1,3 +1,9 @@
+import {
+  MAX_SKILL_FILE_BYTES,
+  MAX_SKILL_TOTAL_BYTES,
+  wasTruncated,
+} from './lockfile.js'
+
 const WEIGHTS = { critical: 20, high: 10, medium: 3, low: 1 }
 
 // Download-and-execute: a curl/wget download piped (or `;`-chained) into a
@@ -291,6 +297,16 @@ export function scanSkill(resolved) {
         seen.add(key)
       }
     }
+  }
+
+  // Content that exceeded the read budget was never scanned. Reporting that is
+  // the difference between "we looked and found nothing" and "we did not look".
+  if (wasTruncated(resolved.fileContents)) {
+    issues.push({
+      severity: 'medium',
+      category: 'scan_incomplete',
+      description: `Skill content exceeded the scan budget (${MAX_SKILL_FILE_BYTES} bytes per file, ${MAX_SKILL_TOTAL_BYTES} total); some files were not scanned`,
+    })
   }
 
   if (!resolved.owner || resolved.owner === 'local') {

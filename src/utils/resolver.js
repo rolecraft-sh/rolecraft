@@ -415,6 +415,11 @@ function parseNpmRef(source) {
   return { pkgName, version }
 }
 
+// A package's registry metadata is at most a few hundred KB in practice. The
+// package name is chosen by whoever is being resolved, so the response is not
+// trusted to be bounded.
+const MAX_JSON_BYTES = 2_000_000
+
 function fetchJson(url) {
   const parsed = new URL(url)
   const hostname = parsed.hostname
@@ -432,10 +437,33 @@ function fetchJson(url) {
       { headers: { Accept: 'application/json' } },
       (res) => {
         let data = ''
+        let bytes = 0
+        let aborted = false
         res.on('data', (chunk) => {
+          if (aborted) return
+          // Package metadata for a popular package is a few hundred KB. A
+          // package name is attacker-chosen, so this stream is bounded:
+          // without a cap a hostile or buggy endpoint can grow `data` without
+          // limit.
+          bytes += chunk.length
+          if (bytes > MAX_JSON_BYTES) {
+            aborted = true
+            reject(
+              new UserError(
+                `npm registry response for ${cleanUrl} exceeded ${MAX_JSON_BYTES} bytes.`,
+                {
+                  suggestion:
+                    'The response was not read. Retry, or install the skill from a git source instead.',
+                  code: 'NPM_FETCH_TOO_LARGE',
+                },
+              ),
+            )
+            return
+          }
           data += chunk.toString()
         })
         res.on('end', () => {
+          if (aborted) return
           if (res.statusCode !== 200) {
             reject(
               new Error(
@@ -450,7 +478,9 @@ function fetchJson(url) {
             reject(new Error(`Invalid JSON from npm registry: ${e.message}`))
           }
         })
-        res.on('error', reject)
+        res.on('error', (e) => {
+          if (!aborted) reject(e)
+        })
       },
     )
     req.on('error', reject)

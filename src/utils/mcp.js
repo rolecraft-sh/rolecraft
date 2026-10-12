@@ -1,4 +1,4 @@
-import { readFile, mkdir, rm, readdir } from 'node:fs/promises'
+import { readFile, mkdir, rm, readdir, stat } from 'node:fs/promises'
 import { join, dirname, relative } from 'node:path'
 import {
   execSync as defaultExecSync,
@@ -9,7 +9,11 @@ import { addServerToMcpLock, removeServerFromMcpLock } from './mcp-lock.js'
 import { updateLockFile, writeJsonAtomic } from './lock-write.js'
 import { parseFrontmatter } from './converter.js'
 import { UserError } from './errors.js'
-import { normalizeSlug } from './lockfile.js'
+import {
+  MAX_SKILL_FILE_BYTES,
+  MAX_SKILL_TOTAL_BYTES,
+  normalizeSlug,
+} from './lockfile.js'
 import { assertSafeSlug } from './installer.js'
 import { expandTilde, home } from './paths.js'
 
@@ -352,8 +356,11 @@ export async function resolveMcpSource(source) {
         : null
       const command = bin ? join(cloneDir, bin) : join(cloneDir, main)
 
-      // Read all files asynchronously for security scanning
+      // Read files for the security scan, under the same byte budget as a skill
+      // directory. The repository is attacker-chosen, so it is scanned on a
+      // bounded read rather than loaded whole.
       const fileContents = {}
+      let totalBytes = 0
       async function readFilesRecursive(dir, baseDir) {
         const entries = await readdir(dir, { withFileTypes: true })
         for (const entry of entries) {
@@ -363,6 +370,10 @@ export async function resolveMcpSource(source) {
             await readFilesRecursive(fullPath, baseDir)
           } else if (entry.isFile()) {
             try {
+              const { size } = await stat(fullPath)
+              if (size > MAX_SKILL_FILE_BYTES) continue
+              if (totalBytes + size > MAX_SKILL_TOTAL_BYTES) return
+              totalBytes += size
               const relPath = relative(baseDir, fullPath)
               fileContents[relPath] = await readFile(fullPath, 'utf-8')
             } catch {}

@@ -204,6 +204,22 @@ function assertAllowedProfileHost(url) {
  * `utils/http-fetch.js` so the npm tarball download can share it instead of
  * growing a second copy.
  */
+// A profile is a small JSON document; anything this large is not one. The URL
+// can point at any public gist, so the body is not trusted to be bounded.
+const MAX_PROFILE_BYTES = 1_000_000
+
+async function readBoundedText(response, url) {
+  const text = await response.text()
+  if (Buffer.byteLength(text, 'utf-8') > MAX_PROFILE_BYTES) {
+    throw new UserError(`Profile at ${url} is larger than expected.`, {
+      code: 'PROFILE_TOO_LARGE',
+      suggestion:
+        'The profile was not imported. Check the link points at a profile JSON file.',
+    })
+  }
+  return text
+}
+
 async function fetchProfileBody(url) {
   const { response, url: finalUrl } = await fetchFollowingRedirects(url, {
     assertAllowed: assertAllowedProfileHost,
@@ -219,7 +235,7 @@ async function fetchProfileBody(url) {
     })
   }
 
-  return response.text()
+  return readBoundedText(response, finalUrl)
 }
 
 export async function apiProfileImport(path) {

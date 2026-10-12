@@ -854,3 +854,65 @@ describe('lockfile', () => {
     })
   })
 })
+
+describe('readSkillFiles size budget', () => {
+  let dir
+
+  beforeEach(async () => {
+    dir = join(tempDir, 'budget-skill')
+    await mkdir(dir, { recursive: true })
+  })
+
+  afterEach(async () => {
+    await rm(dir, { recursive: true, force: true })
+  })
+
+  it('skips a file over the per-file limit and reports truncation', async () => {
+    await writeFile(
+      join(dir, 'huge.md'),
+      Buffer.alloc(lockModule.MAX_SKILL_FILE_BYTES + 1, 0x61),
+    )
+    await writeFile(join(dir, 'small.md'), 'ok')
+
+    const contents = await lockModule.readSkillFiles(dir)
+
+    assert.equal(contents['huge.md'], undefined)
+    assert.equal(contents['small.md'], 'ok')
+    assert.equal(lockModule.wasTruncated(contents), true)
+  })
+
+  it('does not read past the total budget', async () => {
+    const half = Math.floor(lockModule.MAX_SKILL_TOTAL_BYTES / 2) + 1
+    await writeFile(join(dir, 'a.bin'), Buffer.alloc(half, 0x62))
+    await writeFile(join(dir, 'b.bin'), Buffer.alloc(half, 0x63))
+
+    const contents = await lockModule.readSkillFiles(dir)
+
+    assert.equal(lockModule.wasTruncated(contents), true)
+    assert.ok(Object.keys(contents).length < 2)
+  })
+
+  it('does not report truncation for a normal skill', async () => {
+    await writeFile(join(dir, 'SKILL.md'), '# slug: t/s\nname: s\n')
+
+    const contents = await lockModule.readSkillFiles(dir)
+
+    assert.equal(lockModule.wasTruncated(contents), false)
+  })
+
+  it('keeps the truncation flag out of the file list and the hash', async () => {
+    await writeFile(
+      join(dir, 'huge.md'),
+      Buffer.alloc(lockModule.MAX_SKILL_FILE_BYTES + 1, 0x61),
+    )
+    await writeFile(join(dir, 'SKILL.md'), 'ok')
+
+    const contents = await lockModule.readSkillFiles(dir)
+
+    // A non-enumerable flag: the installer would otherwise write it out as a
+    // file, and JSON.stringify feeds the content hash.
+    assert.deepEqual(Object.keys(contents), ['SKILL.md'])
+    assert.equal(JSON.stringify(contents).includes('truncated'), false)
+    assert.equal(lockModule.wasTruncated(contents), true)
+  })
+})

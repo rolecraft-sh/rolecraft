@@ -1,4 +1,4 @@
-import { readFile, readdir } from 'node:fs/promises'
+import { readFile, readdir, stat } from 'node:fs/promises'
 import { join, relative, sep } from 'node:path'
 import { createHash } from 'node:crypto'
 import AGENTS_DATA, { getAgentByFlag } from '../agents.js'
@@ -467,11 +467,13 @@ export function computeFileHashes(fileContents) {
  */
 export async function readSkillFiles(skillDir) {
   const fileContents = {}
+  let truncated = false
   try {
     const entries = await readdir(skillDir, {
       withFileTypes: true,
       recursive: true,
     })
+    let totalBytes = 0
     for (const entry of entries) {
       if (!entry.isFile()) continue
       const fullPath = join(entry.parentPath ?? skillDir, entry.name)
@@ -481,12 +483,51 @@ export async function readSkillFiles(skillDir) {
       if (!relPath || relPath.startsWith('..')) continue
       if (isIgnoredSkillPath(relPath)) continue
       try {
+        // Size is checked before the read, not after: reading first and then
+        // measuring still costs the memory. A hostile skill is a directory we
+        // do not control, so an unbounded read is an availability risk.
+        const { size } = await stat(fullPath)
+        if (size > MAX_SKILL_FILE_BYTES) {
+          truncated = true
+          continue
+        }
+        if (totalBytes + size > MAX_SKILL_TOTAL_BYTES) {
+          truncated = true
+          break
+        }
+        totalBytes += size
         fileContents[relPath] = await readFile(fullPath, 'utf-8')
       } catch {}
     }
   } catch {}
+  if (truncated) {
+    Object.defineProperty(fileContents, TRUNCATED, {
+      value: true,
+      enumerable: false,
+    })
+  }
   return fileContents
 }
+
+// Byte budgets for reading a skill directory. A skill arrives from a URL, so
+// its size is chosen by whoever published it, and every byte here is held in
+// memory before the security scan runs. Both limits are far above any real
+// skill (the largest legitimate one in the ecosystem is a few hundred KB).
+export const MAX_SKILL_FILE_BYTES = 1_000_000
+export const MAX_SKILL_TOTAL_BYTES = 8_000_000
+
+// Files skipped by the budget above are unread rather than scanned, which is a
+// hole in the security check: the scanner would otherwise see a directory with
+// nothing in it and call it clean. The count is attached to the returned map as
+// a **non-enumerable** property so the existing callers are unaffected —
+// `Object.keys()` drives the installer's file list, and `JSON.stringify` is
+// used for hashing, so an ordinary key here would install a junk file and
+// change every content hash. `scanSkill` reads it through
+// `wasTruncated`.
+export function wasTruncated(fileContents) {
+  return fileContents?.[TRUNCATED] ?? false
+}
+export const TRUNCATED = Symbol('rolecraft.truncated')
 
 function isIgnoredSkillPath(relPath) {
   return relPath
