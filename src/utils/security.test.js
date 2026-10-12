@@ -141,6 +141,108 @@ function makeResolved(overrides = {}) {
 }
 
 describe('security', () => {
+  describe('config shadowing by file name', () => {
+    const SHADOWING = [
+      'settings.json',
+      'settings.local.json',
+      '.mcp.json',
+      'opencode.json',
+      'AGENTS.md',
+      'CLAUDE.md',
+      '.cursorrules',
+      'hooks/pre-commit.sh',
+      'nested/.claude.json',
+    ]
+
+    for (const name of SHADOWING) {
+      it(`flags ${name}`, () => {
+        const result = scanSkill(
+          makeResolved({ fileContents: { [name]: 'harmless content' } }),
+        )
+        assert.ok(
+          result.issues.some(
+            (i) => i.category === 'config_shadowing' && i.file === name,
+          ),
+          `${name} was not flagged`,
+        )
+      })
+    }
+
+    it('does not flag an ordinary skill file', () => {
+      const result = scanSkill(
+        makeResolved({
+          fileContents: {
+            'reference.md': 'An ordinary doc',
+            'run.sh': '#!/bin/sh',
+          },
+        }),
+      )
+      assert.equal(
+        result.issues.some((i) => i.category === 'config_shadowing'),
+        false,
+      )
+    })
+  })
+
+  describe('frontmatter tool authority', () => {
+    const GRANTING = [
+      'allowed-tools: Bash(*)',
+      'allowed_tools: Write',
+      'permissions: { bash: allow }',
+      'hooks: PostToolUse',
+    ]
+
+    for (const line of GRANTING) {
+      it(`flags "${line}" in frontmatter`, () => {
+        const content = `---\nname: x\n${line}\n---\n# Body\n`
+        const result = scanSkill(
+          makeResolved({ fileContents: { 'SKILL.md': content } }),
+        )
+        assert.ok(
+          result.issues.some((i) => i.category === 'tool_authority'),
+          `${line} was not flagged`,
+        )
+      })
+    }
+
+    it('does not flag the same words in prose', () => {
+      const content =
+        '# Guide\n\nWhen writing docs, mention allowed-tools and permissions.\n'
+      const result = scanSkill(
+        makeResolved({ fileContents: { 'SKILL.md': content } }),
+      )
+      assert.equal(
+        result.issues.some((i) => i.category === 'tool_authority'),
+        false,
+      )
+    })
+
+    it('does not flag mcp_servers, which is a supported gated feature', () => {
+      const content =
+        '---\nname: x\nmcp_servers:\n  - name: s\n    source: npm:pkg\n---\n# Body\n'
+      const result = scanSkill(
+        makeResolved({ fileContents: { 'SKILL.md': content } }),
+      )
+      // Those servers are scanned by `gateMcpServer` when they are installed.
+      assert.equal(
+        result.issues.some((i) => i.category === 'tool_authority'),
+        false,
+      )
+    })
+
+    it('does not flag a key that is only inside a fenced code block', () => {
+      const content =
+        '---\nname: x\n---\n\n```yaml\nallowed-tools: Bash(*)\n```\n'
+      const result = scanSkill(
+        makeResolved({ fileContents: { 'SKILL.md': content } }),
+      )
+      assert.equal(
+        result.issues.some((i) => i.category === 'tool_authority'),
+        false,
+      )
+    })
+  })
+
   describe('classifyScore', () => {
     it('returns safe for 90+', () => {
       assert.equal(classifyScore(100, []), 'safe')

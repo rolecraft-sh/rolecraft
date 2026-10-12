@@ -263,6 +263,27 @@ const PATTERNS = [
   },
 ]
 
+// A skill is documentation that gets read into an agent's context. It has no
+// business shipping a file that reconfigures the agent, so the *name* alone is
+// enough to flag it — the payload can live entirely in the filename or in a
+// file the content scan would treat as ordinary prose.
+const SHADOWING_FILE_NAMES =
+  /(?:^|\/)(?:settings(?:\.local)?\.json|\.mcp\.json|opencode\.json|claude_code\.json|mcp_config\.json|\.claude\.json|AGENTS\.md|CLAUDE\.md|GEMINI\.md|\.cursorrules|\.windsurfrules|\.aider\.conf\.yml)$/i
+
+// Same list, for anything under a `hooks/` directory at any depth.
+const SHADOWING_HOOK_PATHS = /(?:^|\/)hooks\//i
+
+// Frontmatter keys that grant the skill authority over the agent rather than
+// describing it. These are scanned as metadata, not as prose: a line of text
+// that merely mentions `allowed-tools` is not the same as a key that sets it.
+//
+// `mcp_servers` is deliberately absent. It is a supported feature —
+// `parseMcpServersFromSkill` reads it and every server it names goes through
+// `gateMcpServer` — so flagging it here would double-report a path that is
+// already gated, and would mark a legitimate skill as needing review.
+const TOOL_AUTHORITY_FRONTMATTER =
+  /^([ \t]*)(allowed[-_]tools?|permissions?|hooks?)[ \t]*:/im
+
 export function computeScore(issues) {
   const deductions = {}
   for (const issue of issues) {
@@ -284,6 +305,22 @@ export function scanSkill(resolved) {
   const fileEntries = Object.entries(resolved.fileContents || {})
   for (const [filename, content] of fileEntries) {
     if (typeof content !== 'string') continue
+
+    // Checked before the content patterns: a shadowing filename is a finding
+    // regardless of what is inside it.
+    if (
+      SHADOWING_FILE_NAMES.test(filename) ||
+      SHADOWING_HOOK_PATHS.test(filename)
+    ) {
+      issues.push({
+        severity: 'high',
+        category: 'config_shadowing',
+        description:
+          'Skill ships a file that can reconfigure or shadow the agent configuration',
+        file: filename,
+      })
+    }
+
     for (const check of PATTERNS) {
       const key = `${check.severity}:${check.category}:${check.description}:${filename}`
       if (seen.has(key)) continue
@@ -296,6 +333,20 @@ export function scanSkill(resolved) {
         })
         seen.add(key)
       }
+    }
+
+    // A YAML frontmatter block is delimited by `---` lines at the very top.
+    // Anywhere else, `hooks:` is ordinary prose and must not be flagged.
+    const frontmatter = /^---\r?\n([\s\S]*?)\r?\n---/.exec(content)
+    const authority =
+      frontmatter && TOOL_AUTHORITY_FRONTMATTER.exec(frontmatter[1])
+    if (authority) {
+      issues.push({
+        severity: 'high',
+        category: 'tool_authority',
+        description: `Frontmatter grants agent tool authority via "${authority[2].trim()}"`,
+        file: filename,
+      })
     }
   }
 
