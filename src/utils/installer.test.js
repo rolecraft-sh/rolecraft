@@ -126,23 +126,20 @@ describe('installer', () => {
 
   it('installs skill to copilot project directory (.github/skills/)', async () => {
     // copilot is projectScoped, so both the skill and its lock entry resolve
-    // through process.cwd(). Unmocked this writes a fixture into the repo's own
-    // .github/skills/ and .agents/.skill-lock.json.
-    const origCwd = process.cwd
-    process.cwd = () => tempDir
-    try {
-      const results = await installerModule.installSkill(resolvedSkill, [
-        'copilot',
-      ])
+    // through cwd. Passed explicitly: reassigning process.cwd would be visible
+    // to anything else running in the same process.
+    const results = await installerModule.installSkill(
+      resolvedSkill,
+      ['copilot'],
+      'copy',
+      tempDir,
+    )
 
-      assert.equal(results.length, 1)
-      assert.equal(results[0].target, 'copilot')
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'copilot')
 
-      const skillDir = join(tempDir, '.github', 'skills', 'test-my-skill')
-      assert.ok(existsSync(join(skillDir, 'SKILL.md')))
-    } finally {
-      process.cwd = origCwd
-    }
+    const skillDir = join(tempDir, '.github', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 
   it('installs skill to aider directory', async () => {
@@ -166,21 +163,18 @@ describe('installer', () => {
   })
 
   it('installs skill to devin directory', async () => {
-    const origCwd = process.cwd
-    process.cwd = () => tempDir
-    try {
-      const results = await installerModule.installSkill(resolvedSkill, [
-        'devin',
-      ])
+    const results = await installerModule.installSkill(
+      resolvedSkill,
+      ['devin'],
+      'copy',
+      tempDir,
+    )
 
-      assert.equal(results.length, 1)
-      assert.equal(results[0].target, 'devin')
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'devin')
 
-      const skillDir = join(tempDir, '.devin', 'skills', 'test-my-skill')
-      assert.ok(existsSync(join(skillDir, 'SKILL.md')))
-    } finally {
-      process.cwd = origCwd
-    }
+    const skillDir = join(tempDir, '.devin', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 
   it('installs skill to gemini directory', async () => {
@@ -603,39 +597,32 @@ describe('installer', () => {
     assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
   it('installs skill to project directory', async () => {
-    const origCwd = process.cwd
-    process.cwd = () => tempDir
-    try {
-      const results = await installerModule.installSkill(resolvedSkill, [
-        'project',
-      ])
+    const results = await installerModule.installSkill(
+      resolvedSkill,
+      ['project'],
+      'copy',
+      tempDir,
+    )
 
-      assert.equal(results.length, 1)
-      assert.equal(results[0].target, 'project')
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'project')
 
-      const skillDir = join(tempDir, '.agents', 'skills', 'test-my-skill')
-      assert.ok(existsSync(join(skillDir, 'SKILL.md')))
-    } finally {
-      process.cwd = origCwd
-    }
+    const skillDir = join(tempDir, '.agents', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 
   it('installs to multiple targets', async () => {
-    // `project` resolves its lockfile through process.cwd(). Without this the
-    // install lands in the repo's own .agents/.skill-lock.json, and every
-    // later `rolecraft ci` in that checkout reports this fixture as a broken
-    // skill. Same reason the sibling test above mocks it.
-    const origCwd = process.cwd
-    process.cwd = () => tempDir
-    try {
-      const results = await installerModule.installSkill(resolvedSkill, [
-        'agents',
-        'project',
-      ])
-      assert.equal(results.length, 2)
-    } finally {
-      process.cwd = origCwd
-    }
+    // `project` resolves its lockfile through cwd. Passed explicitly so the
+    // fixture never lands in the repo's own .agents/.skill-lock.json, which
+    // would make every later `rolecraft ci` in this checkout report it as a
+    // broken skill.
+    const results = await installerModule.installSkill(
+      resolvedSkill,
+      ['agents', 'project'],
+      'copy',
+      tempDir,
+    )
+    assert.equal(results.length, 2)
   })
 
   // #332: `--devin` is not the string 'project', but its directory is inside
@@ -1119,34 +1106,30 @@ describe('installer', () => {
   })
 
   it('installs skill to eve directory', async () => {
-    const origCwd = process.cwd
-    process.cwd = () => tempDir
-    try {
-      const results = await installerModule.installSkill(resolvedSkill, ['eve'])
-      assert.equal(results.length, 1)
-      assert.equal(results[0].target, 'eve')
-      const skillDir = join(tempDir, 'agent', 'skills', 'test-my-skill')
-      assert.ok(existsSync(join(skillDir, 'SKILL.md')))
-    } finally {
-      process.cwd = origCwd
-    }
+    const results = await installerModule.installSkill(
+      resolvedSkill,
+      ['eve'],
+      'copy',
+      tempDir,
+    )
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'eve')
+    const skillDir = join(tempDir, 'agent', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 
   it('installs skill to forge directory (.forge/skills/)', async () => {
-    const origCwd = process.cwd
-    process.cwd = () => tempDir
-    try {
-      const results = await installerModule.installSkill(resolvedSkill, [
-        'forge',
-      ])
+    const results = await installerModule.installSkill(
+      resolvedSkill,
+      ['forge'],
+      'copy',
+      tempDir,
+    )
 
-      assert.equal(results.length, 1)
-      assert.equal(results[0].target, 'forge')
-      const skillDir = join(tempDir, '.forge', 'skills', 'test-my-skill')
-      assert.ok(existsSync(join(skillDir, 'SKILL.md')))
-    } finally {
-      process.cwd = origCwd
-    }
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'forge')
+    const skillDir = join(tempDir, '.forge', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 
   it('installs skill to inference-sh directory', async () => {
@@ -1600,20 +1583,17 @@ describe('installer', () => {
   })
 
   it('installs skill to replit directory (./.agents/skills/)', async () => {
-    const origCwd = process.cwd
-    process.cwd = () => tempDir
-    try {
-      const results = await installerModule.installSkill(resolvedSkill, [
-        'replit',
-      ])
+    const results = await installerModule.installSkill(
+      resolvedSkill,
+      ['replit'],
+      'copy',
+      tempDir,
+    )
 
-      assert.equal(results.length, 1)
-      assert.equal(results[0].target, 'replit')
-      const skillDir = join(tempDir, '.agents', 'skills', 'test-my-skill')
-      assert.ok(existsSync(join(skillDir, 'SKILL.md')))
-    } finally {
-      process.cwd = origCwd
-    }
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'replit')
+    const skillDir = join(tempDir, '.agents', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 
   it('installs skill to zed directory (~/.agents/skills/)', async () => {
@@ -1630,19 +1610,16 @@ describe('installer', () => {
   })
 
   it('installs skill to promptscript directory (./agent/skills/)', async () => {
-    const origCwd = process.cwd
-    process.cwd = () => tempDir
-    try {
-      const results = await installerModule.installSkill(resolvedSkill, [
-        'promptscript',
-      ])
-      assert.equal(results.length, 1)
-      assert.equal(results[0].target, 'promptscript')
-      const skillDir = join(tempDir, 'agent', 'skills', 'test-my-skill')
-      assert.ok(existsSync(join(skillDir, 'SKILL.md')))
-    } finally {
-      process.cwd = origCwd
-    }
+    const results = await installerModule.installSkill(
+      resolvedSkill,
+      ['promptscript'],
+      'copy',
+      tempDir,
+    )
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'promptscript')
+    const skillDir = join(tempDir, 'agent', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 
   describe('backup and restore', () => {
