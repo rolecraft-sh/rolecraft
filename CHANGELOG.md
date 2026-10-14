@@ -2,6 +2,47 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.6.2] - 2026-10-14
+
+### Fixed
+- ignore __proto__ in frontmatter (#506) by @Haxxyyyy in [#506](https://github.com/rolecraft-sh/rolecraft/pull/506)
+- sanitize untrusted terminal output (#503) by @Haxxyyyy in [#503](https://github.com/rolecraft-sh/rolecraft/pull/503)
+- retry scorecard on cancelled outcomes (#507) by @Haxxyyyy in [#507](https://github.com/rolecraft-sh/rolecraft/pull/507)
+- bound and verify npm tarball downloads (#502 #504 #505) by @Haxxyyyy in [#510](https://github.com/rolecraft-sh/rolecraft/pull/510)
+- restrict profile and backup file permissions (#501) by @Haxxyyyy in [#501](https://github.com/rolecraft-sh/rolecraft/pull/501)
+- normalize before matching and close scanner evasion gaps by @sametcelikbicak in [#499](https://github.com/rolecraft-sh/rolecraft/pull/499)
+- scan file names and frontmatter for agent-authority grants by @sametcelikbicak in [#497](https://github.com/rolecraft-sh/rolecraft/pull/497)
+- scan upstream content in check so a flagged update is visible by @sametcelikbicak in [#496](https://github.com/rolecraft-sh/rolecraft/pull/496)
+- bound every untrusted read and report an incomplete scan by @sametcelikbicak in [#495](https://github.com/rolecraft-sh/rolecraft/pull/495)
+- reject link entries and fail closed when a tarball cannot be listed by @sametcelikbicak in [#494](https://github.com/rolecraft-sh/rolecraft/pull/494)
+- write MCP config atomically under a lock with owner-only permissions by @sametcelikbicak in [#493](https://github.com/rolecraft-sh/rolecraft/pull/493)
+- gate every MCP config key and drop execution-authority keys from profiles by @sametcelikbicak in [#492](https://github.com/rolecraft-sh/rolecraft/pull/492)
+- never report a high-severity finding as safe by @sametcelikbicak in [#491](https://github.com/rolecraft-sh/rolecraft/pull/491)
+- stop bundle from forcing skills past the security scan by @sametcelikbicak in [#490](https://github.com/rolecraft-sh/rolecraft/pull/490)
+- flag warp, goose and openhands as sharing the agents skills dir by @sametcelikbicak in [#479](https://github.com/rolecraft-sh/rolecraft/pull/479)
+- verify and promote 5 agents from batch 1 - kilo, kode, codeium, augment, codearts-agent by @sametcelikbicak in [#473](https://github.com/rolecraft-sh/rolecraft/pull/473)
+- verify dexto and loaf agents, repair two dead docUrls by @sametcelikbicak in [#466](https://github.com/rolecraft-sh/rolecraft/pull/466)
+- repair dead benchmark link breaking the docs build by @sametcelikbicak in [#465](https://github.com/rolecraft-sh/rolecraft/pull/465)
+- track manifest-derived counts in docs and guard against drift by @sametcelikbicak in [#463](https://github.com/rolecraft-sh/rolecraft/pull/463)
+- stop tests and benchmark writing fixtures to the repo lockfile by @sametcelikbicak in [#462](https://github.com/rolecraft-sh/rolecraft/pull/462)
+
+### Changed
+- cover installSkill reporting a failed target by @sametcelikbicak in [#513](https://github.com/rolecraft-sh/rolecraft/pull/513)
+- pass cwd explicitly instead of reassigning process.cwd by @sametcelikbicak in [#500](https://github.com/rolecraft-sh/rolecraft/pull/500)
+- load command modules on demand instead of at startup by @sametcelikbicak in [#464](https://github.com/rolecraft-sh/rolecraft/pull/464)
+- bump actions/first-interaction from 3.0.0 to 3.1.0 in [#461](https://github.com/rolecraft-sh/rolecraft/pull/461)
+- bump actions/upload-artifact from 4.4.3 to 7.0.1 in [#460](https://github.com/rolecraft-sh/rolecraft/pull/460)
+- bump actions/checkout from 4.1.1 to 7.0.1 in [#459](https://github.com/rolecraft-sh/rolecraft/pull/459)
+- bump @biomejs/biome in [#458](https://github.com/rolecraft-sh/rolecraft/pull/458)
+- grant attestations write and make npm publish idempotent by @sametcelikbicak in [#457](https://github.com/rolecraft-sh/rolecraft/pull/457)
+- update changelog and version for v2.6.1 by @sametcelikbicak in [#456](https://github.com/rolecraft-sh/rolecraft/pull/456)
+
+### Documentation
+- verify and promote agent paths (batch 6) by @sametcelikbicak in [#478](https://github.com/rolecraft-sh/rolecraft/pull/478)
+- verify and promote agent paths (batch 5) by @sametcelikbicak in [#477](https://github.com/rolecraft-sh/rolecraft/pull/477)
+- verify and promote agent paths (batch 4) by @sametcelikbicak in [#476](https://github.com/rolecraft-sh/rolecraft/pull/476)
+- verify and promote agent paths (batch 3) by @sametcelikbicak in [#475](https://github.com/rolecraft-sh/rolecraft/pull/475)
+- verify and promote agent paths (batch 2) by @sametcelikbicak in [#474](https://github.com/rolecraft-sh/rolecraft/pull/474)
 ## [v2.6.1] - 2026-10-08
 
 ### Fixed
