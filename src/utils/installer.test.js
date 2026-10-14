@@ -645,6 +645,45 @@ describe('installer', () => {
     )
   })
 
+  // A target that throws used to vanish from the result array: the outcomes
+  // are collected with `Promise.allSettled`, so one failure does not abandon
+  // the others, but the loop then skipped every `rejected` one and the caller
+  // got a short array and no error.
+  it('reports a target that failed instead of dropping it', async () => {
+    // A file whose path is a prefix of another's: `helper` is written as a
+    // file, then creating the directory for `helper/nested` fails with EEXIST.
+    // That throw happens inside the target, after the pre-flight lockfile
+    // read, so it is exactly the outcome that used to disappear.
+    const clashingSkill = {
+      name: 'prefix-clash',
+      slug: 'test/prefix-clash',
+      sourcePath: 'test/prefix-clash',
+      files: ['helper', 'helper/nested'],
+      fileContents: { helper: 'x', 'helper/nested': 'y' },
+    }
+
+    const results = await installerModule.installSkill(
+      clashingSkill,
+      ['agents', 'project'],
+      'copy',
+      sharedProjectDir,
+    )
+
+    assert.equal(
+      results.length,
+      2,
+      `a target was dropped: ${JSON.stringify(results)}`,
+    )
+
+    // Both targets hit the same clash, so both must report it rather than one
+    // of them vanishing from the array.
+    for (const r of results) {
+      assert.equal(r.failed, true, `${r.target} was reported as a success`)
+      assert.ok(r.reason, `${r.target} failed with no reason`)
+      assert.match(r.reason, /EEXIST/)
+    }
+  })
+
   // #332: `--devin` is not the string 'project', but its directory is inside
   // the project, so its entry belongs in the project lockfile.
   it('records a project-scoped agent install in the project lockfile', async () => {
