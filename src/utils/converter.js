@@ -23,6 +23,11 @@ export function parseFrontmatter(content) {
     const keyMatch = line.match(/^(\w+):\s*(.*)$/)
     if (keyMatch) {
       currentKey = keyMatch[1]
+      // Ignore the special __proto__ setter and any indented values beneath it.
+      if (currentKey === '__proto__') {
+        currentKey = null
+        continue
+      }
       const val = parseYamlValue(keyMatch[2])
       if (val.startsWith('[')) {
         try {

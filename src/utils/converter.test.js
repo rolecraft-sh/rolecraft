@@ -34,6 +34,41 @@ describe('parseFrontmatter', () => {
     })
   })
 
+  it('ignores __proto__ frontmatter and its nested array items', () => {
+    const content = [
+      '---',
+      '__proto__:',
+      '  - isAdmin: true',
+      '---',
+      'Body',
+    ].join('\n')
+
+    const { attrs } = parseFrontmatter(content)
+
+    assert.equal(Object.hasOwn(attrs, '__proto__'), false)
+    assert.equal(attrs.isAdmin, undefined)
+    // The two assertions above hold against the unfixed parser as well:
+    // `__proto__` is never an own property, and the payload lands on an
+    // element of the polluted prototype rather than on the object. The bug is
+    // visible only in the prototype itself.
+    assert.deepEqual(
+      Object.getPrototypeOf(attrs),
+      Object.prototype,
+      'the prototype was replaced',
+    )
+  })
+
+  it('keeps constructor and prototype as ordinary frontmatter keys', () => {
+    const { attrs } = parseFrontmatter(
+      '---\nconstructor: safe\nprototype: value\n---\nBody',
+    )
+
+    assert.equal(Object.hasOwn(attrs, 'constructor'), true)
+    assert.equal(Object.hasOwn(attrs, 'prototype'), true)
+    assert.equal(attrs.constructor, 'safe')
+    assert.equal(attrs.prototype, 'value')
+  })
+
   it('returns unchanged content when frontmatter is missing', () => {
     const content = '# Plain markdown\n\nNo metadata.'
 
