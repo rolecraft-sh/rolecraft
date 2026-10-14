@@ -1,3 +1,7 @@
+---
+description: Uninstall a skill and remove it from every agent directory it was installed to.
+---
+
 # `rolecraft remove`
 
 Uninstall a skill.
@@ -33,3 +37,9 @@ This command is also available as a programmatic function. See the [Node.js API 
 import { remove } from 'rolecraft'
 const result = await remove('my-skill')
 ```
+
+## See also
+
+- [Commands hub](./index.md) — every command, grouped by intent.
+- [`rolecraft update`](./update.md) — remove-and-reinstall a changed skill.
+- [`rolecraft rollback`](./rollback.md) — restore the previous state.

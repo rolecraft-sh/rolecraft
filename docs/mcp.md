@@ -1,3 +1,7 @@
+---
+description: Install and manage Model Context Protocol servers alongside skills so agents gain both behavior and capabilities.
+---
+
 # MCP Server Management
 
 rolecraft can install and manage [Model Context Protocol (MCP)](https://modelcontextprotocol.io) servers alongside skills. This means you can provision both **behavior** (skills) and **capabilities** (MCP tools) for your AI agents in a single workflow.
@@ -237,3 +241,9 @@ If you only want the skill without MCP servers, pass `--no-mcp` during installat
 ### Security approval for npm sources
 
 npm package contents are not currently fetched for scanning. Both `rolecraft mcp install npm:…` and a skill with an embedded npm MCP server require `--yes` after you review and trust the source (API: `yes: true`). Without approval they report `MCP_SECURITY_REVIEW`. `rolecraft ci` fails unscanned npm entries from the global MCP lock instead of silently reinstalling them; it has no `--yes` override. Scanned `gh:` sources keep their existing REVIEW/DANGER policy.
+
+## See also
+
+- [`rolecraft mcp` command](commands/mcp.md) — subcommands, source types, and pinning.
+- [Agent Discovery](agents.md) — the 9 MCP-capable agents and their directories.
+- [Glossary](glossary.md) — what an MCP server is in rolecraft terms.

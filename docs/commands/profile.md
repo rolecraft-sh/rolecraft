@@ -1,3 +1,7 @@
+---
+description: Save, apply and diff named profiles that capture agent config files, MCP servers, skills and instructions.
+---
+
 # `rolecraft profile` — Profile Management
 
 Save, apply, and share multi-agent configuration profiles.
@@ -197,3 +201,10 @@ import { profileSave, profileApply, profileList } from 'rolecraft'
 await profileSave('frontend-dev')
 const profiles = await profileList()
 ```
+
+## See also
+
+- [Commands hub](./index.md) — every command, grouped by intent.
+- [Profile Management](../profile.md) — the conceptual guide.
+- [`rolecraft install`](./install.md) — the install a profile captures.
+- [Onboarding Guide](../guides/onboarding.md) — team workflow with profiles.

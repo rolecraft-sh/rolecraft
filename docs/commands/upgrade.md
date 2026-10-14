@@ -1,3 +1,7 @@
+---
+description: Check the npm registry and upgrade the rolecraft CLI itself to the latest version.
+---
+
 # `rolecraft upgrade`
 
 Upgrade rolecraft itself to the latest version.
@@ -26,3 +30,9 @@ This command is also available as a programmatic function. See the [Node.js API 
 import { upgrade } from 'rolecraft'
 const result = await upgrade({ dryRun: true })
 ```
+
+## See also
+
+- [Commands hub](./index.md) — every command, grouped by intent.
+- [`rolecraft update`](./update.md) — update skills instead of rolecraft.
+- [`rolecraft doctor`](./doctor.md) — check the install after an upgrade.

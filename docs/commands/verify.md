@@ -1,3 +1,7 @@
+---
+description: Hash installed skill files and compare them to the lockfile to report modified, corrupted or missing files.
+---
+
 # `rolecraft verify`
 
 Check installed skill integrity via content hash.
@@ -26,3 +30,9 @@ This command is also available as a programmatic function. See the [Node.js API 
 import { verify } from 'rolecraft'
 const result = await verify()
 ```
+
+## See also
+
+- [Commands hub](./index.md) — every command, grouped by intent.
+- [`rolecraft check`](./check.md) — the security scan it complements.
+- [Security Scoring](../security.md) — how scan categories map to grades.

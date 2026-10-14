@@ -1,3 +1,7 @@
+---
+description: Restore a skill to the version captured before its most recent update.
+---
+
 # `rolecraft rollback`
 
 Restore a skill to its previous version. Requires a history entry — created automatically when you use `rolecraft update` or re-install over an existing skill.
@@ -84,3 +88,10 @@ const preview = await rollback('my-skill', { dryRun: true })
 | `dryRun` | `boolean` | `false` | Preview without restoring |
 
 Returns `{ slug, files, targets, prevContentSha }`.
+
+## See also
+
+- [Commands hub](./index.md) — every command, grouped by intent.
+- [`rolecraft install`](./install.md) — the install being rolled back.
+- [`rolecraft update`](./update.md) — updates are the usual thing you undo.
+- [CI/CD Integration](../guides/ci.md) — rollback in a pipeline.

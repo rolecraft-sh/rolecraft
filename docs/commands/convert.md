@@ -1,3 +1,7 @@
+---
+description: Convert skills between rolecraft's SKILL.md format and Cursor/Claude Code's .mdc rule format.
+---
+
 # rolecraft convert
 
 Convert skills between rolecraft's `SKILL.md` format and Cursor/Claude Code's `.mdc` rule format.
@@ -81,3 +85,9 @@ This command is also available as a programmatic function. See the [Node.js API 
 import { convert } from 'rolecraft'
 const results = await convert('./my-skill/SKILL.md')
 ```
+
+## See also
+
+- [Commands hub](./index.md) — every command, grouped by intent.
+- [`rolecraft install`](./install.md) — install the converted skill.
+- [Migrating from Vercel skills](../migration-from-skills.md) — the format conversion rules.

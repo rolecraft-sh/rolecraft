@@ -1,3 +1,7 @@
+---
+description: Install rolecraft globally with npm and go from zero to your first installed skill in one command.
+---
+
 # Install
 
 ## One-command onboarding
@@ -9,7 +13,7 @@ npm install -g rolecraft
 rolecraft setup ./team-skill
 ```
 
-This detects every AI agent on your machine and installs the skill + MCP servers to all of them. [→ Full onboarding guide](guides/onboarding.md)
+This detects every AI agent on your machine, installs the skill to all of them, and configures any MCP servers it declares for the [9 agents that support MCP](mcp.md). [→ Full onboarding guide](guides/onboarding.md)
 
 ## Quick install
 
@@ -41,72 +45,23 @@ Where do you want to install this skill?
 
 ### Scope flags
 
-| Flag            | Target directory                   |
-| --------------- | ---------------------------------- |
-| `--project`     | `./.agents/skills/` (default)      |
-| `--global`      | `~/.agents/skills/`                |
-| `--all`         | all known agent directories        |
-| `--claude`      | `~/.claude/skills/`                |
-| `--cursor`      | `~/.cursor/skills/`                |
-| `--windsurf`    | `~/.codeium/windsurf/skills/`     |
-| `--devin`       | `./.devin/skills/`                 |
-| `--codex`       | `~/.agents/skills/`                |
-| `--copilot`     | `./.github/skills/`                |
-| `--aider`       | `~/.aider/skills/`                 |
-| `--cline`       | `~/.cline/skills/`                 |
-| `--gemini`      | `~/.gemini/skills/`                |
-| `--cody`        | `~/.cody/skills/`                  |
-| `--continue`    | `~/.continue/skills/`              |
-| `--warp`        | `~/.agents/skills/`                |
-| `--codeium`     | `~/.codeium/skills/`               |
-| `--fabric`      | `~/.fabric/skills/`                |
-| `--goose`       | `~/.agents/skills/`                |
-| `--tabnine`     | `~/.tabnine/agent/skills/`         |
-| `--supermaven`  | `~/.supermaven/skills/`            |
-| `--pr-pilot`    | `~/.pr-pilot/skills/`              |
-| `--loom`        | `~/.loom/skills/`                  |
-| `--roo`         | `~/.roo/skills/`                   |
-| `--trae`        | `~/.trae/skills/`                  |
-| `--hermes`      | `~/.hermes/skills/`                |
-| `--kiro`        | `~/.kiro/skills/`                  |
-| `--augment`     | `~/.augment/skills/`               |
-| `--kilo`        | `~/.kilo/skills/`                  |
-| `--openhands`   | `~/.agents/skills/`                |
-| `--junie`       | `~/.junie/skills/`                 |
-| `--factory`     | `~/.factory/skills/`               |
-| `--command-code` | `~/.commandcode/skills/`         |
-| `--cortex`      | `~/.snowflake/cortex/skills/`      |
-| `--mistral-vibe` | `~/.vibe/skills/`                |
-| `--qwen-code`   | `~/.qwen/skills/`                  |
-| `--openclaw`    | `~/.openclaw/skills/`              |
-| `--codebuddy`   | `~/.codebuddy/skills/`             |
-| `--mux`         | `~/.mux/skills/`                   |
-| `--pi`          | `~/.pi/agent/skills/`              |
-| `--autohand-code` | `~/.autohand/skills/`           |
-| `--rovo`        | `~/.rovodev/skills/`               |
-| `--firebender`  | `~/.firebender/skills/`            |
-| `--bob`             | `~/.bob/skills/`                   |
-| `--aider-desk`      | `~/.aider-desk/skills/`            |
-| `--code-arts-doer`  | `~/.codeartsdoer/skills/`          |
-| `--code-maker`      | `~/.codemaker/skills/`             |
-| `--code-studio`     | `~/.codestudio/skills/`            |
-| `--crush`           | `~/.crush/skills/`                 |
-| `--eve`             | `./agent/skills/`                  |
-| `--forge`           | `./.forge/skills/`                 |
-| `--inference-sh`    | `~/.inferencesh/skills/`           |
-| `--jazz`            | `~/.jazz/skills/`                  |
-| `--iflow`           | `~/.iflow/skills/`                 |
-| `--kilo-code`       | `~/.kilocode/skills/`              |
-| `--kode`            | `~/.kode/skills/`                  |
-| `--lingma`          | `~/.lingma/skills/`                |
-| `--mcp-jam`         | `~/.mcpjam/skills/`                |
-| `--moxby`           | `~/.moxby/skills/`                 |
-| `--ona`             | `~/.ona/skills/`                   |
-| `--qoder`           | `~/.qoder/skills/`                 |
-| `--reasonix`        | `~/.reasonix/skills/`              |
-| `--terra-mind`      | `~/.terramind/skills/`             |
-| `--tiny-cloud`      | `~/.tinycloud/skills/`             |
-| `--zencoder`        | `~/.zencoder/skills/`              |
+| Flag        | Target directory              |
+| ----------- | ----------------------------- |
+| `--project` | `./.agents/skills/` (default) |
+| `--global`  | `~/.agents/skills/`           |
+| `--all`     | every detected agent directory |
+
+### Per-agent flags
+
+Every known agent has its own flag — `--claude`, `--cursor`, `--copilot`, `--grok`, `--omp`, and so on. opencode's flag is `--agents`. The full flag-to-directory table, including support level and MCP support, is generated from the agent manifest in [Agent Discovery](agents.md).
+
+```bash
+# Which agents does rolecraft see on this machine?
+rolecraft agents
+
+# Preview where a skill would land, without writing anything.
+rolecraft install ./my-skill --dry-run --all
+```
 
 Combine flags to install to multiple agents at once:
 
@@ -172,3 +127,10 @@ rolecraft install https://gitlab.com/org/project
 rolecraft install https://bitbucket.org/org/project
 rolecraft install git@github.com:owner/repo.git
 ```
+
+## See also
+
+- [`rolecraft install`](commands/install.md) — the command reference with every flag.
+- [`rolecraft doctor`](commands/doctor.md) — verify the install landed correctly.
+- [`rolecraft rollback`](commands/rollback.md) — undo an install that went wrong.
+- [Getting Started](guides/getting-started.md) — what happens after you install.

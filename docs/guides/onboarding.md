@@ -1,3 +1,7 @@
+---
+description: "A guided setup flow for new developers: detect every AI agent on the machine and provision the same skills and MCP servers for all of them."
+---
+
 # Onboarding Guide
 
 Get your AI agents productive in a single command.
@@ -12,13 +16,13 @@ Every AI coding agent works best when it knows your project's conventions, rules
 
 ## The solution
 
-`rolecraft setup <source>` detects every AI agent on your machine and installs a skill — plus its MCP servers — to all of them in one command.
+`rolecraft setup <source>` detects every AI agent on your machine and installs a skill to all of them in one command, plus its MCP servers for the agents that support MCP.
 
 ```bash
 rolecraft setup ./team-conventions
 ```
 
-One command. All agents. Skills + MCP servers. Zero configuration.
+One command. All agents. Skills everywhere, MCP where it is supported. Zero configuration.
 
 ---
 
@@ -185,3 +189,10 @@ rolecraft doctor              # full system health check
 - [MCP servers](../mcp.md) — manage MCP servers standalone
 - [Security scoring](../security.md) — how the static analysis works
 - [Comparison](../comparison.md) — rolecraft vs other tools
+
+## See also
+
+- [`rolecraft setup`](../commands/setup.md) — the guided onboarding command.
+- [`rolecraft bundle`](../commands/bundle.md) — multi-skill team sources.
+- [Profile Management](../profile.md) — save and share a working setup.
+- [Getting Started](getting-started.md) — the shorter version of this guide.

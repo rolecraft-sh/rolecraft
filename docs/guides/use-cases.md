@@ -1,3 +1,7 @@
+---
+description: Concrete team scenarios rolecraft solves, including onboarding new developers, standardizing agent rules and sharing MCP servers.
+---
+
 # Use Cases
 
 rolecraft solves one problem: **getting AI agents to follow the same rules, conventions, and tools across your entire stack.** Here's when it shines.
@@ -200,3 +204,9 @@ rolecraft profile import ./backup.json
 - **You use one agent with no custom rules** — you don't need it
 - **You prefer manual config** — rolecraft automates what you can do by hand
 - **Your agents don't support skills** — check [agent discovery](../agents) for compatibility
+
+## See also
+
+- [Getting Started](getting-started.md) — the basics each use case builds on.
+- [Commands](../commands/index.md) — the command behind each scenario.
+- [Feature Comparison](../comparison.md) — where rolecraft fits against the alternatives.

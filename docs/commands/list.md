@@ -1,3 +1,7 @@
+---
+description: List installed skills, optionally filtered by agent or emitted as JSON.
+---
+
 # `rolecraft list`
 
 Show all installed skills.
@@ -42,3 +46,9 @@ This command is also available as a programmatic function. See the [Node.js API 
 import { list } from 'rolecraft'
 const skills = await list()
 ```
+
+## See also
+
+- [Commands hub](./index.md) — every command, grouped by intent.
+- [`rolecraft search`](./search.md) — find skills not yet installed.
+- [`rolecraft update`](./update.md) — refresh what is listed.

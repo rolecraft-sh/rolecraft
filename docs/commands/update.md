@@ -1,3 +1,7 @@
+---
+description: Reinstall a skill to its latest version from its recorded source.
+---
+
 # `rolecraft update`
 
 Re-install a skill to the latest version.
@@ -33,3 +37,10 @@ This command is also available as a programmatic function. See the [Node.js API 
 import { update } from 'rolecraft'
 const result = await update('my-skill')
 ```
+
+## See also
+
+- [Commands hub](./index.md) — every command, grouped by intent.
+- [`rolecraft install`](./install.md) — the command `update` wraps.
+- [`rolecraft diff`](./diff.md) — see what changed before you commit.
+- [CI/CD Integration](../guides/ci.md) — keep skills fresh in CI.

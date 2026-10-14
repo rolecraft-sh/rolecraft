@@ -1,3 +1,7 @@
+---
+description: Install several skills at once from inline sources or a bundle file, and create new bundle files.
+---
+
 # `rolecraft bundle`
 
 Install multiple skills at once from inline sources or a bundle file.
@@ -84,3 +88,10 @@ This command is also available as a programmatic function. See the [Node.js API 
 import { bundle } from 'rolecraft'
 const result = await bundle(['./my-skill', 'owner/other-skill'])
 ```
+
+## See also
+
+- [`rolecraft setup`](./setup.md) — the guided install built on bundles.
+- [Commands hub](./index.md) — every command, grouped by intent.
+- [`rolecraft install`](./install.md) — install a single skill without a bundle.
+- [Onboarding Guide](../guides/onboarding.md) — team onboarding with bundles.

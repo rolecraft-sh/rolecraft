@@ -1,3 +1,7 @@
+---
+description: Install a skill from a local path, GitHub repository or npm package, with security scanning and multi-skill selection.
+---
+
 # `rolecraft install`
 
 Install a skill from a local path, GitHub repository, or npm package.
@@ -149,3 +153,10 @@ This command is also available as a programmatic function. See the [Node.js API 
 import { install } from 'rolecraft'
 const result = await install('./my-skill', { global: true })
 ```
+
+## See also
+
+- [Commands hub](./index.md) — every command, grouped by intent.
+- [Install](../install.md) — scope flags, source types, and modes.
+- [`rolecraft rollback`](./rollback.md) — undo an install.
+- [`rolecraft search`](./search.md) — find skills to install.

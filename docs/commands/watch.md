@@ -1,3 +1,7 @@
+---
+description: Watch installed skills for file changes and sync them to agent directories automatically.
+---
+
 # `rolecraft watch`
 
 Watch installed skills for file changes and auto-sync to agent directories.
@@ -59,3 +63,9 @@ This command is also available as a programmatic function. See the [Node.js API 
 import { watch } from 'rolecraft'
 const { watchers, skills } = await watch('my-skill', process.cwd())
 ```
+
+## See also
+
+- [Commands hub](./index.md) — every command, grouped by intent.
+- [`rolecraft test`](./test.md) — the checks `watch` re-runs.
+- [`rolecraft list`](./list.md) — which skills are being watched.

@@ -1,3 +1,7 @@
+---
+description: Scaffold a new SKILL.md from built-in templates such as basic and React best practices.
+---
+
 # `rolecraft init`
 
 Scaffold a new `SKILL.md` for your agent skill.
@@ -85,3 +89,9 @@ This command is also available as a programmatic function. See the [Node.js API 
 import { init } from 'rolecraft'
 const result = await init('my-custom-tool')
 ```
+
+## See also
+
+- [Commands hub](./index.md) — every command, grouped by intent.
+- [Getting Started](../guides/getting-started.md) — create your first skill.
+- [Install](../install.md) — install rolecraft before you init.

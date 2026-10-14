@@ -1,3 +1,7 @@
+---
+description: Compare two SKILL.md files section by section, with brief and machine-readable JSON output modes.
+---
+
 # `rolecraft diff`
 
 Compare two SKILL.md files section-by-section. Parses frontmatter and body sections independently, showing exactly what changed.
@@ -99,3 +103,9 @@ const result = await diff('./a.SKILL.md', './b.SKILL.md')
 //   stats: { changedSections: 1, addedSections: 1, removedSections: 1, ... }
 // }
 ```
+
+## See also
+
+- [Commands hub](./index.md) — every command, grouped by intent.
+- [`rolecraft update`](./update.md) — apply the changes `diff` shows.
+- [`rolecraft test`](./test.md) — check behavior after an update.

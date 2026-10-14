@@ -1,3 +1,7 @@
+---
+description: Score a SKILL.md on frontmatter, structure and security with built-in assertions, for one skill or all installed ones.
+---
+
 # `rolecraft test`
 
 Test a SKILL.md quality with built-in assertions. Scans frontmatter, content structure, security patterns, and completeness — then assigns a score and grade.
@@ -115,3 +119,10 @@ const result = await test('./my-skill/SKILL.md')
 const all = await test(null, { all: true, minScore: 80 })
 // { results: [...], summary: { total: 4, passed: 3, failed: 1 } }
 ```
+
+## See also
+
+- [Commands hub](./index.md) — every command, grouped by intent.
+- [`rolecraft check`](./check.md) — security scan.
+- [`rolecraft verify`](./verify.md) — trust-level verification.
+- [CI/CD Integration](../guides/ci.md) — fail a build on a low score.
