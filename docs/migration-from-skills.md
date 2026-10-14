@@ -1,3 +1,7 @@
+---
+description: A migration guide for teams moving from Vercel's skills CLI to rolecraft, covering command equivalents and behavior differences.
+---
+
 # Migrating from Vercel skills to rolecraft
 
 If you're using [Vercel's `skills` CLI](https://github.com/vercel-labs/skills) and considering a switch, here's everything you need to know.
@@ -30,7 +34,8 @@ rolecraft install user/repo --all
 rolecraft list
 rolecraft doctor
 
-# 5. (Optional) Remove Vercel's lockfile
+# 5. (Optional) Drop the old lockfile — both tools share the same file,
+#    so only do this once rolecraft has everything installed.
 rm ~/.skills-lock.json
 ```
 
@@ -70,11 +75,21 @@ rolecraft doesn't require a marketplace, a signup, or any external service. It w
 If you need to go back to Vercel skills:
 
 ```bash
-# Remove rolecraft lockfile
-rm -rf ~/.agents
+# Uninstall the skills you migrated in, one at a time.
+rolecraft list
+rolecraft remove <slug>
 
-# Reinstall with Vercel
+# Then reinstall with Vercel
 npx skills add user/repo --all
 ```
 
-Both tools use the same `~/.agents/` directory and lockfile format, so skills installed by one are discoverable by the other.
+Both tools read the same `~/.agents/skills/` directory and write the same lockfile format, so skills installed by one are discoverable by the other.
+
+> **Do not `rm -rf ~/.agents`.** That path is the global skills directory for a dozen or more agents, so deleting it wipes every skill they have — including ones you never migrated. Use `rolecraft remove <slug>`, or `rolecraft rollback --list` to restore a snapshot taken before the migration.
+
+## See also
+
+- [`rolecraft install`](commands/install.md) — reinstall your skills under rolecraft.
+- [`rolecraft remove`](commands/remove.md) — take skills back out.
+- [`rolecraft rollback`](commands/rollback.md) — undo a migration in one command.
+- [Feature Comparison](comparison.md) — what you gain by switching.

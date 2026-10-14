@@ -1,3 +1,7 @@
+---
+description: Search GitHub or skills.sh for skills to install, with an interactive picker.
+---
+
 # `rolecraft search`
 
 Search for skills on GitHub or skills.sh (experimental).
@@ -82,3 +86,10 @@ This command is also available as a programmatic function. See the [Node.js API 
 import { search } from 'rolecraft'
 const results = await search('code-review')
 ```
+
+## See also
+
+- [Commands hub](./index.md) — every command, grouped by intent.
+- [`rolecraft install`](./install.md) — install what search finds.
+- [`rolecraft list`](./list.md) — what you already have installed.
+- [Feature Comparison](../comparison.md) — how search differs from skills.sh.

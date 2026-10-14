@@ -1,3 +1,7 @@
+---
+description: How rolecraft's static security scanner rates a skill from 0-100 across 15+ patterns and which install paths enforce it.
+---
+
 # Security Scoring
 
 rolecraft scans a skill before it is written into an agent's skill directory, using zero-dependency static analysis. The files it reads are matched against 15+ regex patterns across 4 severity levels.
@@ -236,3 +240,9 @@ This is intended for CI pipelines and fully trusted sources only.
 MCP servers are scanned before direct installation, skill-embedded installation, and restoration from the global MCP lockfile. DANGER findings block installation (`MCP_SECURITY_DANGER`). Only `npm:` and `gh:` actually fetch the server's contents; every other source type (`uvx:`, `pipx:`, `go:`, `deno:`, `cargo:`, local paths) resolves to a runner command that fetches at run time, leaving the scanner nothing to read. Those sources receive an `unscanned_source` finding rather than a SAFE score. Direct and skill-embedded installs require explicit approval with `--yes` (API: `yes: true`); otherwise they report `MCP_SECURITY_REVIEW`. `rolecraft ci` has no approval override and reports unscanned entries in `mcpFailed` without writing agent configuration. A lockfile entry is not evidence of a completed security scan.
 
 Scanned `gh:` sources retain their existing policy: REVIEW alone does not block installation; DANGER still does. Raising `unscanned_source` for unscannable sources does not expand the blocking policy for scanned GitHub content.
+
+## See also
+
+- [`rolecraft check`](commands/check.md) — run the security scan yourself.
+- [`rolecraft verify`](commands/verify.md) — verify trust levels before you use a skill.
+- [FAQ](faq.md) — what to do when a skill is blocked as DANGER.

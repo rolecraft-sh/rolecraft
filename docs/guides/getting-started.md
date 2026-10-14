@@ -1,3 +1,7 @@
+---
+description: Install rolecraft, add your first skill, and confirm it landed on every agent in about five minutes.
+---
+
 # Getting Started
 
 Welcome to **rolecraft** — a zero-dependency CLI for installing AI agent skills as roles & behaviors from any source.
@@ -118,3 +122,9 @@ rolecraft install ./my-skill --all
 - **[Install Guide](../install)** — full reference for all install options
 - **[Security Scoring](../security)** — understand the static analysis
 - **[Comparison](../comparison)** — how rolecraft stacks up against other tools
+
+## See also
+
+- [Install](../install.md) — install rolecraft first.
+- [`rolecraft init`](../commands/init.md) — scaffold your first skill.
+- [Commands](../commands/index.md) — what to do next, by intent.

@@ -1,3 +1,7 @@
+---
+description: Programmatic Node.js API for installing, listing, searching and managing skills from your own scripts and CI pipelines.
+---
+
 # Node.js API
 
 rolecraft exposes a programmatic API for use in your own Node.js scripts, tools, and CI pipelines. All API functions return plain objects with no side-effects.
@@ -436,3 +440,9 @@ Returns `{ xml: string, written: boolean, path?: string }`.
 ### `compareVersions(a, b)`
 
 Compare two semver version strings. Returns negative, zero, or positive number.
+
+## See also
+
+- [CLI Reference](reference.md) — every command with all flags on one page.
+- [Commands](commands/index.md) — each command grouped by what you are trying to do.
+- [Architecture](architecture.md) — how rolecraft is put together under the hood.

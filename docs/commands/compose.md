@@ -1,3 +1,7 @@
+---
+description: Merge or chain multiple SKILL.md files into a single composed skill.
+---
+
 # `rolecraft compose`
 
 Combine multiple SKILL.md files into a single composed skill. Supports two composition strategies: **merge** (deduplicate) and **chain** (override).
@@ -104,3 +108,9 @@ const result = await compose(['./base.SKILL.md', './team.SKILL.md'], { mode: 'me
 
 const chained = await compose(['./base.md', './override.md'], { mode: 'chain', name: 'Final' })
 ```
+
+## See also
+
+- [Commands hub](./index.md) — every command, grouped by intent.
+- [`rolecraft bundle`](./bundle.md) — multi-skill sources compose builds on.
+- [`rolecraft use`](./use.md) — preview one skill without installing.

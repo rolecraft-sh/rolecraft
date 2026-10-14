@@ -1,3 +1,8 @@
+---
+description: Side-by-side feature comparison of rolecraft, Vercel skills and @agentskill.sh/cli across runtime, agent targets, MCP support and CI.
+outline: false
+---
+
 # Feature Comparison
 
 > How rolecraft stacks up against [skills (Vercel)](https://github.com/vercel-labs/skills) and [@agentskill.sh/cli (`ags`)](https://github.com/agentskill-sh/ags).
@@ -8,9 +13,9 @@
 |---|---|---|---|
 | **Runtime** | Zero-dep Node ESM | 1 dep (Node) | 2 deps (TypeScript) |
 | **Agent targets** | **90** | 72 | 15+ |
-| **Skill marketplace** | skills.sh (90K+) | agentskill.sh (100K+) | — |
+| **Skill marketplace** | — (no marketplace) | agentskill.sh (100K+) | — |
 | **Publish your own** | ❌ | ❌ | ❌ |
-| **MCP management** | ✅ | ❌ | ❌ |
+| **MCP management** | ✅ (9 agents) | ❌ | ❌ |
 | **Bundle / Compose / Diff** | ✅ | ❌ | ❌ |
 
 ## Feature table
@@ -50,7 +55,7 @@
 | System health check (`doctor`) | ✅ | ❌ | ❌ |
 | Watch mode (auto-sync) | ✅ | ❌ | ❌ |
 | AGENTS.md XML generation | ✅ | ❌ | ❌ |
-| **MCP server management** | ✅ | ❌ | ❌ |
+| **MCP server management** | ✅ (9 of 90 agents) | ❌ | ❌ |
 | Skill quality test | ✅ | ❌ | ❌ |
 | Skill conflict detection (`doctor --deep`) | ✅ | ❌ | ❌ |
 | **Node.js API** | ✅ | ❌ | ❌ |
@@ -59,7 +64,7 @@
 
 ## When to use what
 
-- **rolecraft** — You need MCP management, CI/CD pipelines, skill quality tooling (diff/compose/test). Best for power users and teams.
+- **rolecraft** — You need MCP management (for the 9 agents that support it), CI/CD pipelines, skill quality tooling (diff/compose/test). Best for power users and teams.
 - **skills (Vercel)** — You just want the simplest one-liner to install skills. Largest marketplace (90K+ via skills.sh). Best for casual users who trust the Vercel ecosystem.
 - **@agentskill.sh/cli** — You want in-agent discovery via `/learn` and skill rating/feedback. Largest marketplace (100K+ via agentskill.sh).
 
@@ -76,8 +81,17 @@ These aren't CLI tools — they're curated SKILL.md repositories. rolecraft can 
 
 ## Benchmark
 
-rolecraft installs local skills in ~18 ms, against ~4.7 s for `npx skills`. See
-[`benchmark/RESULTS.md`](benchmark/RESULTS.md) for the measured numbers, the
-method that produces them, and what the ratio does and does not measure.
+rolecraft installs local skills in ~18 ms, against ~4.7 s for `npx skills`.
+
+That is not like-for-like: the npx figure includes the package download and process
+startup, and repeated runs varied by roughly a third. Read
+[`benchmark/RESULTS.md`](benchmark/RESULTS.md) for the numbers, the method, and what
+the ratio does and does not measure.
 
 [→ Full benchmark results](benchmark/RESULTS.md)
+
+## See also
+
+- [Benchmark Results](benchmark/RESULTS.md) — measured install times behind these claims.
+- [Migrating from Vercel skills](migration-from-skills.md) — command-by-command mapping if you switch.
+- [FAQ](faq.md) — short answers to the questions this page raises.

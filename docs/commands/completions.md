@@ -1,3 +1,7 @@
+---
+description: Generate bash, zsh or fish completion scripts for rolecraft commands, flags and arguments.
+---
+
 # `rolecraft completions`
 
 Generate shell completion scripts for bash, zsh, and fish.
@@ -57,3 +61,9 @@ This command is also available as a programmatic function. See the [Node.js API 
 import { completions } from 'rolecraft'
 const script = completions('bash')
 ```
+
+## See also
+
+- [Commands hub](./index.md) — every command, grouped by intent.
+- [CLI Reference](../reference.md) — what gets completed.
+- [Install](../install.md) — install rolecraft first.

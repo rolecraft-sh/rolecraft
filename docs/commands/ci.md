@@ -1,3 +1,7 @@
+---
+description: Reinstall every skill and MCP server recorded in the lockfiles so CI state matches the locked state.
+---
+
 # `rolecraft ci`
 
 Re-install all skills and MCP servers from lockfile (CI mode).
@@ -29,3 +33,9 @@ This command is also available as a programmatic function. See the [Node.js API 
 import { ci } from 'rolecraft'
 const result = await ci()
 ```
+
+## See also
+
+- [CI/CD Integration](../guides/ci.md) — the GitHub Action wrapping this command.
+- [`rolecraft update`](./update.md) — refresh skills in a pipeline.
+- [CLI Reference](../reference.md) — exit codes and common flags.

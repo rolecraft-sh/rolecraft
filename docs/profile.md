@@ -1,3 +1,7 @@
+---
+description: Save, apply, diff and share named profiles that capture your agents' config files, MCP servers, skills and instructions.
+---
+
 # Profile Management
 
 Save, apply, and share complete AI agent configurations as named profiles.
@@ -68,3 +72,9 @@ Every `profile apply` creates a timestamped backup of your current config in `~/
 ## Commands reference
 
 See [`docs/commands/profile.md`](./commands/profile.md) for the full command reference.
+
+## See also
+
+- [`rolecraft profile` command](commands/profile.md) — save, apply, diff, and import profiles.
+- [`rolecraft install`](commands/install.md) — the per-agent install a profile captures.
+- [Onboarding Guide](guides/onboarding.md) — the team workflow profiles are built for.

@@ -1,8 +1,13 @@
+---
+description: Complete reference for every rolecraft command, flag and option, including install, bundle, CI, MCP and profile subcommands.
+outline: false
+---
+
 # CLI Reference
 
 Complete reference for all rolecraft commands, flags, and options.
 
-> **Node.js API:** rolecraft also exposes a programmatic API. See [`src/index.js`](../src/index.js) or `import { ... } from 'rolecraft'`. All API functions return plain objects with no side-effects.
+> **Node.js API:** rolecraft also exposes a programmatic API. See [`src/index.js`](https://github.com/rolecraft-sh/rolecraft/blob/main/src/index.js) or `import { ... } from 'rolecraft'`. All API functions return plain objects with no side-effects.
 
 ---
 
@@ -484,3 +489,9 @@ rolecraft compose ./a.SKILL.md ./b.SKILL.md --no-color           # disable ANSI 
 ### `rolecraft upgrade`
 
 Upgrades rolecraft to the latest npm version.
+
+## See also
+
+- [Node.js API](api.md) — use rolecraft as a library.
+- [Commands](commands/index.md) — per-command pages with examples.
+- [Getting Started](guides/getting-started.md) — if you have not run rolecraft yet.

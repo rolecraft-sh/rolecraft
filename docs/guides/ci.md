@@ -1,3 +1,7 @@
+---
+description: Wire rolecraft into GitHub Actions and other CI pipelines to verify and reinstall locked skills and MCP servers on every push.
+---
+
 # CI/CD Integration
 
 Use rolecraft in your CI pipeline to verify and install skills automatically.
@@ -71,3 +75,10 @@ jobs:
 ## Action repository
 
 https://github.com/rolecraft-sh/rolecraft-action
+
+## See also
+
+- [`rolecraft ci`](../commands/ci.md) — the command the Action wraps.
+- [`rolecraft test`](../commands/test.md) — fail the build on a low score.
+- [`rolecraft rollback`](../commands/rollback.md) — restore the previous install.
+- [CLI Reference](../reference.md) — exit codes the Action relies on.

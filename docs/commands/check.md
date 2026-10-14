@@ -1,3 +1,7 @@
+---
+description: Compare installed skills against their source to report which ones have updates available.
+---
+
 # `rolecraft check`
 
 Check installed skills for available updates.
@@ -28,3 +32,10 @@ This command is also available as a programmatic function. See the [Node.js API 
 import { check } from 'rolecraft'
 const updates = await check()
 ```
+
+## See also
+
+- [Commands hub](./index.md) — every command, grouped by intent.
+- [`rolecraft verify`](./verify.md) — verify trust levels, not security.
+- [`rolecraft test`](./test.md) — assert a skill behaves as written.
+- [Security Scoring](../security.md) — what `check` actually scans.

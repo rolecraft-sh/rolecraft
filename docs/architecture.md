@@ -1,3 +1,7 @@
+---
+description: How rolecraft resolves sources, security-scans them, copies files, hashes content and maintains lockfiles across every command.
+---
+
 # Architecture
 
 ## How it works
@@ -105,3 +109,9 @@ Three layers, and where each one is allowed to reach.
 **3. `src/utils/`** — shared helpers. No circular dependencies. Not strictly a bottom layer: `utils/profile.js` imports from `commands/setup.js`, which is how `detectAgents` ended up reachable from four places before it moved to `utils/agent-detection.js`.
 
 The command surface is 26 modules under `src/commands/` over 25 under `src/api/`, exposed as 25 top-level handlers in `bin/rolecraft.js` (`profile` and `mcp` each carry several subcommands). Those handlers hold no flag lists: they read flags by exact name, and the one `validateFlags` call in `main()` checks them against `commands/spec.js`. A flag added there appears in `--help`, in validation and in all three completion scripts at once. Unknown commands and flags exit 2, so a typo is distinguishable from a failed operation.
+
+## See also
+
+- [`rolecraft install`](commands/install.md) — where files actually land on disk.
+- [Node.js API](api.md) — the programmatic surface the CLI is built on.
+- [Glossary](glossary.md) — the vocabulary used throughout these docs.

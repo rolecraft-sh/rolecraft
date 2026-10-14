@@ -1,3 +1,7 @@
+---
+description: Emit a `<skills_system>` XML block of installed skills to stdout, or write it into AGENTS.md.
+---
+
 # `rolecraft agents-xml`
 
 Generate a `<skills_system>` XML block listing installed skills, compatible with Claude Code and other spec-compliant AI agents.
@@ -54,3 +58,9 @@ This command is also available as a programmatic function. See the [Node.js API 
 import { agentsXml } from 'rolecraft'
 const { xml } = await agentsXml()
 ```
+
+## See also
+
+- [Commands hub](./index.md) — every command, grouped by intent.
+- [`rolecraft agents`](./agents.md) — the agent list this XML is generated from.
+- [Agent Discovery](../agents.md) — support levels and directories.

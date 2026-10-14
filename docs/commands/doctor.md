@@ -1,3 +1,7 @@
+---
+description: Run a system health check across Node.js, agent directories and lockfiles, with optional network and conflict detection.
+---
+
 # `rolecraft doctor`
 
 Run a system health check to diagnose common issues.
@@ -118,3 +122,10 @@ import { doctor } from 'rolecraft'
 const health = await doctor({ json: true, deep: true })
 ```
 ```
+
+## See also
+
+- [Commands hub](./index.md) — every command, grouped by intent.
+- [Install](../install.md) — fix a missing or partial install.
+- [`rolecraft check`](./check.md) — run the security scan.
+- [FAQ](../faq.md) — common fixes for a broken setup.

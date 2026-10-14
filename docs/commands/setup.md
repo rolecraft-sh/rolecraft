@@ -1,14 +1,18 @@
+---
+description: Detect every AI agent on the machine and install a skill plus its MCP servers to all of them at once.
+---
+
 # `rolecraft setup`
 
 One command. All agents. Skills + MCP servers. Zero configuration.
 
-Detect every AI agent on your machine and install a skill — plus its MCP servers — to all of them at once.
+Detect every AI agent on your machine and install a skill to all of them at once, plus its MCP servers for the agents that support MCP.
 
 ## Usage
 
 ```bash
 rolecraft setup                    # detect agents only
-rolecraft setup <source>           # detect + install skill + MCP to all agents
+rolecraft setup <source>           # detect + install to all agents, MCP where supported
 rolecraft setup <source> --list    # list skills without installing
 rolecraft setup <source> --skill <names>  # install specific skills
 ```
@@ -76,7 +80,7 @@ mcp_servers:
     source: npm:@modelcontextprotocol/server-filesystem
 ```
 
-`rolecraft setup ./my-skill` installs both the skill and the MCP servers to all agents.
+`rolecraft setup ./my-skill` installs the skill to all agents and configures the MCP servers for the agents that support MCP (see [MCP Server Management](../mcp.md)).
 
 ### Non-interactive (CI)
 

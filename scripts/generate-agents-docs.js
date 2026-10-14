@@ -133,6 +133,12 @@ ${notesSection}
 \`\`\`bash
 rolecraft install ./my-skill --cursor --devin --copilot --gemini --cody
 \`\`\`
+
+## See also
+
+- [\`rolecraft agents\`](commands/agents.md) — the command that prints this manifest.
+- [Install Guide](install.md) — how to target a specific agent directory.
+- [Glossary](glossary.md) — what "agent", "target" and "verified" mean.
 `
 
   return header + rows + footer

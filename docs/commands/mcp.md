@@ -1,3 +1,7 @@
+---
+description: Install, list, search, check, update and remove MCP servers for your AI agents.
+---
+
 # `rolecraft mcp` — MCP Server Management
 
 Install, list, search, check, update, and remove MCP servers for AI agents.
@@ -175,3 +179,10 @@ import { mcpInstall, mcpList, mcpCheck } from 'rolecraft'
 await mcpInstall('npm:@modelcontextprotocol/github', { cursor: true })
 const servers = await mcpList()
 ```
+
+## See also
+
+- [Commands hub](./index.md) — every command, grouped by intent.
+- [MCP Server Management](../mcp.md) — the conceptual guide.
+- [Agent Discovery](../agents.md) — MCP-capable agents and their config formats.
+- [`rolecraft agents`](./agents.md) — verify an agent supports MCP.

@@ -1,3 +1,7 @@
+---
+description: Print the agent capability manifest listing every supported AI coding agent, its skill directory, support level and MCP support.
+---
+
 # `rolecraft agents`
 
 Display the agent capability manifest — a structured overview of all supported AI coding agents, their skill install directories, support levels, and MCP server configuration support.
@@ -102,3 +106,9 @@ $ rolecraft agents --json
 ## Node.js API
 
 This command is not available as a package-level API function. The manifest is internal to the CLI — see the [Node.js API documentation](../api.md) for the functions that are exported from `rolecraft`.
+
+## See also
+
+- [Commands hub](./index.md) — every command, grouped by intent.
+- [`rolecraft agents-xml`](./agents-xml.md) — write the agent list into AGENTS.md.
+- [Agent Discovery](../agents.md) — the conceptual guide behind this output.

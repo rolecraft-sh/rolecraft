@@ -1,3 +1,7 @@
+---
+description: Preview the files inside a skill source without installing it.
+---
+
 # `rolecraft use`
 
 Preview a skill's files without installing.
@@ -42,3 +46,10 @@ This command is also available as a programmatic function. See the [Node.js API 
 import { use } from 'rolecraft'
 const preview = await use('./my-skill')
 ```
+
+## See also
+
+- [Commands hub](./index.md) — every command, grouped by intent.
+- [`rolecraft install`](./install.md) — install the skill instead of previewing.
+- [`rolecraft bundle`](./bundle.md) — multi-skill sources.
+- [Getting Started](../guides/getting-started.md) — create your own skill.

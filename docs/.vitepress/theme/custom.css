@@ -1,0 +1,50 @@
+/**
+ * Nav logo.
+ *
+ * The source is a square with a dark fill and no alpha, so on the dark nav bar
+ * it reads as a flat rectangle. Rounding it and lifting it slightly off the bar
+ * makes it look like a mark rather than a hole.
+ */
+.VPNavBarTitle .logo {
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px var(--vp-c-divider);
+}
+
+/**
+ * Hero demo.
+ *
+ * The recording is 820x520 with 15px terminal text, so it only stays legible
+ * above ~656px of viewport. Below that it is hidden; above it the container is
+ * sized explicitly so the image never overflows. The install command sits
+ * directly under the hero actions in that same range.
+ */
+@media (min-width: 960px) {
+  .VPHero .image-container {
+    width: 560px;
+    height: 520px;
+    transform: none;
+  }
+
+  .VPHero .image-src {
+    max-width: 520px;
+    max-height: none;
+    width: 100%;
+    height: auto;
+  }
+
+  /* The blurred circle VitePress draws behind the hero art reads as a stray
+     blob next to a rectangular screenshot. */
+  .VPHero .image-bg {
+    display: none;
+  }
+}
+
+@media (max-width: 959px) {
+  .VPHero .image {
+    display: none;
+  }
+
+  .VPHero .VPButton {
+    margin-bottom: 8px;
+  }
+}
