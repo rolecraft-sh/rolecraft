@@ -10,6 +10,15 @@ const pkg = JSON.parse(
 
 const SAFE_VERSION = /^\d+\.\d+\.\d+(-[\w.]+)?$/
 
+// A Homebrew install lives inside the Cellar, an npm install does not.
+export function detectInstallMethod(
+  modulePath = fileURLToPath(import.meta.url),
+) {
+  return modulePath.includes('/Cellar/') || modulePath.includes('/homebrew/')
+    ? 'brew'
+    : 'npm'
+}
+
 export function compareVersions(a, b) {
   const pa = a.split('.').map(Number)
   const pb = b.split('.').map(Number)
@@ -69,21 +78,30 @@ export async function upgradeApi(options = {}) {
   }
 
   const runExecSync = options.execSync || execSync
+  const installMethod = options.installMethod || detectInstallMethod()
 
   try {
-    runExecSync(`npm install -g ${pkg.name}@${latest}`, {
-      stdio: options.silent ? 'pipe' : 'inherit',
-      env: {
-        ...process.env,
-        npm_config_fund: 'false',
-        npm_config_audit: 'false',
-      },
-    })
+    if (installMethod === 'brew') {
+      runExecSync(`brew upgrade ${pkg.name}`, {
+        stdio: options.silent ? 'pipe' : 'inherit',
+      })
+    } else {
+      runExecSync(`npm install -g ${pkg.name}@${latest}`, {
+        stdio: options.silent ? 'pipe' : 'inherit',
+        env: {
+          ...process.env,
+          npm_config_fund: 'false',
+          npm_config_audit: 'false',
+        },
+      })
+    }
     result.upgraded = true
     result.version = latest
   } catch {
     throw new Error(
-      'Upgrade failed. Try running manually: npm install -g rolecraft',
+      installMethod === 'brew'
+        ? 'Upgrade failed. Try running manually: brew upgrade rolecraft'
+        : 'Upgrade failed. Try running manually: npm install -g rolecraft',
     )
   }
 

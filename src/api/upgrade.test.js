@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { compareVersions, upgradeApi } from './upgrade.js'
+import { compareVersions, detectInstallMethod, upgradeApi } from './upgrade.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const pkg = JSON.parse(
@@ -194,6 +194,63 @@ describe('upgradeApi', () => {
           },
         }),
       /Upgrade failed\. Try running manually: npm install -g rolecraft/,
+    )
+  })
+
+  it('upgrades with brew when rolecraft was installed with Homebrew', async () => {
+    mockRegistry(registryVersion(NEWER))
+    const exec = recordingExecSync()
+
+    const result = await upgradeApi({
+      execSync: exec.fn,
+      installMethod: 'brew',
+      silent: true,
+    })
+
+    assert.equal(result.upgraded, true)
+    assert.equal(result.version, NEWER)
+    assert.equal(exec.calls.length, 1)
+    assert.equal(exec.calls[0].command, 'brew upgrade rolecraft')
+  })
+
+  it('throws a manual-upgrade hint when brew upgrade fails', async () => {
+    mockRegistry(registryVersion(NEWER))
+
+    await assert.rejects(
+      () =>
+        upgradeApi({
+          installMethod: 'brew',
+          execSync: () => {
+            throw new Error('EACCES')
+          },
+        }),
+      /Upgrade failed\. Try running manually: brew upgrade rolecraft/,
+    )
+  })
+})
+
+describe('detectInstallMethod', () => {
+  it('detects a Homebrew install from the Cellar path', () => {
+    assert.equal(
+      detectInstallMethod(
+        '/usr/local/Cellar/rolecraft/2.6.2/libexec/src/api/upgrade.js',
+      ),
+      'brew',
+    )
+    assert.equal(
+      detectInstallMethod(
+        '/opt/homebrew/Cellar/rolecraft/2.6.2/libexec/src/api/upgrade.js',
+      ),
+      'brew',
+    )
+  })
+
+  it('detects an npm install from a global node_modules path', () => {
+    assert.equal(
+      detectInstallMethod(
+        '/usr/local/lib/node_modules/rolecraft/src/api/upgrade.js',
+      ),
+      'npm',
     )
   })
 })

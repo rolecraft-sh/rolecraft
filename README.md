@@ -66,6 +66,11 @@ npx rolecraft --help
 # Install globally (npm, pnpm, yarn, bun)
 npm install -g rolecraft
 
+# or with Homebrew
+brew tap sametcelikbicak/tap https://github.com/sametcelikbicak/homebrew-tap
+brew trust sametcelikbicak/tap
+brew install rolecraft
+
 # Install a skill (local, GitHub, GitLab, SSH, npm)
 rolecraft install ./my-skill --cursor
 
@@ -77,6 +82,8 @@ rolecraft setup user/repo
 ```
 
 **Requirements:** Node.js >= 22
+
+> **Homebrew:** the formula installs the CLI only — Node.js >= 22 must be in `PATH` (nvm, asdf or a system install). The formula version always matches the released version.
 
 > **Why zero dependencies?** Every dependency is a supply-chain risk. rolecraft uses only Node.js built-ins (`fs`, `path`, `crypto`, `https`) — no `node_modules` surprises.
 

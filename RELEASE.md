@@ -63,6 +63,21 @@ GitHub Actions:
 - Re-signs the tag on the new commit (uses the SSH or GPG key from secrets)
 - Creates a release PR
 - After the PR is merged, the package is published to npm
+- After the release exists, the Homebrew formula in `sametcelikbicak/homebrew-tap` is updated to the same version
+
+## Homebrew Tap
+
+`rolecraft` is installable with Homebrew:
+
+```bash
+brew tap sametcelikbicak/tap https://github.com/sametcelikbicak/homebrew-tap
+brew trust sametcelikbicak/tap
+brew install rolecraft
+```
+
+The formula lives in `sametcelikbicak/homebrew-tap` (`Formula/rolecraft.rb`) and points at the published npm tarball, so its version always matches the npm package and the GitHub release.
+
+Keeping it in sync needs one secret in **this** repository: `TAP_TOKEN`, a fine-grained token with access to `sametcelikbicak/homebrew-tap` only (contents: read and write). The `update-tap` job in `.github/workflows/release-publish.yml` skips itself when the secret is missing, so a release never fails because of it.
 
 ## Contributors
 

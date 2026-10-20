@@ -18,7 +18,9 @@ rolecraft upgrade --dry-run
 Checks the npm registry for the latest version of rolecraft and
 upgrades if a newer version is available.
 
-Uses `npm install -g rolecraft` under the hood.
+Uses `npm install -g rolecraft` under the hood. If rolecraft was installed
+with Homebrew it uses `brew upgrade rolecraft` instead, so the two install
+methods never fight over the same binary.
 
 Use `--dry-run` to check for updates without actually upgrading.
 
