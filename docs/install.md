@@ -28,7 +28,17 @@ yarn global add rolecraft
 bun add -g rolecraft
 ```
 
+With Homebrew:
+
+```bash
+brew tap sametcelikbicak/tap https://github.com/sametcelikbicak/homebrew-tap
+brew trust sametcelikbicak/tap
+brew install rolecraft
+```
+
 > **Requirements:** Node.js >= 22
+
+> **Homebrew installs the CLI only** — Node.js >= 22 must be available in `PATH` (nvm, asdf or a system install). The formula is published from every release, so its version always matches the released version.
 
 ## Install scope
 

@@ -34,7 +34,15 @@ One command. All agents. Skills everywhere, MCP where it is supported. Zero conf
 npm install -g rolecraft
 ```
 
-Works with npm, pnpm, yarn, bun. Or run without installing:
+Works with npm, pnpm, yarn, bun — or Homebrew:
+
+```bash
+brew tap sametcelikbicak/tap https://github.com/sametcelikbicak/homebrew-tap
+brew trust sametcelikbicak/tap
+brew install rolecraft
+```
+
+Or run without installing:
 
 ```bash
 npx rolecraft setup owner/repo

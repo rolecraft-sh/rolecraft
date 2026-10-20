@@ -50,8 +50,8 @@ manifest and run the script — it updates every location automatically.
 | agent_count | docs/guides/getting-started.md:22 | 90 |
 | verified_count | docs/guides/getting-started.md:22 | 65 |
 | verified_count | docs/index.md:32 | 65 |
-| agent_count | docs/index.md:63 | 90 |
-| verified_count | docs/index.md:63 | 65 |
+| agent_count | docs/index.md:71 | 90 |
+| verified_count | docs/index.md:71 | 65 |
 | agent_count | docs/migration-from-skills.md:14 | 90 |
 | agent_count | docs/migration-from-skills.md:59 | 90 |
 | agent_count | docs/reference.md:223 | 90 |
@@ -59,7 +59,7 @@ manifest and run the script — it updates every location automatically.
 | agent_count | README.md:9 | 90 |
 | verified_count | README.md:9 | 65 |
 | verified_count | README.md:55 | 65 |
-| agent_count | README.md:91 | 90 |
+| agent_count | README.md:98 | 90 |
 | agent_count | SKILL.md:5 | 90 |
 | verified_count | SKILL.md:5 | 65 |
 | agent_count | SKILL.md:10 | 90 |

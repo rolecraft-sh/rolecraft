@@ -49,6 +49,14 @@ rolecraft search code-review
 rolecraft install sametcelikbicak/coverage-guard --global
 ```
 
+Or with Homebrew:
+
+```bash
+brew tap sametcelikbicak/tap https://github.com/sametcelikbicak/homebrew-tap
+brew trust sametcelikbicak/tap
+brew install rolecraft
+```
+
 Install from a local path, a GitHub shorthand (`owner/repo`), any git URL, or a multi-skill repository. `--dry-run` prints the plan without touching disk. Full walkthrough: [Getting Started](guides/getting-started.md).
 
 ## Proof, not promises

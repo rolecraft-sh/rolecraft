@@ -108,3 +108,62 @@ jobs:
               --notes-file /tmp/changelog.md \
               --latest=false
           fi
+
+  # Keeps the Homebrew formula in sametcelikbicak/homebrew-tap on the same
+  # version as the npm package and the GitHub release.
+  update-tap:
+    needs: publish
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4cabbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+
+      - name: Update the Homebrew formula
+        env:
+          TAP_TOKEN: ${{ secrets.TAP_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          VERSION=$(node -e "console.log(require('./package.json').version)")
+          TAG="v$VERSION"
+
+          if [ -z "$TAP_TOKEN" ]; then
+            echo "TAP_TOKEN is not configured - skipping the tap update"
+            exit 0
+          fi
+
+          # Only a published release may update the formula.
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG does not exist - skipping the tap update"
+            exit 0
+          fi
+
+          # The npm registry can lag a few seconds behind the publish.
+          SHA="$(curl -fsSL --retry 5 --retry-delay 3 --retry-all-errors "https://registry.npmjs.org/rolecraft/-/rolecraft-$VERSION.tgz" | shasum -a 256 | awk '{print $1}')"
+          echo "rolecraft $VERSION sha256: $SHA"
+
+          git clone "https://sametcelikbicak:${TAP_TOKEN}@github.com/sametcelikbicak/homebrew-tap.git" tap
+          cd tap
+          sed -i "s|url \".*\"|url \"https://registry.npmjs.org/rolecraft/-/rolecraft-$VERSION.tgz\"|" Formula/rolecraft.rb
+          sed -i "s|sha256 \".*\"|sha256 \"$SHA\"|" Formula/rolecraft.rb
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/rolecraft.rb
+          if git diff --cached --quiet; then
+            echo "Formula is already up to date"
+            exit 0
+          fi
+          git commit -m "rolecraft $VERSION"
+          git pull --rebase origin main
+          git push

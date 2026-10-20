@@ -31,6 +31,14 @@ rolecraft manages all of this across **90 AI agents** (65 verified) with a singl
 npm install -g rolecraft
 ```
 
+Or with Homebrew:
+
+```bash
+brew tap sametcelikbicak/tap https://github.com/sametcelikbicak/homebrew-tap
+brew trust sametcelikbicak/tap
+brew install rolecraft
+```
+
 Or run without installing:
 
 ```bash
