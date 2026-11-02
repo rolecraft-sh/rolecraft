@@ -119,7 +119,7 @@
     "node": ">=22"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.5",
+    "@biomejs/biome": "^2.6.3",
     "vitepress": "^1.6.4"
   },
   "overrides": {
